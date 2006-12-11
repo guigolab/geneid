@@ -4,10 +4,11 @@
 *                                                                        *
 *   Hash table of exons used during backup of genes                      *
 *                                                                        *
-*   This file is part of the geneid 1.2 distribution                     *
+*   This file is part of the geneid 1.3 distribution                     *
 *                                                                        *
-*     Copyright (C) 2003 - Enrique BLANCO GARCIA                         *
-*                          Roderic GUIGO SERRA                           * 
+*     Copyright (C) 2006 - Enrique BLANCO GARCIA                         *
+*                          Roderic GUIGO SERRA                           *
+*                          Tyler   ALIOTO                                * 
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
 *  it under the terms of the GNU General Public License as published by  *
@@ -24,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: DumpHash.c,v 1.6 2003-11-05 14:22:37 eblanco Exp $  */
+/*  $Id: DumpHash.c,v 1.7 2006-12-11 09:50:48 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -82,6 +83,8 @@ void setExonDumpHash(exonGFF* E, dumpHash* h)
   n->donor = E->Donor->Position;
   n->frame = E->Frame;
   n->strand = E->Strand;
+  strcpy(n->dsub,E->Donor->subtype);
+  strcpy(n->asub,E->Acceptor->subtype);
   strcpy(n->type,E->Type);
 
   n->exon = E;
@@ -130,7 +133,9 @@ exonGFF* getExonDumpHash(exonGFF* E, dumpHash* h)
 			  (p->donor == E->Donor->Position) &&
 			  (p->frame == E->Frame) &&
 			  (p->strand == E->Strand) &&
-			  (!strcmp(p->type,E->Type))  )
+		      (!strcmp(p->dsub,E->Donor->subtype)) &&
+		      (!strcmp(p->asub,E->Acceptor->subtype)) &&
+		      (!strcmp(p->type,E->Type))  )
 			{
 			  found = 1;
 			  exon = p->exon;

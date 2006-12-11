@@ -4,10 +4,11 @@
 *                                                                        *
 *   Read set up options and filenames from user input                    *
 *                                                                        *
-*   This file is part of the geneid 1.2 distribution                     *
+*   This file is part of the geneid 1.3 distribution                     *
 *                                                                        *
-*     Copyright (C) 2003 - Enrique BLANCO GARCIA                         *
-*                          Roderic GUIGO SERRA                           * 
+*     Copyright (C) 2006 - Enrique BLANCO GARCIA                         *
+*                          Roderic GUIGO SERRA                           *
+*                          Tyler   ALIOTO                                * 
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
 *  it under the terms of the GNU General Public License as published by  *
@@ -24,12 +25,12 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: readargv.c,v 1.18 2006-06-02 09:53:52 talioto Exp $  */
+/*  $Id: readargv.c,v 1.19 2006-12-11 09:50:48 talioto Exp $  */
 
 #include "geneid.h"
 
 /* geneid.c external vars */
-extern int 	SFP,SDP,SAP,STP,
+extern int  SFP,SDP,SAP,STP,
             EFP,EIP,ETP,EXP,ESP,EOP,
             U12, INTRON,
             VRB,
@@ -46,7 +47,7 @@ extern long LOW,HI;
 extern char* optarg;
 extern int optind;
 
-char* USAGE="NAME\n\tgeneid - a program to annotate genomic sequences\nSYNOPSIS\n\tgeneid\t[-bdaefitnxsz]\n\t\t[-DA] [-Z]\n\t\t[-G] [-3] [-X] [-M] [-m]\n\t\t[-WCF] [-o]\n\t\t[-j <lower bound coord>]\n\t\t[-k <upper bound coord>]\n\t\t[-O <gff_exons_file>]\n\t\t[-R <gff_annotation-file>]\n\t\t[-S <gff_homology_file>]\n\t\t[-P <parameter_file>]\n\t\t[-E exonweight]\n\t\t[-Bv] [-h]\n\t\t<locus_seq_in_fasta_format>\nRELEASE\n\tgeneid v 1.2.2\n";
+char* USAGE="NAME\n\tgeneid - a program to annotate genomic sequences\nSYNOPSIS\n\tgeneid\t[-bdaefitnxsz]\n\t\t[-DA] [-Z]\n\t\t[-G] [-3] [-X] [-M] [-m]\n\t\t[-WCF] [-o]\n\t\t[-j <lower bound coord>]\n\t\t[-k <upper bound coord>]\n\t\t[-O <gff_exons_file>]\n\t\t[-R <gff_annotation-file>]\n\t\t[-S <gff_homology_file>]\n\t\t[-P <parameter_file>]\n\t\t[-E exonweight]\n\t\t[-Bv] [-h]\n\t\t<locus_seq_in_fasta_format>\nRELEASE\n\tgeneid v 1.3\n";
 
 void printHelp()
 {

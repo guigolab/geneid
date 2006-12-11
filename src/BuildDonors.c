@@ -4,10 +4,11 @@
 *                                                                        *
 *   Signal prediction by using a Position Weighted Array                 *
 *                                                                        *
-*   This file is part of the geneid 1.2 distribution                     *
+*   This file is part of the geneid 1.3 distribution                     *
 *                                                                        *
-*     Copyright (C) 2003 - Enrique BLANCO GARCIA                         *
-*                          Roderic GUIGO SERRA                           * 
+*     Copyright (C) 2006 - Enrique BLANCO GARCIA                         *
+*                          Roderic GUIGO SERRA                           *
+*                          Tyler   ALIOTO                                * 
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
 *  it under the terms of the GNU General Public License as published by  *
@@ -24,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: BuildDonors.c,v 1.2 2006-05-29 13:55:27 talioto Exp $  */
+/*  $Id: BuildDonors.c,v 1.3 2006-12-11 09:50:48 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -34,14 +35,17 @@ extern int TRANS[];
 /* Maximum allowed number of generic sites */
 extern long NUMSITES;
 
-long  BuildDonors(char* s,char* type,
-                          profile* p,
-                          site* st, 
-                          long l1, 
-                          long l2,
-			  long ns,
-		          long nsites
-) 
+long  BuildDonors(char* s,
+		  short class,
+		  char* type,
+		  char* subtype,
+		  profile* p,
+		  site* st, 
+		  long l1, 
+		  long l2,
+		  long ns,
+		  long nsites
+		  ) 
 {
   int i,j;
   float score;
@@ -49,10 +53,10 @@ long  BuildDonors(char* s,char* type,
   long is;
   long left,right;
   int index;
-  
+/*   char mess[MAXSTRING];  */
   /* Final number of predicted signals (that type) */
 /*  ns = 0;*/
-  
+
   /* 1. Searching sites between beginning of the sequence and p->offset */
   if (!l1)
     {
@@ -66,16 +70,20 @@ long  BuildDonors(char* s,char* type,
 			  index = OligoToInt(s+j, p->order+1,5);
 			  
 			  if (index >= p->dimensionTrans)
-				score = score + -INFI;
+			    score = score + -INFI;
 			  else
-				score = score + p->transitionValues[i][index];
+			    score = score + p->transitionValues[i][index];
 			}
-        
+		  score = p->afactor + (p->bfactor * score);
+		 
 		  if (score >= p->cutoff) 
 			{
 			  st[ns].Position = is + p->order;
-			  st[ns].Score=score;
-			  strcpy(st[ns].subtype,type);
+			  st[ns].Score= score;
+			  st[ns].class= class;
+			  strcpy(st[ns].type,type);
+			  strcpy(st[ns].subtype,subtype);
+/* 			  sprintf(mess,"%i %s %s %s %s",st[ns].class,type,subtype,st[ns].type,st[ns].subtype);printMess(mess); */
 			  ns++;
 			}
 		}
@@ -104,12 +112,16 @@ long  BuildDonors(char* s,char* type,
 			  else
 				score = score + p->transitionValues[i][index];
 			}
-		  
+		  score = p->afactor + (p->bfactor * score);
+		 
 		  if (score >= p->cutoff) 
 			{
 			  st[ns].Position = left + is + p->offset;
 			  st[ns].Score=score;
-			  strcpy(st[ns].subtype,type);
+			  st[ns].class= class;
+			  strcpy(st[ns].type,type);
+			  strcpy(st[ns].subtype,subtype);
+/* 			  sprintf(mess,"%i %s %s %s %s",st[ns].class,type,subtype,st[ns].type,st[ns].subtype);printMess(mess); */
 			  ns++;
 			}
 			
@@ -134,12 +146,15 @@ long  BuildDonors(char* s,char* type,
 			  else
 				score = score + p->transitionValues[i][index];
 			}
-		  
+		  score = p->afactor + (p->bfactor * score);
 		  if (score >= p->cutoff) 
 			{
 			  st[ns].Position = left + is + p->offset;
 			  st[ns].Score=score;
-			  strcpy(st[ns].subtype,type);
+			  st[ns].class= class;
+			  strcpy(st[ns].type,type);
+			  strcpy(st[ns].subtype,subtype);
+/* 			  sprintf(mess,"%i %s %s %s %s",st[ns].class,type,subtype,st[ns].type,st[ns].subtype);printMess(mess); */
 			  ns++;
 			}
 			
@@ -166,12 +181,16 @@ long  BuildDonors(char* s,char* type,
 			  else
 				score = score + p->transitionValues[i][index];
 			}
-		  
+		  score = p->afactor + (p->bfactor * score);
+		 
 		  if (score >= p->cutoff) 
 			{
 			  st[ns].Position = left + is + p->offset;
 			  st[ns].Score=score;
-			  strcpy(st[ns].subtype,type);
+			  st[ns].class= class;
+			  strcpy(st[ns].type,type);
+			  strcpy(st[ns].subtype,subtype);
+/* 			  sprintf(mess,"%i %s %s %s %s",st[ns].class,type,subtype,st[ns].type,st[ns].subtype);printMess(mess); */
 			  ns++;
 			}
 			
@@ -182,7 +201,7 @@ long  BuildDonors(char* s,char* type,
   
   if (ns >= nsites)
     printError("Too many predicted sites: decrease RSITES (or RU12SITES) parameter");
-  
+
   return(ns);
 }
 

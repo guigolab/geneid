@@ -4,10 +4,11 @@
 *                                                                        *
 *   Reading statistic parameters and gene construction model             *
 *                                                                        *
-*   This file is part of the geneid 1.2 distribution                     *
+*   This file is part of the geneid 1.3 distribution                     *
 *                                                                        *
-*     Copyright (C) 2003 - Enrique BLANCO GARCIA                         *
-*                          Roderic GUIGO SERRA                           * 
+*     Copyright (C) 2006 - Enrique BLANCO GARCIA                         *
+*                          Roderic GUIGO SERRA                           *
+*                          Tyler   ALIOTO                                * 
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
 *  it under the terms of the GNU General Public License as published by  *
@@ -24,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: readparam.c,v 1.9 2006-05-29 13:52:26 talioto Exp $  */
+/*  $Id: readparam.c,v 1.10 2006-12-11 09:50:48 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -34,7 +35,11 @@ extern int BP;
 extern int U12GTAG;
 extern int U12ATAC;
 extern int U2GCAG;
+extern int U2GTA;
+extern int U2GTG;
+extern int U2GTY;
 extern int SGE;
+extern short SPLICECLASSES;
 extern float U12_SPLICE_SCORE_THRESH;
 extern float U12_EXON_SCORE_THRESH;
 
@@ -281,22 +286,30 @@ void ReadProfile(FILE* RootFile, profile* p, char* signal, int H)
 {
   char line[MAXLINE];
   char mess[MAXSTRING];
-  
+  int numProfileParams = 0;
   /* Definition parameters: Length, offset, cutoff and order (Markov chain) */
   if (H==1)
 	readHeader(RootFile,line);
 
   readLine(RootFile,line);
-  if ((sscanf(line,"%d %d %f %d", 
+  numProfileParams = sscanf(line,"%d %d %f %d %f %f", 
 			  &(p->dimension),
 			  &(p->offset), 
 			  &(p->cutoff),
-			  &(p->order)))!=4)
+			  &(p->order),
+			  &(p->afactor),
+			  &(p->bfactor));
+  if (numProfileParams<4)
 	{
 	  sprintf(mess,"Wrong format: Definition parameters in %s profile",signal);
 	  printError(mess);
 	}
-  
+  if (numProfileParams<6)
+	{
+	  p->afactor = 0;
+	  p->bfactor = 1;
+	}
+ 
   /* Memory to allocate the data with these fixed dimensions */
   RequestMemoryProfile(p);
   
@@ -411,71 +424,107 @@ void ReadProfileSpliceSites(FILE* RootFile, gparam* gp)
   
   readHeader(RootFile,line);
   if ((sscanf(line,"%s",header))!=1)
-	{
-	  sprintf(mess,"Wrong format: header in optional profile for splice sites");
-	  printError(mess);
-	}
+    {
+      sprintf(mess,"Wrong format: header in optional profile for splice sites");
+      printError(mess);
+    }
 
   /* Read optional profiles: sprofileU12gtagDON,sprofileU12atacDON */
   
-    while(strcasecmp(header,sprofileDON))
-	{ 
+  while(strcasecmp(header,sprofileDON))
+    { 
 
-	  if (!strcasecmp(header,sprofileU12gtagDON))
+      if (!strcasecmp(header,sprofileU12gtagDON))
+	{
+
+	  u12gtagDon++;
+
+	  /* Reading the U12gtag donor profile */
+	  p = gp->U12gtagDonorProfile;
+	  ReadProfile(RootFile, p, sDON, 0);
+	}
+      else
+	{
+	  if (!strcasecmp(header,sprofileU12atacDON))
+	    {
+
+	      u12atacDon++;
+
+	      /* Reading the U12atac donor profile */
+	      p = gp->U12atacDonorProfile;
+	      ReadProfile(RootFile, p, sDON, 0);
+	    }
+	  else
+	    {
+	      if (!strcasecmp(header,sprofileU2gcagDON))
 		{
 
-		  u12gtagDon++;
+		  U2GCAG++;
 
-		  /* Reading the U12gtag donor profile */
-		  p = gp->U12gtagDonorProfile;
+		  /* Reading the U2gcag donor profile */
+		  p = gp->U2gcagDonorProfile;
 		  ReadProfile(RootFile, p, sDON, 0);
 		}
-	  else
+	      else
 		{
-		  if (!strcasecmp(header,sprofileU12atacDON))
-			{
+		  if (!strcasecmp(header,sprofileU2gtaDON))
+		    {
 
-			  u12atacDon++;
+		      U2GTA++;
 
-			  /* Reading the U12atac donor profile */
-			  p = gp->U12atacDonorProfile;
-			  ReadProfile(RootFile, p, sDON, 0);
-			}
+		      /* Reading the U2gta donor profile */
+		      p = gp->U2gtaDonorProfile;
+		      ReadProfile(RootFile, p, sDON, 0);
+		    }
 		  else
 		    {
-		  	  if (!strcasecmp(header,sprofileU2gcagDON))
-				{
+		      if (!strcasecmp(header,sprofileU2gtgDON))
+			{
 
-				  U2GCAG++;
+			  U2GTG++;
 
-				  /* Reading the U12gtag donor profile */
-				  p = gp->U2gcagDonorProfile;
-				  ReadProfile(RootFile, p, sDON, 0);
-				}
+			  /* Reading the U2gtg donor profile */
+			  p = gp->U2gtgDonorProfile;
+			  ReadProfile(RootFile, p, sDON, 0);
+			}
+		      else
+			{
+		  	  if (!strcasecmp(header,sprofileU2gtyDON))
+			    {
+
+			      U2GTY++;
+
+			      /* Reading the U2gty donor profile */
+			      p = gp->U2gtyDonorProfile;
+			      ReadProfile(RootFile, p, sDON, 0);
+			    }
 			  else
-				{		  
-				 	sprintf(mess,"Wrong format: profile name %s \n\tis not admitted for donors [only %s, %s, %s or %s]",
-							  header, sprofileDON, sprofileU12gtagDON, sprofileU12atacDON,sprofileU2gcagDON);
-					printError(mess);		
-	  			}
+			    {		  
+			      sprintf(mess,"Wrong format: profile name %s \n\tis not admitted for donors [only %s, %s, %s, %s, %s, %s or %s]",
+				      header, sprofileDON, sprofileU12gtagDON, sprofileU12atacDON,sprofileU2gcagDON,sprofileU2gtaDON,sprofileU2gtgDON,sprofileU2gtyDON);
+			      printError(mess);		
+			    }
 	  		}
-	  }
-	  /* Next profile for donor site */
-	  readHeader(RootFile,line);
-	  if ((sscanf(line,"%s",header))!=1)
-		{
-		  sprintf(mess,"Wrong format: header in optional profile for donor sites");
-		  printError(mess);
+		    }
 		}
+	    }
 	}
+      /* Next profile for donor site */
+      readHeader(RootFile,line);
+      if ((sscanf(line,"%s",header))!=1)
+	{
+	  sprintf(mess,"Wrong format: header in optional profile for donor sites");
+	  printError(mess);
+	}
+    }
 
   /* Reading the Donor site profile */
   p = gp->DonorProfile;
   ReadProfile(RootFile, p, sDON, 0);
   
   /* Switch on the site prediction of U12gtag and U12atac introns */
-  if (u12bp && u12gtagAcc && u12gtagDon){ U12GTAG++;}
-  if (u12bp && u12atacAcc && u12atacDon){ U12ATAC++;}
+  if (u12bp && u12gtagAcc && u12gtagDon){ U12GTAG++;SPLICECLASSES++;}
+  if (u12bp && u12atacAcc && u12atacDon){ U12ATAC++;SPLICECLASSES++;}
   
 }
 
@@ -603,8 +652,7 @@ void ReadIsochore(FILE* RootFile, gparam* gp)
 	 /* 1. Read U12_SPLICE_SCORE_THRESH for sum of U12 donor and acceptor splice scores */
 	if(!strcasecmp(header,sU12_SPLICE_SCORE_THRESH)){
 		  readLine(RootFile,line);
-		  if ((sscanf(line,"%f\n",
-					  &(U12_SPLICE_SCORE_THRESH)))!=1)
+		  if ((sscanf(line,"%f\n", &(U12_SPLICE_SCORE_THRESH)))!=1)
 			printError("Wrong format: U12_SPLICE_SCORE_THRESH value scores (number/type)");  
 
 		  sprintf(mess,"U12_SPLICE_SCORE_THRESH: \t%9.2f",
@@ -614,8 +662,7 @@ void ReadIsochore(FILE* RootFile, gparam* gp)
 	 /* 1. Read U12_EXON_SCORE_THRESH for sum of U12 donor and acceptor exon scores */
 	if(!strcasecmp(header,sU12_EXON_SCORE_THRESH)){
 		  readLine(RootFile,line);
-		  if ((sscanf(line,"%f\n",
-					  &(U12_EXON_SCORE_THRESH)))!=1)
+		  if ((sscanf(line,"%f\n", &(U12_EXON_SCORE_THRESH)))!=1)
 			printError("Wrong format: U12_EXON_SCORE_THRESH value scores (number/type)");  
 
 		  sprintf(mess,"U12_EXON_SCORE_THRESH: \t%9.2f",
@@ -623,41 +670,6 @@ void ReadIsochore(FILE* RootFile, gparam* gp)
 		  printMess(mess);
 	}
 
-	/* Read optional exon weights for U12 exons */ 
-	if(!strcasecmp(header,sU12gtag_Exon_weights)){
-      	readLine(RootFile,line);
-	  	if ((sscanf(line,"%f %f %f\n",
-				  &(gp->Initial->U12gtagExonWeight),
-				  &(gp->Internal->U12gtagExonWeight),
-				  &(gp->Terminal->U12gtagExonWeight)))!=3)
-    	printError("Wrong format: U12gtag exon weight values (number/type)"); 
-		gp->Single->U12gtagExonWeight = 0;
-
-	  	sprintf(mess,"U12gtag Exon weights: \t%9.3f\t%9.3f\t%9.3f",
-			  gp->Initial->U12gtagExonWeight,
-			  gp->Internal->U12gtagExonWeight,
-			  gp->Terminal->U12gtagExonWeight);
-	  	printMess(mess);
-
-  	} else {
-	
-		if(!strcasecmp(header,sU12atac_Exon_weights)){
-		  	readLine(RootFile,line);
-		  	if ((sscanf(line,"%f %f %f\n",
-					  &(gp->Initial->U12atacExonWeight),
-					  &(gp->Internal->U12atacExonWeight),
-					  &(gp->Terminal->U12atacExonWeight)))!=3)
-    		printError("Wrong format: U12atac exon weight values (number/type)"); 
-			gp->Single->U12atacExonWeight = 0;
-
-		  	sprintf(mess,"U12atac Exon weights: \t%9.3f\t%9.3f\t%9.3f",
-				  gp->Initial->U12atacExonWeight,
-				  gp->Internal->U12atacExonWeight,
-				  gp->Terminal->U12atacExonWeight);
-		  	printMess(mess);
-
-		}
-	}
 	readHeader(RootFile,line);
 	if ((sscanf(line,"%s",header))!=1)
 		{

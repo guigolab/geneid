@@ -4,10 +4,11 @@
 *                                                                        *
 *   Exchanging left and right signals in reverse sense exons             *
 *                                                                        *
-*   This file is part of the geneid 1.2 distribution                     *
+*   This file is part of the geneid 1.3 distribution                     *
 *                                                                        *
-*     Copyright (C) 2003 - Enrique BLANCO GARCIA                         *
-*                          Roderic GUIGO SERRA                           * 
+*     Copyright (C) 2006 - Enrique BLANCO GARCIA                         *
+*                          Roderic GUIGO SERRA                           *
+*                          Tyler   ALIOTO                                * 
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
 *  it under the terms of the GNU General Public License as published by  *
@@ -24,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: SwitchPositions.c,v 1.4 2006-05-25 14:33:43 talioto Exp $  */
+/*  $Id: SwitchPositions.c,v 1.5 2006-12-11 09:50:48 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -43,22 +44,6 @@ void SwitchPositions(packExons* allExons)
       (allExons->InitialExons+i)->Donor = c;
     }
 
-  for (i=0;i<allExons->nU12gtagInitialExons;i++) 
-    {
-      c = (allExons->U12gtagInitialExons+i)->Acceptor; 
-      (allExons->U12gtagInitialExons+i)->Acceptor = 
-	(allExons->U12gtagInitialExons+i)->Donor;
-      (allExons->U12gtagInitialExons+i)->Donor = c;
-    }
-
-  for (i=0;i<allExons->nU12atacInitialExons;i++) 
-    {
-      c = (allExons->U12atacInitialExons+i)->Acceptor; 
-      (allExons->U12atacInitialExons+i)->Acceptor = 
-	(allExons->U12atacInitialExons+i)->Donor;
-      (allExons->U12atacInitialExons+i)->Donor = c;
-    }
-
   for (i=0;i<allExons->nInternalExons;i++) 
     {
       c = (allExons->InternalExons+i)->Acceptor; 
@@ -67,92 +52,12 @@ void SwitchPositions(packExons* allExons)
       (allExons->InternalExons+i)->Donor = c;
     }
 
-  for (i=0;i<allExons->nU2_U12gtag_InternalExons;i++) 
-    {
-      c = (allExons->U2_U12gtag_InternalExons+i)->Acceptor; 
-      (allExons->U2_U12gtag_InternalExons+i)->Acceptor = 
-	(allExons->U2_U12gtag_InternalExons+i)->Donor;
-      (allExons->U2_U12gtag_InternalExons+i)->Donor = c;
-    }
-
-  for (i=0;i<allExons->nU12gtag_U2_InternalExons;i++) 
-    {
-      c = (allExons->U12gtag_U2_InternalExons+i)->Acceptor; 
-      (allExons->U12gtag_U2_InternalExons+i)->Acceptor = 
-	(allExons->U12gtag_U2_InternalExons+i)->Donor;
-      (allExons->U12gtag_U2_InternalExons+i)->Donor = c;
-    }
-
-  for (i=0;i<allExons->nU12gtag_U12gtag_InternalExons;i++) 
-    {
-      c = (allExons->U12gtag_U12gtag_InternalExons+i)->Acceptor; 
-      (allExons->U12gtag_U12gtag_InternalExons+i)->Acceptor = 
-	(allExons->U12gtag_U12gtag_InternalExons+i)->Donor;
-      (allExons->U12gtag_U12gtag_InternalExons+i)->Donor = c;
-    }
-
-  for (i=0;i<allExons->nU2_U12atac_InternalExons;i++) 
-    {
-      c = (allExons->U2_U12atac_InternalExons+i)->Acceptor; 
-      (allExons->U2_U12atac_InternalExons+i)->Acceptor = 
-	(allExons->U2_U12atac_InternalExons+i)->Donor;
-      (allExons->U2_U12atac_InternalExons+i)->Donor = c;
-    }
-
-  for (i=0;i<allExons->nU12atac_U2_InternalExons;i++) 
-    {
-      c = (allExons->U12atac_U2_InternalExons+i)->Acceptor; 
-      (allExons->U12atac_U2_InternalExons+i)->Acceptor = 
-	(allExons->U12atac_U2_InternalExons+i)->Donor;
-      (allExons->U12atac_U2_InternalExons+i)->Donor = c;
-    }
-
-  for (i=0;i<allExons->nU12atac_U12atac_InternalExons;i++) 
-    {
-      c = (allExons->U12atac_U12atac_InternalExons+i)->Acceptor; 
-      (allExons->U12atac_U12atac_InternalExons+i)->Acceptor = 
-	(allExons->U12atac_U12atac_InternalExons+i)->Donor;
-      (allExons->U12atac_U12atac_InternalExons+i)->Donor = c;
-    }
-
-  for (i=0;i<allExons->nU12gtag_U12atac_InternalExons;i++) 
-    {
-      c = (allExons->U12gtag_U12atac_InternalExons+i)->Acceptor; 
-      (allExons->U12gtag_U12atac_InternalExons+i)->Acceptor = 
-	(allExons->U12gtag_U12atac_InternalExons+i)->Donor;
-      (allExons->U12gtag_U12atac_InternalExons+i)->Donor = c;
-    }
-
-  for (i=0;i<allExons->nU12atac_U12gtag_InternalExons;i++) 
-    {
-      c = (allExons->U12atac_U12gtag_InternalExons+i)->Acceptor; 
-      (allExons->U12atac_U12gtag_InternalExons+i)->Acceptor = 
-	(allExons->U12atac_U12gtag_InternalExons+i)->Donor;
-      (allExons->U12atac_U12gtag_InternalExons+i)->Donor = c;
-    }
-
   for (i=0;i<allExons->nTerminalExons;i++) 
     {
       c = (allExons->TerminalExons+i)->Acceptor; 
       (allExons->TerminalExons+i)->Acceptor = 
 	(allExons->TerminalExons+i)->Donor;
       (allExons->TerminalExons+i)->Donor = c;
-    }
-
-  for (i=0;i<allExons->nU12gtagTerminalExons;i++) 
-    {
-      c = (allExons->U12gtagTerminalExons+i)->Acceptor; 
-      (allExons->U12gtagTerminalExons+i)->Acceptor = 
-	(allExons->U12gtagTerminalExons+i)->Donor;
-      (allExons->U12gtagTerminalExons+i)->Donor = c;
-    }
-
-  for (i=0;i<allExons->nU12atacTerminalExons;i++) 
-    {
-      c = (allExons->U12atacTerminalExons+i)->Acceptor; 
-      (allExons->U12atacTerminalExons+i)->Acceptor = 
-	(allExons->U12atacTerminalExons+i)->Donor;
-      (allExons->U12atacTerminalExons+i)->Donor = c;
     }
 
   for (i=0;i<allExons->nSingles;i++) 

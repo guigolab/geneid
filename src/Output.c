@@ -4,10 +4,11 @@
 *                                                                        *
 *   Management: displaying results                                       *
 *                                                                        *
-*   This file is part of the geneid 1.2 distribution                     *
+*   This file is part of the geneid 1.3 distribution                     *
 *                                                                        *
-*     Copyright (C) 2003 - Enrique BLANCO GARCIA                         *
-*                          Roderic GUIGO SERRA                           * 
+*     Copyright (C) 2006 - Enrique BLANCO GARCIA                         *
+*                          Roderic GUIGO SERRA                           *
+*                          Tyler   ALIOTO                                * 
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
 *  it under the terms of the GNU General Public License as published by  *
@@ -24,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: Output.c,v 1.15 2006-06-01 20:59:52 talioto Exp $  */
+/*  $Id: Output.c,v 1.16 2006-12-11 09:50:48 talioto Exp $  */
 
 #include "geneid.h"
 extern int U12GTAG;
@@ -166,26 +167,10 @@ void Output(packSites* allSites,
       if (SAP){
 		PrintSites(allSites->AcceptorSites, allSites->nAcceptorSites,
 				   ACC, Locus, FORWARD, l1, l2, lowerlimit, Sequence, gp->AcceptorProfile);
-		if (U12GTAG){
-			PrintSites(allSites->U12gtagAcceptorSites, allSites->nU12gtagAcceptorSites,
-				   ACC, Locus, FORWARD, l1, l2, lowerlimit, Sequence, gp->U12gtagAcceptorProfile);
-		}		   
-		if (U12ATAC){
-			PrintSites(allSites->U12atacAcceptorSites, allSites->nU12atacAcceptorSites,
-				   ACC, Locus, FORWARD, l1, l2, lowerlimit, Sequence, gp->U12atacAcceptorProfile);
-		}
 	  }
       if (SDP){
 		PrintSites(allSites->DonorSites, allSites->nDonorSites,
-				   DON, Locus, FORWARD, l1, l2, lowerlimit, Sequence, gp->DonorProfile);
-		if (U12GTAG){
-			PrintSites(allSites->U12gtagDonorSites, allSites->nU12gtagDonorSites,
-				   DON, Locus, FORWARD, l1, l2, lowerlimit, Sequence, gp->U12gtagDonorProfile);
-		}	
-		if (U12ATAC){
-			PrintSites(allSites->U12atacDonorSites, allSites->nU12atacDonorSites,
-				   DON, Locus, FORWARD, l1, l2, lowerlimit, Sequence, gp->U12atacDonorProfile);
-		}	   
+				   DON, Locus, FORWARD, l1, l2, lowerlimit, Sequence, gp->DonorProfile);	   
 	  }
       if (STP)
 		PrintSites(allSites->StopCodons, allSites->nStopCodons,
@@ -195,52 +180,14 @@ void Output(packSites* allSites,
       if (EFP){
 		PrintExons(allExons->InitialExons,allExons->nInitialExons,
 				   FIRST, Locus, l1, l2, Sequence, dAA);
-		if (U12GTAG){
-			PrintExons(allExons->U12gtagInitialExons,allExons->nU12gtagInitialExons,
-				   FIRST, Locus, l1, l2, Sequence, dAA);
-		}
-		if (U12ATAC){
-			PrintExons(allExons->U12atacInitialExons,allExons->nU12atacInitialExons,
-				   FIRST, Locus, l1, l2, Sequence, dAA);
-		}
       }
 	  if (EIP){
 		PrintExons(allExons->InternalExons,allExons->nInternalExons,
 				   INTERNAL, Locus, l1, l2, Sequence, dAA);
-		if (U12GTAG){
-			PrintExons(allExons->U2_U12gtag_InternalExons,allExons->nU2_U12gtag_InternalExons,
-				   INTERNAL, Locus, l1, l2, Sequence, dAA);
-			PrintExons(allExons->U12gtag_U2_InternalExons,allExons->nU12gtag_U2_InternalExons,
-				   INTERNAL, Locus, l1, l2, Sequence, dAA);
-			PrintExons(allExons->U12gtag_U12gtag_InternalExons,allExons->nU12gtag_U12gtag_InternalExons,
-				   INTERNAL, Locus, l1, l2, Sequence, dAA);
-		}
-		if (U12ATAC){
-			PrintExons(allExons->U2_U12atac_InternalExons,allExons->nU2_U12atac_InternalExons,
-				   INTERNAL, Locus, l1, l2, Sequence, dAA);
-			PrintExons(allExons->U12atac_U2_InternalExons,allExons->nU12atac_U2_InternalExons,
-				   INTERNAL, Locus, l1, l2, Sequence, dAA);
-			PrintExons(allExons->U12atac_U12atac_InternalExons,allExons->nU12atac_U12atac_InternalExons,
-				   INTERNAL, Locus, l1, l2, Sequence, dAA);
-		}
-		if (U12ATAC && U12GTAG){
-			PrintExons(allExons->U12gtag_U12atac_InternalExons,allExons->nU12gtag_U12atac_InternalExons,
-				   INTERNAL, Locus, l1, l2, Sequence, dAA);
-			PrintExons(allExons->U12atac_U12gtag_InternalExons,allExons->nU12atac_U12gtag_InternalExons,
-				   INTERNAL, Locus, l1, l2, Sequence, dAA);
-		}
       }
 	  if (ETP){
 		PrintExons(allExons->TerminalExons,allExons->nTerminalExons,
 				   TERMINAL, Locus, l1, l2, Sequence, dAA);
-		if (U12GTAG){
-				PrintExons(allExons->U12gtagTerminalExons,allExons->nU12gtagTerminalExons,
-				   TERMINAL, Locus, l1, l2, Sequence, dAA);
-		}
-		if (U12ATAC){
-				PrintExons(allExons->U12atacTerminalExons,allExons->nU12atacTerminalExons,
-				   TERMINAL, Locus, l1, l2, Sequence, dAA);
-		}
       }
 	  if (ESP)
 		PrintExons(allExons->Singles,allExons->nSingles,
@@ -262,26 +209,10 @@ void Output(packSites* allSites,
       if (SAP){
 		PrintSites(allSites_r->AcceptorSites, allSites_r->nAcceptorSites,
 				   ACC, Locus, REVERSE, l1, l2, lowerlimit, Sequence, gp->AcceptorProfile);
-		if (U12GTAG){
-			PrintSites(allSites_r->U12gtagAcceptorSites, allSites_r->nU12gtagAcceptorSites,
-				   ACC, Locus, REVERSE, l1, l2, lowerlimit, Sequence, gp->U12gtagAcceptorProfile);
-		}		   
-		if (U12ATAC){
-			PrintSites(allSites_r->U12atacAcceptorSites, allSites_r->nU12atacAcceptorSites,
-				   ACC, Locus, REVERSE, l1, l2, lowerlimit, Sequence, gp->U12atacAcceptorProfile);
-		}
 	  }
       if (SDP){
 		PrintSites(allSites_r->DonorSites, allSites_r->nDonorSites,
 				   DON, Locus, REVERSE, l1, l2, lowerlimit, Sequence, gp->DonorProfile);
-		if (U12GTAG){
-			PrintSites(allSites_r->U12gtagDonorSites, allSites_r->nU12gtagDonorSites,
-				   DON, Locus, REVERSE, l1, l2, lowerlimit, Sequence, gp->U12gtagDonorProfile);
-		}	
-		if (U12ATAC){
-			PrintSites(allSites_r->U12atacDonorSites, allSites_r->nU12atacDonorSites,
-				   DON, Locus, REVERSE, l1, l2, lowerlimit, Sequence, gp->U12atacDonorProfile);
-		}	   
 	  }
       if (STP)
 		PrintSites(allSites_r->StopCodons,allSites_r->nStopCodons,STO,
@@ -291,52 +222,14 @@ void Output(packSites* allSites,
       if (EFP){
 		PrintExons(allExons_r->InitialExons,allExons_r->nInitialExons,
 				   FIRST, Locus, l1, l2, Sequence, dAA);
-		if (U12GTAG){
-			PrintExons(allExons_r->U12gtagInitialExons,allExons_r->nU12gtagInitialExons,
-				   FIRST, Locus, l1, l2, Sequence, dAA);
-		}
-		if (U12ATAC){
-			PrintExons(allExons_r->U12atacInitialExons,allExons_r->nU12atacInitialExons,
-				   FIRST, Locus, l1, l2, Sequence, dAA);
-		}
       }
 	  if (EIP){
 		PrintExons(allExons_r->InternalExons,allExons_r->nInternalExons,
 				   INTERNAL, Locus, l1, l2, Sequence, dAA);
-		if (U12GTAG){
-			PrintExons(allExons_r->U2_U12gtag_InternalExons,allExons_r->nU2_U12gtag_InternalExons,
-				   INTERNAL, Locus, l1, l2, Sequence, dAA);
-			PrintExons(allExons_r->U12gtag_U2_InternalExons,allExons_r->nU12gtag_U2_InternalExons,
-				   INTERNAL, Locus, l1, l2, Sequence, dAA);
-			PrintExons(allExons_r->U12gtag_U12gtag_InternalExons,allExons_r->nU12gtag_U12gtag_InternalExons,
-				   INTERNAL, Locus, l1, l2, Sequence, dAA);
-		}
-		if (U12ATAC){
-			PrintExons(allExons_r->U2_U12atac_InternalExons,allExons_r->nU2_U12atac_InternalExons,
-				   INTERNAL, Locus, l1, l2, Sequence, dAA);
-			PrintExons(allExons_r->U12atac_U2_InternalExons,allExons_r->nU12atac_U2_InternalExons,
-				   INTERNAL, Locus, l1, l2, Sequence, dAA);
-			PrintExons(allExons_r->U12atac_U12atac_InternalExons,allExons_r->nU12atac_U12atac_InternalExons,
-				   INTERNAL, Locus, l1, l2, Sequence, dAA);
-		}
-		if (U12ATAC && U12GTAG){
-			PrintExons(allExons_r->U12gtag_U12atac_InternalExons,allExons_r->nU12gtag_U12atac_InternalExons,
-				   INTERNAL, Locus, l1, l2, Sequence, dAA);
-			PrintExons(allExons_r->U12atac_U12gtag_InternalExons,allExons_r->nU12atac_U12gtag_InternalExons,
-				   INTERNAL, Locus, l1, l2, Sequence, dAA);
-		}
       }
 	  if (ETP){
 		PrintExons(allExons_r->TerminalExons,allExons_r->nTerminalExons,
 				   TERMINAL, Locus, l1, l2, Sequence, dAA);
-		if (U12GTAG){
-				PrintExons(allExons_r->U12gtagTerminalExons,allExons_r->nU12gtagTerminalExons,
-				   TERMINAL, Locus, l1, l2, Sequence, dAA);
-		}
-		if (U12ATAC){
-				PrintExons(allExons_r->U12atacTerminalExons,allExons_r->nU12atacTerminalExons,
-				   TERMINAL, Locus, l1, l2, Sequence, dAA);
-		}
       }
       if (ESP)
 		PrintExons(allExons_r->Singles,allExons_r->nSingles,

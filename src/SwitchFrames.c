@@ -4,10 +4,11 @@
 *                                                                        *
 *   Exchange frame and remainder from reverse exons                      *
 *                                                                        *
-*   This file is part of the geneid 1.2 distribution                     *
+*   This file is part of the geneid 1.3 distribution                     *
 *                                                                        *
-*     Copyright (C) 2003 - Enrique BLANCO GARCIA                         *
-*                          Roderic GUIGO SERRA                           * 
+*     Copyright (C) 2006 - Enrique BLANCO GARCIA                         *
+*                          Roderic GUIGO SERRA                           *
+*                          Tyler   ALIOTO                                * 
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
 *  it under the terms of the GNU General Public License as published by  *
@@ -24,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: SwitchFrames.c,v 1.3 2003-11-05 15:10:32 eblanco Exp $  */
+/*  $Id: SwitchFrames.c,v 1.4 2006-12-11 09:50:48 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -33,6 +34,7 @@ void SwitchFrames(exonGFF* e, long n)
 {
   long i;
   int f;
+  site* d;
 
   /* Exchange frame/rmd in reverse exons and reset the selected flag */
   for (i=0; i<n; i++)
@@ -40,8 +42,11 @@ void SwitchFrames(exonGFF* e, long n)
 	  if ((e+i)->Strand == '-')
 		{
 		  f=(e+i)->Frame;
+		  d=(e+i)->Donor;
 		  (e+i)->Frame=(e+i)->Remainder;
 		  (e+i)->Remainder=f;
+		  (e+i)->Donor = (e+i)->Acceptor;
+		  (e+i)->Acceptor = d;
 		}
 
 	  /* Mark exon as prediction in the current fragment */
@@ -56,6 +61,7 @@ void SwitchFramesDa(packGenes* pg, int nclass)
   long i;
   long j;
   int f;
+  site* d;
 
   /* Screening every class looking for exons... */
   for (i=0; i < nclass; i++) 
@@ -71,7 +77,9 @@ void SwitchFramesDa(packGenes* pg, int nclass)
 				f= pg->d[i][j]->Frame;
 				pg->d[i][j]->Frame = pg->d[i][j]->Remainder;
 				pg->d[i][j]->Remainder = f;
-
+				d=pg->d[i][j]->Donor;
+				pg->d[i][j]->Donor = pg->d[i][j]->Acceptor;
+				pg->d[i][j]->Acceptor = d;
 				/* Mark exon */
 				pg->d[i][j]->selected = 1;
 			  }
@@ -85,6 +93,7 @@ void SwitchFramesDb(packGenes* pg, int nclass)
   long i;
   long j;
   int f;
+  site* d;
 
   /* Screening every class looking for exons... */
   for (i=0; i < nclass; i++)
@@ -100,6 +109,9 @@ void SwitchFramesDb(packGenes* pg, int nclass)
 				f = pg->d[i][j]->Frame;
 				pg->d[i][j]->Frame = pg->d[i][j]->Remainder;
 				pg->d[i][j]->Remainder = f;
+				d=pg->d[i][j]->Donor;
+				pg->d[i][j]->Donor = pg->d[i][j]->Acceptor;
+				pg->d[i][j]->Acceptor = d;
 
 				/* Mark exon */
 				pg->d[i][j]->selected = 0;
@@ -113,6 +125,7 @@ void UndoFrames(exonGFF* e, long n)
 {
   long i;
   int f;
+  site* d;
   
   /* Undo frame/rmd change*/
   for (i=0;i<n;i++)  
@@ -121,5 +134,8 @@ void UndoFrames(exonGFF* e, long n)
 		f=(e+i)->Frame;
 		(e+i)->Frame=(e+i)->Remainder;
 		(e+i)->Remainder=f;
+		d=(e+i)->Donor;
+		(e+i)->Donor = (e+i)->Acceptor;
+		(e+i)->Acceptor = d;
       }
 }

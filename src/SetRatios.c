@@ -4,10 +4,11 @@
 *                                                                        *
 *   Stablish maximum allowed number of signals and exons per split       *
 *                                                                        *
-*   This file is part of the geneid 1.2 distribution                     *
+*   This file is part of the geneid 1.3 distribution                     *
 *                                                                        *
-*     Copyright (C) 2003 - Enrique BLANCO GARCIA                         *
-*                          Roderic GUIGO SERRA                           * 
+*     Copyright (C) 2006 - Enrique BLANCO GARCIA                         *
+*                          Roderic GUIGO SERRA                           *
+*                          Tyler   ALIOTO                                * 
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
 *  it under the terms of the GNU General Public License as published by  *
@@ -39,8 +40,8 @@ an estimation for the amount of signals and exons (any type), necessary
 to restore the prediction between 2 splits, is computed in order to ask
 for enough memory to allocate them */
 
-void SetRatios(long* NUMSITES,long* NUMU12SITES,
-               long* NUMEXONS,long* NUMU12EXONS, long* NUMU12U12EXONS,
+void SetRatios(long* NUMSITES,
+               long* NUMEXONS,
                long* MAXBACKUPSITES,
                long* MAXBACKUPEXONS,
                long L)
@@ -51,10 +52,7 @@ void SetRatios(long* NUMSITES,long* NUMU12SITES,
     {
       /* Short sequences processed as a whole: only one split */
       *NUMSITES = L / RSITES + BASEVALUESITES_SHORT;
-      *NUMU12SITES = L / RU12SITES + BASEVALUESITES_SHORT;
       *NUMEXONS = L / REXONS + BASEVALUEEXONS_SHORT;
-      *NUMU12EXONS = L / RU12EXONS + BASEVALUEEXONS_SHORT;
-      *NUMU12U12EXONS = L / RU12EXONS + BASEVALUEEXONS_SHORT;
 
       /* There is no need to divide the sequence */
       *MAXBACKUPSITES = 0;
@@ -65,9 +63,6 @@ void SetRatios(long* NUMSITES,long* NUMU12SITES,
       /* Long sequences must be divided into several fragments */
       *NUMSITES = LENGTHSi / RSITES;
       *NUMEXONS = LENGTHSi / REXONS;     
-      *NUMU12SITES =  LENGTHSi/ RU12SITES;    
-      *NUMU12EXONS =  LENGTHSi/ RU12EXONS;
-      *NUMU12U12EXONS = LENGTHSi / RU12EXONS;
 
       /* Information inter-split predictions must be saved */ 
       *MAXBACKUPSITES = (L / RBSITES) + BASEVALUESITES_LARGE; 

@@ -4,10 +4,11 @@
 *                                                                        *
 *   From acceptor/donor sites and stop codons, to build internal exons   *
 *                                                                        *
-*   This file is part of the geneid 1.2 distribution                     *
+*   This file is part of the geneid 1.3 distribution                     *
 *                                                                        *
-*     Copyright (C) 2003 - Enrique BLANCO GARCIA                         *
-*                          Roderic GUIGO SERRA                           * 
+*     Copyright (C) 2006 - Enrique BLANCO GARCIA                         *
+*                          Roderic GUIGO SERRA                           *
+*                          Tyler   ALIOTO                                * 
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
 *  it under the terms of the GNU General Public License as published by  *
@@ -24,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: BuildInternalExons.c,v 1.7 2006-05-29 13:53:49 talioto Exp $  */
+/*  $Id: BuildInternalExons.c,v 1.8 2006-12-11 09:50:48 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -37,8 +38,8 @@ long BuildInternalExons(site *Acceptor, long nAcceptors,
                         site *Donor, long nDonors,
                         site *Stop, long nStops,
                         int MaxDonors,
-						char* ExonType,
-						char* Sequence,
+			char* ExonType,
+			char* Sequence,
                         exonGFF* Exon, long nexons)
 {
   /* Best exons built using the current Acceptor and frame availability */
@@ -110,7 +111,7 @@ long BuildInternalExons(site *Acceptor, long nAcceptors,
 			{
 			  /* Donors between Acceptor and Stop defines internal exons */
 			  while (((Donor+ks)->Position < (Stop+js)->Position + 1 + 2)
-					 && (ks < nDonors))
+					 && (ks < nDonors)&&((Donor+ks)->Position > (Acceptor+i)->Position + EXONLENGTH))
 				{
 				  /* a. There is room to save this new exon */
 				  if (nLocalExons < MaxDonors)
@@ -172,7 +173,7 @@ long BuildInternalExons(site *Acceptor, long nAcceptors,
 	    {
 		  /* if any frame is opened and there are not more stops left */
 		  /* then every donor forms an internal exon with the Acceptor */
-		  while (ks < nDonors)
+	      while ((ks < nDonors)&&((Donor+ks)->Position > (Acceptor+i)->Position + EXONLENGTH))
 			{
 			  /* a. There is room to save this new exon */
 			  if (nLocalExons < MaxDonors)

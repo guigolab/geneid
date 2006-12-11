@@ -4,10 +4,11 @@
 *                                                                        *
 *   Reading the rules used to assemble best predicted genes              *
 *                                                                        *
-*   This file is part of the geneid 1.2 distribution                     *
+*   This file is part of the geneid 1.3 distribution                     *
 *                                                                        *
-*     Copyright (C) 2003 - Enrique BLANCO GARCIA                         *
-*                          Roderic GUIGO SERRA                           * 
+*     Copyright (C) 2006 - Enrique BLANCO GARCIA                         *
+*                          Roderic GUIGO SERRA                           *
+*                          Tyler   ALIOTO                                * 
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
 *  it under the terms of the GNU General Public License as published by  *
@@ -24,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: ReadGeneModel.c,v 1.6 2004-01-27 16:23:18 eblanco Exp $  */
+/*  $Id: ReadGeneModel.c,v 1.7 2006-12-11 09:50:48 talioto Exp $  */
 
 #include "geneid.h"
 

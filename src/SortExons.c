@@ -4,10 +4,11 @@
 *                                                                        *
 *   Sort by left signal position all of predicted exons                  *
 *                                                                        *
-*   This file is part of the geneid 1.2 distribution                     *
+*   This file is part of the geneid 1.3 distribution                     *
 *                                                                        *
-*     Copyright (C) 2003 - Enrique BLANCO GARCIA                         *
-*                          Roderic GUIGO SERRA                           * 
+*     Copyright (C) 2006 - Enrique BLANCO GARCIA                         *
+*                          Roderic GUIGO SERRA                           *
+*                          Tyler   ALIOTO                                * 
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
 *  it under the terms of the GNU General Public License as published by  *
@@ -24,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: SortExons.c,v 1.10 2006-06-01 21:06:36 talioto Exp $  */
+/*  $Id: SortExons.c,v 1.11 2006-12-11 09:50:48 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -58,7 +59,13 @@ void InsertBeginExon(exonGFF* Exons, long lowerlimit)
   
   e->Acceptor->Position = lowerlimit;
   e->Donor->Position = lowerlimit;
-  
+  e->Acceptor->class = U2;
+  strcpy(e->Acceptor->subtype,sU2);
+  strcpy(e->Acceptor->type,sU2type);
+  e->Donor->class = U2;
+  strcpy(e->Donor->subtype,sU2);
+  strcpy(e->Donor->type,sU2type);
+
   /* Save the extracted exon */
   Exons[0].Acceptor = e->Acceptor;
   Exons[0].Donor = e->Donor;
@@ -94,7 +101,13 @@ void InsertBeginExon(exonGFF* Exons, long lowerlimit)
   
   re->Acceptor->Position = 0;
   re->Donor->Position = 0;
-  
+  re->Acceptor->class = U2;
+  strcpy(re->Acceptor->subtype,sU2);
+  strcpy(re->Acceptor->type,sU2type);
+  re->Donor->class = U2;
+  strcpy(re->Donor->subtype,sU2);
+  strcpy(re->Donor->type,sU2type);
+
   /* Save the extracted exon */
   Exons[1].Acceptor = re->Acceptor;
   Exons[1].Donor = re->Donor;
@@ -138,6 +151,12 @@ void InsertEndExon(exonGFF* Exons, long n, long L)
 
   e->Acceptor->Position = L;
   e->Donor->Position = L;
+  e->Acceptor->class = U2;
+  strcpy(e->Acceptor->subtype,sU2);
+  strcpy(e->Acceptor->type,sU2type);
+  e->Donor->class = U2;
+  strcpy(e->Donor->subtype,sU2);
+  strcpy(e->Donor->type,sU2type);
 
   /* Save the extracted exon */
   Exons[n].Acceptor = e->Acceptor;
@@ -175,6 +194,12 @@ void InsertEndExon(exonGFF* Exons, long n, long L)
 
   re->Acceptor->Position = L;
   re->Donor->Position = L;
+  re->Acceptor->class = U2;
+  strcpy(re->Acceptor->subtype,sU2);
+  strcpy(re->Acceptor->type,sU2type);
+  re->Donor->class = U2;
+  strcpy(re->Donor->subtype,sU2);
+  strcpy(re->Donor->type,sU2type);
 
   /* Save the extracted exon */
   Exons[n+1].Acceptor = re->Acceptor;
@@ -254,8 +279,8 @@ void SortExons(packExons* allExons,
   long HowMany;
 
   /* 0. Creating the array for sorting: 1 - Length of fragment */
-  left = l1 + COFFSET - LENGTHCODON;
-  right = l2 + COFFSET;
+  left = lowerlimit + COFFSET - LENGTHCODON;
+  right = upperlimit + COFFSET;
   l =  right - left + 1;
 
   /* Allocating memory for array ExonList */
@@ -281,29 +306,29 @@ void SortExons(packExons* allExons,
       UpdateList(&(ExonList[acceptor+offset]), allExons->InitialExons+i);
     }
 
-  for (i=0; i<allExons->nU12gtagInitialExons; i++) 
-    {
-      /* Correction between real and relative to fragment position */
-      acceptor=(allExons->U12gtagInitialExons+i)->Acceptor->Position - left;
-      (allExons->U12gtagInitialExons+i)->Strand = '+';
-      /* Fixing positions according to the COFFSET in arrays */
-      CorrectExon(allExons->U12gtagInitialExons+i);
-      offset = (allExons->U12gtagInitialExons+i)->offset1;
-      /* Insert exon in the proper list depending on the left position */
-      UpdateList(&(ExonList[acceptor+offset]), allExons->U12gtagInitialExons+i);
-    }
+/*   for (i=0; i<allExons->nU12gtagInitialExons; i++)  */
+/*     { */
+/*       /\* Correction between real and relative to fragment position *\/ */
+/*       acceptor=(allExons->U12gtagInitialExons+i)->Acceptor->Position - left; */
+/*       (allExons->U12gtagInitialExons+i)->Strand = '+'; */
+/*       /\* Fixing positions according to the COFFSET in arrays *\/ */
+/*       CorrectExon(allExons->U12gtagInitialExons+i); */
+/*       offset = (allExons->U12gtagInitialExons+i)->offset1; */
+/*       /\* Insert exon in the proper list depending on the left position *\/ */
+/*       UpdateList(&(ExonList[acceptor+offset]), allExons->U12gtagInitialExons+i); */
+/*     } */
 
-  for (i=0; i<allExons->nU12atacInitialExons; i++) 
-    {
-      /* Correction between real and relative to fragment position */
-      acceptor=(allExons->U12atacInitialExons+i)->Acceptor->Position - left;
-      (allExons->U12atacInitialExons+i)->Strand = '+';
-      /* Fixing positions according to the COFFSET in arrays */
-      CorrectExon(allExons->U12atacInitialExons+i);
-      offset = (allExons->U12atacInitialExons+i)->offset1;
-      /* Insert exon in the proper list depending on the left position */
-      UpdateList(&(ExonList[acceptor+offset]), allExons->U12atacInitialExons+i);
-    }
+/*   for (i=0; i<allExons->nU12atacInitialExons; i++)  */
+/*     { */
+/*       /\* Correction between real and relative to fragment position *\/ */
+/*       acceptor=(allExons->U12atacInitialExons+i)->Acceptor->Position - left; */
+/*       (allExons->U12atacInitialExons+i)->Strand = '+'; */
+/*       /\* Fixing positions according to the COFFSET in arrays *\/ */
+/*       CorrectExon(allExons->U12atacInitialExons+i); */
+/*       offset = (allExons->U12atacInitialExons+i)->offset1; */
+/*       /\* Insert exon in the proper list depending on the left position *\/ */
+/*       UpdateList(&(ExonList[acceptor+offset]), allExons->U12atacInitialExons+i); */
+/*     } */
 
   for (i=0;i<allExons->nInternalExons;i++) 
     {
@@ -314,77 +339,77 @@ void SortExons(packExons* allExons,
       UpdateList(&(ExonList[acceptor + offset]), allExons->InternalExons+i); 
     }
 
-  for (i=0;i<allExons->nU2_U12gtag_InternalExons;i++) 
-    {
-      acceptor=(allExons->U2_U12gtag_InternalExons+i)->Acceptor->Position - left;
-      (allExons->U2_U12gtag_InternalExons+i)->Strand = '+';
-      CorrectExon(allExons->U2_U12gtag_InternalExons+i);
-      offset = (allExons->U2_U12gtag_InternalExons+i)->offset1;
-      UpdateList(&(ExonList[acceptor + offset]), allExons->U2_U12gtag_InternalExons+i); 
-    }
+/*   for (i=0;i<allExons->nU2_U12gtag_InternalExons;i++)  */
+/*     { */
+/*       acceptor=(allExons->U2_U12gtag_InternalExons+i)->Acceptor->Position - left; */
+/*       (allExons->U2_U12gtag_InternalExons+i)->Strand = '+'; */
+/*       CorrectExon(allExons->U2_U12gtag_InternalExons+i); */
+/*       offset = (allExons->U2_U12gtag_InternalExons+i)->offset1; */
+/*       UpdateList(&(ExonList[acceptor + offset]), allExons->U2_U12gtag_InternalExons+i);  */
+/*     } */
 
-  for (i=0;i<allExons->nU12gtag_U2_InternalExons;i++) 
-    {
-      acceptor=(allExons->U12gtag_U2_InternalExons+i)->Acceptor->Position - left;
-      (allExons->U12gtag_U2_InternalExons+i)->Strand = '+';
-      CorrectExon(allExons->U12gtag_U2_InternalExons+i);
-      offset = (allExons->U12gtag_U2_InternalExons+i)->offset1;
-      UpdateList(&(ExonList[acceptor + offset]), allExons->U12gtag_U2_InternalExons+i); 
-    }
+/*   for (i=0;i<allExons->nU12gtag_U2_InternalExons;i++)  */
+/*     { */
+/*       acceptor=(allExons->U12gtag_U2_InternalExons+i)->Acceptor->Position - left; */
+/*       (allExons->U12gtag_U2_InternalExons+i)->Strand = '+'; */
+/*       CorrectExon(allExons->U12gtag_U2_InternalExons+i); */
+/*       offset = (allExons->U12gtag_U2_InternalExons+i)->offset1; */
+/*       UpdateList(&(ExonList[acceptor + offset]), allExons->U12gtag_U2_InternalExons+i);  */
+/*     } */
 
-  for (i=0;i<allExons->nU12gtag_U12gtag_InternalExons;i++) 
-    {
-      acceptor=(allExons->U12gtag_U12gtag_InternalExons+i)->Acceptor->Position - left;
-      (allExons->U12gtag_U12gtag_InternalExons+i)->Strand = '+';
-      CorrectExon(allExons->U12gtag_U12gtag_InternalExons+i);
-      offset = (allExons->U12gtag_U12gtag_InternalExons+i)->offset1;
-      UpdateList(&(ExonList[acceptor + offset]), allExons->U12gtag_U12gtag_InternalExons+i); 
-    }
+/*   for (i=0;i<allExons->nU12gtag_U12gtag_InternalExons;i++)  */
+/*     { */
+/*       acceptor=(allExons->U12gtag_U12gtag_InternalExons+i)->Acceptor->Position - left; */
+/*       (allExons->U12gtag_U12gtag_InternalExons+i)->Strand = '+'; */
+/*       CorrectExon(allExons->U12gtag_U12gtag_InternalExons+i); */
+/*       offset = (allExons->U12gtag_U12gtag_InternalExons+i)->offset1; */
+/*       UpdateList(&(ExonList[acceptor + offset]), allExons->U12gtag_U12gtag_InternalExons+i);  */
+/*     } */
 
-  for (i=0;i<allExons->nU2_U12atac_InternalExons;i++) 
-    {
-      acceptor=(allExons->U2_U12atac_InternalExons+i)->Acceptor->Position - left;
-      (allExons->U2_U12atac_InternalExons+i)->Strand = '+';
-      CorrectExon(allExons->U2_U12atac_InternalExons+i);
-      offset = (allExons->U2_U12atac_InternalExons+i)->offset1;
-      UpdateList(&(ExonList[acceptor + offset]), allExons->U2_U12atac_InternalExons+i); 
-    }
+/*   for (i=0;i<allExons->nU2_U12atac_InternalExons;i++)  */
+/*     { */
+/*       acceptor=(allExons->U2_U12atac_InternalExons+i)->Acceptor->Position - left; */
+/*       (allExons->U2_U12atac_InternalExons+i)->Strand = '+'; */
+/*       CorrectExon(allExons->U2_U12atac_InternalExons+i); */
+/*       offset = (allExons->U2_U12atac_InternalExons+i)->offset1; */
+/*       UpdateList(&(ExonList[acceptor + offset]), allExons->U2_U12atac_InternalExons+i);  */
+/*     } */
 
-  for (i=0;i<allExons->nU12atac_U2_InternalExons;i++) 
-    {
-      acceptor=(allExons->U12atac_U2_InternalExons+i)->Acceptor->Position - left;
-      (allExons->U12atac_U2_InternalExons+i)->Strand = '+';
-      CorrectExon(allExons->U12atac_U2_InternalExons+i);
-      offset = (allExons->U12atac_U2_InternalExons+i)->offset1;
-      UpdateList(&(ExonList[acceptor + offset]), allExons->U12atac_U2_InternalExons+i); 
-    }
+/*   for (i=0;i<allExons->nU12atac_U2_InternalExons;i++)  */
+/*     { */
+/*       acceptor=(allExons->U12atac_U2_InternalExons+i)->Acceptor->Position - left; */
+/*       (allExons->U12atac_U2_InternalExons+i)->Strand = '+'; */
+/*       CorrectExon(allExons->U12atac_U2_InternalExons+i); */
+/*       offset = (allExons->U12atac_U2_InternalExons+i)->offset1; */
+/*       UpdateList(&(ExonList[acceptor + offset]), allExons->U12atac_U2_InternalExons+i);  */
+/*     } */
 
-  for (i=0;i<allExons->nU12atac_U12atac_InternalExons;i++) 
-    {
-      acceptor=(allExons->U12atac_U12atac_InternalExons+i)->Acceptor->Position - left;
-      (allExons->U12atac_U12atac_InternalExons+i)->Strand = '+';
-      CorrectExon(allExons->U12atac_U12atac_InternalExons+i);
-      offset = (allExons->U12atac_U12atac_InternalExons+i)->offset1;
-      UpdateList(&(ExonList[acceptor + offset]), allExons->U12atac_U12atac_InternalExons+i); 
-    }
+/*   for (i=0;i<allExons->nU12atac_U12atac_InternalExons;i++)  */
+/*     { */
+/*       acceptor=(allExons->U12atac_U12atac_InternalExons+i)->Acceptor->Position - left; */
+/*       (allExons->U12atac_U12atac_InternalExons+i)->Strand = '+'; */
+/*       CorrectExon(allExons->U12atac_U12atac_InternalExons+i); */
+/*       offset = (allExons->U12atac_U12atac_InternalExons+i)->offset1; */
+/*       UpdateList(&(ExonList[acceptor + offset]), allExons->U12atac_U12atac_InternalExons+i);  */
+/*     } */
 
-  for (i=0;i<allExons->nU12gtag_U12atac_InternalExons;i++) 
-    {
-      acceptor=(allExons->U12gtag_U12atac_InternalExons+i)->Acceptor->Position - left;
-      (allExons->U12gtag_U12atac_InternalExons+i)->Strand = '+';
-      CorrectExon(allExons->U12gtag_U12atac_InternalExons+i);
-      offset = (allExons->U12gtag_U12atac_InternalExons+i)->offset1;
-      UpdateList(&(ExonList[acceptor + offset]), allExons->U12gtag_U12atac_InternalExons+i); 
-    }
+/*   for (i=0;i<allExons->nU12gtag_U12atac_InternalExons;i++)  */
+/*     { */
+/*       acceptor=(allExons->U12gtag_U12atac_InternalExons+i)->Acceptor->Position - left; */
+/*       (allExons->U12gtag_U12atac_InternalExons+i)->Strand = '+'; */
+/*       CorrectExon(allExons->U12gtag_U12atac_InternalExons+i); */
+/*       offset = (allExons->U12gtag_U12atac_InternalExons+i)->offset1; */
+/*       UpdateList(&(ExonList[acceptor + offset]), allExons->U12gtag_U12atac_InternalExons+i);  */
+/*     } */
 
-  for (i=0;i<allExons->nU12atac_U12gtag_InternalExons;i++) 
-    {
-      acceptor=(allExons->U12atac_U12gtag_InternalExons+i)->Acceptor->Position - left;
-      (allExons->U12atac_U12gtag_InternalExons+i)->Strand = '+';
-      CorrectExon(allExons->U12atac_U12gtag_InternalExons+i);
-      offset = (allExons->U12atac_U12gtag_InternalExons+i)->offset1;
-      UpdateList(&(ExonList[acceptor + offset]), allExons->U12atac_U12gtag_InternalExons+i); 
-    }
+/*   for (i=0;i<allExons->nU12atac_U12gtag_InternalExons;i++)  */
+/*     { */
+/*       acceptor=(allExons->U12atac_U12gtag_InternalExons+i)->Acceptor->Position - left; */
+/*       (allExons->U12atac_U12gtag_InternalExons+i)->Strand = '+'; */
+/*       CorrectExon(allExons->U12atac_U12gtag_InternalExons+i); */
+/*       offset = (allExons->U12atac_U12gtag_InternalExons+i)->offset1; */
+/*       UpdateList(&(ExonList[acceptor + offset]), allExons->U12atac_U12gtag_InternalExons+i);  */
+/*     } */
 
   for (i=0;i<allExons->nTerminalExons;i++) 
     {
@@ -395,23 +420,23 @@ void SortExons(packExons* allExons,
       UpdateList(&(ExonList[acceptor + offset]), allExons->TerminalExons+i); 
     }
   
-  for (i=0;i<allExons->nU12gtagTerminalExons;i++) 
-    {
-      acceptor=(allExons->U12gtagTerminalExons+i)->Acceptor->Position - left;
-      (allExons->U12gtagTerminalExons+i)->Strand = '+';
-      CorrectExon(allExons->U12gtagTerminalExons+i);
-      offset = (allExons->U12gtagTerminalExons+i)->offset1;
-      UpdateList(&(ExonList[acceptor + offset]), allExons->U12gtagTerminalExons+i); 
-    }
+/*   for (i=0;i<allExons->nU12gtagTerminalExons;i++)  */
+/*     { */
+/*       acceptor=(allExons->U12gtagTerminalExons+i)->Acceptor->Position - left; */
+/*       (allExons->U12gtagTerminalExons+i)->Strand = '+'; */
+/*       CorrectExon(allExons->U12gtagTerminalExons+i); */
+/*       offset = (allExons->U12gtagTerminalExons+i)->offset1; */
+/*       UpdateList(&(ExonList[acceptor + offset]), allExons->U12gtagTerminalExons+i);  */
+/*     } */
   
-  for (i=0;i<allExons->nU12atacTerminalExons;i++) 
-    {
-      acceptor=(allExons->U12atacTerminalExons+i)->Acceptor->Position - left;
-      (allExons->U12atacTerminalExons+i)->Strand = '+';
-      CorrectExon(allExons->U12atacTerminalExons+i);
-      offset = (allExons->U12atacTerminalExons+i)->offset1;
-      UpdateList(&(ExonList[acceptor + offset]), allExons->U12atacTerminalExons+i); 
-    }
+/*   for (i=0;i<allExons->nU12atacTerminalExons;i++)  */
+/*     { */
+/*       acceptor=(allExons->U12atacTerminalExons+i)->Acceptor->Position - left; */
+/*       (allExons->U12atacTerminalExons+i)->Strand = '+'; */
+/*       CorrectExon(allExons->U12atacTerminalExons+i); */
+/*       offset = (allExons->U12atacTerminalExons+i)->offset1; */
+/*       UpdateList(&(ExonList[acceptor + offset]), allExons->U12atacTerminalExons+i);  */
+/*     } */
   
   for (i=0;i<allExons->nSingles;i++) 
     {
@@ -442,23 +467,23 @@ void SortExons(packExons* allExons,
       UpdateList(&(ExonList[acceptor + offset]), allExons_r->InitialExons+i); 
     }
 
-  for (i=0;i<allExons_r->nU12gtagInitialExons;i++) 
-    {
-      acceptor=(allExons_r->U12gtagInitialExons+i)->Acceptor->Position - left;
-      (allExons_r->U12gtagInitialExons+i)->Strand = '-';
-      CorrectExon(allExons_r->U12gtagInitialExons+i);
-      offset = (allExons_r->U12gtagInitialExons+i)->offset1;
-      UpdateList(&(ExonList[acceptor + offset]), allExons_r->U12gtagInitialExons+i); 
-    }
+/*   for (i=0;i<allExons_r->nU12gtagInitialExons;i++)  */
+/*     { */
+/*       acceptor=(allExons_r->U12gtagInitialExons+i)->Acceptor->Position - left; */
+/*       (allExons_r->U12gtagInitialExons+i)->Strand = '-'; */
+/*       CorrectExon(allExons_r->U12gtagInitialExons+i); */
+/*       offset = (allExons_r->U12gtagInitialExons+i)->offset1; */
+/*       UpdateList(&(ExonList[acceptor + offset]), allExons_r->U12gtagInitialExons+i);  */
+/*     } */
 
-  for (i=0;i<allExons_r->nU12atacInitialExons;i++) 
-    {
-      acceptor=(allExons_r->U12atacInitialExons+i)->Acceptor->Position - left;
-      (allExons_r->U12atacInitialExons+i)->Strand = '-';
-      CorrectExon(allExons_r->U12atacInitialExons+i);
-      offset = (allExons_r->U12atacInitialExons+i)->offset1;
-      UpdateList(&(ExonList[acceptor + offset]), allExons_r->U12atacInitialExons+i); 
-    }
+/*   for (i=0;i<allExons_r->nU12atacInitialExons;i++)  */
+/*     { */
+/*       acceptor=(allExons_r->U12atacInitialExons+i)->Acceptor->Position - left; */
+/*       (allExons_r->U12atacInitialExons+i)->Strand = '-'; */
+/*       CorrectExon(allExons_r->U12atacInitialExons+i); */
+/*       offset = (allExons_r->U12atacInitialExons+i)->offset1; */
+/*       UpdateList(&(ExonList[acceptor + offset]), allExons_r->U12atacInitialExons+i);  */
+/*     } */
 
   for (i=0;i<allExons_r->nInternalExons;i++) 
     {
@@ -469,77 +494,77 @@ void SortExons(packExons* allExons,
       UpdateList(&(ExonList[acceptor + offset]), allExons_r->InternalExons+i); 
     }
 
-  for (i=0;i<allExons_r->nU2_U12gtag_InternalExons;i++) 
-    {
-      acceptor=(allExons_r->U2_U12gtag_InternalExons+i)->Acceptor->Position - left;
-      (allExons_r->U2_U12gtag_InternalExons+i)->Strand = '-';
-      CorrectExon(allExons_r->U2_U12gtag_InternalExons+i);
-      offset = (allExons_r->U2_U12gtag_InternalExons+i)->offset1;
-      UpdateList(&(ExonList[acceptor + offset]), allExons_r->U2_U12gtag_InternalExons+i); 
-    }
+/*   for (i=0;i<allExons_r->nU2_U12gtag_InternalExons;i++)  */
+/*     { */
+/*       acceptor=(allExons_r->U2_U12gtag_InternalExons+i)->Acceptor->Position - left; */
+/*       (allExons_r->U2_U12gtag_InternalExons+i)->Strand = '-'; */
+/*       CorrectExon(allExons_r->U2_U12gtag_InternalExons+i); */
+/*       offset = (allExons_r->U2_U12gtag_InternalExons+i)->offset1; */
+/*       UpdateList(&(ExonList[acceptor + offset]), allExons_r->U2_U12gtag_InternalExons+i);  */
+/*     } */
 
-  for (i=0;i<allExons_r->nU12gtag_U2_InternalExons;i++) 
-    {
-      acceptor=(allExons_r->U12gtag_U2_InternalExons+i)->Acceptor->Position - left;
-      (allExons_r->U12gtag_U2_InternalExons+i)->Strand = '-';
-      CorrectExon(allExons_r->U12gtag_U2_InternalExons+i);
-      offset = (allExons_r->U12gtag_U2_InternalExons+i)->offset1;
-      UpdateList(&(ExonList[acceptor + offset]), allExons_r->U12gtag_U2_InternalExons+i); 
-    }
+/*   for (i=0;i<allExons_r->nU12gtag_U2_InternalExons;i++)  */
+/*     { */
+/*       acceptor=(allExons_r->U12gtag_U2_InternalExons+i)->Acceptor->Position - left; */
+/*       (allExons_r->U12gtag_U2_InternalExons+i)->Strand = '-'; */
+/*       CorrectExon(allExons_r->U12gtag_U2_InternalExons+i); */
+/*       offset = (allExons_r->U12gtag_U2_InternalExons+i)->offset1; */
+/*       UpdateList(&(ExonList[acceptor + offset]), allExons_r->U12gtag_U2_InternalExons+i);  */
+/*     } */
 
-  for (i=0;i<allExons_r->nU12gtag_U12gtag_InternalExons;i++) 
-    {
-      acceptor=(allExons_r->U12gtag_U12gtag_InternalExons+i)->Acceptor->Position - left;
-      (allExons_r->U12gtag_U12gtag_InternalExons+i)->Strand = '-';
-      CorrectExon(allExons_r->U12gtag_U12gtag_InternalExons+i);
-      offset = (allExons_r->U12gtag_U12gtag_InternalExons+i)->offset1;
-      UpdateList(&(ExonList[acceptor + offset]), allExons_r->U12gtag_U12gtag_InternalExons+i); 
-    }
+/*   for (i=0;i<allExons_r->nU12gtag_U12gtag_InternalExons;i++)  */
+/*     { */
+/*       acceptor=(allExons_r->U12gtag_U12gtag_InternalExons+i)->Acceptor->Position - left; */
+/*       (allExons_r->U12gtag_U12gtag_InternalExons+i)->Strand = '-'; */
+/*       CorrectExon(allExons_r->U12gtag_U12gtag_InternalExons+i); */
+/*       offset = (allExons_r->U12gtag_U12gtag_InternalExons+i)->offset1; */
+/*       UpdateList(&(ExonList[acceptor + offset]), allExons_r->U12gtag_U12gtag_InternalExons+i);  */
+/*     } */
 
-  for (i=0;i<allExons_r->nU2_U12atac_InternalExons;i++) 
-    {
-      acceptor=(allExons_r->U2_U12atac_InternalExons+i)->Acceptor->Position - left;
-      (allExons_r->U2_U12atac_InternalExons+i)->Strand = '-';
-      CorrectExon(allExons_r->U2_U12atac_InternalExons+i);
-      offset = (allExons_r->U2_U12atac_InternalExons+i)->offset1;
-      UpdateList(&(ExonList[acceptor + offset]), allExons_r->U2_U12atac_InternalExons+i); 
-    }
+/*   for (i=0;i<allExons_r->nU2_U12atac_InternalExons;i++)  */
+/*     { */
+/*       acceptor=(allExons_r->U2_U12atac_InternalExons+i)->Acceptor->Position - left; */
+/*       (allExons_r->U2_U12atac_InternalExons+i)->Strand = '-'; */
+/*       CorrectExon(allExons_r->U2_U12atac_InternalExons+i); */
+/*       offset = (allExons_r->U2_U12atac_InternalExons+i)->offset1; */
+/*       UpdateList(&(ExonList[acceptor + offset]), allExons_r->U2_U12atac_InternalExons+i);  */
+/*     } */
 
-  for (i=0;i<allExons_r->nU12atac_U2_InternalExons;i++) 
-    {
-      acceptor=(allExons_r->U12atac_U2_InternalExons+i)->Acceptor->Position - left;
-      (allExons_r->U12atac_U2_InternalExons+i)->Strand = '-';
-      CorrectExon(allExons_r->U12atac_U2_InternalExons+i);
-      offset = (allExons_r->U12atac_U2_InternalExons+i)->offset1;
-      UpdateList(&(ExonList[acceptor + offset]), allExons_r->U12atac_U2_InternalExons+i); 
-    }
+/*   for (i=0;i<allExons_r->nU12atac_U2_InternalExons;i++)  */
+/*     { */
+/*       acceptor=(allExons_r->U12atac_U2_InternalExons+i)->Acceptor->Position - left; */
+/*       (allExons_r->U12atac_U2_InternalExons+i)->Strand = '-'; */
+/*       CorrectExon(allExons_r->U12atac_U2_InternalExons+i); */
+/*       offset = (allExons_r->U12atac_U2_InternalExons+i)->offset1; */
+/*       UpdateList(&(ExonList[acceptor + offset]), allExons_r->U12atac_U2_InternalExons+i);  */
+/*     } */
 
-  for (i=0;i<allExons_r->nU12atac_U12atac_InternalExons;i++) 
-    {
-      acceptor=(allExons_r->U12atac_U12atac_InternalExons+i)->Acceptor->Position - left;
-      (allExons_r->U12atac_U12atac_InternalExons+i)->Strand = '-';
-      CorrectExon(allExons_r->U12atac_U12atac_InternalExons+i);
-      offset = (allExons_r->U12atac_U12atac_InternalExons+i)->offset1;
-      UpdateList(&(ExonList[acceptor + offset]), allExons_r->U12atac_U12atac_InternalExons+i); 
-    }
+/*   for (i=0;i<allExons_r->nU12atac_U12atac_InternalExons;i++)  */
+/*     { */
+/*       acceptor=(allExons_r->U12atac_U12atac_InternalExons+i)->Acceptor->Position - left; */
+/*       (allExons_r->U12atac_U12atac_InternalExons+i)->Strand = '-'; */
+/*       CorrectExon(allExons_r->U12atac_U12atac_InternalExons+i); */
+/*       offset = (allExons_r->U12atac_U12atac_InternalExons+i)->offset1; */
+/*       UpdateList(&(ExonList[acceptor + offset]), allExons_r->U12atac_U12atac_InternalExons+i);  */
+/*     } */
 
-  for (i=0;i<allExons_r->nU12gtag_U12atac_InternalExons;i++) 
-    {
-      acceptor=(allExons_r->U12gtag_U12atac_InternalExons+i)->Acceptor->Position - left;
-      (allExons_r->U12gtag_U12atac_InternalExons+i)->Strand = '-';
-      CorrectExon(allExons_r->U12gtag_U12atac_InternalExons+i);
-      offset = (allExons_r->U12gtag_U12atac_InternalExons+i)->offset1;
-      UpdateList(&(ExonList[acceptor + offset]), allExons_r->U12gtag_U12atac_InternalExons+i); 
-    }
+/*   for (i=0;i<allExons_r->nU12gtag_U12atac_InternalExons;i++)  */
+/*     { */
+/*       acceptor=(allExons_r->U12gtag_U12atac_InternalExons+i)->Acceptor->Position - left; */
+/*       (allExons_r->U12gtag_U12atac_InternalExons+i)->Strand = '-'; */
+/*       CorrectExon(allExons_r->U12gtag_U12atac_InternalExons+i); */
+/*       offset = (allExons_r->U12gtag_U12atac_InternalExons+i)->offset1; */
+/*       UpdateList(&(ExonList[acceptor + offset]), allExons_r->U12gtag_U12atac_InternalExons+i);  */
+/*     } */
 
-  for (i=0;i<allExons_r->nU12atac_U12gtag_InternalExons;i++) 
-    {
-      acceptor=(allExons_r->U12atac_U12gtag_InternalExons+i)->Acceptor->Position - left;
-      (allExons_r->U12atac_U12gtag_InternalExons+i)->Strand = '-';
-      CorrectExon(allExons_r->U12atac_U12gtag_InternalExons+i);
-      offset = (allExons_r->U12atac_U12gtag_InternalExons+i)->offset1;
-      UpdateList(&(ExonList[acceptor + offset]), allExons_r->U12atac_U12gtag_InternalExons+i); 
-    }
+/*   for (i=0;i<allExons_r->nU12atac_U12gtag_InternalExons;i++)  */
+/*     { */
+/*       acceptor=(allExons_r->U12atac_U12gtag_InternalExons+i)->Acceptor->Position - left; */
+/*       (allExons_r->U12atac_U12gtag_InternalExons+i)->Strand = '-'; */
+/*       CorrectExon(allExons_r->U12atac_U12gtag_InternalExons+i); */
+/*       offset = (allExons_r->U12atac_U12gtag_InternalExons+i)->offset1; */
+/*       UpdateList(&(ExonList[acceptor + offset]), allExons_r->U12atac_U12gtag_InternalExons+i);  */
+/*     } */
 
   for (i=0;i<allExons_r->nTerminalExons;i++) 
     {   
@@ -550,23 +575,23 @@ void SortExons(packExons* allExons,
       UpdateList(&(ExonList[acceptor + offset]), allExons_r->TerminalExons+i); 
     }
 
-  for (i=0;i<allExons_r->nU12gtagTerminalExons;i++) 
-    {   
-      acceptor=(allExons_r->U12gtagTerminalExons+i)->Acceptor->Position - left;
-      (allExons_r->U12gtagTerminalExons+i)->Strand = '-';
-      CorrectExon(allExons_r->U12gtagTerminalExons+i);
-      offset = (allExons_r->U12gtagTerminalExons+i)->offset1;
-      UpdateList(&(ExonList[acceptor + offset]), allExons_r->U12gtagTerminalExons+i); 
-    }
+/*   for (i=0;i<allExons_r->nU12gtagTerminalExons;i++)  */
+/*     {    */
+/*       acceptor=(allExons_r->U12gtagTerminalExons+i)->Acceptor->Position - left; */
+/*       (allExons_r->U12gtagTerminalExons+i)->Strand = '-'; */
+/*       CorrectExon(allExons_r->U12gtagTerminalExons+i); */
+/*       offset = (allExons_r->U12gtagTerminalExons+i)->offset1; */
+/*       UpdateList(&(ExonList[acceptor + offset]), allExons_r->U12gtagTerminalExons+i);  */
+/*     } */
 
-  for (i=0;i<allExons_r->nU12atacTerminalExons;i++) 
-    {   
-      acceptor=(allExons_r->U12atacTerminalExons+i)->Acceptor->Position - left;
-      (allExons_r->U12atacTerminalExons+i)->Strand = '-';
-      CorrectExon(allExons_r->U12atacTerminalExons+i);
-      offset = (allExons_r->U12atacTerminalExons+i)->offset1;
-      UpdateList(&(ExonList[acceptor + offset]), allExons_r->U12atacTerminalExons+i); 
-    }
+/*   for (i=0;i<allExons_r->nU12atacTerminalExons;i++)  */
+/*     {    */
+/*       acceptor=(allExons_r->U12atacTerminalExons+i)->Acceptor->Position - left; */
+/*       (allExons_r->U12atacTerminalExons+i)->Strand = '-'; */
+/*       CorrectExon(allExons_r->U12atacTerminalExons+i); */
+/*       offset = (allExons_r->U12atacTerminalExons+i)->offset1; */
+/*       UpdateList(&(ExonList[acceptor + offset]), allExons_r->U12atacTerminalExons+i);  */
+/*     } */
 
   for (i=0;i<allExons_r->nSingles;i++) 
     {

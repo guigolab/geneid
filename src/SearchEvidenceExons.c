@@ -4,10 +4,11 @@
 *                                                                        *
 *   Extracting evidence exons between (l1, l2) for the current split     *
 *                                                                        *
-*   This file is part of the geneid 1.2 distribution                     *
+*   This file is part of the geneid 1.3 distribution                     *
 *                                                                        *
-*     Copyright (C) 2003 - Enrique BLANCO GARCIA                         *
-*                          Roderic GUIGO SERRA                           * 
+*     Copyright (C) 2006 - Enrique BLANCO GARCIA                         *
+*                          Roderic GUIGO SERRA                           *
+*                          Tyler   ALIOTO                                * 
 *                                                                        *
 *  This program is free software; you can redistribute it and/or modify  *
 *  it under the terms of the GNU General Public License as published by  *
@@ -24,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: SearchEvidenceExons.c,v 1.7 2003-11-05 15:05:56 eblanco Exp $  */
+/*  $Id: SearchEvidenceExons.c,v 1.8 2006-12-11 09:50:48 talioto Exp $  */
 
 #include "geneid.h"
 
