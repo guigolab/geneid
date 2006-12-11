@@ -1,0 +1,1 @@
+0 10 * * * /home/ug/arnau/cron/testServices.sh 4 1> /dev/null 2>&1
