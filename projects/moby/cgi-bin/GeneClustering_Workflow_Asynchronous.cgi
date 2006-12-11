@@ -88,11 +88,12 @@ if ($_debug) {
 if (defined($cgi->param ('sequences')) && (($cgi->param ('sequences') =~ />/) || (length ($cgi->param ('sequences')) > 0))) {
 
     if ($_debug) {
-	print STDERR "sequences...\n";
+	print STDERR "parsing pasted sequences...\n";
     }
     
     my $sequences = $cgi->param ('sequences');
     $sequences =~ s/[\r]//g;
+    
     print $seq_fh $sequences;
 }
 else {
@@ -147,7 +148,7 @@ if (-z $seqfile) {
 
 my $t2 = Benchmark->new ();
 if ($_debug) {
-    print STDERR "\nGene clustering Input Uploading : ", timestr (timediff ($t2, $t1)), "\n";
+    # print STDERR "\nGene clustering Input Uploading : ", timestr (timediff ($t2, $t1)), "\n";
 }
 
 # Get The type of input, so we know if we have to deal with FASTA sequences or a list of genes
@@ -254,8 +255,11 @@ my $non_colinear     = $cgi->param ('noncol');
 
 # Parameters Validation
 
-if (! ($cluster_number =~ /\d+/)) {
-    print STDERR "number of clusters is not numerical, $cluster_number!\n";
+if (!defined $cluster_number || ! ($cluster_number =~ /\d+/)) {
+    print STDERR "number of clusters not defined or is not numerical, $cluster_number!\n";
+    print "Content-type: text/html\n\n";
+    print_error("<b>ERROR> Error parsing the parameters!");
+    exit 1;
 }
 
 if (! ($iteration_number =~ /\d+/)) {
