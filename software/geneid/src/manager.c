@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/* $Id: manager.c,v 1.7 2006-12-11 09:50:48 talioto Exp $ */
+/* $Id: manager.c,v 1.8 2006-12-13 11:28:13 talioto Exp $ */
 
 #include "geneid.h"
 
@@ -237,7 +237,7 @@ void  manager(char *Sequence,
   allSites->AcceptorSites = acceptorsites;
   allExons->nInitialExons =
     BuildInitialExons(allSites->StartCodons,allSites->nStartCodons,
-					  donorsites,allSites->nDonorSites,
+					  allSites->DonorSites,allSites->nDonorSites,
 					  allSites->StopCodons,allSites->nStopCodons,
 					  gp->MaxDonors,sFIRST,Sequence,
 					  allExons->InitialExons,NUMEXONS);
@@ -245,8 +245,8 @@ void  manager(char *Sequence,
   printRes(mess); 
 
   allExons->nInternalExons =
-	BuildInternalExons(acceptorsites,allSites->nAcceptorSites,
-					   donorsites,allSites->nDonorSites,
+	BuildInternalExons(allSites->AcceptorSites,allSites->nAcceptorSites,
+					   allSites->DonorSites,allSites->nDonorSites,
 					   allSites->StopCodons,allSites->nStopCodons,
 					   gp->MaxDonors,sINTERNAL,Sequence,
 					   allExons->InternalExons,NUMEXONS);
@@ -254,7 +254,7 @@ void  manager(char *Sequence,
   printRes(mess); 
   
   allExons->nTerminalExons =
-    BuildTerminalExons(acceptorsites,allSites->nAcceptorSites,
+    BuildTerminalExons(allSites->AcceptorSites,allSites->nAcceptorSites,
 					   allSites->StopCodons,allSites->nStopCodons,
 					   LengthSequence,cutPoint,sTERMINAL,Sequence,
 					   allExons->TerminalExons,NUMEXONS);

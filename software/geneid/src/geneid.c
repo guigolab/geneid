@@ -29,7 +29,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/* $Id: geneid.c,v 1.18 2006-12-11 09:50:48 talioto Exp $ */
+/* $Id: geneid.c,v 1.19 2006-12-13 11:28:13 talioto Exp $ */
 
 #include "geneid.h"
 
@@ -454,27 +454,27 @@ int main (int argc, char *argv[])
 			  
 			  /* B.5. Calling to genamic for assembling the best gene */ 
 			  if (GENAMIC && nExons)
-				{
-				  genamic(exons, nExons, genes, gp);
+			    {
+			      genamic(exons, nExons, genes, gp);
 				  
-				  if (upperlimit + 1 > LENGTHSi)
-                    {
-                      /* clean hash table of exons */
-                      cleanDumpHash(dumpster->h);
-                    } 
+			      if (upperlimit - lowerlimit + 1 > LENGTHSi) /*NEED TO TEST THIS*/
+				{
+				  /* clean hash table of exons */
+				  cleanDumpHash(dumpster->h);
+				} 
 
-				  /* B.6. Backup operations of genes for the next split */
-				  if (!lastSplit)
-					{
-					  /* backup of unused genes */
-					  printMess("Back-up of d-genes");
-					  BackupArrayD(genes, l2 - OVERLAP, gp, dumpster);
+			      /* B.6. Backup operations of genes for the next split */
+			      if (!lastSplit)
+				{
+				  /* backup of unused genes */
+				  printMess("Back-up of d-genes");
+				  BackupArrayD(genes, l2 - OVERLAP, gp, dumpster);
 					  
-					  /* back-up best partial genes */
-					  printMess("Back-up of best partial genes\n");
-					  BackupGenes(genes, gp->nclass, dumpster);
-					}
+				  /* back-up best partial genes */
+				  printMess("Back-up of best partial genes\n");
+				  BackupGenes(genes, gp->nclass, dumpster);
 				}
+			    }
 			  /* Computing new boundaries: next fragment in current sequence */
 			  l1 += LENGTHSi - OVERLAP;
 			  l2 = MIN(l1 + LENGTHSi -1, upperlimit);

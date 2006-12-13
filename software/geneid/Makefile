@@ -13,7 +13,7 @@ HEADERS = $(INCLUDE)/geneid.h
 PROGRAM= geneid
 PRODUCT= $(BIN)/$(PROGRAM)
 CC=gcc
-OPTS=-I$(INCLUDE) -Wall -O3
+OPTS=-I$(INCLUDE) -Wall -O3 -g
 ### OPTS=-I$(INCLUDE) -Wall -O3 -g
 #######
 
@@ -26,7 +26,7 @@ OBJECTS = $(OBJ)/BackupGenes.o $(OBJ)/BuildAcceptors.o $(OBJ)/BuildU12Acceptors.
 	$(OBJ)/PrintExons.o $(OBJ)/PrintSites.o $(OBJ)/ReadExonsGFF.o \
 	$(OBJ)/ReadGeneModel.o $(OBJ)/ReadSequence.o $(OBJ)/ReadHSP.o $(OBJ)/RecomputePositions.o \
 	$(OBJ)/RequestMemory.o $(OBJ)/ScoreExons.o $(OBJ)/SearchEvidenceExons.o \
-	$(OBJ)/SetRatios.o $(OBJ)/SortExons.o $(OBJ)/SortHSPs.o $(OBJ)/SwitchFrames.o \
+	$(OBJ)/SetRatios.o $(OBJ)/SortExons.o $(OBJ)/SortSites.o $(OBJ)/SortHSPs.o $(OBJ)/SwitchFrames.o \
 	$(OBJ)/SwitchPositions.o $(OBJ)/Translate.o \
 	$(OBJ)/account.o $(OBJ)/beggar.o $(OBJ)/genamic.o $(OBJ)/manager.o \
 	$(OBJ)/readparam.o $(OBJ)/readargv.o \
@@ -158,6 +158,9 @@ $(OBJ)/SetRatios.o : $(CDIR)/SetRatios.c $(HEADERS)
 
 $(OBJ)/SortExons.o : $(CDIR)/SortExons.c $(HEADERS)
 	$(CC) -c $(OPTS) $(CDIR)/SortExons.c -o $(OBJ)/SortExons.o
+
+$(OBJ)/SortSites.o : $(CDIR)/SortSites.c $(HEADERS)
+	$(CC) -c $(OPTS) $(CDIR)/SortSites.c -o $(OBJ)/SortSites.o
 
 $(OBJ)/SortHSPs.o : $(CDIR)/SortHSPs.c $(HEADERS)
 	$(CC) -c $(OPTS) $(CDIR)/SortHSPs.c -o $(OBJ)/SortHSPs.o

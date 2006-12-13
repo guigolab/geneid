@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: genamic.c,v 1.7 2006-12-11 09:50:48 talioto Exp $  */
+/*  $Id: genamic.c,v 1.8 2006-12-13 11:28:13 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -85,6 +85,8 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
   for(i=0; i< nExons; i++)
     {
       /* What is the type of this exon? */
+/*       sprintf(mess,"%s",(E+i)->Type); */
+/*       printMess(mess); */
       saux[0]='\0';
       strcpy (saux, (E+i)->Type);
       strcat (saux, &((E+i)->Strand));
@@ -94,8 +96,8 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
       spliceclass = (E+i)->Acceptor->class;
       (E+i)->PreviousExon = pg->Ghost;
       (E+i)->GeneScore = (E+i)->Score;
-
-      if (!strcmp((E+i)->Type,sEND) || !strcmp((E+i)->Type,sBEGIN)){
+      current_exon_is_u12 = 0;
+      if (!strcmp((E+i)->Type,sEND) || !strcmp((E+i)->Type,sBEGIN)|| !strcmp((E+i)->Type,sSINGLE)){
 	current_exon_is_u12 = 0;
       }else{ 
 /*       sprintf(mess,"%s %i %s %s",saux,(E+i)->Acceptor->class,(E+i)->Acceptor->type,(E+i)->Acceptor->subtype); */

@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: DumpHash.c,v 1.7 2006-12-11 09:50:48 talioto Exp $  */
+/*  $Id: DumpHash.c,v 1.8 2006-12-13 11:28:13 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -51,15 +51,26 @@ long fDump(exonGFF* E)
 {
   long sum;
   long sum2;
+/*   long sum3; */
+/*   long sum4; */
   long total; 
   long i;
-  
-  sum = (E->Frame * E->Acceptor->Position + E->Donor->Position); 
+    sum = (E->Frame * E->Acceptor->Position + E->Donor->Position); 
   
   for(i=0, sum2=0; i < strlen(E->Type); i++)
     sum2 = (i+1) * E->Type[i] + sum2;
   
   total = (sum + sum2 * E->Strand) % MAXDUMPHASH;
+  
+/*   sum = ((E->Frame + E->Acceptor->class) * E->Acceptor->Position + E->Donor->Position * (E->Donor->class + 1));  */
+  
+/*   for(i=0, sum2=0; i < strlen(E->Type); i++) */
+/*     sum2 = (i+1) * E->Type[i] + sum2; */
+/*   for(i=0, sum3=0; i < strlen(E->Donor->subtype); i++) */
+/*     sum3 = (i+1) * E->Type[i] + sum3; */
+/*   for(i=0, sum4=0; i < strlen(E->Acceptor->subtype); i++) */
+/*     sum4 = (i+1) * E->Type[i] + sum4;   */
+/*   total = (sum + sum2 + sum3 + sum2 * E->Strand) % MAXDUMPHASH; */
   
   return(total);
 }
@@ -70,7 +81,7 @@ void setExonDumpHash(exonGFF* E, dumpHash* h)
   dumpNode* p;
   dumpNode* n;
   long i;
-  
+
   /* Computing hash value */
   i = fDump(E);
   
@@ -83,8 +94,10 @@ void setExonDumpHash(exonGFF* E, dumpHash* h)
   n->donor = E->Donor->Position;
   n->frame = E->Frame;
   n->strand = E->Strand;
-  strcpy(n->dsub,E->Donor->subtype);
-  strcpy(n->asub,E->Acceptor->subtype);
+  n->dclass = E->Donor->class;
+  n->aclass = E->Acceptor->class;
+/*   strcpy(n->dsub, E->Donor->subtype); */
+/*   strcpy(n->asub, E->Acceptor->subtype); */
   strcpy(n->type,E->Type);
 
   n->exon = E;
@@ -103,7 +116,7 @@ void setExonDumpHash(exonGFF* E, dumpHash* h)
       n->next = p;
     }
   
-  /* How many exons do we have got? */
+  /* How many exons have we got? */
   h->total++;
 }
 
@@ -114,7 +127,7 @@ exonGFF* getExonDumpHash(exonGFF* E, dumpHash* h)
   int found=0;
   exonGFF* exon;
   dumpNode *p;
-  
+
   exon = NULL;
   i = fDump(E);
   
@@ -128,13 +141,15 @@ exonGFF* getExonDumpHash(exonGFF* E, dumpHash* h)
       /* Searching until the first position free */
       while( p != NULL && !found )
 		{
-		  /* Searching on the sinonimous list the wanted exon */
+		  /* Searching on the synonymous list the wanted exon */
 		  if ((p->acceptor == E->Acceptor->Position) &&
 			  (p->donor == E->Donor->Position) &&
 			  (p->frame == E->Frame) &&
 			  (p->strand == E->Strand) &&
-		      (!strcmp(p->dsub,E->Donor->subtype)) &&
-		      (!strcmp(p->asub,E->Acceptor->subtype)) &&
+		      (p->dclass == E->Donor->class) &&
+		      (p->aclass == E->Acceptor->class) &&
+/* 		      (!strcmp(p->dsub,E->Acceptor->subtype))  && */
+/* 		      (!strcmp(p->asub,E->Donor->subtype))  && */
 		      (!strcmp(p->type,E->Type))  )
 			{
 			  found = 1;

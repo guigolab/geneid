@@ -28,7 +28,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/     
 
-/* $Id: geneid.h,v 1.25 2006-12-11 09:51:00 talioto Exp $ */
+/* $Id: geneid.h,v 1.26 2006-12-13 11:28:13 talioto Exp $ */
 
 /* Required libraries */
 #include <stdlib.h>
@@ -486,6 +486,8 @@ typedef struct s_dumpNode
 {
   long acceptor;                      
   long donor;
+  short aclass;
+  short dclass;
   char asub[MAXSUBTYPE];
   char dsub[MAXSUBTYPE];
   short frame;

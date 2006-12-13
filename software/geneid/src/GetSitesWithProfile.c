@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: GetSitesWithProfile.c,v 1.8 2006-12-11 09:50:48 talioto Exp $  */
+/*  $Id: GetSitesWithProfile.c,v 1.9 2006-12-13 11:28:13 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -72,6 +72,7 @@ long  GetSitesWithProfile(char* s,
 			{
 			  st[ns].Position = is + p->order;
 			  st[ns].Score=score;
+			  st[ns].class=U2;
 /* 			  strcpy(st[ns].subtype,sU2); */
 			  ns++;
 			}
@@ -106,6 +107,7 @@ long  GetSitesWithProfile(char* s,
 			{
 			  st[ns].Position = left + is + p->offset;
 			  st[ns].Score=score;
+			  st[ns].class=U2;
 /* 			  strcpy(st[ns].subtype,sU2); */
 			  ns++;
 			}
@@ -135,6 +137,7 @@ long  GetSitesWithProfile(char* s,
 			{
 			  st[ns].Position = left + is + p->offset;
 			  st[ns].Score=score;
+			  st[ns].class=U2;
 /* 			  strcpy(st[ns].subtype,sU2); */
 			  ns++;
 			}
@@ -166,6 +169,7 @@ long  GetSitesWithProfile(char* s,
 			{
 			  st[ns].Position = left + is + p->offset;
 			  st[ns].Score=score;
+			  st[ns].class=U2;
 /* 			  strcpy(st[ns].subtype,sU2); */
 			  ns++;
 			}
