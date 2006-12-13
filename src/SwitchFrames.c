@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: SwitchFrames.c,v 1.4 2006-12-11 09:50:48 talioto Exp $  */
+/*  $Id: SwitchFrames.c,v 1.5 2006-12-13 11:28:13 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -34,7 +34,9 @@ void SwitchFrames(exonGFF* e, long n)
 {
   long i;
   int f;
-  site* d;
+  short cl;
+  char sub[MAXSUBTYPE];
+  char t[MAXSPLICETYPE];
 
   /* Exchange frame/rmd in reverse exons and reset the selected flag */
   for (i=0; i<n; i++)
@@ -42,11 +44,18 @@ void SwitchFrames(exonGFF* e, long n)
 	  if ((e+i)->Strand == '-')
 		{
 		  f=(e+i)->Frame;
-		  d=(e+i)->Donor;
+
 		  (e+i)->Frame=(e+i)->Remainder;
 		  (e+i)->Remainder=f;
-		  (e+i)->Donor = (e+i)->Acceptor;
-		  (e+i)->Acceptor = d;
+		  cl=(e+i)->Donor->class;
+		  strcpy(t,(e+i)->Donor->type);
+		  strcpy(sub,(e+i)->Donor->subtype);
+		  (e+i)->Donor->class = (e+i)->Acceptor->class;
+		  strcpy((e+i)->Donor->type,(e+i)->Acceptor->type);
+		  strcpy((e+i)->Donor->subtype,(e+i)->Acceptor->subtype);
+		  (e+i)->Acceptor->class = cl;
+		  strcpy((e+i)->Acceptor->type,t);
+		  strcpy((e+i)->Acceptor->subtype,sub);
 		}
 
 	  /* Mark exon as prediction in the current fragment */
@@ -61,8 +70,10 @@ void SwitchFramesDa(packGenes* pg, int nclass)
   long i;
   long j;
   int f;
-  site* d;
-
+/*   site* d; */
+  short cl;
+  char sub[MAXSUBTYPE];
+  char t[MAXSPLICETYPE];
   /* Screening every class looking for exons... */
   for (i=0; i < nclass; i++) 
 	{
@@ -77,9 +88,16 @@ void SwitchFramesDa(packGenes* pg, int nclass)
 				f= pg->d[i][j]->Frame;
 				pg->d[i][j]->Frame = pg->d[i][j]->Remainder;
 				pg->d[i][j]->Remainder = f;
-				d=pg->d[i][j]->Donor;
-				pg->d[i][j]->Donor = pg->d[i][j]->Acceptor;
-				pg->d[i][j]->Acceptor = d;
+
+				cl=pg->d[i][j]->Donor->class;
+				strcpy(t,pg->d[i][j]->Donor->type);
+				strcpy(sub,pg->d[i][j]->Donor->subtype);
+				pg->d[i][j]->Donor->class = pg->d[i][j]->Acceptor->class;
+				strcpy(pg->d[i][j]->Donor->type,pg->d[i][j]->Acceptor->type);
+				strcpy(pg->d[i][j]->Donor->subtype,pg->d[i][j]->Acceptor->subtype);
+				pg->d[i][j]->Acceptor->class = cl;
+				strcpy(pg->d[i][j]->Acceptor->type,t);
+				strcpy(pg->d[i][j]->Acceptor->subtype,sub);
 				/* Mark exon */
 				pg->d[i][j]->selected = 1;
 			  }
@@ -93,8 +111,10 @@ void SwitchFramesDb(packGenes* pg, int nclass)
   long i;
   long j;
   int f;
-  site* d;
 
+  short cl;
+  char sub[MAXSUBTYPE];
+  char t[MAXSPLICETYPE];
   /* Screening every class looking for exons... */
   for (i=0; i < nclass; i++)
     {
@@ -109,9 +129,16 @@ void SwitchFramesDb(packGenes* pg, int nclass)
 				f = pg->d[i][j]->Frame;
 				pg->d[i][j]->Frame = pg->d[i][j]->Remainder;
 				pg->d[i][j]->Remainder = f;
-				d=pg->d[i][j]->Donor;
-				pg->d[i][j]->Donor = pg->d[i][j]->Acceptor;
-				pg->d[i][j]->Acceptor = d;
+				cl=pg->d[i][j]->Donor->class;
+				strcpy(t,pg->d[i][j]->Donor->type);
+				strcpy(sub,pg->d[i][j]->Donor->subtype);
+				pg->d[i][j]->Donor->class = pg->d[i][j]->Acceptor->class;
+				strcpy(pg->d[i][j]->Donor->type,pg->d[i][j]->Acceptor->type);
+				strcpy(pg->d[i][j]->Donor->subtype,pg->d[i][j]->Acceptor->subtype);
+				pg->d[i][j]->Acceptor->class = cl;
+				strcpy(pg->d[i][j]->Acceptor->type,t);
+				strcpy(pg->d[i][j]->Acceptor->subtype,sub);
+			/* 	pg->d[i][j]->Acceptor = d; */
 
 				/* Mark exon */
 				pg->d[i][j]->selected = 0;
@@ -125,8 +152,10 @@ void UndoFrames(exonGFF* e, long n)
 {
   long i;
   int f;
-  site* d;
-  
+
+  short cl;
+  char sub[MAXSUBTYPE];
+  char t[MAXSPLICETYPE];  
   /* Undo frame/rmd change*/
   for (i=0;i<n;i++)  
     if ((e+i)->Strand == '-')
@@ -134,8 +163,15 @@ void UndoFrames(exonGFF* e, long n)
 		f=(e+i)->Frame;
 		(e+i)->Frame=(e+i)->Remainder;
 		(e+i)->Remainder=f;
-		d=(e+i)->Donor;
-		(e+i)->Donor = (e+i)->Acceptor;
-		(e+i)->Acceptor = d;
+
+		cl=(e+i)->Donor->class;
+		strcpy(t,(e+i)->Donor->type);
+		strcpy(sub,(e+i)->Donor->subtype);
+		(e+i)->Donor->class = (e+i)->Acceptor->class;
+		strcpy((e+i)->Donor->type,(e+i)->Acceptor->type);
+		strcpy((e+i)->Donor->subtype,(e+i)->Acceptor->subtype);
+		(e+i)->Acceptor->class = cl;
+		strcpy((e+i)->Acceptor->type,t);
+		strcpy((e+i)->Acceptor->subtype,sub);
       }
 }

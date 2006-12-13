@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: RequestMemory.c,v 1.12 2006-12-11 09:50:48 talioto Exp $  */
+/*  $Id: RequestMemory.c,v 1.13 2006-12-13 11:28:13 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -542,10 +542,10 @@ packGenes* RequestMemoryGenes()
   pg->Ghost->GeneScore = 0.0;
   pg->Ghost->Donor->Score = 0;
   pg->Ghost->Donor->Position = 0;
-  pg->Ghost->Donor->class = 0;
+  pg->Ghost->Donor->class = U2;
   pg->Ghost->Acceptor->Score = 0;
   pg->Ghost->Acceptor->Position = 0;
-  pg->Ghost->Acceptor->class = 0;
+  pg->Ghost->Acceptor->class = U2;
   strcpy(pg->Ghost->Donor->type,sU2type);
   strcpy(pg->Ghost->Donor->subtype,sU2);
   strcpy(pg->Ghost->Acceptor->type,sU2type);

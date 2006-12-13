@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: GetStopCodons.c,v 1.8 2006-12-11 09:50:48 talioto Exp $  */
+/*  $Id: GetStopCodons.c,v 1.9 2006-12-13 11:28:13 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -82,6 +82,7 @@ long GetStopCodons(char* s,
 			{
 			  sc[ns].Position = is + p->order;
 			  sc[ns].Score=score;
+			  sc[ns].class=U2;
 			  ns++;
 			}
 		}
@@ -124,6 +125,7 @@ long GetStopCodons(char* s,
 				  /* Position given is last coding position before Stop */ 
 				  sc[ns].Position=left + is + p->offset;
 				  sc[ns].Score=score;
+				  sc[ns].class=U2;
 				  ns++;
 				}
 			} 
@@ -161,6 +163,7 @@ long GetStopCodons(char* s,
 				  /* Position given is last coding position before Stop */ 
 				  sc[ns].Position=left + is + p->offset;
 				  sc[ns].Score=score;
+				  sc[ns].class=U2;
 				  ns++;
 				}
 			} 
@@ -198,6 +201,7 @@ long GetStopCodons(char* s,
 				  /* Position given is last coding position before Stop */ 
 				  sc[ns].Position=left + is + p->offset;
 				  sc[ns].Score=score;
+				  sc[ns].class=U2;
 				  ns++;
 				}
 			} 
@@ -223,6 +227,7 @@ long GetStopCodons(char* s,
 			  /* Position given is last coding position before Stop */
 			  sc[ns].Position=is-1;  
 			  sc[ns].Score=0;
+			  sc[ns].class=U2;
 			  ns++;
 			} 
 		  is++;
