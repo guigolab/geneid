@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: genamic.c,v 1.8 2006-12-13 11:28:13 talioto Exp $  */
+/*  $Id: genamic.c,v 1.9 2006-12-18 12:02:38 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -85,8 +85,6 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
   for(i=0; i< nExons; i++)
     {
       /* What is the type of this exon? */
-/*       sprintf(mess,"%s",(E+i)->Type); */
-/*       printMess(mess); */
       saux[0]='\0';
       strcpy (saux, (E+i)->Type);
       strcat (saux, &((E+i)->Strand));
@@ -100,13 +98,12 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
       if (!strcmp((E+i)->Type,sEND) || !strcmp((E+i)->Type,sBEGIN)|| !strcmp((E+i)->Type,sSINGLE)){
 	current_exon_is_u12 = 0;
       }else{ 
-/*       sprintf(mess,"%s %i %s %s",saux,(E+i)->Acceptor->class,(E+i)->Acceptor->type,(E+i)->Acceptor->subtype); */
-/*       printMess(mess); */
 	if ((E+i)->Acceptor->class == U2){
 	  current_exon_is_u12 = 0;
 	} else { 
 	  if (((E+i)->Acceptor->class == U12gtag)||((E+i)->Acceptor->class == U12atac)){
 	    current_exon_is_u12 = 1;
+	     
 	  }
 	}
       }
@@ -187,7 +184,6 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 		      /* Assembling the exon with the best compatible gene before it */
 		      /* Verify group rules if there are evidence exons (annotations) */
 		      if (current_exon_is_u12){
-			/* 			    printMess("Here"); */
 			if (pg->Ga[etype][frame][spliceclass]->Donor->class != U2){				  
 			  if(((pg->Ga[etype][frame][spliceclass]->Donor->Score + (E+i)->Acceptor->Score) > U12_SPLICE_SCORE_THRESH)
 			     &&
@@ -196,8 +192,10 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 			    thresholdmet = 1;
 			  } else {
 			    thresholdmet = 0;
+			    
 			  }
 			} else {
+			  
 			  thresholdmet = 0;
 			}			  	
 		      } else {

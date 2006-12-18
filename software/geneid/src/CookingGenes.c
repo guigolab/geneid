@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: CookingGenes.c,v 1.19 2006-12-11 09:50:48 talioto Exp $  */
+/*  $Id: CookingGenes.c,v 1.20 2006-12-18 12:02:38 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -355,13 +355,22 @@ void PrintGene(exonGFF* start,
   int type1;
   int type2;
   int strand;
+  int nint = 1;
+  int nex = 1;
   
   /* a. Recursive case */
   if (start != end)
     {
+      if (start->Strand == '+'){
+	nint = nExons - nExon - 1;
+	nex = nint + 1;
+      }else{
+	nint = nExon + 1;
+      }
       eaux = start -> PreviousExon;
       /* a.1. Recursive call to print before the rest of the gene */
       PrintGene(eaux,end,Name,s,gp,dAA,igen,nAA,tAA,nExon+1,nExons);
+
       /* a.2. printing this exon: XML, extend, gff or geneid format */      
       if (XML)
         {
@@ -376,12 +385,12 @@ void PrintGene(exonGFF* start,
 			selectFeatures(start->Type,start->Strand,
 						   &p1,&p2,&type1,&type2,&strand,gp);
 			PrintSite(start->Acceptor,type1,Name,strand,s,p1);
-			PrintGExon(start,Name,s,dAA,igen,tAA[nExon][0],tAA[nExon][1],nAA);
+			PrintGExon(start,Name,s,dAA,igen,tAA[nExon][0],tAA[nExon][1],nAA, nint);
 			PrintSite(start->Donor,type2,Name,strand,s,p2);
           }
 		else {
-		  if (INTRON) { PrintGIntron(eaux,start,Name,igen); }
-		  PrintGExon(start,Name,s,dAA,igen,tAA[nExon][0],tAA[nExon][1],nAA);
+		  if (INTRON) { PrintGIntron(eaux,start,Name,igen,nint); }
+		  PrintGExon(start,Name,s,dAA,igen,tAA[nExon][0],tAA[nExon][1],nAA,nint);
 		}
     }
   else
@@ -401,12 +410,12 @@ void PrintGene(exonGFF* start,
 			selectFeatures(end->Type,end->Strand,
 						   &p1,&p2,&type1,&type2,&strand,gp);
 			PrintSite(end->Acceptor,type1,Name,strand,s,p1);
-			PrintGExon(end,Name,s,dAA,igen,tAA[nExon][0],tAA[nExon][1],nAA);
+			PrintGExon(end,Name,s,dAA,igen,tAA[nExon][0],tAA[nExon][1],nAA, nint);
 			PrintSite(end->Donor,type2,Name,strand,s,p2);
 		  }
 		else {
 
-			PrintGExon(end,Name,s,dAA,igen,tAA[nExon][0],tAA[nExon][1],nAA);
+			PrintGExon(end,Name,s,dAA,igen,tAA[nExon][0],tAA[nExon][1],nAA, nint);
 		    
 		}
     }

@@ -28,7 +28,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/     
 
-/* $Id: geneid.h,v 1.26 2006-12-13 11:28:13 talioto Exp $ */
+/* $Id: geneid.h,v 1.27 2006-12-18 12:02:38 talioto Exp $ */
 
 /* Required libraries */
 #include <stdlib.h>
@@ -275,8 +275,7 @@ A. DEFINITIONS
 
 /* Header exon weights                          */
 #define sExon_weights "Exon_weights"
-/* #define sU12gtag_Exon_weights "U12gtag_Exon_weights" */
-/* #define sU12atac_Exon_weights "U12atac_Exon_weights" */
+#define sU12_EXON_WEIGHT "U12_Exon_weight"
 
 /* Exons                                    */
 #define FIRST    0               
@@ -821,9 +820,11 @@ void PrintSite(site *s, int type, char Name[], int Strand,
                char* seq, profile *p);
 
 void PrintGExon(exonGFF *e, char Name[], char* s, dict* dAA, 
-		long ngen, int AA1, int AA2, int nAA);
+		long ngen, int AA1, int AA2, int nAA,
+		int numInt);
 			   
-void PrintGIntron(exonGFF *d, exonGFF *a, char Name[],long ngen);
+void PrintGIntron(exonGFF *d, exonGFF *a, char Name[],long ngen,
+		int numInt);
 
 void PrintGGene(exonGFF *s, exonGFF *e, char Name[],
 		long ngen, float score);
@@ -911,7 +912,10 @@ void  manager(char *Sequence, long LengthSequence,
 	      gparam* gp,
 	      gparam** isochores,
 	      int nIsochores,
-	      packGC* GCInfo);
+	      packGC* GCInfo,
+	      site* acceptorsites,
+	      site* donorsites
+	      );
 
 void resetEvidenceCounters(packExternalInformation* external);
 

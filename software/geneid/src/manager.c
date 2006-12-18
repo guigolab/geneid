@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/* $Id: manager.c,v 1.8 2006-12-13 11:28:13 talioto Exp $ */
+/* $Id: manager.c,v 1.9 2006-12-18 12:02:38 talioto Exp $ */
 
 #include "geneid.h"
 
@@ -40,23 +40,26 @@ extern long NUMSITES,NUMEXONS;
 
 /* Management of splice sites prediction and exon construction/scoring */
 void  manager(char *Sequence, 
-			  long LengthSequence,
-			  packSites* allSites,
-			  packExons* allExons,
-			  long l1, long l2, long lowerlimit, long upperlimit,
-			  int Strand,
-			  packExternalInformation* external,
-			  packHSP* hsp,
-			  gparam* gp,
-			  gparam** isochores,
-			  int nIsochores,
-			  packGC* GCInfo)
+	      long LengthSequence,
+	      packSites* allSites,
+	      packExons* allExons,
+	      long l1, long l2, long lowerlimit, long upperlimit,
+	      int Strand,
+	      packExternalInformation* external,
+	      packHSP* hsp,
+	      gparam* gp,
+	      gparam** isochores,
+	      int nIsochores,
+	      packGC* GCInfo,
+	      site* acceptorsites,
+	      site* donorsites
+	      )
 {
   char mess[MAXSTRING];
 
   /* For sorting sites */
-  site* acceptorsites; 
-  site* donorsites; 
+/*   site* acceptorsites;  */
+/*   site* donorsites;  */
   long l1a, l1b,
 	l2a, l2b,
 	l1c, l2c;
@@ -229,12 +232,12 @@ void  manager(char *Sequence,
   /* 2. Building exons with splice sites predicted before */ 
   printMess ("Computing exons ...");   
   
-  donorsites      = (site*)      RequestMemorySortSites();
-  acceptorsites      = (site*)      RequestMemorySortSites();
+
+  /* Predicted sites must be sorted by position */
+  printMess ("Sorting sites ...");
   SortSites(allSites->DonorSites,allSites->nDonorSites,donorsites,l1b,l2b);
   SortSites(allSites->AcceptorSites,allSites->nAcceptorSites,acceptorsites,l1a,l2a);
-  allSites->DonorSites = donorsites;
-  allSites->AcceptorSites = acceptorsites;
+
   allExons->nInitialExons =
     BuildInitialExons(allSites->StartCodons,allSites->nStartCodons,
 					  allSites->DonorSites,allSites->nDonorSites,

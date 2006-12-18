@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: readparam.c,v 1.10 2006-12-11 09:50:48 talioto Exp $  */
+/*  $Id: readparam.c,v 1.11 2006-12-18 12:02:38 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -42,6 +42,7 @@ extern int SGE;
 extern short SPLICECLASSES;
 extern float U12_SPLICE_SCORE_THRESH;
 extern float U12_EXON_SCORE_THRESH;
+extern float U12EW;
 
 /* Numeric values: read one line skipping comments and empty lines */
 void readLine(FILE *File, char* line)
@@ -669,7 +670,16 @@ void ReadIsochore(FILE* RootFile, gparam* gp)
 				  U12_EXON_SCORE_THRESH);
 		  printMess(mess);
 	}
+	 /* 1. Read U12_EXON_WEIGHT, an additional exon weight that applies to exons flanking U12 introns */
+	if(!strcasecmp(header,sU12_EXON_WEIGHT)){
+		  readLine(RootFile,line);
+		  if ((sscanf(line,"%f\n", &(U12EW)))!=1)
+			printError("Wrong format: U12_EXON_WEIGHT value score (number/type)");  
 
+		  sprintf(mess,"U12_EXON_WEIGHT: \t%9.2f",
+				  U12EW);
+		  printMess(mess);
+	}
 	readHeader(RootFile,line);
 	if ((sscanf(line,"%s",header))!=1)
 		{

@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: PrintExons.c,v 1.12 2006-12-11 09:50:48 talioto Exp $  */
+/*  $Id: PrintExons.c,v 1.13 2006-12-18 12:02:38 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -161,7 +161,8 @@ void PrintGExon(exonGFF *e,
                 long ngen,
                 int AA1,
                 int AA2,
-                int nAA)
+                int nAA,
+		int nExon)
 {
 	char attribute[MAXSTRING] = "";
   if (GFF3)
@@ -169,20 +170,23 @@ void PrintGExon(exonGFF *e,
       /* GFF3 format 5_prime_partial=true ???*/
       if (e->five_prime_partial) { strcpy(attribute,";5_prime_partial=true");}
       if (e->three_prime_partial) { strcpy(attribute,";3_prime_partial=true");}
-      printf ("%s\t%s\t%s\t%ld\t%ld\t%1.2f\t%c\t%hd\tParent=mRNA_%s_%ld;type=%s\n",
-			  /* correct stop codon position, Terminal- & Terminal+ */ 
-			  Name,
-			  (e->evidence)? EVIDENCE : VERSION,     
-			  "exon",
-			  (e->evidence)? e->Acceptor->Position : e->Acceptor->Position + e->offset1,
-			  (e->evidence)? e->Donor->Position : e->Donor->Position + e->offset2,
-			  (e->Score==MAXSCORE)? 0.0:e->Score,
-			  e->Strand,
-			  e->Frame,
-			  Name,
-			  ngen,
-			  e->Type);
-		printf ("%s\t%s\t%s\t%ld\t%ld\t%1.2f\t%c\t%hd\tParent=mRNA_%s_%ld;ID=cds_%s_%ld;Target=%s_predicted_protein_%s_%ld %d %d%s\n",
+      printf ("%s\t%s\t%s\t%ld\t%ld\t%1.2f\t%c\t%hd\tID=exon_%s_%ld.%i;Parent=mRNA_%s_%ld;type=%s\n",
+	      /* correct stop codon position, Terminal- & Terminal+ */ 
+	      Name,
+	      (e->evidence)? EVIDENCE : VERSION,     
+	      "exon",
+	      (e->evidence)? e->Acceptor->Position : e->Acceptor->Position + e->offset1,
+	      (e->evidence)? e->Donor->Position : e->Donor->Position + e->offset2,
+	      (e->Score==MAXSCORE)? 0.0:e->Score,
+	      e->Strand,
+	      e->Frame,
+	      Name,
+	      ngen,
+	      nExon,
+	      Name,
+	      ngen,
+	      e->Type);
+      printf ("%s\t%s\t%s\t%ld\t%ld\t%1.2f\t%c\t%hd\tID=cds_%s_%ld;Parent=mRNA_%s_%ld;Target=%s_predicted_protein_%s_%ld %d %d%s\n",
 			  /* correct stop codon position, Terminal- & Terminal+ */ 
 			  Name,
 			  (e->evidence)? EVIDENCE : VERSION,     
@@ -326,9 +330,10 @@ void PrintGmRNA(exonGFF *s,
 }
 /* Print a predicted intron from a assembled gene: gff/geneid format */
 void PrintGIntron(exonGFF *d,
-				exonGFF *a,
-                char Name[],
-                long ngen
+		  exonGFF *a,
+		  char Name[],
+		  long ngen,
+		  int numInt
                 )
 {
 	char intronType[MAXTYPE]; 
@@ -340,6 +345,7 @@ void PrintGIntron(exonGFF *d,
 	long start = (a->evidence)? d->Donor->Position + 1: d->Donor->Position + 1 + d->offset2;
 	long end = (a->evidence)? a->Acceptor->Position - 1: a->Acceptor->Position -1 + a->offset1;
 	float score = (d->Donor->Score + a->Acceptor->Score)/2;
+	
 	if (!(strcmp(d->Donor->subtype,sU12gtag))||!(strcmp(d->Donor->subtype,sU12atac))){
 		strcpy(intronType,"U12");
 	}
@@ -354,7 +360,7 @@ void PrintGIntron(exonGFF *d,
 	}
     if (GFF3) {
 	  /* GFF3 format */
-      printf ("%s\t%s\tintron\t%ld\t%ld\t%1.2f\t%c\t%hd\tParent=mRNA_%s_%ld;type=%s;subtype=%s\n",
+      printf ("%s\t%s\tintron\t%ld\t%ld\t%1.2f\t%c\t%hd\tID=intron_%s_%ld.%i;Parent=mRNA_%s_%ld;type=%s;subtype=%s\n",
 	      /* correct stop codon position, Terminal- & Terminal+ */ 
 	      Name,
 	      (a->evidence)? EVIDENCE : VERSION,     
@@ -363,6 +369,9 @@ void PrintGIntron(exonGFF *d,
 	      score,
 	      a->Strand,
 	      phase,
+	      Name,
+	      ngen,
+	      numInt,
 	      Name,
 	      ngen,
 	      intronType,
