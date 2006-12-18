@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: BackupGenes.c,v 1.7 2006-12-13 11:28:13 talioto Exp $  */
+/*  $Id: BackupGenes.c,v 1.8 2006-12-18 12:02:38 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -101,35 +101,12 @@ exonGFF* backupGene(exonGFF* E, packDump* d)
 {
   exonGFF* PrevExon;
   exonGFF* ResExon;
-  char mess[MAXSTRING];
-/* 	sprintf(mess, "%c strand",E->Strand); */
-/* 	printMess(mess); */
+
   /* Ghost exon doesn't need backup */
   if ((E->Strand == '*')) /* ||(E->Strand != '+')||(E->Strand != '-')) */
     ResExon = E; 
   else
 	{
-
-/*   sprintf(mess,"Type:%s, Frame:%i, Don:%i, Acc:%i, Strand:%c, Score:%f, Pscore:%f, HSPscore:%f, GeneScore:%f, Rem:%i, Grp:%s, offset1:%i, offset2:%i, lV:%i, rV:%i, evid:%i, PrevStrand:%c", */
-/* 	  E->Type, */
-/* 	  E->Frame, */
-/* 	  E->Donor->class, */
-/* 	  E->Acceptor->class, */
-/* 	  E->Strand, */
-/* 	  E->Score, */
-/* 	  E->PartialScore, */
-/* 	  E->HSPScore, */
-/* 	  E->GeneScore,  */
-/* 	  E->Remainder, */
-/* 	  E->Group, */
-/* 	  E->offset1, */
-/* 	  E->offset2,  */
-/* 	  E->lValue,  */
-/* 	  E->rValue, */
-/* 	  E->evidence,  */
-/* 	  E->PreviousExon->Strand); */
-
-
 	  /* Ckeckpoint to discover if exon is already in the dumpster */
 	  ResExon  = (exonGFF*) getExonDumpHash(E, d->h);
 	  
@@ -153,14 +130,11 @@ exonGFF* backupGene(exonGFF* E, packDump* d)
 void BackupGenes(packGenes* pg, int nclass, packDump* d)
 {
   int i,j,k;
-    char mess[MAXSTRING];
 
   /* 1. back-up best partial genes */
   for(i=0; i<nclass; i++)
     for(j=0; j<FRAMES; j++)
       for(k=0; k<SPLICECLASSES; k++){
-/* 	sprintf(mess, "%c strand",pg->Ga[i][j][k]->Strand); */
-/* 	printMess(mess); */
 	pg->Ga[i][j][k] = backupGene(pg->Ga[i][j][k], d);
       }
 

@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: BuildDonors.c,v 1.3 2006-12-11 09:50:48 talioto Exp $  */
+/*  $Id: BuildDonors.c,v 1.4 2006-12-18 12:02:38 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -49,13 +49,9 @@ long  BuildDonors(char* s,
 {
   int i,j;
   float score;
-/* long ns,is;*/
   long is;
   long left,right;
   int index;
-/*   char mess[MAXSTRING];  */
-  /* Final number of predicted signals (that type) */
-/*  ns = 0;*/
 
   /* 1. Searching sites between beginning of the sequence and p->offset */
   if (!l1)
@@ -83,7 +79,6 @@ long  BuildDonors(char* s,
 			  st[ns].class= class;
 			  strcpy(st[ns].type,type);
 			  strcpy(st[ns].subtype,subtype);
-/* 			  sprintf(mess,"%i %s %s %s %s",st[ns].class,type,subtype,st[ns].type,st[ns].subtype);printMess(mess); */
 			  ns++;
 			}
 		}
@@ -121,10 +116,8 @@ long  BuildDonors(char* s,
 			  st[ns].class= class;
 			  strcpy(st[ns].type,type);
 			  strcpy(st[ns].subtype,subtype);
-/* 			  sprintf(mess,"%i %s %s %s %s",st[ns].class,type,subtype,st[ns].type,st[ns].subtype);printMess(mess); */
 			  ns++;
-			}
-			
+			}			
 		  is++;
 		  s++;
 		}
@@ -154,7 +147,6 @@ long  BuildDonors(char* s,
 			  st[ns].class= class;
 			  strcpy(st[ns].type,type);
 			  strcpy(st[ns].subtype,subtype);
-/* 			  sprintf(mess,"%i %s %s %s %s",st[ns].class,type,subtype,st[ns].type,st[ns].subtype);printMess(mess); */
 			  ns++;
 			}
 			
@@ -190,17 +182,15 @@ long  BuildDonors(char* s,
 			  st[ns].class= class;
 			  strcpy(st[ns].type,type);
 			  strcpy(st[ns].subtype,subtype);
-/* 			  sprintf(mess,"%i %s %s %s %s",st[ns].class,type,subtype,st[ns].type,st[ns].subtype);printMess(mess); */
 			  ns++;
-			}
-			
+			}			
 		  is++;
 		  s++;
 		}
     }
   
   if (ns >= nsites)
-    printError("Too many predicted sites: decrease RSITES (or RU12SITES) parameter");
+    printError("Too many predicted sites: decrease RSITES parameter");
 
   return(ns);
 }

@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: SwitchFrames.c,v 1.5 2006-12-13 11:28:13 talioto Exp $  */
+/*  $Id: SwitchFrames.c,v 1.6 2006-12-18 12:02:38 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -34,33 +34,31 @@ void SwitchFrames(exonGFF* e, long n)
 {
   long i;
   int f;
-  short cl;
-  char sub[MAXSUBTYPE];
-  char t[MAXSPLICETYPE];
-
+/*   short class; */
+/*   float score; */
+ 
   /* Exchange frame/rmd in reverse exons and reset the selected flag */
   for (i=0; i<n; i++)
-	{      
-	  if ((e+i)->Strand == '-')
-		{
-		  f=(e+i)->Frame;
+    {      
+      if ((e+i)->Strand == '-')
+	{
+	  f=(e+i)->Frame;
 
-		  (e+i)->Frame=(e+i)->Remainder;
-		  (e+i)->Remainder=f;
-		  cl=(e+i)->Donor->class;
-		  strcpy(t,(e+i)->Donor->type);
-		  strcpy(sub,(e+i)->Donor->subtype);
-		  (e+i)->Donor->class = (e+i)->Acceptor->class;
-		  strcpy((e+i)->Donor->type,(e+i)->Acceptor->type);
-		  strcpy((e+i)->Donor->subtype,(e+i)->Acceptor->subtype);
-		  (e+i)->Acceptor->class = cl;
-		  strcpy((e+i)->Acceptor->type,t);
-		  strcpy((e+i)->Acceptor->subtype,sub);
-		}
+	  (e+i)->Frame=(e+i)->Remainder;
+	  (e+i)->Remainder=f;
 
-	  /* Mark exon as prediction in the current fragment */
-	  (e+i)->selected = 0;
+/* 	  score=(e+i)->Donor->Score; */
+/* 	  class=(e+i)->Donor->class; */
+/* 	  (e+i)->Donor->Score = (e+i)->Acceptor->Score; */
+/* 	  (e+i)->Donor->class = (e+i)->Acceptor->class; */
+/* 	  (e+i)->Acceptor->Score = score; */
+/* 	  (e+i)->Acceptor->class = class; */
 	}
+
+      /* Mark exon as prediction in the current fragment */
+      (e+i)->selected = 0;
+    }
+
 }
 
 /* Exchange frame and remainder in the sorted-by-donor exons only once */
@@ -70,39 +68,35 @@ void SwitchFramesDa(packGenes* pg, int nclass)
   long i;
   long j;
   int f;
-/*   site* d; */
-  short cl;
-  char sub[MAXSUBTYPE];
-  char t[MAXSPLICETYPE];
+/*   short class; */
+/*   float score; */
+
   /* Screening every class looking for exons... */
   for (i=0; i < nclass; i++) 
-	{
+    {
       /* Traversing the list of exons in this class */
       for (j=0; j < pg->km[i]; j++)
-		if (pg->d[i][j]->Strand == '-')
-		  {
+	if (pg->d[i][j]->Strand == '-')
+	  {
             /* Exchange frame/rmd only once */
             /* One exon might be in more than one list */
             if (!pg->d[i][j]->selected)
-			  {
-				f= pg->d[i][j]->Frame;
-				pg->d[i][j]->Frame = pg->d[i][j]->Remainder;
-				pg->d[i][j]->Remainder = f;
-
-				cl=pg->d[i][j]->Donor->class;
-				strcpy(t,pg->d[i][j]->Donor->type);
-				strcpy(sub,pg->d[i][j]->Donor->subtype);
-				pg->d[i][j]->Donor->class = pg->d[i][j]->Acceptor->class;
-				strcpy(pg->d[i][j]->Donor->type,pg->d[i][j]->Acceptor->type);
-				strcpy(pg->d[i][j]->Donor->subtype,pg->d[i][j]->Acceptor->subtype);
-				pg->d[i][j]->Acceptor->class = cl;
-				strcpy(pg->d[i][j]->Acceptor->type,t);
-				strcpy(pg->d[i][j]->Acceptor->subtype,sub);
-				/* Mark exon */
-				pg->d[i][j]->selected = 1;
-			  }
-		  }
-	}
+	      {	    
+		f= pg->d[i][j]->Frame;
+		pg->d[i][j]->Frame = pg->d[i][j]->Remainder;
+		pg->d[i][j]->Remainder = f;
+/* 		score=pg->d[i][j]->Donor->Score; */
+/* 		class=pg->d[i][j]->Donor->class; */
+/* 		pg->d[i][j]->Donor->Score = pg->d[i][j]->Acceptor->Score; */
+/* 		pg->d[i][j]->Donor->class = pg->d[i][j]->Acceptor->class; */
+/* 		pg->d[i][j]->Acceptor->Score = score; */
+/* 		pg->d[i][j]->Acceptor->class = class; */
+		/* Mark exon */
+		pg->d[i][j]->selected = 1;
+	      }
+	  }
+    }
+ 
 }   
 
 /* Restore original frame and remainder in exons from last fragment */
@@ -111,40 +105,37 @@ void SwitchFramesDb(packGenes* pg, int nclass)
   long i;
   long j;
   int f;
+/*   short class; */
+/*   float score; */
 
-  short cl;
-  char sub[MAXSUBTYPE];
-  char t[MAXSPLICETYPE];
   /* Screening every class looking for exons... */
   for (i=0; i < nclass; i++)
     {
-	  /* Traversing the list of exons in this class */
-	  for (j=0; j < pg->km[i]; j++)
-		if (pg->d[i][j]->Strand == '-')
-		  {
-			/* Exchange frame/rmd only once */
-			/* Only exons from last fragment will have selected = 1 */
-			if (pg->d[i][j]->selected)
-			  {
-				f = pg->d[i][j]->Frame;
-				pg->d[i][j]->Frame = pg->d[i][j]->Remainder;
-				pg->d[i][j]->Remainder = f;
-				cl=pg->d[i][j]->Donor->class;
-				strcpy(t,pg->d[i][j]->Donor->type);
-				strcpy(sub,pg->d[i][j]->Donor->subtype);
-				pg->d[i][j]->Donor->class = pg->d[i][j]->Acceptor->class;
-				strcpy(pg->d[i][j]->Donor->type,pg->d[i][j]->Acceptor->type);
-				strcpy(pg->d[i][j]->Donor->subtype,pg->d[i][j]->Acceptor->subtype);
-				pg->d[i][j]->Acceptor->class = cl;
-				strcpy(pg->d[i][j]->Acceptor->type,t);
-				strcpy(pg->d[i][j]->Acceptor->subtype,sub);
-			/* 	pg->d[i][j]->Acceptor = d; */
+      /* Traversing the list of exons in this class */
+      for (j=0; j < pg->km[i]; j++)
+	if (pg->d[i][j]->Strand == '-')
+	  {
+	    /* Exchange frame/rmd only once */
+	    /* Only exons from last fragment will have selected = 1 */
+	    if (pg->d[i][j]->selected)
+	      {
+		f = pg->d[i][j]->Frame;
+		pg->d[i][j]->Frame = pg->d[i][j]->Remainder;
+		pg->d[i][j]->Remainder = f;
+				
+/* 		score=pg->d[i][j]->Donor->Score; */
+/* 		class=pg->d[i][j]->Donor->class; */
+/* 		pg->d[i][j]->Donor->Score = pg->d[i][j]->Acceptor->Score; */
+/* 		pg->d[i][j]->Donor->class = pg->d[i][j]->Acceptor->class; */
+/* 		pg->d[i][j]->Acceptor->Score = score; */
+/* 		pg->d[i][j]->Acceptor->class = class; */
 
-				/* Mark exon */
-				pg->d[i][j]->selected = 0;
-			  }   
-		  }
-	}
+		/* Mark exon */
+		pg->d[i][j]->selected = 0;
+	      }   
+	  }
+    }
+ 
 }
 
 /* Restore frame/remainder in reverse exons read from gff file */
@@ -152,26 +143,22 @@ void UndoFrames(exonGFF* e, long n)
 {
   long i;
   int f;
-
-  short cl;
-  char sub[MAXSUBTYPE];
-  char t[MAXSPLICETYPE];  
+/*   float score; */
+/*   short class; */
   /* Undo frame/rmd change*/
   for (i=0;i<n;i++)  
     if ((e+i)->Strand == '-')
       {
-		f=(e+i)->Frame;
-		(e+i)->Frame=(e+i)->Remainder;
-		(e+i)->Remainder=f;
+	f=(e+i)->Frame;
+	(e+i)->Frame=(e+i)->Remainder;
+	(e+i)->Remainder=f;
+/* 	score=(e+i)->Donor->Score; */
+/* 	class=(e+i)->Donor->class; */
+/* 	(e+i)->Donor->Score = (e+i)->Acceptor->Score; */
+/* 	(e+i)->Donor->class = (e+i)->Acceptor->class; */
+/* 	(e+i)->Acceptor->Score = score; */
+/* 	(e+i)->Acceptor->class = class; */
 
-		cl=(e+i)->Donor->class;
-		strcpy(t,(e+i)->Donor->type);
-		strcpy(sub,(e+i)->Donor->subtype);
-		(e+i)->Donor->class = (e+i)->Acceptor->class;
-		strcpy((e+i)->Donor->type,(e+i)->Acceptor->type);
-		strcpy((e+i)->Donor->subtype,(e+i)->Acceptor->subtype);
-		(e+i)->Acceptor->class = cl;
-		strcpy((e+i)->Acceptor->type,t);
-		strcpy((e+i)->Acceptor->subtype,sub);
       }
+ 
 }
