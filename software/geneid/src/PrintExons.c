@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: PrintExons.c,v 1.13 2006-12-18 12:02:38 talioto Exp $  */
+/*  $Id: PrintExons.c,v 1.14 2006-12-21 13:56:54 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -38,7 +38,7 @@ void PrintExon(exonGFF *e, char Name[], char* s, dict* dAA)
   char sAux[MAXAA];
   char* rs;
   long p1, p2;
-  int nAA;
+  int nAA = 0;
 /*   char saux[MAXTYPE]; */
 /*   char saux2[MAXTYPE]; */
   
@@ -47,34 +47,36 @@ void PrintExon(exonGFF *e, char Name[], char* s, dict* dAA)
   p2 = e->Donor->Position + e->offset2 - COFFSET;
   
   /* Translation of exon nucleotides into amino acids */
-  if (e->Strand == '+')
-    /* Translate codons to amino acids */
-    nAA = Translate(p1,p2,
-					e->Frame,
-					(3 - e->Remainder)%3,
-					s, dAA, sAux);
-  else
-    {
-      /* Reverse strand exon */
-      if ((rs = (char*) calloc(p2-p1+2,sizeof(char))) == NULL)
-		printError("Not enough memory: translating reverse exon");
+  strcpy(sAux,"\0");
+  if(e->Donor->Position >= e->Acceptor->Position){
+    if (e->Strand == '+')
+      /* Translate codons to amino acids */
+      nAA = Translate(p1,p2,
+		      e->Frame,
+		      (3 - e->Remainder)%3,
+		      s, dAA, sAux);
+    else
+      {
+	/* Reverse strand exon */
+	if ((rs = (char*) calloc(p2-p1+2,sizeof(char))) == NULL)
+	  printError("Not enough memory: translating reverse exon");
       
-      /* Reversing and complementing the exon sequence */
-      ReverseSubSequence(p1, p2, s, rs);
+	/* Reversing and complementing the exon sequence */
+	ReverseSubSequence(p1, p2, s, rs);
       
-      /* Translate codons to aminoacids */
-      nAA = Translate(0,p2-p1,
-					  e->Frame,
-					  (3 - e->Remainder)%3,
-					  rs, dAA, sAux);
-      free(rs);
-    }
-  
+	/* Translate codons to aminoacids */
+	nAA = Translate(0,p2-p1,
+			e->Frame,
+			(3 - e->Remainder)%3,
+			rs, dAA, sAux);
+	free(rs);
+      }
+  }
   /* According to selected options formatted output */
   if (GFF)
     {
       /* GFF format */
-      printf ("%s\t%s\t%s\t%ld\t%ld\t%1.2f\t%c\t%hd\tgene_id %s_%s_%ld_%ld\n",
+      printf ("%s\t%s\t%s\t%ld\t%ld\t%1.2f\t%c\t%hd\t%s_%s_%ld_%ld\n",
 			  /* correct stop codon position, Terminal- & Terminal+ */ 
 			  Name,
 			  (e->evidence)? EVIDENCE : EXONS,
@@ -164,7 +166,8 @@ void PrintGExon(exonGFF *e,
                 int nAA,
 		int nExon)
 {
-	char attribute[MAXSTRING] = "";
+  if (e->Donor->Position == e->Acceptor->Position - 1){return;}
+  char attribute[MAXSTRING] = "";
   if (GFF3)
     {
       /* GFF3 format 5_prime_partial=true ???*/
@@ -360,7 +363,7 @@ void PrintGIntron(exonGFF *d,
 	}
     if (GFF3) {
 	  /* GFF3 format */
-      printf ("%s\t%s\tintron\t%ld\t%ld\t%1.2f\t%c\t%hd\tID=intron_%s_%ld.%i;Parent=mRNA_%s_%ld;type=%s;subtype=%s\n",
+      printf ("%s\t%s\tintron\t%ld\t%ld\t%1.2f\t%c\t%hd\tID=intron_%s_%ld.%i;Parent=%s_%ld;type=%s;subtype=%s\n",
 	      /* correct stop codon position, Terminal- & Terminal+ */ 
 	      Name,
 	      (a->evidence)? EVIDENCE : VERSION,     

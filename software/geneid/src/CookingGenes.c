@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: CookingGenes.c,v 1.20 2006-12-18 12:02:38 talioto Exp $  */
+/*  $Id: CookingGenes.c,v 1.21 2006-12-21 13:56:54 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -357,7 +357,7 @@ void PrintGene(exonGFF* start,
   int strand;
   int nint = 1;
   int nex = 1;
-  
+
   /* a. Recursive case */
   if (start != end)
     {
@@ -395,6 +395,12 @@ void PrintGene(exonGFF* start,
     }
   else
     {
+      if (start->Strand == '+'){
+	nint = nExons - nExon - 1;
+	nex = nint + 1;
+      }else{
+	nint = nExon + 1;
+      }
       /* b. Trivial case: not recursive */
       /* b.1. printing this exon: XML, extend, gff or geneid format */      
       if (XML)

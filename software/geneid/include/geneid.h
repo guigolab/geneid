@@ -28,7 +28,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/     
 
-/* $Id: geneid.h,v 1.27 2006-12-18 12:02:38 talioto Exp $ */
+/* $Id: geneid.h,v 1.28 2006-12-21 13:56:54 talioto Exp $ */
 
 /* Required libraries */
 #include <stdlib.h>
@@ -145,6 +145,12 @@ A. DEFINITIONS
 
 #define U12BP_PENALTY_SCALING_FACTOR 7 /* used to be 15 */
 #define U2BP_PENALTY_SCALING_FACTOR 0 /* used to be 15 */
+
+/* Recursive splice site thresholds */
+#define RDT 3 /*donor*/
+#define RAT 3 /*acceptor*/
+#define sRSSMARKOVSCORE "RSS_Markov_Score"
+
 /* Markov score penalty for unknown symbols */
 #define NULL_OLIGO_SCORE  -4     
 
