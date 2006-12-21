@@ -29,10 +29,10 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/* $Id: geneid.c,v 1.21 2006-12-21 13:56:54 talioto Exp $ */
+/* $Id: geneid.c,v 1.22 2006-12-21 14:03:00 talioto Exp $ */
 
 #include "geneid.h"
-#include <mcheck.h>
+/* #include <mcheck.h> */
 
 /* geneid setup flags */
 int
