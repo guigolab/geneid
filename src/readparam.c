@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: readparam.c,v 1.11 2006-12-18 12:02:38 talioto Exp $  */
+/*  $Id: readparam.c,v 1.12 2006-12-21 13:56:54 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -43,6 +43,7 @@ extern short SPLICECLASSES;
 extern float U12_SPLICE_SCORE_THRESH;
 extern float U12_EXON_SCORE_THRESH;
 extern float U12EW;
+extern float RSSMARKOVSCORE;
 
 /* Numeric values: read one line skipping comments and empty lines */
 void readLine(FILE *File, char* line)
@@ -650,6 +651,15 @@ void ReadIsochore(FILE* RootFile, gparam* gp)
 		}
   while(strcasecmp(header,sExon_weights)&& strcmp(header,"Exon_weigths"))
   { 
+	 /* 1. Read RSSMARKOVSCORE for markov score to assign non-exonic recursively spliced elements */
+	if(!strcasecmp(header,sRSSMARKOVSCORE)){
+		  readLine(RootFile,line);
+		  if ((sscanf(line,"%f\n", &(RSSMARKOVSCORE)))!=1)
+			printError("Wrong format: RSSMARKOVSCORE value scores (number/type)");  
+
+		  sprintf(mess,"RSSMARKOVSCORE: \t%9.2f",RSSMARKOVSCORE);
+		  printMess(mess);
+	}
 	 /* 1. Read U12_SPLICE_SCORE_THRESH for sum of U12 donor and acceptor splice scores */
 	if(!strcasecmp(header,sU12_SPLICE_SCORE_THRESH)){
 		  readLine(RootFile,line);

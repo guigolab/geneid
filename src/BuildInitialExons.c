@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: BuildInitialExons.c,v 1.8 2006-12-11 09:50:48 talioto Exp $  */
+/*  $Id: BuildInitialExons.c,v 1.9 2006-12-21 13:56:54 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -98,7 +98,7 @@ long BuildInitialExons(site *Start, long nStarts,
 	  /* a) Every Donor between Start and that Stop defines an initial exon */
 	  /* b) If not any Stop in frame after current Start: every donor is OK */
 	  while ((js == nStops || (Donor+ks)->Position < (Stop+js)->Position + 1 + 2)
-			 && (ks < nDonors) && ((Donor+ks)->Position > (Start+i)->Position+2)) 
+		 && (ks < nDonors)) /* && ((Donor+ks)->Position > (Start+i)->Position+2)*/
 		{
 		  /* a. There is room to save this new exon */
 		  if (nLocalExons < MaxDonors) 

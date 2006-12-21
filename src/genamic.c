@@ -25,12 +25,13 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: genamic.c,v 1.9 2006-12-18 12:02:38 talioto Exp $  */
+/*  $Id: genamic.c,v 1.10 2006-12-21 13:56:54 talioto Exp $  */
 
 #include "geneid.h"
 
 /* Complete gene prediction (sites and exons) or only assembling */
 extern int GENEID;
+extern int RSS;
 extern float U12_SPLICE_SCORE_THRESH;
 extern float U12_EXON_SCORE_THRESH;
 void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
@@ -212,32 +213,43 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 			  (thresholdmet) 
 			  )
 			{
-			  if (((E+i)->Strand == '+') && 
-			      ((pg->Ga[etype][frame][spliceclass]->rValue == 1 && (E+i)->lValue == 1)
-			       ||
-			       (pg->Ga[etype][frame][spliceclass]->rValue == 2 && (E+i)->lValue == 2)
-			       ||
-			       (pg->Ga[etype][frame][spliceclass]->rValue == 3 && ((E+i)->lValue == 2 || (E+i)->lValue == 3))))
-			    {
-			      /* FWD: Avoiding building a stop codon */
-			    }
-			  else
-			    {
-			      if (((E+i)->Strand == '-') && 
-				  ((pg->Ga[etype][frame][spliceclass]->lValue == 1 && (E+i)->rValue == 1)
-				   ||
-				   (pg->Ga[etype][frame][spliceclass]->lValue == 2 && (E+i)->rValue == 2)
-				   ||
-				   ((pg->Ga[etype][frame][spliceclass]->lValue == 2 || pg->Ga[etype][frame][spliceclass]->lValue == 3) && (E+i)->rValue == 3)))
-				{
-				  /* RVS: Avoiding building a stop codon */
-				}
-			      else
-				{
-				  (E+i)->GeneScore = pg->Ga[etype][frame][spliceclass]->GeneScore + (E+i)->Score;  
-				  (E+i)->PreviousExon = pg->Ga[etype][frame][spliceclass];
-				}
-			    }
+			  
+			  if (RSS && ((E+i)->Donor->Position == (E+i)->Donor->Position -1)){
+			    (E+i)->GeneScore = pg->Ga[etype][frame][spliceclass]->GeneScore + (E+i)->Score; 
+			    (E+i)->PreviousExon = pg->Ga[etype][frame][spliceclass];
+			    (E+i)->Frame = pg->Ga[etype][frame][spliceclass]->Frame;
+			    (E+i)->Remainder = pg->Ga[etype][frame][spliceclass]->Remainder;
+			    (E+i)->lValue = pg->Ga[etype][frame][spliceclass]->lValue;
+			    (E+i)->rValue = pg->Ga[etype][frame][spliceclass]->rValue;
+			  }else{
+
+			    if (((E+i)->Strand == '+') && 
+				((pg->Ga[etype][frame][spliceclass]->rValue == 1 && (E+i)->lValue == 1)
+				 ||
+				 (pg->Ga[etype][frame][spliceclass]->rValue == 2 && (E+i)->lValue == 2)
+				 ||
+				 (pg->Ga[etype][frame][spliceclass]->rValue == 3 && ((E+i)->lValue == 2 || (E+i)->lValue == 3))))
+			      {
+				/* FWD: Avoiding building a stop codon */
+			      }
+			    else
+			      {
+				if (((E+i)->Strand == '-') && 
+				    ((pg->Ga[etype][frame][spliceclass]->lValue == 1 && (E+i)->rValue == 1)
+				     ||
+				     (pg->Ga[etype][frame][spliceclass]->lValue == 2 && (E+i)->rValue == 2)
+				     ||
+				     ((pg->Ga[etype][frame][spliceclass]->lValue == 2 || pg->Ga[etype][frame][spliceclass]->lValue == 3) && (E+i)->rValue == 3)))
+				  {
+				    /* RVS: Avoiding building a stop codon */
+				  }
+				else
+				  {
+				    (E+i)->GeneScore = pg->Ga[etype][frame][spliceclass]->GeneScore + (E+i)->Score;  
+				    (E+i)->PreviousExon = pg->Ga[etype][frame][spliceclass];
+				  }
+			      }
+			  }
 			}
 		    }
 

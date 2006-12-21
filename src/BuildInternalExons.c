@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: BuildInternalExons.c,v 1.8 2006-12-11 09:50:48 talioto Exp $  */
+/*  $Id: BuildInternalExons.c,v 1.9 2006-12-21 13:56:54 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -33,6 +33,7 @@
 /* Maximum allowed number of generic exons (divided by RINTER) */
 /* extern long NUMEXONS; */
 extern long MAXBACKUPSITES;
+extern int RSS;
 
 long BuildInternalExons(site *Acceptor, long nAcceptors, 
                         site *Donor, long nDonors,
@@ -51,7 +52,8 @@ long BuildInternalExons(site *Acceptor, long nAcceptors,
   } *LocalExon; 
   int nLocalExons, LowestLocalExon;
   float LowestLocalScore;
-  
+  /* char mess[MAXSTRING]; */
+
   /* Boolean array of windows: closed or opened */ 
   int Frame[FRAMES];
   
@@ -67,7 +69,7 @@ long BuildInternalExons(site *Acceptor, long nAcceptors,
   /* Allocating space for exons built by using the current Acceptor */
   /* MaxDonors is the maximum allowed number of exons with this signal */
   if ((LocalExon =
-	   (struct iexon *) calloc(MaxDonors,sizeof(struct iexon))) == NULL)
+       (struct iexon *) calloc(MaxDonors,sizeof(struct iexon))) == NULL)
     printError("Not enough memory: local initial exons"); 
   
   /* Main loop, forall Acceptor looking for donor sites... */
@@ -76,11 +78,11 @@ long BuildInternalExons(site *Acceptor, long nAcceptors,
   
   
   for (i=0, j=0, k=0, nExon = 0;
-	   (i < nAcceptors) && (nExon<HowMany); i++)
+       (i < nAcceptors) && (nExon<HowMany); i++)
     {
       /* Open the 3 windows */
       for (f=0;f<FRAMES;f++) 
-		Frame[f]=1;
+	Frame[f]=1;
 
       /* Reset the best local exons array */
       nLocalExons = 0;
@@ -89,15 +91,37 @@ long BuildInternalExons(site *Acceptor, long nAcceptors,
 
       /* Skip previous Stops to current Acceptor */
       while ((j < nStops) && ((Stop+j)->Position+1 < (Acceptor+i)->Position))
-		j++;
+	j++;
 	  
       /* Save counter j for the next iteration */
       js=j;
       
       /* Skip previous Donors to current Acceptor */
+      while ((k < nDonors) && ((Donor+k)->Position < (Acceptor+i)->Position - 1))
+	k++;
+      if (RSS){
+	if (((Donor+k)->Position == (Acceptor+i)->Position - 1)&&((Donor+k)->Score > RDT) &&((Acceptor+i)->Score > RAT)){
+	  /* Make a zero length exon representing the recursive splice site */
+	  (LocalExon+nLocalExons)->Acceptor=(Acceptor+i);
+	  (LocalExon+nLocalExons)->Donor=(Donor+k);
+					  
+	  /* Saving the exon in the opened frames */
+	  for (ll=0;ll<FRAMES;ll++)
+	    (LocalExon+nLocalExons)->Frame[ll]=Frame[ll];
+					  
+	  /* Updating the worst exon pointer */
+	  if ((Donor+k)->Score < LowestLocalScore)
+	    {
+	      LowestLocalScore = (Donor+k)->Score;
+	      LowestLocalExon = nLocalExons;
+	    }
+	  nLocalExons++;
+	}
+      }
+      /* Skip previous Donors to current Acceptor plus minimum exon length */
       /* Minimal length: EXONLENGTH */
       while ((k < nDonors) && ((Donor+k)->Position < (Acceptor+i)->Position + EXONLENGTH))
-		k++;
+	k++;
 	  
       /* Save counter k for the next iteration */
       ks=k;
@@ -105,156 +129,163 @@ long BuildInternalExons(site *Acceptor, long nAcceptors,
       /* A. While there are opened frames, look for next Stop to close them */
       /* Donors between Acceptor and current Stop define internal exons */
       while ((js < nStops) && (Frame[0]==1 || Frame[1]==1 || Frame[2]==1))
+	{
+	  /* If this window is still opened... */
+	  if ((Frame[f=((Stop+js)->Position - (Acceptor+i)->Position + 1) % 3]))
+	    {
+	      /* Donors between Acceptor and Stop defines internal exons */
+	      while (((Donor+ks)->Position < (Stop+js)->Position + 1 + 2)
+		     && (ks < nDonors)) /*&&((Donor+ks)->Position > (Acceptor+i)->Position + EXONLENGTH)*/
 		{
-		  /* If this window is still opened... */
-		  if ((Frame[f=((Stop+js)->Position - (Acceptor+i)->Position + 1) % 3]))
-			{
-			  /* Donors between Acceptor and Stop defines internal exons */
-			  while (((Donor+ks)->Position < (Stop+js)->Position + 1 + 2)
-					 && (ks < nDonors)&&((Donor+ks)->Position > (Acceptor+i)->Position + EXONLENGTH))
-				{
-				  /* a. There is room to save this new exon */
-				  if (nLocalExons < MaxDonors)
-					{
-					  (LocalExon+nLocalExons)->Acceptor=(Acceptor+i);
-					  (LocalExon+nLocalExons)->Donor=(Donor+ks);
+		  /* a. There is room to save this new exon */
+		  if (nLocalExons < MaxDonors)
+		    {
+		      (LocalExon+nLocalExons)->Acceptor=(Acceptor+i);
+		      (LocalExon+nLocalExons)->Donor=(Donor+ks);
 					  
-					  /* Saving the exon in the opened frames */
-					  for (ll=0;ll<FRAMES;ll++)
-						(LocalExon+nLocalExons)->Frame[ll]=Frame[ll];
+		      /* Saving the exon in the opened frames */
+		      for (ll=0;ll<FRAMES;ll++)
+			(LocalExon+nLocalExons)->Frame[ll]=Frame[ll];
 					  
-					  /* Updating the worst exon pointer */
-					  if ((Donor+ks)->Score < LowestLocalScore)
+		      /* Updating the worst exon pointer */
+		      if ((Donor+ks)->Score < LowestLocalScore)
                         {
                           LowestLocalScore = (Donor+ks)->Score;
                           LowestLocalExon = nLocalExons;
                         }
-					  nLocalExons++;
-					}
-				  else
-					{
-					  /* b. Keep only the top scoring MaxDonors */
-					  if ((Donor+ks)->Score >= LowestLocalScore)
-						{
-						  /* Extract the worst exon and input the new exon */
-						  for (l=LowestLocalExon;l<nLocalExons-1;l++)
-							LocalExon[l]=LocalExon[l+1];
-						  (LocalExon+nLocalExons-1)->Acceptor=(Acceptor+i);
-						  (LocalExon+nLocalExons-1)->Donor=(Donor+ks);
+		      nLocalExons++;
+		    }
+		  else
+		    {
+		      /* b. Keep only the top scoring MaxDonors */
+		      if ((Donor+ks)->Score >= LowestLocalScore)
+			{
+			  /* Extract the worst exon and input the new exon */
+			  for (l=LowestLocalExon;l<nLocalExons-1;l++)
+			    LocalExon[l]=LocalExon[l+1];
+			  (LocalExon+nLocalExons-1)->Acceptor=(Acceptor+i);
+			  (LocalExon+nLocalExons-1)->Donor=(Donor+ks);
 						  
-						  /* Saving the exon in the opened frames */
-						  for (ll=0;ll<FRAMES;ll++)
-							(LocalExon+nLocalExons-1)->Frame[ll]=Frame[ll];
+			  /* Saving the exon in the opened frames */
+			  for (ll=0;ll<FRAMES;ll++)
+			    (LocalExon+nLocalExons-1)->Frame[ll]=Frame[ll];
 						  
-						  /* Updating the worst exon pointer */ 
-						  LowestLocalExon = 0;
-						  LowestLocalScore = (LocalExon+0)->Donor->Score;
-						  for (l=1;l<nLocalExons;l++)
-							if ((LocalExon+l)->Donor->Score < LowestLocalScore)
-							  {
-								LowestLocalScore = (LocalExon+l)->Donor->Score;
-								LowestLocalExon = l;
-							  }
-						} /* end if */
-					} /* end else */
-				  /* Next donor */
-				  ks++;
-				} /* while there are donors left */
+			  /* Updating the worst exon pointer */ 
+			  LowestLocalExon = 0;
+			  LowestLocalScore = (LocalExon+0)->Donor->Score;
+			  for (l=1;l<nLocalExons;l++)
+			    if ((LocalExon+l)->Donor->Score < LowestLocalScore)
+			      {
+				LowestLocalScore = (LocalExon+l)->Donor->Score;
+				LowestLocalExon = l;
+			      }
+			} /* end if */
+		    } /* end else */
+		  /* Next donor */
+		  ks++;
+		} /* while there are donors left */
 			  
-			  /* Close the window corresponding to the Stop found */
-			  Frame[f]=0;
-			} /* If this window was still opened... */
-		  /* Next Stop */
-		  js++;
-		} /* end while-frames opened scan stops */
+	      /* Close the window corresponding to the Stop found */
+	      Frame[f]=0;
+	    } /* If this window was still opened... */
+	  /* Next Stop */
+	  js++;
+	} /* end while-frames opened scan stops */
 	  
 	  /* B. EXTRA: Stop list finished but there are frames still opened... */
-	  if ((js == nStops) && (Frame[0]==1 || Frame[1]==1 || Frame[2]==1))
+      if ((js == nStops) && (Frame[0]==1 || Frame[1]==1 || Frame[2]==1))
+	{
+	  /* if any frame is opened and there are not more stops left */
+	  /* then every donor forms an internal exon with the Acceptor */
+	  while ((ks < nDonors)) /*&&((Donor+ks)->Position > (Acceptor+i)->Position + EXONLENGTH)*/
 	    {
-		  /* if any frame is opened and there are not more stops left */
-		  /* then every donor forms an internal exon with the Acceptor */
-	      while ((ks < nDonors)&&((Donor+ks)->Position > (Acceptor+i)->Position + EXONLENGTH))
-			{
-			  /* a. There is room to save this new exon */
-			  if (nLocalExons < MaxDonors)
-				{
-				  (LocalExon+nLocalExons)->Acceptor=(Acceptor+i);
-				  (LocalExon+nLocalExons)->Donor=(Donor+ks);
+	      /* a. There is room to save this new exon */
+	      if (nLocalExons < MaxDonors)
+		{
+		  (LocalExon+nLocalExons)->Acceptor=(Acceptor+i);
+		  (LocalExon+nLocalExons)->Donor=(Donor+ks);
 				  
-				  /* Saving the exon in the opened frames */
-				  for (ll=0;ll<FRAMES;ll++)
-					(LocalExon+nLocalExons)->Frame[ll]=Frame[ll];
+		  /* Saving the exon in the opened frames */
+		  for (ll=0;ll<FRAMES;ll++)
+		    (LocalExon+nLocalExons)->Frame[ll]=Frame[ll];
 				  
-				  /* Updating the worst exon pointer */
-				  if ((Donor+ks)->Score < LowestLocalScore)
-					{
-					  LowestLocalScore = (Donor+ks)->Score;
-					  LowestLocalExon = nLocalExons;
-					}
-				  nLocalExons++;
-				}
-			  else
-				{
-				  /* b. Keep only the top scoring MaxDonors */
-				  if ((Donor+ks)->Score >= LowestLocalScore)
-					{
-					  /* Extract the worst exon and input the new exon */
-					  for (l=LowestLocalExon;l<nLocalExons-1;l++)
-						LocalExon[l]=LocalExon[l+1];
-					  (LocalExon+nLocalExons-1)->Acceptor=(Acceptor+i);
-					  (LocalExon+nLocalExons-1)->Donor=(Donor+ks);
+		  /* Updating the worst exon pointer */
+		  if ((Donor+ks)->Score < LowestLocalScore)
+		    {
+		      LowestLocalScore = (Donor+ks)->Score;
+		      LowestLocalExon = nLocalExons;
+		    }
+		  nLocalExons++;
+		}
+	      else
+		{
+		  /* b. Keep only the top scoring MaxDonors */
+		  if ((Donor+ks)->Score >= LowestLocalScore)
+		    {
+		      /* Extract the worst exon and input the new exon */
+		      for (l=LowestLocalExon;l<nLocalExons-1;l++)
+			LocalExon[l]=LocalExon[l+1];
+		      (LocalExon+nLocalExons-1)->Acceptor=(Acceptor+i);
+		      (LocalExon+nLocalExons-1)->Donor=(Donor+ks);
 					  
-					  /* Saving the exon in the opened frames */
-					  for (ll=0;ll<FRAMES;ll++)
-						(LocalExon+nLocalExons-1)->Frame[ll]=Frame[ll];
+		      /* Saving the exon in the opened frames */
+		      for (ll=0;ll<FRAMES;ll++)
+			(LocalExon+nLocalExons-1)->Frame[ll]=Frame[ll];
 					  
-					  /* Updating the worst exon pointer */
-					  LowestLocalExon = 0;
-					  LowestLocalScore = (LocalExon+0)->Donor->Score;
+		      /* Updating the worst exon pointer */
+		      LowestLocalExon = 0;
+		      LowestLocalScore = (LocalExon+0)->Donor->Score;
 					  
-					  for (l=1;l<nLocalExons;l++)
-						if ((LocalExon+l)->Donor->Score < LowestLocalScore)
-						  {
-							LowestLocalScore = (LocalExon+l)->Donor->Score;
-							LowestLocalExon = l;
-						  }
-					} /* end if */
-				}/* end else */  
-			  /* Next donor */
-			  ks++;
-			} /* while there are donors... */
-		}/* end if EXTRA */
+		      for (l=1;l<nLocalExons;l++)
+			if ((LocalExon+l)->Donor->Score < LowestLocalScore)
+			  {
+			    LowestLocalScore = (LocalExon+l)->Donor->Score;
+			    LowestLocalExon = l;
+			  }
+		    } /* end if */
+		}/* end else */  
+	      /* Next donor */
+	      ks++;
+	    } /* while there are donors... */
+	}/* end if EXTRA */
 	  
       /* Save predicted exons for the current Acceptor site */
       for (l=0;(l<nLocalExons) && (nExon<HowMany);l++) 
-		{
-		  /* There are exons in every frame */
-		  for (ll=0;(ll<FRAMES) && (nExon < HowMany);ll++)
-            if ((LocalExon+l)->Frame[ll]) 
-			  {
-				/* Frame was opened then */
-				(Exon+nExon)->Acceptor = (LocalExon+l)->Acceptor;
-				(Exon+nExon)->Donor = (LocalExon+l)->Donor;
-				(Exon+nExon)->Frame = ll;
-				(Exon+nExon)->Remainder = ((Exon+nExon)->Donor->Position -
-										   ((Exon+nExon)->Acceptor->Position +
-											(Exon+nExon)->Frame)+ 1 ) % 3;
-				(Exon+nExon)->Remainder = (3 - (Exon+nExon)->Remainder) % 3;
-				/* Assign Type according to Donor and Acceptor subtypes */
-				strcpy((Exon+nExon)->Type,ExonType);
-				strcpy((Exon+nExon)->Group,NOGROUP);
-				(Exon+nExon)->evidence = 0;
+	{
+	  /* There are exons in every frame */
+	  for (ll=0;(ll<FRAMES) && (nExon < HowMany);ll++)
+	    if ((LocalExon+l)->Frame[ll]) 
+	      {
+		/* Frame was opened then */
+		(Exon+nExon)->Acceptor = (LocalExon+l)->Acceptor;
+		(Exon+nExon)->Donor = (LocalExon+l)->Donor;
+		(Exon+nExon)->Frame = ll;
+		(Exon+nExon)->Remainder = ((Exon+nExon)->Donor->Position -
+					   ((Exon+nExon)->Acceptor->Position +
+					    (Exon+nExon)->Frame)+ 1 ) % 3;
+		(Exon+nExon)->Remainder = (3 - (Exon+nExon)->Remainder) % 3;
+		strcpy((Exon+nExon)->Type,ExonType);
+		strcpy((Exon+nExon)->Group,NOGROUP);
+		(Exon+nExon)->evidence = 0;
 				
-				/* Save info (frame/remainder bases to avoid stops in frame */
-				ComputeStopInfo((Exon+nExon),Sequence);
-
-				nExon++;
-			  }
+		/* Save info (frame/remainder bases to avoid stops in frame */
+		if(!RSS){
+		  ComputeStopInfo((Exon+nExon),Sequence);
+		} else {
+		  if ((Exon+nExon)->Donor->Position == (Exon+nExon)->Acceptor->Position - 1){
+		    (Exon+nExon)->rValue = 0;
+		    (Exon+nExon)->lValue = 0;
+		  }else{
+		    ComputeStopInfo((Exon+nExon),Sequence);
+		  }
 		}
+		nExon++;
+	      }
+	}
     }
   
   if (nExon >= HowMany)
-	printError("Too many internal exons: decrease RINTER parameter");
+    printError("Too many internal exons: decrease RINTER parameter");
   
   free(LocalExon);
   

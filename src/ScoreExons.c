@@ -34,6 +34,7 @@ extern int SRP;
 extern float NO_SCORE;
 extern int U12GTAG;
 extern int U12ATAC;
+extern float RSSMARKOVSCORE;
 
 /* Matrix to translate characters to numbers. borrowed from jwf */
 int TRANS[] = {
@@ -509,7 +510,7 @@ long Score(exonGFF *Exons,
            long l1,
            long l2,
            int Strand,
-		   packExternalInformation* external,
+	   packExternalInformation* external,
            packHSP* hsp,
            gparam** isochores,
            packGC* GCInfo)
@@ -530,6 +531,8 @@ long Score(exonGFF *Exons,
   paramexons* p;
   int OligoLength;
   gparam* gp;
+  int rss = 0;
+/*   char mess[MAXSTRING]; */
 /*   int u12correction; */
 /*   u12correction = 0; */
   /* Number of survivor exons after scoring and filtering */
@@ -542,7 +545,7 @@ long Score(exonGFF *Exons,
       iniExon=(Exons+i)->Acceptor->Position - l1;
       endExon=(Exons+i)->Donor->Position - l1;
       exonLen=endExon-iniExon+1;
-
+      rss = 0;
       /* 0. Get G+C content of the region around the exon (local) */
       /* selecting the proper isochore to score the exon */
       if (iniExon <= ISOCONTEXT)
@@ -584,62 +587,65 @@ long Score(exonGFF *Exons,
       
       /* 1. Coding potential score: initial plus accumulated sums */
       /* Checkpoint for exons shorter than a minimum value */
-      if (exonLen < MINEXONLENGTH)
-		scoreMarkov = MINSCORELENGTH;
+      if (exonLen < MINEXONLENGTH){
+	scoreMarkov = MINSCORELENGTH;
+	if (exonLen == 0){scoreMarkov = RSSMARKOVSCORE;}
+      }
       else
-		{
-		  scoreMarkov = 0.0;
-		  frame = (Exons+i)->Frame;
+	{
+	  scoreMarkov = 0.0;
+	  frame = (Exons+i)->Frame;
          
-		  /* Translate frame to position into codon */
-		  codonPosition = (3 - frame) % 3;
+	  /* Translate frame to position into codon */
+	  codonPosition = (3 - frame) % 3;
    
-		  /* Assign initial probability: pentanucleotide */
-		  scoreMarkov += gp->OligoDistIni[codonPosition][iniExon];
+	  /* Assign initial probability: pentanucleotide */
+	  scoreMarkov += gp->OligoDistIni[codonPosition][iniExon];
          
-		  /* Which one of the three combinations? */
-		  j = (iniExon + (3-codonPosition)) % 3;
+	  /* Which one of the three combinations? */
+	  j = (iniExon + (3-codonPosition)) % 3;
    
-		  /* Accumulating transition probabilities: hexanucleotides */    
-		  scoreMarkov +=
-			gp->OligoDistTran[j][(endExon>OligoLength_1)?endExon-OligoLength_1+1 : endExon]
-			- gp->OligoDistTran[j][(iniExon)? iniExon - 1 : 0];
-		}
+	  /* Accumulating transition probabilities: hexanucleotides */    
+	  scoreMarkov +=
+	    gp->OligoDistTran[j][(endExon>OligoLength_1)?endExon-OligoLength_1+1 : endExon]
+	    - gp->OligoDistTran[j][(iniExon)? iniExon - 1 : 0];
+	}
 
       /* First cutoff: coding potential score */
       if (scoreMarkov >= p->OligoCutoff) 
-		{
-		  /* 2. Homology to protein score */
-		  scoreHSP = 0.0;
-		  if (SRP)
+	{
+		  
+	  /* 2. Homology to protein score */
+	  scoreHSP = 0.0;
+	  if (SRP)
             scoreHSP = ScoreHSPexon((Exons+i),Strand,external,l1,l2);
 
-		  /* 3. Total (combined) score */
-		  scoreTotal = 
-			(p->siteFactor * ((Exons+i)->Acceptor->Score + (Exons+i)->Donor->Score))
-			+ (p->exonFactor * scoreMarkov) 
-			+ (p->HSPFactor * scoreHSP); 
+	  /* 3. Total (combined) score */
+	  scoreTotal = 
+	    (p->siteFactor * ((Exons+i)->Acceptor->Score + (Exons+i)->Donor->Score))
+	    + (p->exonFactor * scoreMarkov) 
+	    + (p->HSPFactor * scoreHSP); 
 	  
-		  /* Second cutoff- final score */
-		  if (scoreTotal >= p->ExonCutoff) 
-			{
-			  Exons[n]=Exons[i];
+	  /* Second cutoff- final score */
+	  if (scoreTotal >= p->ExonCutoff) 
+	    {
+	      Exons[n]=Exons[i];
 
-			  /* -E: increase/decrease current ExonWeight parameter */
-			  ExonWeight = p->ExonWeight;
-			  if (EW != NOVALUE){
-			    ExonWeight = ExonWeight + EW;
-			  }
-			  if ((U12EW != NOVALUE)&&(((Exons+i)->Acceptor->class != U2) && ((Exons+i)->Donor->class != U2))){	    
-			      ExonWeight = ExonWeight + U12EW;			       
-			  }
-			  (Exons+n)->Score = scoreTotal + ExonWeight;
-			  (Exons+n)->PartialScore = scoreMarkov;
-			  (Exons+n)->HSPScore = scoreHSP;
-   
-			  n++;
-			}
-		}
+	      /* -E: increase/decrease current ExonWeight parameter */
+	      ExonWeight = p->ExonWeight;
+	      if (EW != NOVALUE){
+		ExonWeight = ExonWeight + EW;
+	      }
+	      if ((U12EW != NOVALUE)&&(((Exons+i)->Acceptor->class != U2) && ((Exons+i)->Donor->class != U2))){	    
+		ExonWeight = ExonWeight + U12EW;			       
+	      }
+	      (Exons+n)->Score = scoreTotal + ExonWeight;
+	      (Exons+n)->PartialScore = scoreMarkov;
+	      (Exons+n)->HSPScore = scoreHSP;
+	      
+	      n++;
+	    }
+	}
     }
   return(n);
 }

@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/* $Id: manager.c,v 1.9 2006-12-18 12:02:38 talioto Exp $ */
+/* $Id: manager.c,v 1.10 2006-12-21 13:56:54 talioto Exp $ */
 
 #include "geneid.h"
 
@@ -229,14 +229,14 @@ void  manager(char *Sequence,
   sprintf(mess,"---------\t\t%8ld", allSites->nSites);
   printRes(mess);
 
-  /* 2. Building exons with splice sites predicted before */ 
-  printMess ("Computing exons ...");   
-  
-
   /* Predicted sites must be sorted by position */
   printMess ("Sorting sites ...");
   SortSites(allSites->DonorSites,allSites->nDonorSites,donorsites,l1b,l2b);
   SortSites(allSites->AcceptorSites,allSites->nAcceptorSites,acceptorsites,l1a,l2a);
+
+  /* 2. Building exons with splice sites predicted before */ 
+  printMess ("Computing exons ...");   
+  
 
   allExons->nInitialExons =
     BuildInitialExons(allSites->StartCodons,allSites->nStartCodons,
@@ -288,7 +288,7 @@ void  manager(char *Sequence,
   /* 3. Scoring and Filtering Exons */
   ScoreExons(Sequence, allExons, 
              l1, l2, Strand, 
-			 external, hsp,
+	     external, hsp,
              isochores,nIsochores,
              GCInfo);
   
