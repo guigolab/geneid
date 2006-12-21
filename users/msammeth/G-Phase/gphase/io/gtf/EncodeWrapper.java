@@ -418,8 +418,10 @@ public class EncodeWrapper extends GTFWrapper {
 				transcript.setStrand(ff.getStrand());
 				for (int k = 0; k < gtfs.length; k++) {		// exons 
 					France f= (France) gtfs[k];
-					if (f.isExon()) 
+					if (f.isExon()) { 
 						transcript.setBoundaries(new Exon(transcript, f.getExonID(), f.getStart(), f.getEnd()));
+						transcript.setHUGO(gtfs[k].getAttribute("gene_id"));
+					}
 				}
 				t2Hash.put(tID, transcript);	// fill tHash with transcripts
 			}

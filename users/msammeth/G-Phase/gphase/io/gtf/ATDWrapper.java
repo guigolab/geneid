@@ -142,7 +142,7 @@ public class ATDWrapper extends EncodeWrapper {
 					newObj.start= Integer.parseInt(toki.nextToken());
 					newObj.end= Integer.parseInt(toki.nextToken());
 					newObj.setScore(toki.nextToken());
-					newObj.setLeadingStrand(toki.nextToken());
+					newObj.setStrand(toki.nextToken());
 					newObj.setFrame(toki.nextToken());
 				} catch (Exception e) {
 					System.err.println("Invalid GTF format: line "+ lineCtr);

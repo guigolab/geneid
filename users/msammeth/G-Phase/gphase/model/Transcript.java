@@ -36,6 +36,7 @@ public class Transcript extends DirectedRegion {
 	TU[] tu= null;
 	byte nmd= 0;
 	Translation predORF= null;
+	String HUGO= null;
 	
 	public static int REGION_5UTR= 1;
 	public static int REGION_3UTR= 2;
@@ -513,6 +514,19 @@ public class Transcript extends DirectedRegion {
 			return ss[p];
 		else
 			return null;
+	}
+	
+	public SpliceSite[] getLastUTRIntron() {
+		if (translations== null|| exons.length< 3|| exons[1].get3PrimeCDS()>= translations[0].get5PrimeEdge())
+			return null;
+		int i;
+		for (i = 0; i < exons.length; i++) 
+			if (exons[i].get3PrimeEdge()>= translations[0].get5PrimeEdge())
+				break;
+		SpliceSite[] ss= new SpliceSite[2];
+		ss[0]= exons[i-1].getDonor();
+		ss[1]= exons[i].getAcceptor();
+		return ss;
 	}
 	
 	public static int getPredPos(int[] ss, int pos) {
@@ -1429,6 +1443,12 @@ public class Transcript extends DirectedRegion {
 	}
 	public void setPredORF(Translation predORF) {
 		this.predORF = predORF;
+	}
+	public String getHUGO() {
+		return HUGO;
+	}
+	public void setHUGO(String hugo) {
+		HUGO = hugo;
 	}
 
 

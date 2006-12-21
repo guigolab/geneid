@@ -1440,6 +1440,22 @@ public class ASVariation implements Serializable {
 		return false;
 	}
 	
+	public boolean isUTRnotLastIntron() {
+		if (!isCompletelyIn5UTR())
+			return false;
+			// exclude that affects last intron
+		SpliceSite[] su= getSpliceUniverse();
+		SpliceSite[] lintron1= trans1.getLastUTRIntron();
+		SpliceSite[] lintron2= trans2.getLastUTRIntron();
+		if (lintron1== null|| lintron2== null)
+			return false;
+		for (int i = su.length- 1; i >=0; --i) 
+			if ((su[i].getPos()== lintron1[0].getPos()|| su[i].getPos()== lintron1[1].getPos())
+					|| (su[i].getPos()== lintron2[0].getPos()|| su[i].getPos()== lintron2[1].getPos()))
+				return true;
+		return false;
+	}
+	
 	public boolean isTwilightCDS() {
 		if (!isTwilightZone())
 			return false;

@@ -620,6 +620,7 @@ public class Species implements Serializable {
 					t.setStrand(newTranscripts[j][k].getStrand());
 					t.setStart(newTranscripts[j][k].getStart());
 					t.setEnd(newTranscripts[j][k].getEnd());
+					t.setHUGO(newTranscripts[j][k].getHUGO());
 					//Transcript t= newTranscripts.removeAll
 					nuGene.addTranscript(t);
 					Exon[] ex= newTranscripts[j][k].getExons();

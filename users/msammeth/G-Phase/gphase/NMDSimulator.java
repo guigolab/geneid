@@ -274,8 +274,8 @@ public class NMDSimulator {
 	
 	public static void main(String[] args) {
 		//testNMD();
-		testNMD_noncoding();
-		//outputNMDEvents();
+		//testNMD_noncoding();
+		outputNMDEvents();
 	}
 	
 	Transcript trpt= null;
@@ -398,7 +398,7 @@ public class NMDSimulator {
 	
 	public boolean isNMD(Translation trln) {
 		boolean ejcDS= isTerminatingUpstreamOfEJC(trln, MIN_DIST_NC_EJC);
-		boolean atgUS= false;	// hasUsORF(trln, MIN_ORF_LENGTH_AA);
+		boolean atgUS= false;	//hasUsORF(trln, MIN_ORF_LENGTH_AA);
 		return (ejcDS|| atgUS);
 	}
 	public boolean isNMD() {
