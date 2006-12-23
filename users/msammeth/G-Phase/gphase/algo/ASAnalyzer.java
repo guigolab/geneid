@@ -35,7 +35,6 @@ import com.p6spy.engine.logging.appender.StdoutLogger;
 import com.sun.org.apache.xalan.internal.xsltc.compiler.util.FilterGenerator;
 import com.sun.org.apache.xml.internal.utils.StringToStringTable;
 
-import gphase.CodeBookMark;
 import gphase.Toolbox;
 import gphase.db.EnsemblDBAdaptor;
 import gphase.gui.Paparazzi;
@@ -633,7 +632,7 @@ public class ASAnalyzer {
 
 	public static void test01_clusters_coverage_as() {
 		
-		String fName= "test01_clusters_coverage_encode_cds.txt";			
+		String fName= "test01_clusters_coverage_asd_noNMDfilter.txt";			
 		PrintStream p= null;
 		try {
 			fName= Toolbox.checkFileExists(fName);
@@ -643,8 +642,8 @@ public class ASAnalyzer {
 			e.printStackTrace();
 		}
 		
-		Graph g= getGraph(INPUT_ENCODE);
-		g.filterNonCodingTranscripts();
+		Graph g= getGraph(INPUT_ASD);
+		//g.filterNonCodingTranscripts();
 		//g.filterNMDTranscripts();
 		
 		p.println("clusters: "+g.getGenes().length+" transcripts: "+g.getTranscriptCount());
@@ -1267,11 +1266,13 @@ public class ASAnalyzer {
 	
 	public static void test02_ss_statistics() {
 	
-		String iname= "encode/44regions_genes_CHR_coord.gtf.conservation_high";
+		// "encode/44regions_genes_CHR_coord.gtf.conservation_high"
+		String iname= INPUT_ASD;
 		Graph g= getGraph(iname);
+		g.filterNMDTranscripts();
 		
 		//String fName= "test02_ss_statistics_refseq_in_encode_nmd.txt";
-		String fName= iname+ ".utr";
+		String fName= "test02_ss_statistics_asd.txt";
 		PrintStream p= null;
 		try {
 			fName= Toolbox.checkFileExists(fName);
@@ -1909,7 +1910,7 @@ public class ASAnalyzer {
 	public final static String INPUT_REFSEQ_CODING_FROM_UCSC= "encode/RefSeqGenes_fromUCSC.gtf";
 	public final static String INPUT_ENSEMBL_FROM_ENSEMBL= "encode/EnsemblGenes_all_fromENSEMBL.gtf";
 	public final static String INPUT_HAVANA= "encode/Sequences_mapped_HAVANA_136.gtf";
-	public final static String INPUT_ASD= "Sequences_mapped_HAVANA_136.gtf";
+	public final static String INPUT_ASD= "encode/ASD_27.35a.1.CLASSES_filtChr.gff";
 	public final static String[] INPUT_GO_LEVEL1= new String[] {
 		   "0008150",	// biological_process [137651]  
            "0005575", 	// cellular_component [115920]  
@@ -1998,7 +1999,11 @@ public class ASAnalyzer {
 		if (fName.startsWith("encode/44regions_genes_CHR_coord"))
 			encode= true;
 		
-		Graph g= myWrapper.getGraph(encode);		// <===== check ENCODE here !!!
+		Graph g= null;
+		if (fName.equals(INPUT_ASD))
+			g= ((ATDWrapper) myWrapper).getGraph();
+		else
+			g= myWrapper.getGraph(encode);		// <===== check ENCODE here !!!
 		return g;
 	}
 	public static Graph getGraph_now(String fName)  {
@@ -2238,12 +2243,12 @@ public class ASAnalyzer {
 					//"encode/44regions_genes_CHR_coord.gtf.TissueSpecificity_high";
 					//"encode/44regions_genes_CHR_coord.gtf.conservation_high";
 					String iname= INPUT_ENCODE;
-					String sfx= "_GENCODE.landscape";			
+					String sfx= "_GENCODE_CDS.landscape";			
 					Graph g= getGraph(iname);
 					
 					PrintStream p= null;
 					
-					//g.filterNonCodingTranscripts();
+					g.filterNonCodingTranscripts();
 					g.filterNMDTranscripts();
 					ASVariation[][] classes= g.getASVariations(ASMultiVariation.FILTER_NONE);
 					classes= (ASVariation[][]) Arrays.sort2DFieldRev(classes);
@@ -2750,89 +2755,6 @@ public class ASAnalyzer {
 			e.printStackTrace();
 		} 
 	}
-	public static void test05_countUTRs(boolean onlyAS_UTRs, String fName) {
-		CodeBookMark cb= new CodeBookMark();
-		String mName= cb.getMethodName();
-		
-		PrintStream p= null;
-		try {
-			String oName= Toolbox.checkFileExists(fName+"."+mName+"AS"+onlyAS_UTRs);
-			p= new PrintStream(oName);
-			//p= System.out;
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		Graph g= getGraph(fName);
-		g.filterNMDTranscripts();
-			// init
-		ASVariation[][] vars= g.getASVariations(ASMultiVariation.FILTER_NONE);
-		
-		HashMap intronMap= new HashMap();	// maps nrIntrons to UTRcount
-		Gene[] ge= g.getGenes();
-		int countNoUTR= 0;
-		for (int i = 0; i < ge.length; i++) {
-			Transcript[] tr= ge[i].getTranscripts();
-			for (int j = 0; j < tr.length; j++) {
-				if (!tr[j].isCoding())
-					continue;
-				boolean asUTR= false;
-				Exon[] ex= tr[j].getExons();
-				int k;
-				for (k = 0; k < ex.length; k++) {					
-					if (ex[k].isCoding5Prime()) {
-						--k;
-						break;
-					} else
-						if (ex[k].getAcceptor()!= null&& !ex[k].getAcceptor().isConstitutive())
-							asUTR= true;
-					
-					if (ex[k].isCoding3Prime())
-						break;
-					else
-						if (ex[k].getDonor()!= null&& !ex[k].getDonor().isConstitutive())
-							asUTR= true;
-				}
-				
-				if (((!onlyAS_UTRs)|| asUTR)&& k>= 0) {
-					Integer key= new Integer(k);
-					Integer val= (Integer) intronMap.get(key);
-					if (val== null)
-						val= new Integer(1);
-					else
-						val= new Integer(val.intValue()+ 1);
-					intronMap.put(key, val);
-				}
-				if (k< 0)
-					++countNoUTR;
-			}
-		}
-		
-		if (onlyAS_UTRs)
-			p.println("Number of introns in UTRs showing AS");
-		else
-			p.println("Number of introns in all UTRs");
-
-		Object[] o= intronMap.keySet().toArray();
-		java.util.Arrays.sort(o);
-		int sum= 0;
-		int sumSpliced= 0;
-		p.println("no UTR\t"+countNoUTR);
-		for (int i = 0; i < o.length; i++) {
-			Integer key= (Integer) o[i];
-			Integer val= (Integer) intronMap.get(o[i]);
-			p.println(o[i]+"\t"+val);
-			sum+= val.intValue();
-			if (key.intValue()> 0)
-				sumSpliced+= val.intValue();
-		}
-		p.println("total spliced\t"+sumSpliced+"\n\n");
-		
-		p.println("1 intron/spliced\t"+ 
-				((float) ((Integer) intronMap.get(new Integer(1))).intValue()/ sumSpliced));
-		p.println(">1 intron/total UTR\t"+ 
-				((float) sumSpliced/ sum));
-	}
 
 	/**
 	 * @param g
@@ -2899,7 +2821,6 @@ public class ASAnalyzer {
 			
 			//g.filterNonCodingTranscripts();
 			g.filterNMDTranscripts();
-			
 			HashMap mapUTRspliced= new HashMap();
 			HashMap mapUTRas= new HashMap();
 			HashMap mapAll= new HashMap();
@@ -4094,7 +4015,7 @@ public class ASAnalyzer {
 		Graph g= null;
 		//g= getGraph(INPUT_ENCODE);
 		//g.filterNMDTranscripts();
-		//test02_ss_statistics(g, System.out, false);
+		test02_ss_statistics();
 		//test04_determineVariations_nmd();
 		//test02_ss_statistics();
 		//test01_clusters_coverage_as();
@@ -4104,13 +4025,12 @@ public class ASAnalyzer {
 		//test04_determineVariations_nmd();
 		//test02_ss_statistics();
 		//test05_GO_splice_utr_sigTest();
-		test05_countUTRs(false, INPUT_ENCODE);
 		if (1== 1)
 			System.exit(0);
 		
 		
 		g.filterNonCodingTranscripts();
-		//g.filterCodingTranscripts();
+		//g.filterCodingTranscripts(); 
 		//test04a_determineVarDegree(g, System.out);
 		//test04_checkOutsideEncode(g, System.out);
 

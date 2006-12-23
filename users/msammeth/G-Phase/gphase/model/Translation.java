@@ -99,7 +99,7 @@ public class Translation extends DirectedRegion {
 		
 		Translation[] trns= getTranscript().getAllORFs();
 		Vector uOrfV= new Vector();
-		for (int i = 0; i < trns.length; i++) {
+		for (int i = 0; trns!= null&& i < trns.length; i++) {
 			if (trns[i].get3PrimeEdge()< get5PrimeEdge())
 				uOrfV.add(trns[i]);
 		}

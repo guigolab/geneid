@@ -172,7 +172,7 @@ public class Arrays {
 		Object[] oo;
 		if (o instanceof Collection)
 			oo= (Object[]) ((Collection) o).toArray();
-		else
+		else  
 			oo= (Object[]) o;
 		
 		java.util.Arrays.sort(oo, new Arrays.FieldSizeRevComparator());

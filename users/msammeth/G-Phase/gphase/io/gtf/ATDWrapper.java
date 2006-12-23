@@ -69,6 +69,7 @@ public class ATDWrapper extends EncodeWrapper {
 	Graph assemble() {
 		
 		Species spec= new Species("human");
+		spec.setBuildVersion(17);
 		
 			// genes
 		GTFObject[] gtfs= getGtfObj();
@@ -206,21 +207,21 @@ public class ATDWrapper extends EncodeWrapper {
 				encode= true;
 			
 			Graph g= myWrapper.getGraph();		// <===== check ENCODE here !!!
-			g= filterForENCODERegions(g);
+			//g= filterForENCODERegions(g);
 			//g.filterNonCodingTranscripts();
 			//g.filterCodingTranscripts();
 			g.initTU();
 	
 			PrintStream pr= null;
 			try {
-				pr = new PrintStream(new File("asd_test01_encode.txt"));
+				pr = new PrintStream(new File("test04_asd.txt"));
 			} catch (FileNotFoundException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 			
-			ASAnalyzer.test01_clusters_coverage_as(g, pr);
-			//ASAnalyzer.test04_determineVariations_rev(g, pr);
+			//ASAnalyzer.test01_clusters_coverage_as(g, pr);
+			ASAnalyzer.test04_determineVariations_rev(g, pr);
 		}
 
 	public ATDWrapper(String absFName) {

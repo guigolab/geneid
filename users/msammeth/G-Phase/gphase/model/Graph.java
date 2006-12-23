@@ -609,10 +609,9 @@ public class Graph implements Serializable {
 			try {
 //				System.out.println(getSequenceDirectory(speRealName)+ File.separator+ "chr"+ chromosome+ Constants.CHROMOSOME_EXT);
 //				System.out.println(start+"-"+end);
-				RandomAccessFile raf= new RandomAccessFile(new File(
-						getSequenceDirectory(spe)+ 
-						File.separator+ "chr"+ chromosome+ Constants.CHROMOSOME_EXT),
-						"r");
+				String fName= getSequenceDirectory(spe)+File.separator+ "chr"+ chromosome+ Constants.CHROMOSOME_EXT;
+				RandomAccessFile raf= new RandomAccessFile(new File(fName),"r");
+				
 				String read= raf.readLine();
 				while (!read.startsWith(">"))
 					read= raf.readLine();
@@ -1347,7 +1346,12 @@ public class Graph implements Serializable {
 	/**
 	 */
 	public void filterNMDTranscripts() {
-		System.out.println("filter NMD transcripts");
+		System.out.print("filtering NMD transcripts..");
+		System.out.flush();
+		
+		int ctr= 0;
+		int ctrFilt= 0;
+		int ctrLocus= 0;
 		Iterator iter= speciesHash.values().iterator();
 		NMDSimulator nmd;
 		while (iter.hasNext()) {
@@ -1355,20 +1359,26 @@ public class Graph implements Serializable {
 			Gene[] ge= spec.getGenes();
 			for (int i = 0; i < ge.length; i++) {
 				Transcript[] trans= ge[i].getTranscripts();
-				for (int j = 0; j < trans.length; j++) {					
+				for (int j = 0; j < trans.length; j++) {
+					++ctr;
 					nmd= new NMDSimulator(trans[j]);
 					Translation tln;
 					if (trans[j].getTranslations()== null|| trans[j].getTranslations()[0]== null)
 						tln= trans[j].findHavanaORF();	// *
 					else
 						tln= trans[j].getTranslations()[0];
-					if (tln!= null&& nmd.isNMD(tln))	// (tln== null|| nmd.isNMD(tln)) for removing trpts wo ORF
+					if (tln!= null&& nmd.isNMD(tln)) {	// (tln== null|| nmd.isNMD(tln)) for removing trpts wo ORF
 						ge[i].removeTranscript(trans[j]);
+						++ctrFilt;
+					}
 				}
-				if (ge[i].getTranscriptCount()< 1)	// remove gene if there are no more transcripts
+				if (ge[i].getTranscriptCount()< 1) {	// remove gene if there are no more transcripts
 					spec.remove(ge[i], true);
+					++ctrLocus;
+				}
 			}
 		}
+		System.out.println(" removed "+ctrFilt+"/"+ctr+" trpts, eliminated "+ctrLocus+" loci.");
 		recluster();
 	}
 	
