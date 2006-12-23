@@ -1223,9 +1223,9 @@ public class ASVariation implements Serializable {
 					return 2;		// keep second
 
 					// separate from spooky twilight zone
-				if (as1.isTwilightCDS()|| as1.isTwilight5UTR()|| as1.isTwilight3UTR()) 
+				if (as1.is_twilight_CDS()|| as1.is_twilight_5UTR()|| as1.is_twilight_3UTR()) 
 					return (as2.isProteinCoding())?0:1;	// keep only first
-				if (as2.isTwilightCDS()|| as2.isTwilight5UTR()|| as2.isTwilight3UTR())
+				if (as2.is_twilight_CDS()|| as2.is_twilight_5UTR()|| as2.is_twilight_3UTR())
 					return 2;		// keep second
 				return 0;	// keep one (whichever)
 			}
@@ -1278,10 +1278,10 @@ public class ASVariation implements Serializable {
 				
 				ASVariation as1= (ASVariation) arg0;
 				ASVariation as2= (ASVariation) arg1;
-				if (as1.isNothingRedundant()) {
-					return (as2.isNothingRedundant())?0:2;	// keep only secd
+				if (as1.is_non_classifiable()) {
+					return (as2.is_non_classifiable())?0:2;	// keep only secd
 				} else {
-					return (as2.isNothingRedundant())?1:-1;	// keep only secd
+					return (as2.is_non_classifiable())?1:-1;	// keep only secd
 				}
 			}
 		}
@@ -1297,11 +1297,11 @@ public class ASVariation implements Serializable {
 			ASVariation as1= (ASVariation) arg0;
 			ASVariation as2= (ASVariation) arg1;
 			
-			if (as2.is5UTRRedundant())
+			if (as2.is_affecting_5UTR())
 				as1.setSsRegionID5UTR((byte) 1);
-			if (as2.isCDSRedundant())
+			if (as2.is_affecting_CDS())
 				as1.setSsRegionID5UTR((byte) 1);
-			if (as2.is3UTRRedundant())
+			if (as2.is_affecting_3UTR())
 				as1.setSsRegionID5UTR((byte) 1);
 			
 			return 2;
@@ -1374,7 +1374,7 @@ public class ASVariation implements Serializable {
 		
 		if (pattern== null|| pattern.length!= 2)		
 			return false;
-		
+		return false;
 		
 	}
 	
@@ -1418,8 +1418,9 @@ public class ASVariation implements Serializable {
 		
 		
 		if (!trans1.isNonCoding()) {
-			trans1.getTranslations()[0]
+			trans1.getTranslations();
 		}
+		return null;
 	}
 	
 	public boolean isNotProteinCoding() {
@@ -1456,7 +1457,7 @@ public class ASVariation implements Serializable {
 		return true;
 	}
 	
-	public boolean isTwilightCDS() {
+	public boolean is_twilight_CDS() {
 		if (!isTwilightZone())
 			return false;
 		
@@ -1497,7 +1498,7 @@ public class ASVariation implements Serializable {
 		return b;
 	}
 	
-	public boolean isTwilight5UTR() {
+	public boolean is_twilight_5UTR() {
 		
 		if (!isTwilightZone())
 			return false;
@@ -1522,7 +1523,7 @@ public class ASVariation implements Serializable {
 		return b;
 	}
 	
-	public boolean isTwilight3UTR() {
+	public boolean is_twilight_3UTR() {
 		if (!isTwilightZone())
 			return false;
 		
@@ -1547,7 +1548,7 @@ public class ASVariation implements Serializable {
 	}
 	
 	public boolean isTwilightSpooky() {
-		if (isTwilightZone()&& !isTwilightCDS()&& !isTwilight5UTR()&& !isTwilight3UTR())
+		if (isTwilightZone()&& !is_twilight_CDS()&& !is_twilight_5UTR()&& !is_twilight_3UTR())
 			return true;
 		return false;
 	}
@@ -1938,7 +1939,11 @@ public class ASVariation implements Serializable {
 		return (ssRegionID3UTR> 0);
 	}
 
-	public boolean is3UTRRedundant() {
+	public boolean is_all() {
+		return true;
+	}
+	
+	public boolean is_affecting_3UTR() {
 		if (ssRegionID3UTR== 0) {
 			SpliceSite[] su= getSpliceUniversePlusFlanks();
 			int i;
@@ -1954,7 +1959,7 @@ public class ASVariation implements Serializable {
 		return (ssRegionID3UTR> 0);
 	}
 
-	public boolean is5UTRRedundant() {
+	public boolean is_affecting_5UTR() {
 		if (ssRegionID5UTR== 0) {
 			SpliceSite[] su= getSpliceUniversePlusFlanks();
 			int i;
@@ -1989,7 +1994,7 @@ public class ASVariation implements Serializable {
 		return (ssRegionIDCDS> 0);
 	}
 
-	public boolean isCDSRedundant() {
+	public boolean is_affecting_CDS() {
 		if (ssRegionIDCDS== 0) {
 			SpliceSite[] su= getSpliceUniverse();
 			int i;
@@ -2005,20 +2010,20 @@ public class ASVariation implements Serializable {
 		return (ssRegionIDCDS> 0);
 	}
 	
-	public boolean isCDSNonRedundant() {
-		if (isCDSRedundant()&& !is5UTRRedundant()&& !is3UTRRedundant())
+	public boolean is_contained_in_CDS() {
+		if (is_affecting_CDS()&& !is_affecting_5UTR()&& !is_affecting_3UTR())
 			return true;
 		return false;
 	}
 	
-	public boolean is5UTRNonRedundant() {
-		if (!isCDSRedundant()&& is5UTRRedundant()&& !is3UTRRedundant())
+	public boolean is_contained_in_5UTR() {
+		if (!is_affecting_CDS()&& is_affecting_5UTR()&& !is_affecting_3UTR())
 			return true;
 		return false;
 	}
 	
-	public boolean is3UTRNonRedundant() {
-		if (!isCDSRedundant()&& !is5UTRRedundant()&& is3UTRRedundant())
+	public boolean is_contained_in_3UTR() {
+		if (!is_affecting_CDS()&& !is_affecting_5UTR()&& is_affecting_3UTR())
 			return true;
 		return false;
 	}
@@ -2034,37 +2039,37 @@ public class ASVariation implements Serializable {
 		return (ctr> 1);
 	}
 
-	public boolean isTwilightRedundant() {
+	public boolean isTwilight() {
 		int ctr= 0;
-		if (is5UTRRedundant())
+		if (is_affecting_5UTR())
 			++ctr;
-		if (isCDSRedundant())
+		if (is_affecting_CDS())
 			++ctr;
-		if (is3UTRRedundant())
+		if (is_affecting_3UTR())
 			++ctr;
 		return (ctr> 1);
 	}
 	
-	public boolean isTwilightRedundant5CDS() {
-		if (is5UTRRedundant()&& isCDSRedundant())
+	public boolean is_twilight_5UTR_CDS() {
+		if (is_affecting_5UTR()&& is_affecting_CDS())
 			return true;
 		return false;
 	}
 	
-	public boolean isTwilightRedundantCDS3() {
-		if (is3UTRRedundant()&& isCDSRedundant())
+	public boolean is_twilight_CDS_3UTR() {
+		if (is_affecting_3UTR()&& is_affecting_CDS())
 			return true;
 		return false;
 	}
 	
-	public boolean isTwilightRedundant53() {
-		if (is3UTRRedundant()&& is5UTRRedundant())
+	public boolean is_twilight_5UTR_3UTR() {
+		if (is_affecting_3UTR()&& is_affecting_5UTR())
 			return true;
 		return false;
 	}
 
-	public boolean isTwilightRedundantAll() {
-		if (is3UTRRedundant()&& is5UTRRedundant()&& isCDSRedundant())
+	public boolean is_twilight_5UTR_CDS_3UTR() {
+		if (is_affecting_3UTR()&& is_affecting_5UTR()&& is_affecting_CDS())
 			return true;
 		return false;
 	}
@@ -2080,13 +2085,13 @@ public class ASVariation implements Serializable {
 		return (ctr== 0);
 	}
 
-	public boolean isNothingRedundant() {
+	public boolean is_non_classifiable() {
 		int ctr= 0;
-		if (is5UTRRedundant())
+		if (is_affecting_5UTR())
 			++ctr;
-		if (isCDSRedundant())
+		if (is_affecting_CDS())
 			++ctr;
-		if (is3UTRRedundant())
+		if (is_affecting_3UTR())
 			++ctr;
 		return (ctr== 0);
 	}

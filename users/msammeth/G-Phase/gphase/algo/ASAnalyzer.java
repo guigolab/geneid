@@ -2253,7 +2253,7 @@ public class ASAnalyzer {
 					classes= filtClasses;
 					
 					try {
-						Method m = classes[0][0].getClass().getMethod("isTrue", null);	// warum eigentlich?
+						Method m = classes[0][0].getClass().getMethod("is_all", null);	// warum eigentlich?
 						try {
 							String fName= Toolbox.checkFileExists(iname+"."+m.getName()+sfx);
 							p= new PrintStream(fName);
@@ -2279,7 +2279,7 @@ public class ASAnalyzer {
 						
 						
 						// "isProteinCoding_1cover"
-						m = classes[0][0].getClass().getMethod("isCDSRedundant", null);
+						m = classes[0][0].getClass().getMethod("is_affecting_CDS", null);
 						try {p= new PrintStream(iname+"."+m.getName()+sfx);
 						} catch (Exception e) {e.printStackTrace();}
 						p.println(m.getName());
@@ -2289,7 +2289,7 @@ public class ASAnalyzer {
 						outputVariations(filtClasses, true, false, p);
 						p.flush(); p.close();
 				
-						m = classes[0][0].getClass().getMethod("isCDSNonRedundant", null);
+						m = classes[0][0].getClass().getMethod("is_contained_in_CDS", null);
 						try {p= new PrintStream(iname+"."+m.getName()+sfx);
 						} catch (Exception e) {e.printStackTrace();}
 						filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
@@ -2300,7 +2300,7 @@ public class ASAnalyzer {
 						p.flush(); p.close();
 				
 						// "isNotProteinCoding_1cover"
-						m = classes[0][0].getClass().getMethod("is5UTRRedundant", null);
+						m = classes[0][0].getClass().getMethod("is_affecting_5UTR", null);
 						try {p= new PrintStream(iname+"."+m.getName()+sfx);
 						} catch (Exception e) {e.printStackTrace();}
 						filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
@@ -2317,7 +2317,7 @@ public class ASAnalyzer {
 						outputVariations(filtClasses, true, false, p);
 						p.flush(); p.close();
 				
-						m = classes[0][0].getClass().getMethod("is5UTRNonRedundant", null);
+						m = classes[0][0].getClass().getMethod("is_contained_in_5UTR", null);
 						try {p= new PrintStream(iname+"."+m.getName()+sfx);
 						} catch (Exception e) {e.printStackTrace();}
 						filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
@@ -2327,7 +2327,7 @@ public class ASAnalyzer {
 						outputVariations(filtClasses, true, false, p);
 						p.flush(); p.close();
 				
-						m = classes[0][0].getClass().getMethod("is3UTRRedundant", null);
+						m = classes[0][0].getClass().getMethod("is_affecting_3UTR", null);
 						try {p= new PrintStream(iname+"."+m.getName()+sfx);
 						} catch (Exception e) {e.printStackTrace();}
 						filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
@@ -2337,7 +2337,7 @@ public class ASAnalyzer {
 						outputVariations(filtClasses, true, false, p);
 						p.flush(); p.close();
 						
-						m = classes[0][0].getClass().getMethod("is3UTRNonRedundant", null);
+						m = classes[0][0].getClass().getMethod("is_contained_in_3UTR", null);
 						try {p= new PrintStream(iname+"."+m.getName()+sfx);
 						} catch (Exception e) {e.printStackTrace();}
 						filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
@@ -2347,7 +2347,7 @@ public class ASAnalyzer {
 						outputVariations(filtClasses, true, false, p);
 						p.flush(); p.close();
 				
-						m = classes[0][0].getClass().getMethod("isTwilightRedundant5CDS", null);
+						m = classes[0][0].getClass().getMethod("is_twilight_5UTR_CDS", null);
 						try {p= new PrintStream(iname+"."+m.getName()+sfx);
 						} catch (Exception e) {e.printStackTrace();}
 						filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
@@ -2357,7 +2357,7 @@ public class ASAnalyzer {
 						outputVariations(filtClasses, true, false, p);
 						p.flush(); p.close();
 						
-						m = classes[0][0].getClass().getMethod("isTwilightRedundantCDS3", null);
+						m = classes[0][0].getClass().getMethod("is_twilight_CDS_3UTR", null);
 						try {p= new PrintStream(iname+"."+m.getName()+sfx);
 						} catch (Exception e) {e.printStackTrace();}
 						filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
@@ -2367,7 +2367,7 @@ public class ASAnalyzer {
 						outputVariations(filtClasses, true, false, p);
 						p.flush(); p.close();
 						
-						m = classes[0][0].getClass().getMethod("isTwilightRedundant53", null);
+						m = classes[0][0].getClass().getMethod("is_twilight_5UTR_3UTR", null);
 						try {p= new PrintStream(iname+"."+m.getName()+sfx);
 						} catch (Exception e) {e.printStackTrace();}
 						filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
@@ -2377,7 +2377,7 @@ public class ASAnalyzer {
 						outputVariations(filtClasses, true, false, p);
 						p.flush(); p.close();
 						
-						m = classes[0][0].getClass().getMethod("isTwilightRedundantAll", null);
+						m = classes[0][0].getClass().getMethod("is_twilight_5UTR_CDS_3UTR", null);
 						try {p= new PrintStream(iname+"."+m.getName()+sfx);
 						} catch (Exception e) {e.printStackTrace();}
 						filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
@@ -2387,7 +2387,7 @@ public class ASAnalyzer {
 						outputVariations(filtClasses, true, false, p);
 						p.flush(); p.close();
 						
-						m = classes[0][0].getClass().getMethod("isNothingRedundant", null);
+						m = classes[0][0].getClass().getMethod("is_non_classifiable", null);
 						try {p= new PrintStream(iname+"."+m.getName()+sfx);
 						} catch (Exception e) {e.printStackTrace();}
 						filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
