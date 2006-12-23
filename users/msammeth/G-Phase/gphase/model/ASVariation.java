@@ -1452,8 +1452,8 @@ public class ASVariation implements Serializable {
 		for (int i = su.length- 1; i >=0; --i) 
 			if ((su[i].getPos()== lintron1[0].getPos()|| su[i].getPos()== lintron1[1].getPos())
 					|| (su[i].getPos()== lintron2[0].getPos()|| su[i].getPos()== lintron2[1].getPos()))
-				return true;
-		return false;
+				return false;
+		return true;
 	}
 	
 	public boolean isTwilightCDS() {
