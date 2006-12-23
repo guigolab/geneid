@@ -517,7 +517,7 @@ public class Transcript extends DirectedRegion {
 	}
 	
 	public SpliceSite[] getLastUTRIntron() {
-		if (translations== null|| exons.length< 3|| exons[1].get3PrimeCDS()>= translations[0].get5PrimeEdge())
+		if (translations== null|| exons.length< 3|| exons[1].get3PrimeEdge()>= translations[0].get5PrimeEdge())
 			return null;
 		int i;
 		for (i = 0; i < exons.length; i++) 

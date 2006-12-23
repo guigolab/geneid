@@ -2363,6 +2363,15 @@ public class ASVariation implements Serializable {
 		return result;
 	}
 	
+	public String toCoordinates() {
+		String s= trans1.getTranscriptID()+ ":";
+		for (int i = 0; spliceChain1!= null&& i < spliceChain1.length; i++) 
+			s+= spliceChain1[i]+" ";
+		s+= "\t"+ trans2.getTranscriptID();
+		for (int i = 0; spliceChain2!= null&& i < spliceChain2.length; i++) 
+			s+= spliceChain2[i]+" ";
+		return s;
+	}
 	
 	public boolean containsTranscripts(Transcript tID1, Transcript tID2) {
 		if ((tID1== trans1&& tID2== trans2)||
