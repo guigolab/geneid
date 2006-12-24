@@ -2243,13 +2243,13 @@ public class ASAnalyzer {
 					//"encode/44regions_genes_CHR_coord.gtf.TissueSpecificity_high";
 					//"encode/44regions_genes_CHR_coord.gtf.conservation_high";
 					String iname= INPUT_ENCODE;
-					String sfx= "_GENCODE_CDS.landscape";			
+					String sfx= "_GENCODE_with_NMD.landscape";			
 					Graph g= getGraph(iname);
 					
 					PrintStream p= null;
 					
-					g.filterNonCodingTranscripts();
-					g.filterNMDTranscripts();
+					//g.filterNonCodingTranscripts();
+					//g.filterNMDTranscripts();
 					ASVariation[][] classes= g.getASVariations(ASMultiVariation.FILTER_NONE);
 					classes= (ASVariation[][]) Arrays.sort2DFieldRev(classes);
 					ASVariation[][] filtClasses= new ASVariation[classes.length][];
@@ -4015,14 +4015,14 @@ public class ASAnalyzer {
 		Graph g= null;
 		//g= getGraph(INPUT_ENCODE);
 		//g.filterNMDTranscripts();
-		test02_ss_statistics();
+		//test02_ss_statistics();
 		//test04_determineVariations_nmd();
 		//test02_ss_statistics();
 		//test01_clusters_coverage_as();
 		//mvar_output();
 		//test05_GO_splice_utr();
 		//test02_UTRvsCDS_go();
-		//test04_determineVariations_nmd();
+		test04_determineVariations_nmd();
 		//test02_ss_statistics();
 		//test05_GO_splice_utr_sigTest();
 		if (1== 1)
