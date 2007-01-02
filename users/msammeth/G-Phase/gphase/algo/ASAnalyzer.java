@@ -35,6 +35,7 @@ import com.p6spy.engine.logging.appender.StdoutLogger;
 import com.sun.org.apache.xalan.internal.xsltc.compiler.util.FilterGenerator;
 import com.sun.org.apache.xml.internal.utils.StringToStringTable;
 
+import gphase.CodeBookMark;
 import gphase.Toolbox;
 import gphase.db.EnsemblDBAdaptor;
 import gphase.gui.Paparazzi;
@@ -47,6 +48,7 @@ import gphase.model.ASEvent;
 import gphase.model.ASMultiVariation;
 import gphase.model.ASVariation;
 import gphase.model.AbstractRegion;
+import gphase.model.AbstractSite;
 import gphase.model.DefaultRegion;
 import gphase.model.DirectedRegion;
 import gphase.model.Exon;
@@ -2243,13 +2245,13 @@ public class ASAnalyzer {
 					//"encode/44regions_genes_CHR_coord.gtf.TissueSpecificity_high";
 					//"encode/44regions_genes_CHR_coord.gtf.conservation_high";
 					String iname= INPUT_ENCODE;
-					String sfx= "_GENCODE_with_NMD.landscape";			
+					String sfx= "_GENCODE_CDS.landscape1";			
 					Graph g= getGraph(iname);
 					
 					PrintStream p= null;
 					
-					//g.filterNonCodingTranscripts();
-					//g.filterNMDTranscripts();
+					g.filterNonCodingTranscripts();
+					g.filterNMDTranscripts();
 					ASVariation[][] classes= g.getASVariations(ASMultiVariation.FILTER_NONE);
 					classes= (ASVariation[][]) Arrays.sort2DFieldRev(classes);
 					ASVariation[][] filtClasses= new ASVariation[classes.length][];
@@ -2756,6 +2758,156 @@ public class ASAnalyzer {
 		} 
 	}
 
+	public static void test05_countUTRs(boolean onlyAS_UTRs, String fName) {
+		CodeBookMark cb= new CodeBookMark();
+		String mName= cb.getMethodName();
+		
+		PrintStream p= null;
+		try {
+			String oName= Toolbox.checkFileExists(fName+"."+mName+"AS"+onlyAS_UTRs);
+			p= new PrintStream(oName);
+			//p= System.out;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		Graph g= getGraph(fName);
+		g.filterNMDTranscripts();
+			// init
+		ASVariation[][] vars= g.getASVariations(ASMultiVariation.FILTER_NONE);
+		
+		HashMap intronMap= new HashMap();	// maps nrIntrons to UTRcount
+		Gene[] ge= g.getGenes();
+		int countNoUTR= 0;
+		for (int i = 0; i < ge.length; i++) {
+			Transcript[] tr= ge[i].getTranscripts();
+			for (int j = 0; j < tr.length; j++) {
+				if (!tr[j].isCoding())
+					continue;
+				boolean asUTR= false;
+				Exon[] ex= tr[j].getExons();
+				int k;
+				for (k = 0; k < ex.length; k++) {					
+					if (ex[k].isCoding5Prime()) {
+						--k;
+						break;
+					} else
+						if (ex[k].getAcceptor()!= null&& !ex[k].getAcceptor().isConstitutive())
+							asUTR= true;
+					
+					if (ex[k].isCoding3Prime())
+						break;
+					else
+						if (ex[k].getDonor()!= null&& !ex[k].getDonor().isConstitutive())
+							asUTR= true;
+				}
+				
+				if (((!onlyAS_UTRs)|| asUTR)&& k>= 0) {
+					Integer key= new Integer(k);
+					Integer val= (Integer) intronMap.get(key);
+					if (val== null)
+						val= new Integer(1);
+					else
+						val= new Integer(val.intValue()+ 1);
+					intronMap.put(key, val);
+				}
+				if (k< 0)
+					++countNoUTR;
+			}
+		}
+		
+		if (onlyAS_UTRs)
+			p.println("Number of introns in UTRs showing AS");
+		else
+			p.println("Number of introns in all UTRs");
+	
+		Object[] o= intronMap.keySet().toArray();
+		java.util.Arrays.sort(o);
+		int sum= 0;
+		int sumSpliced= 0;
+		p.println("no UTR\t"+countNoUTR);
+		for (int i = 0; i < o.length; i++) {
+			Integer key= (Integer) o[i];
+			Integer val= (Integer) intronMap.get(o[i]);
+			p.println(o[i]+"\t"+val);
+			sum+= val.intValue();
+			if (key.intValue()> 0)
+				sumSpliced+= val.intValue();
+		}
+		p.println("total spliced\t"+sumSpliced+"\n\n");
+		
+		p.println("1 intron/spliced\t"+ 
+				((float) ((Integer) intronMap.get(new Integer(1))).intValue()/ sumSpliced));
+		p.println(">1 intron/total UTR\t"+ 
+				((float) sumSpliced/ sum));
+	}
+
+	public static void test05_ASlengthExchange(String fName) {
+		CodeBookMark cb= new CodeBookMark();
+		String mName= cb.getMethodName();
+		
+		PrintStream p= null;
+		try {
+			String oName= Toolbox.checkFileExists(fName+"."+mName);
+			p= new PrintStream(oName);
+			//p= System.out;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		Graph g= getGraph(fName);
+		g.filterNonCodingTranscripts();
+		g.filterNMDTranscripts();
+			
+		ASVariation[][] vars= g.getASVariations(ASMultiVariation.FILTER_NONE);
+		Vector[] fracV= new Vector[2];
+		fracV[0]= new Vector(); fracV[1]= new Vector();
+		for (int i = 0; i < vars.length; i++) {
+			for (int j = 0; j < vars[i].length; j++) {
+				int l1, l2;
+				if (vars[i][j].is_contained_in_5UTR()) {
+					l1= vars[i][j].getTranscript1().get5UTRLength(true);
+					l2= vars[i][j].getTranscript2().get5UTRLength(true);
+				} else if (vars[i][j].is_contained_in_CDS()) {
+					l1= vars[i][j].getTranscript1().getCDSLength(true);
+					l2= vars[i][j].getTranscript2().getCDSLength(true);
+				} else
+					continue;
+				
+					// exonic var regions
+				DirectedRegion[] vReg= vars[i][j].getVariableRegion1();
+				int v1= 0;
+				for (int k = 0; vReg!= null&& k < vReg.length; k++) 
+					//for (int m = 0; vReg[k]!= null&& m < vReg[k].length; m++) 
+						v1+= vReg[k].getLength();
+				
+				vReg= vars[i][j].getVariableRegion2();
+				int v2= 0;
+				for (int k = 0; vReg!= null&& k < vReg.length; k++) 
+						v2+= vReg[k].getLength();
+				
+				if (v1> l1|| v2> l2)
+					System.currentTimeMillis();
+				if (vars[i][j].is_contained_in_5UTR()) {
+					fracV[0].add(new Double(((double) l1- v1)/ l1));
+					fracV[0].add(new Double(((double) l2- v2)/ l2));
+				} else if (vars[i][j].is_contained_in_CDS()) {
+					fracV[1].add(new Double(((double) l1- v1)/ l1));
+					fracV[1].add(new Double(((double) l2- v2)/ l2));
+				}
+			}
+		}
+		
+		double[] frac= new double[2];
+		frac[0]= 0d; frac[1]= 0d;
+		for (int i = 0; i < fracV[0].size(); i++) 
+			frac[0]+= ((Double) fracV[0].elementAt(i)).doubleValue();
+		for (int i = 0; i < fracV[1].size(); i++) 
+			frac[1]+= ((Double) fracV[1].elementAt(i)).doubleValue();
+		
+		System.out.println((frac[0]/fracV[0].size())+"\t"+(frac[1]/fracV[1].size()));
+	}
+	
 	/**
 	 * @param g
 	 * @param respectCoding
@@ -4013,23 +4165,25 @@ public class ASAnalyzer {
 		
 		
 		Graph g= null;
-		//g= getGraph(INPUT_ENCODE);
 		//g.filterNMDTranscripts();
 		//test02_ss_statistics();
-		//test04_determineVariations_nmd();
+		//test04_determineVariations_nmd,();
 		//test02_ss_statistics();
 		//test01_clusters_coverage_as();
 		//mvar_output();
 		//test05_GO_splice_utr();
 		//test02_UTRvsCDS_go();
-		test04_determineVariations_nmd();
+		//test04_determineVariations_nmd();
 		//test02_ss_statistics();
 		//test05_GO_splice_utr_sigTest();
-		if (1== 1)
-			System.exit(0);
+		//test05_ASlengthExchange(INPUT_ENCODE);
+//		if (1== 1)
+//			System.exit(0);
 		
 		
-		g.filterNonCodingTranscripts();
+		g= getGraph(INPUT_ENCODE);
+		//g.filterNonCodingTranscripts();
+		g.filterNMDTranscripts();
 		//g.filterCodingTranscripts(); 
 		//test04a_determineVarDegree(g, System.out);
 		//test04_checkOutsideEncode(g, System.out);
@@ -4043,34 +4197,63 @@ public class ASAnalyzer {
 //			if (vars[i][0].toString().startsWith("(1-2^ // 3-4^)")||
 //					vars[i][0].toString().startsWith("(1-2^3-4^ // 1-2^ // 3-4^)")||
 //					vars[i][0].toString().startsWith("(1-2^ // 3-4^ // )")) {
-			if ((vars[i][0].toString().startsWith("(1^ // 2^ // 3^)"))||
-					(vars[i][0].toString().startsWith("(1- // 2- // 3-)"))){
-				outputMultiVars(vars[i], System.out);
+//			if ((vars[i][0].toString().startsWith("(1-2^3-4^ // )"))||
+//					(vars[i][0].toString().startsWith("(1- // 2- // 3-)"))){
+//				outputMultiVars(vars[i], System.out);
+			String[] s= new String[vars[i].length];
+			if (vars[i][0].toString().equals("(1^4- // 2^3-)")) {
+				for (int j = 0; j < vars[i].length; j++) {
+					s[j]= "";
+					s[j]+= ("\t"+ vars[i][j].getGene().getChromosome()+" ");
+					Transcript[][] t= vars[i][j].getTranscriptsFromHash(); 
+					s[j]+= (t[0][0]+" "+t[1][0]+" ");
+					SpliceSite[] sc1= vars[i][j].getSpliceChains()[0];
+					SpliceSite[] sc2= vars[i][j].getSpliceChains()[1];
+					SpliceSite[][] sc= new SpliceSite[][] {sc1, sc2};
+					if (sc2.length> sc1.length)
+						Arrays.swap(sc);
+					for (int k = 0; k < sc.length; k++) {
+						for (int m = 0; m < sc[k].length; m++) 
+							s[j]+= (sc[k][m]+ " ");
+						s[j]+= (";// ");
+					}
+					//System.out.println();
+				}
+				java.util.Arrays.sort(s);
+				for (int j = 0; j < s.length; j++) {
+					System.out.println(s[j]);
+				}
 			}
 		}
 		
-//		ASVariation[][] vars2= g.getASVariations(ASMultiVariation.FILTER_HIERARCHICALLY);
-//		vars2= (ASVariation[][]) Arrays.sort2DFieldRev(vars2);
-//		for (int i = 0; i < vars2.length; i++) {
-//			System.out.println(vars2[i].length+ "\t"+ vars2[i][0]);
-//			if (vars2[i][0].toString().equals("(1=2^ // 3=4^)")) {
-//				System.out.println(vars2[i].length+ "\t"+ vars2[i][0]);
-//				for (int j = 0; j < vars2[i].length; j++) {
-//					System.out.print("\t"+ vars2[i][j].getGene().getChromosome()+" ");
-//					SpliceSite[] sc1= vars2[i][j].getSpliceChain1();
-//					SpliceSite[] sc2= vars2[i][j].getSpliceChain2();
-//					SpliceSite[][] sc= new SpliceSite[][] {sc1, sc2};
-//					if (sc2.length> sc1.length)
-//						Arrays.swap(sc);
-//					for (int k = 0; k < sc.length; k++) {
-//						for (int m = 0; m < sc[k].length; m++) 
-//							System.out.print(sc[k][m]+ " ");
-//						System.out.print("\t// ");
-//					}
-//					System.out.println();
-//				}
-//			}
-//		}
+		ASVariation[][] vars2= g.getASVariations(ASMultiVariation.FILTER_STRUCTURALLY);
+		vars2= (ASVariation[][]) Arrays.sort2DFieldRev(vars2);
+		for (int i = 0; i < vars2.length; i++) {
+			System.out.println(vars2[i].length+ "\t"+ vars2[i][0]);
+			String[] s= new String[vars2[i].length];
+			if (vars2[i][0].toString().equals("(1^4= // 2^3=)")) {
+				for (int j = 0; j < vars2[i].length; j++) {
+					s[j]= "";
+					s[j]+= ("\t"+ vars2[i][j].getGene().getChromosome()+" ");
+					s[j]+= (vars2[i][j].getTranscript1()+" "+vars2[i][j].getTranscript2()+" ");
+					SpliceSite[] sc1= vars2[i][j].getSpliceChain1();
+					SpliceSite[] sc2= vars2[i][j].getSpliceChain2();
+					SpliceSite[][] sc= new SpliceSite[][] {sc1, sc2};
+					if (sc2.length> sc1.length)
+						Arrays.swap(sc);
+					for (int k = 0; k < sc.length; k++) {
+						for (int m = 0; m < sc[k].length; m++) 
+							s[j]+=(sc[k][m]+ " ");
+						s[j]+= ";// ";
+					}
+					//System.out.println();
+				}
+				java.util.Arrays.sort(s);
+				for (int j = 0; j < s.length; j++) {
+					System.out.println(s[j]);
+				}
+			}
+		}
 		
 		
 		
