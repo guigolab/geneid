@@ -194,6 +194,10 @@ public class Arrays {
 	}
 	
 	public static Object[] addAll(Object[] a, Object[] b) {
+		if (b== null)
+			return a;
+		if (a== null)
+			return b;
 		Vector v= new Vector(a.length+ b.length);
 		v= (Vector) addAll(v, a);
 		v= (Vector) addAll(v, b);

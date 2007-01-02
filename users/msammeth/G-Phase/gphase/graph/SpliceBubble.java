@@ -29,6 +29,24 @@ public class SpliceBubble {
 		}
 	}
 	
+	public static class SizePartitionSizeComparator extends SpliceBubble.SizeComparator {
+		public int compare(Object o1, Object o2) {
+			int val= super.compare(o1, o2);
+			if (val!= 0)
+				return val;
+			SpliceBubble bub1= (SpliceBubble) o1;
+			SpliceBubble bub2= (SpliceBubble) o2;
+			Transcript[][] t1= bub1.getTranscriptPartitions();
+			Transcript[][] t2= bub2.getTranscriptPartitions();
+			
+			if (t1.length> t2.length)
+				return 1;
+			if (t2.length> t1.length)
+				return -1;
+			return 0;
+		}
+	}
+	
 	public static class SizeComparator implements Comparator {
 		public int compare(Object o1, Object o2) {
 			SpliceBubble bub1= (SpliceBubble) o1;
@@ -218,6 +236,18 @@ public class SpliceBubble {
 		return pathes;
 	}
 	
+	int getPartitionNr(Transcript t) {
+		Object[] o= transHash.values().toArray();
+		for (int i = 0; i < o.length; i++) { 
+			Transcript[] tr= (Transcript[]) o[i];
+			for (int j = 0; j < tr.length; j++) {
+				if (tr[j]== t)
+					return i;
+			}
+		}
+		return -1;
+	}
+	
 	void getPath(Stack backtrackStack, Vector path, Vector v) {
 		
 		if (backtrackStack.isEmpty())
@@ -308,6 +338,19 @@ public class SpliceBubble {
 		if (t2.length> t1.length)
 			return false;
 		if (SpliceBubble.containedByTranscript(t2, t1))
+			return true;
+		return false;
+	}
+
+	public boolean containsPreservesPartitions(SpliceBubble anotherBubble) {
+		
+		if (!containsGeometrically(anotherBubble))
+			return false;
+		
+			// transcript set not included
+		Transcript[][] t1= getTranscriptPartitions();
+		Transcript[][] t2= anotherBubble.getTranscriptPartitions();
+		if (SpliceBubble.preservesPartitions(t1, t2))
 			return true;
 		return false;
 	}
@@ -652,6 +695,162 @@ public class SpliceBubble {
 				if (k== containingTrans.length)
 					return false;
 			}
+		}
+		
+		return true;
+	}
+	
+	/**
+	 * all partitions matched by at least 1 transcript support.
+	 * no partition matches 2 of the other
+	 * @param t1
+	 * @param t2
+	 * @return
+	 */
+	public static boolean preservesPartitions(Transcript[][] t1, Transcript[][] t2) {
+	
+		for (int i = 0; i < t1.length; i++) {
+			Transcript[] found= null;
+			for (int j = 0; j < t1[i].length; j++) {
+				for (int k = 0; k < t2.length; k++) {
+					for (int m = 0;m < t2[k].length; m++) {
+						if (t1[i][j]== t2[k][m]) {
+							if (found== null)
+								found= t2[k];
+							else if (found!= t2[k])
+								return false;
+						}
+					}
+				}
+			}
+		}
+		
+		return true;
+	}
+
+	/**
+	 * t1 shows in each partition at least one tID of each partition of t2 (exclusively?).
+	 * @param t1
+	 * @param t2
+	 * @return
+	 */
+	public static boolean atLeastOneContained(Transcript[][] t1, Transcript[][] t2) {
+
+		for (int i = 0; i < t1.length; i++) {
+			Transcript[] found= null;
+			for (int j = 0; j < t1[i].length; j++) {
+				for (int k = 0; k < t2.length; k++) {
+					for (int m = 0;m < t2[k].length; m++) {
+						if (t1[i][j]== t2[k][m]) {
+							if (found== null)
+								found= t2[k];
+							else if (found!= t2[k])
+								return false;
+						}
+					}
+				}
+			}
+			if (found== null)
+				return false;	// all tIDs of a partition not found
+		}
+		
+		return true;
+	}
+
+	/**
+	 * all partitions matched by at least 1 transcript support.
+	 * no partition matches 2 of the other
+	 * @param t1
+	 * @param t2
+	 * @return
+	 */
+	public static boolean preservesAllPartitions(Transcript[][] t1, Transcript[][] t2) {
+		if (t1.length!= t2.length)
+			return false;
+		
+		for (int i = 0; i < t1.length; i++) {
+			Transcript[] found= null;
+			for (int j = 0; j < t1[i].length; j++) {
+				for (int k = 0; k < t2.length; k++) {
+					for (int m = 0;m < t2[j].length; m++) {
+						if (t1[i][j]== t2[k][m]) {
+							if (found== null)
+								found= t2[k];
+							else if (found!= t2[k])
+								return false;
+						}
+					}
+				}
+			}
+			if (found== null)
+				return false;
+		}
+		
+			// necessary
+		for (int i = 0; i < t2.length; i++) {
+			Transcript[] found= null;
+			for (int j = 0; j < t2[i].length; j++) {
+				for (int k = 0; k < t1.length; k++) {
+					for (int m = 0;m < t1[j].length; m++) {
+						if (t1[i][j]== t1[k][m]) {
+							if (found== null)
+								found= t1[k];
+							else if (found!= t1[k])
+								return false;
+						}
+					}
+				}
+			}
+			if (found== null)
+				return false;
+		}
+		
+		return true;
+	}
+
+	/**
+	 * all transcripts of t1 contained in t2 AND partitions only narrowed t2->t1, eg. [5],[3] -> [5,3].
+	 * no partition matches 2 of the other
+	 * @param t1
+	 * @param t2
+	 * @return
+	 */
+	public static boolean containedPreservesPartitions(Transcript[][] t1, Transcript[][] t2) {
+		for (int i = 0; i < t1.length; i++) {
+			Transcript[] found= null;
+			for (int j = 0; j < t1[i].length; j++) {
+				for (int k = 0; k < t2.length; k++) {
+					for (int m = 0;m < t2[j].length; m++) {
+						if (t1[i][j]== t2[k][m]) {
+							if (found== null)
+								found= t2[k];
+							else if (found!= t2[k])
+								return false;
+						}
+					}
+				}
+				if (found== null)
+					return false;
+			}
+		}
+		
+			// necessary
+		for (int i = 0; i < t2.length; i++) {
+			Transcript[] found= null;
+			for (int j = 0; j < t2[i].length; j++) {
+				for (int k = 0; k < t1.length; k++) {
+					for (int m = 0;m < t1[j].length; m++) {
+						if (t1[i][j]== t1[k][m]) {
+							if (found== null)
+								found= t1[k];
+							else if (found!= t1[k])
+								return false;
+						}
+					}
+				}
+			}
+			if (found== null)
+				return false;
 		}
 		
 		return true;

@@ -64,6 +64,7 @@ public class SpliceGraph {
 		
 			// add border anchors
 		Vector tssV= new Vector();
+		//Vector nullEdges= new Vector();	// edges AS -> AS, for cross-linking
 		for (int i = 0; i < transcripts.length; i++) {
 			for (int j = i+1; j < transcripts.length; j++) {
 					// find trim points
@@ -84,6 +85,32 @@ public class SpliceGraph {
 				tes.addTranscripts(new Transcript[] {transcripts[i], transcripts[j]});
 				createEdge(transcripts[i], tss, tes);
 				createEdge(transcripts[j], tss, tes);
+				// dont need, if a connection is supported by at least 2 pathes
+				// it will exist, otherwise not interesting for bubbles
+//				SpliceEdge nEdge= createEdge(transcripts[i], tss, tes);	// crosslink anchors, for finding pathes
+//				if (nEdge!= null) {
+//					for (int k = 0; k < nullEdges.size(); k++) {
+//						SpliceEdge e= (SpliceEdge) nullEdges.elementAt(k);
+//						Transcript[][] nt= SpliceBubble.intersect(e.getTranscripts(), nEdge.getTranscripts());
+//						if (nt!= null&& nt[2]!= null&& nt[2].length> 0) {
+//							createEdge(e.tail, nEdge.head, nt[2]);
+//							createEdge(nEdge.tail, e.head, nt[2]);
+//						}
+//					}
+//					nullEdges.add(nEdge);
+//				}
+//				nEdge= createEdge(transcripts[j], tss, tes);
+//				if (nEdge!= null) {	// crosslink anchors, for finding pathes
+//					for (int k = 0; k < nullEdges.size(); k++) {
+//						SpliceEdge e= (SpliceEdge) nullEdges.elementAt(k);
+//						Transcript[][] nt= SpliceBubble.intersect(e.getTranscripts(), nEdge.getTranscripts());
+//						if (nt!= null&& nt[2]!= null&& nt[2].length> 0) {
+//							createEdge(e.tail, nEdge.head, nt[2]);
+//							createEdge(nEdge.tail, e.head, nt[2]);
+//						}
+//					}
+//					nullEdges.add(nEdge);
+//				}
 				
 				SpliceNode tmpTss= (SpliceNode) nodeList.get(tss);
 				int k;
@@ -131,9 +158,9 @@ public class SpliceGraph {
 			}
 		}
 			// forbid AS -> acceptor, donor -> AS
-		contractInvalidEdges(tssV);
+		//contractInvalidEdges(tssV);
 			// forbid 2 AS adjacent in same exon 
-		eliminateRedundantTSS(tssV);
+		//eliminateRedundantTSS(tssV);
 	}
 	
 	public void init_stable() {
@@ -409,7 +436,16 @@ public class SpliceGraph {
 			}
 		}
 	}
-	void createEdge(Transcript trans, AbstractSite trimEnd5, AbstractSite trimEnd3) {
+	
+	/**
+	 * returns null edge, when created
+	 * 
+	 * @param trans
+	 * @param trimEnd5
+	 * @param trimEnd3
+	 * @return
+	 */
+	SpliceEdge createEdge(Transcript trans, AbstractSite trimEnd5, AbstractSite trimEnd3) {
 		
 			// make nodes, check before whether sides are valid
 		SpliceNode tssN= new SpliceNode(trimEnd5);
@@ -425,25 +461,27 @@ public class SpliceGraph {
 		SpliceSite[] sc= trans.getSpliceChain();
 		PositionComparator compi= new AbstractSite.PositionComparator();
 		int p5= Arrays.binarySearch(sc, trimEnd5, compi);
-		if (p5< 0) 
+		if (p5< 0) 	// necessary here, cannot connect lateron in contract edges
 			p5= -(p5+1);
-//		else if (sc[p5].isAcceptor())	// do not connect tss -> acceptor
-//			++p5;						// try next ss
+		else if (sc[p5].isAcceptor())	// do not connect tss -> acceptor
+			++p5;						// try next ss
 		int p3= Arrays.binarySearch(sc, trimEnd3, compi);
 		if (p3< 0) 
 			p3= -(p3+1)- 1;// one before for end connections
-//		else if (sc[p3].isDonor())	// do not connect donor -> tes
-//			--p3;				// try prev ss
+		else if (sc[p3].isDonor())	// do not connect donor -> tes
+			--p3;				// try prev ss
 		
 		
+		SpliceEdge nEdge= null;	// null edge
 		if (p5>= 0&& p5< sc.length&& p5<= p3) {
-			createEdge(tssN, getNode(sc[p5]), new Transcript[] {trans});
+			nEdge= createEdge(tssN, getNode(sc[p5]), new Transcript[] {trans});
 		} else if (p3< 0|| p3>= sc.length|| p3< p5) {	// no valid ss for both trimmed ends, connect them (for events with empty sc)
-			createEdge(tssN, tesN, new Transcript[] {trans});
+			nEdge= createEdge(tssN, tesN, new Transcript[] {trans});
 		}
 		if (p3>= 0&& p3< sc.length&& p3>= p5) {
-			createEdge(getNode(sc[p3]), tesN, new Transcript[] {trans});
+			nEdge= createEdge(getNode(sc[p3]), tesN, new Transcript[] {trans});
 		}
+		return nEdge;
 	}
 
 	boolean createEdge_old(Transcript trans, AbstractSite trimEnd, Comparator compi, SpliceNode node, boolean tss) {
@@ -744,10 +782,12 @@ public class SpliceGraph {
 		}
 			// filter redundancy, TODO very inefficient
 		Vector remVector= new Vector(multiVars.size());
-		for (int j = 0; j < multiVars.size(); j++) 
+		for (int j = 0; j < multiVars.size(); j++) {
+			ASMultiVariation var= (ASMultiVariation) multiVars.elementAt(j);
 			for (int x = j+1; x < multiVars.size(); x++) 
 				if (compi.compare(multiVars.elementAt(j), multiVars.elementAt(x))== 0)
 					remVector.add(multiVars.elementAt(x));
+		}
 		multiVars.removeAll(remVector);
 		
 		return (ASMultiVariation[]) gphase.tools.Arrays.toField(multiVars);
@@ -780,20 +820,180 @@ public class SpliceGraph {
 			multiVars.add(new ASMultiVariation(sc, transHash));	// TODO children !!!?!!
 		} else { // generate all k-mers
 				// check for contained subbubbles
-			SpliceBubble[] sbubl= blob.getChildren();
-			Vector transNot= null;
-			if (sbubl!= null&& sbubl.length> 0) {
-				transNot= new Vector(sbubl.length);
-				for (int j = 0; j < sbubl.length; j++) {
-					transNot.add(sbubl[j].getTranscriptPartitions());
-					extractVars(k, sbubl[j], procH, multiVars);
-				}
-			}
+//			SpliceBubble[] sbubl= blob.getChildren();
+//			Vector transNot= null;
+//			if (sbubl!= null&& sbubl.length> 0) {
+//				transNot= new Vector(sbubl.length);
+//				for (int j = 0; j < sbubl.length; j++) {
+//					transNot.add(sbubl[j].getTranscriptPartitions());
+//					extractVars(k, sbubl[j], procH, multiVars);
+//				}
+//			}
+			
+			Vector transNot= new Vector();
+			collectPartitionsRek(blob.getChildren(), transNot, blob);
+
+			if (!(blob.getSource().getSite() instanceof SpliceSite)||
+					!(blob.getSink().getSite() instanceof SpliceSite))
+				removeInvalidRek(blob.getParents(), blob, transNot);
 			
 			reKmer(k, sc, transHash, 0, new int[0], multiVars, transNot);
 		}
 		
 
+	}
+	
+	void removeInvalidRek(SpliceBubble[] parents, SpliceBubble blob, Vector transNot) {
+		
+		boolean srcBlobTSS= !(blob.getSource().getSite() instanceof SpliceSite);
+		boolean snkBlobTES= !(blob.getSink().getSite() instanceof SpliceSite);
+		for (int i = 0; parents!= null&& i < parents.length; i++) {
+			
+			boolean srcTSS= !(parents[i].getSource().getSite() instanceof SpliceSite);
+			boolean snkTES= !(parents[i].getSink().getSite() instanceof SpliceSite);
+			
+			decompose(parents[i], blob, srcBlobTSS, snkBlobTES, true, transNot);
+			
+			removeInvalidRek(parents[i].getParents(), blob, transNot);		// recursion
+		}
+	}
+	
+	void addUniquePart(Vector partV, Transcript[][] part) {
+		
+		boolean add= true;
+		Vector remV= new Vector();
+		for (int i = 0; i < partV.size(); i++) {
+			Transcript[][] t= (Transcript[][]) partV.elementAt(i);
+//			if (SpliceBubble.identical(t, part))
+//				add= false;
+			if (SpliceBubble.contained(part, t))
+				add= false;
+			else if (SpliceBubble.contained(t, part))
+				remV.add(t);
+		}
+		for (int i = 0; i < remV.size(); i++) 
+			partV.remove(remV.elementAt(i));
+		if (add)
+			partV.add(part);
+	}
+	
+	SpliceBubble decompose(SpliceBubble outer, SpliceBubble inner, boolean tss) {
+		
+		SpliceNode[][] partN= outer.getPathes();	// SSs
+		Transcript[][] partT= inner.getTranscriptPartitions();
+		
+			// find part in inner with preceding SSs in outer
+		Vector remV= new Vector(partN.length); 
+		for (int j = 0; j < partT.length; j++) {
+			for (int k = 0; k < partT[j].length; k++) {
+				int x= outer.getPartitionNr(partT[j][k]);
+				int y= 0;
+				if (tss) {
+					for (y = 0; x>= 0&& y < partN[x].length; y++) 
+						if (partN[x][y].getSite().getPos()<= inner.getSource().getSite().getPos())
+							break;
+					if (x>= 0&& y< partN[x].length) {
+						remV.add(partT[j]);
+						break;
+					}
+				} else {	// tes
+					for (y = partN[x].length- 1; y >= 0; --y) {
+						if (partN[x][y].getSite().getPos()>= inner.getSink().getSite().getPos())
+							break;
+					}
+					if (y>= 0) {
+						remV.add(partT[j]);
+						break;
+					}
+				}
+			}
+		}
+		
+			// new inner bubble
+		Vector v= new Vector(partT.length);
+		for (int j = 0; j < partT.length; j++) 
+			v.add(partT[j]);
+		for (int j = 0; j < remV.size(); j++) 
+			v.remove(remV.elementAt(j));
+		partT= (Transcript[][]) gphase.tools.Arrays.toField(v);
+		
+		if (partT<)
+		
+	}
+
+	void decompose(SpliceBubble outer, SpliceBubble inner, boolean tss, boolean tes, boolean parent, Vector transNot) {
+		
+		SpliceNode[][] partN= outer.getPathes();	// SSs
+		Transcript[][] partT= inner.getTranscriptPartitions();
+		
+			// find part in inner with preceding SSs in outer
+		Vector remV= new Vector(partN.length); 
+		for (int j = 0; j < partT.length; j++) {
+			int k;
+			for (k = 0; k < partT[j].length; k++) {
+				int x= outer.getPartitionNr(partT[j][k]);
+				int y= 0;
+
+				if (x< 0) {
+					if (parent) {
+						remV.add(partT[j]);	// as soon as one transcript not found, preserve partition
+						break;
+					}
+					continue;
+				}
+					
+				if (tss) {
+					for (y = 0; y < partN[x].length; y++) 
+						if (partN[x][y].getSite().getPos()<= inner.getSource().getSite().getPos())
+							break;
+					if (y< partN[x].length) { 
+						remV= (Vector) gphase.tools.Arrays.addUnique(remV, partT[j]);
+						if (!parent)
+							break;
+					}
+				} 
+				if (tes) {	// tes
+					for (y = partN[x].length- 1; y >= 0; --y) {
+						if (partN[x][y].getSite().getPos()>= inner.getSink().getSite().getPos())
+							break;
+					}
+					if (y>= 0) {
+						remV= (Vector) gphase.tools.Arrays.addUnique(remV, partT[j]);
+						if (!parent)
+							break;
+					}
+				}
+			}
+		}
+		
+			// new inner bubble
+		Vector v= new Vector(partT.length);
+		for (int j = 0; j < partT.length; j++) 
+			v.add(partT[j]);
+		for (int j = 0; j < remV.size(); j++) 
+			v.remove(remV.elementAt(j));
+		partT= (Transcript[][]) gphase.tools.Arrays.toField(v);
+		
+		if (remV.size()> 0&& partT!= null&& partT.length> 1)
+			addUniquePart(transNot, partT);
+	}
+	
+	void collectPartitionsRek(SpliceBubble[] bubs, Vector transNot, SpliceBubble blob) {
+
+		for (int i = 0; bubs!= null&& i < bubs.length; i++) {
+			boolean inTSS= !(bubs[i].getSource().getSite() instanceof SpliceSite);
+			boolean inTES= !(bubs[i].getSink().getSite() instanceof SpliceSite);
+			Transcript[][] partT= bubs[i].getTranscriptPartitions();
+			if ((!inTSS)&& (!inTES)) {
+				addUniquePart(transNot, partT);
+			} else {
+				SpliceNode[][] partN= blob.getPathes();
+				Vector remV= new Vector(partN.length); 
+				decompose(blob, bubs[i], inTSS, inTES, false, transNot);
+			}
+			
+			collectPartitionsRek(bubs[i].getChildren(), transNot, blob);
+		}
 	}
 	private void reKmer(int maxDepth, SpliceSite[][] sc, HashMap transHash, int minVal, int[] vals, Vector result, Vector transNot) {
 		
@@ -804,13 +1004,14 @@ public class SpliceGraph {
 				ss[i]= sc[vals[i]];
 				hh.put(ss[i], transHash.get(ss[i]));
 			}
-			
+		    
 				// check whether combination is fully contained in any sub-bubble
 			Transcript[][] thisT= (Transcript[][]) gphase.tools.Arrays.toField(hh.values().toArray());
 			for (int i = 0; transNot!= null&& i < transNot.size(); i++) {
 				Transcript[][] subublT= (Transcript[][]) transNot.elementAt(i);
-				if (SpliceBubble.contained(thisT, subublT))
+				if (SpliceBubble.atLeastOneContained(thisT, subublT)) {
 					return;	// skip
+				}
 			}
 			
 				// else add
@@ -833,9 +1034,191 @@ public class SpliceGraph {
 		if (bubbles== null) {
 			//System.err.println(transcripts[0].getTranscriptID());
 			SpliceBubble[] allBubs= findBubbles();
-			bubbles= cascadeBubbles(allBubs);
+			// allBubs= resolveAS(allBubs);		// leider nicht..
+			SpliceBubble[] interBubs= intersectAll(allBubs);
+			bubbles= (SpliceBubble[]) gphase.tools.Arrays.addAll(allBubs, interBubs);
+			bubbles= cascadeBubblesNew(bubbles);
 		}
 		return bubbles;
+	}
+	
+	SpliceBubble[] resolveAS(SpliceBubble[] allBubs) {
+		Vector interBubV= new Vector();
+		for (int i = 0; allBubs!= null&& i < allBubs.length; i++) {
+			for (int j = i+1; j < allBubs.length; j++) {
+				SpliceBubble bub0= allBubs[i];
+				SpliceBubble bub1= allBubs[j];
+				if (bub0== null|| bub1== null)
+					continue;
+				
+				if (!bub0.overlapsGeometrically(bub1))
+					continue;
+					
+					// find intersection nodes, no abs!! src <-> snk on neg strand !
+				SpliceNode iSrc, iSnk;
+				iSrc= (bub0.getSource().getSite().getPos()> bub1.getSource().getSite().getPos())?	
+						bub0.getSource():bub1.getSource();	// maxPos of srcs
+				iSnk= (bub0.getSink().getSite().getPos()< bub1.getSink().getSite().getPos())?
+						bub0.getSink():bub1.getSink();	// minPos of snks
+				
+					// AS at source
+				if ((bub0.getSource()!= bub1.getSource())&& (!(iSrc.getSite() instanceof SpliceSite))) {
+					SpliceBubble[] decBubs;
+					if (iSrc== bub0.getSource()) { 
+						decBubs= decompose(bub1, bub0, true);	// outer, inner
+						bub1= decBubs[0];
+						bub0= decBubs[1];
+					} else {
+						decBubs= decompose(bub0, bub1, true);
+						bub0= decBubs[0];
+						bub1= decBubs[1];
+					}
+				}
+				
+				// AS at source
+				if ((bub0.getSink()!= bub1.getSink())&& (!(iSnk.getSite() instanceof SpliceSite))) {
+					SpliceBubble[] decBubs;
+					if (iSnk== bub0.getSource()) { 
+						decBubs= decompose(bub1, bub0, true);	// outer, inner
+						bub1= decBubs[0];
+						bub0= decBubs[1];
+					} else {
+						decBubs= decompose(bub0, bub1, true);
+						bub0= decBubs[0];
+						bub1= decBubs[1];
+					}
+				}
+				
+					// save, consistent with prior iterations, boundaries only smaller
+				allBubs[i]= bub0;
+				allBubs[j]= bub1;
+			}
+		}
+	}
+	
+	SpliceBubble[] cascadeBubblesNew(SpliceBubble[] allBubs) {
+		if (allBubs== null)
+			return allBubs;
+		Comparator compi= new SpliceBubble.SizePartitionSizeComparator();
+		Arrays.sort(allBubs, compi);
+		for (int i = 0; i < allBubs.length; i++) {
+				// AS bub cannot be child
+//			if ((!(allBubs[i].getSource().getSite() instanceof SpliceSite))||
+//					(!(allBubs[i].getSink().getSite() instanceof SpliceSite)))
+//				continue;
+			for (int j = i+1; j < allBubs.length; j++) {
+				if (!allBubs[j].containsPreservesPartitions(allBubs[i]))
+					continue;
+				
+				//	is lowest point in hierachy?
+				SpliceBubble[] p= allBubs[i].getParents();
+				int x;
+				for (x = 0; p!= null&& x < p.length; x++) {
+					if (allBubs[j].containsPreservesPartitions(p[x]))
+						break;
+				}
+				if (p== null|| x== p.length) {
+					allBubs[i].addParent(allBubs[j]);
+					allBubs[j].addChild(allBubs[i]);
+				}
+			}
+		}
+		return allBubs;
+	}
+	
+	SpliceBubble[] intersectAll(SpliceBubble[] allBubs) {
+		Vector interBubV= new Vector();
+		for (int i = 0; allBubs!= null&& i < allBubs.length; i++) {
+			for (int j = i+1; j < allBubs.length; j++) {
+				SpliceBubble bub0= allBubs[i];
+				SpliceBubble bub1= allBubs[j];
+				
+				if (!bub0.overlapsGeometrically(bub1))
+					continue;
+				
+					// find intersection nodes
+				SpliceNode iSrc, iSnk;
+					// no abs!! src <-> snk on neg strand !
+				iSrc= (bub0.getSource().getSite().getPos()> bub1.getSource().getSite().getPos())?	
+						bub0.getSource():bub1.getSource();	// maxPos of srcs
+				iSnk= (bub0.getSink().getSite().getPos()< bub1.getSink().getSite().getPos())?
+						bub0.getSink():bub1.getSink();	// maxPos of srcs
+						
+					// find intersection partitions
+				Transcript[][] part0= bub0.getTranscriptPartitions();
+				Transcript[][] part1= bub1.getTranscriptPartitions();
+				Vector v= new Vector();	// collects transcripts found in the intersection
+				for (int x = 0; x < part0.length; x++) {
+					for (int y = 0; y < part1.length; y++) {
+						Transcript[][] iPart= SpliceBubble.intersect(part0[x], part1[y]);	// [0] sobre tiny, [1] sobre wide, [2] intersect
+						if (iPart!= null&& iPart[2]!= null) 
+								v.add(iPart[2]);	//v= (Vector) Arrays.addUnique(v, iPart[2]);	// intersection
+					}
+				}
+				
+					// get pathes
+				Transcript[][] iPart= (Transcript[][]) gphase.tools.Arrays.toField(v);
+				if (iPart== null|| iPart.length< 1)
+					continue;
+				SplicePath[] iPathes= new SplicePath[iPart.length];
+				for (int x = 0; x < iPart.length; x++) {
+					iPathes[x]= findPath(iSrc, iSnk, iPart[x]);
+				}
+					// no path
+				if (iPathes== null)
+					continue;
+				int x;
+				for (x = 0; x < iPathes.length; x++) {
+					if (iPathes[x]== null|| iPathes[x].getNodeV().size()== 0)
+						break;
+				}
+				if (x< iPathes.length)
+					continue;
+				
+					// redundancy filter pathes
+				Vector iPathesV= new Vector();
+				for (x = 0; x < iPathes.length; x++) {
+					int y;
+					for (y = x+1; y < iPathes.length; y++) {
+						Transcript[] t1= iPathes[x].getTranscripts();
+						Transcript[] t2= iPathes[y].getTranscripts();
+						if (t1.length!= t2.length)
+							continue;
+						
+						Transcript[][] it= SpliceBubble.intersect(t1, t2);
+						if (it== null||((it[0]== null|| it[0].length== 0)&& (it[1]== null|| it[1].length== 0)))
+							break;	// identical path found
+					}
+					if (y== iPathes.length)
+						iPathesV.add(iPathes[x]);
+				}
+				iPathes= (SplicePath[]) gphase.tools.Arrays.toField(iPathesV);
+				
+					// create bubble
+				if (iPathes.length< 2)
+					continue;
+				SpliceBubble interBub= new SpliceBubble(iSrc, iSnk, iPathes);
+				interBub.setIBubble(true);
+					// redundancy check
+				for (x = 0; x < allBubs.length; x++) {
+					if (allBubs[x].equals(interBub))
+						break;
+				}
+				if (x< allBubs.length)
+					continue;
+				for (x = 0; x < interBubV.size(); x++) 
+					if (interBub.equals(interBubV.elementAt(x))) {
+						interBub= (SpliceBubble) interBubV.elementAt(x);
+						break;
+					}
+				if (x== interBubV.size()) {
+					interBubV.add(interBub);
+				}
+				
+				
+			}	// double loop AllxAll
+		}
+		return (SpliceBubble[]) gphase.tools.Arrays.toField(interBubV);
 	}
 	
 	public SpliceBubble[] getBubbles_stable() {
@@ -919,6 +1302,7 @@ public class SpliceGraph {
 				if (i== j)
 					continue;
 				if (bubs[j].containsGeometrically(bubs[i])) {
+				//if (bubs[j].contains(bubs[i])) {
 					SpliceBubble[] c1= bubs[i].getChildren();	// remove double represented children
 					SpliceBubble[] c2= bubs[j].getChildren();
 					for (int k = 0; c1!= null&& k < c1.length; k++) 
@@ -945,7 +1329,7 @@ public class SpliceGraph {
 			// create intersections
 		Vector interBubV= new Vector();
 		for (int i = 0; i < leafBubs.length; i++) {
-			for (int j = i+1; j < leafBubs.length; j++) {	// try every 2 hierarchies once
+			for (int j = i; j < leafBubs.length; j++) {	// try every 2 hierarchies once
 				intersectBubbles_bottomUp(leafBubs[i], leafBubs[j], interBubV);
 			}
 		}
@@ -1080,15 +1464,36 @@ public class SpliceGraph {
 										// check bubble for minimal boundaries (wrt start)
 									if (partV.size()> 0) {
 										int n;
-										for (n = 0; n < partV.size(); n++) 
-											if (SpliceBubble.contained(pathT, (Transcript[][]) partV.elementAt(n)))
+										for (n = 0; n < partV.size(); n++) {
+											SpliceBubble b= (SpliceBubble) partV.elementAt(n);
+											boolean ctn= SpliceBubble.contained(pathT, b.getTranscriptPartitions());
+											boolean accept= true;
+											if (b.getSource().getSite().getPos()> mKeys[k].getSite().getPos()) {
+												if (ctn)
+													accept= false;
+											} else {	// AS / SS
+												assert (b.getSource().getSite().getPos()== mKeys[k].getSite().getPos());
+												boolean bTSS= !(b.getSource().getSite() instanceof SpliceSite);
+												boolean inTSS= !(mKeys[k].getSite() instanceof SpliceSite);
+												if (inTSS!= bTSS) {	// keep AS and SS, throw away only partial
+													assert(ctn);
+													accept= false;
+												}
+											}
+											if (!accept)
 												break;
+//											if (((b.getSource().getSite().getPos()!= mKeys[k].getSite().getPos())&& ctn)||
+//													((b.getSource().getSite().getPos()== mKeys[k].getSite().getPos())&&
+//													((b.getSource().getSite() instanceof SpliceSite)== (mKeys[k].getSite() instanceof SpliceSite))&&
+//													((b.getSink().getSite() instanceof SpliceSite)== (head.getSite() instanceof SpliceSite))))
+										}
 										if (n< partV.size())
 											continue; // skip bubble (smaller bubble w same transcript set already found)
 									}
 									
-									partV.add(pathT);
 									SpliceBubble blob= new SpliceBubble(mKeys[k], head, pathes);
+									partV.add(blob);
+										
 										// remove partial bubbles
 									boolean add= true;
 									for (int m = 0; m < bubV.size(); m++) {
@@ -1096,17 +1501,24 @@ public class SpliceGraph {
 										if (tmpBub.getSource().getSite().getPos()== blob.getSource().getSite().getPos()&& 
 												tmpBub.getSink().getSite().getPos()== blob.getSink().getSite().getPos()) {
 											if (tmpBub.getSource()== blob.getSource()&& tmpBub.getSink()== blob.getSink()) 
-												bubV.remove(m); 
-											else {	// AbstractSite vc SS
-												if (SpliceBubble.contained(blob.getTranscriptPartitions(), tmpBub.getTranscriptPartitions())) 
-													bubV.remove(m);
-												else
-													add= false;
+												bubV.remove(m--); 
+											else {	// AbstractSite vs SS
+												assert(((tmpBub.getSource().getSite() instanceof SpliceSite)!= (blob.getSource().getSite() instanceof SpliceSite))||
+														((tmpBub.getSink().getSite() instanceof SpliceSite)!= (blob.getSink().getSite() instanceof SpliceSite)));
+//												if (tmpBub.getSource().getSite() instanceof SpliceSite) 
+//													bubV.remove(m--);
+//												else {
+//													assert(blob.getSource().getSite() instanceof SpliceSite);
+//													add= false;
+//												}
+//												if (SpliceBubble.contained(tmpBub.getTranscriptPartitions(), blob.getTranscriptPartitions())) 
+//													bubV.remove(m);
+//												else
+//													add= false;
 											}
-											break;
 										}
 									}
-									if (add)
+									if (add) 
 										bubV.add(blob);
 //								}
 							}								
@@ -1229,6 +1641,9 @@ public class SpliceGraph {
 
 	public SplicePath findPath(SpliceNode pSrc, SpliceNode pSnk, Transcript[] pPart) {
 		
+		if (pSrc.getSite().getPos()== pSnk.getSite().getPos())
+			return null;
+		
 		SpliceNode tmpNode= pSrc;
 		SplicePath path= null;
 		while (tmpNode!= pSnk) {
@@ -1241,6 +1656,11 @@ public class SpliceGraph {
 			SpliceEdge tmpEdge= null;
 			int i;
 			SpliceEdge[] oldVecData= (SpliceEdge[]) gphase.tools.Arrays.toField(edgeV);
+			if (oldVecData== null) {
+				assert ((!(pSrc.getSite() instanceof SpliceSite))&& (!(pSnk.getSite() instanceof SpliceSite)));	
+					// can happen for not crosslinked AS, means that path splits up between ts of part
+				return null;
+			}
 			for (i = 0; i < oldVecData.length; i++) {
 				tmpEdge= oldVecData[i];
 				if (!(tmpEdge.getHead().getSite() instanceof SpliceSite)) {
@@ -1251,9 +1671,11 @@ public class SpliceGraph {
 				}
 			}
 			if (i== oldVecData.length) {	// no abstract site as sink found
-				if (edgeV.size()!= 1)
-					System.err.println("Assertion failed: ambigous path");
-				else
+				if (edgeV.size()!= 1) {
+					assert ((!(pSrc.getSite() instanceof SpliceSite))&& (!(pSnk.getSite() instanceof SpliceSite))&& pPart.length== 1);	
+						// can happen for not crosslinked AS, see init()
+					return null; //System.err.println("Assertion failed: ambigous path");
+				} else
 					tmpEdge= (SpliceEdge) edgeV.elementAt(0);
 			}
 			
@@ -1286,9 +1708,10 @@ public class SpliceGraph {
 		
 			// find intersection nodes
 		SpliceNode iSrc, iSnk;
-		iSrc= (Math.abs(bub0.getSource().getSite().getPos())> Math.abs(bub1.getSource().getSite().getPos()))?
+			// no abs!! src <-> snk on neg strand !
+		iSrc= (bub0.getSource().getSite().getPos()> bub1.getSource().getSite().getPos())?	
 				bub0.getSource():bub1.getSource();	// maxPos of srcs
-		iSnk= (Math.abs(bub0.getSink().getSite().getPos())< Math.abs(bub1.getSink().getSite().getPos()))?
+		iSnk= (bub0.getSink().getSite().getPos()< bub1.getSink().getSite().getPos())?
 				bub0.getSink():bub1.getSink();	// maxPos of srcs
 				
 				
@@ -1313,8 +1736,12 @@ public class SpliceGraph {
 			iPathes[i]= findPath(iSrc, iSnk, iPart[i]);
 		}
 			// no path
-		if (iPathes== null|| iPathes[0]== null|| iPathes[0].getNodeV().size()== 0)
+		if (iPathes== null)
 			return false;
+		for (int i = 0; i < iPathes.length; i++) {
+			if (iPathes[i]== null|| iPathes[i].getNodeV().size()== 0)
+				return false;
+		}
 			// redundancy filter pathes
 		Vector iPathesV= new Vector();
 		for (int i = 0; i < iPathes.length; i++) {
@@ -1347,6 +1774,9 @@ public class SpliceGraph {
 			chkBubV.add(interBub);
 			return false;
 		}
+		
+//		bub0.addChild(interBub);
+//		bub1.addChild(interBub);
 		
 			// insert into hierarchy
 //		if (iPathes.length> 0) {
@@ -1387,6 +1817,7 @@ public class SpliceGraph {
 //			}
 //		} else 
 //			return false;
+		
 		
 		return true;
 	}

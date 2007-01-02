@@ -2699,10 +2699,22 @@ public class ASVariation implements Serializable {
 	}
 	
 	public DirectedRegion[] getVariableRegion() {
+		return getVariableRegion("BC");
+	}
+	
+	public DirectedRegion[] getVariableRegion1() {
+		return getVariableRegion("B");
+	}
+	
+	public DirectedRegion[] getVariableRegion2() {
+		return getVariableRegion("C");
+	}
+	
+	public DirectedRegion[] getVariableRegion(String id) {
 		String bit= toBitString();
 		Vector regV= new Vector();
 		for (int i = 0; i < bit.length(); i++) {
-			if (bit.charAt(i)== 'B'|| bit.charAt(i)== 'C') {
+			if (id.contains(Character.toString(bit.charAt(i)))) {
 					// create variable area
 				SpliceSite[][] ss= getSpliceSites(i-1, i+1);
 				int min= 0, max= 0;
