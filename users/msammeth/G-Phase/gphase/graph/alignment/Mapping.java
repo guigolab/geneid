@@ -1,6 +1,6 @@
 package gphase.graph.alignment;
 
-import gphase.graph.SpliceBubble_last;
+import gphase.graph.SpliceBubble;
 import gphase.graph.SpliceEdge;
 import gphase.graph.SpliceGraph;
 import gphase.graph.SpliceNode;
@@ -57,20 +57,20 @@ public class Mapping {
 			maxI= nI;
 			maxRel= 1;
 			if (nJ== null&& nI.getOutDegree()== 0)
-				cost+= getCost_pathes(nI, nJ);
+				cost+= getCost_edge(nI, nJ); // getCost_pathes(nI, nJ);
 		}
 		if (nJ!= null) {
 			maxJ= nJ;
 			maxRel= 2;
 			if (nI== null&& nJ.getOutDegree()== 0)
-				cost+= getCost_pathes(nI, nJ);
+				cost+= getCost_edge(nI, nJ); // getCost_pathes(nI, nJ);
 		}
 		
 		if (nI!= null&& nJ!= null) {
 			mapTableI.put(nI, nJ);
 			mapTableJ.put(nJ, nI);
 			maxRel= 3;
-			cost+= getCost_pathes(nI, nJ);
+			cost+= getCost_edge(nI, nJ); // getCost_pathes(nI, nJ);
 		}
 		
 	}
@@ -182,7 +182,7 @@ public class Mapping {
 			for (int j = 0; j < pathes.length; j++) {
 				if (i== j)
 					continue;
-				if (SpliceBubble_last.intersects(pathes[i].getTranscripts(), pathes[j].getTranscripts())) {
+				if (SpliceBubble.intersects(pathes[i].getTranscripts(), pathes[j].getTranscripts())) {
 					if (pathes[i].edgeLength()> pathes[j].edgeLength())
 						remV.add(pathes[i]);
 					else
