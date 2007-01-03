@@ -5,7 +5,7 @@ import java.util.Comparator;
 import java.util.PriorityQueue;
 import java.util.Vector;
 
-import prefuse.data.Graph;
+// import prefuse.data.Graph;
 
 import gphase.graph.SpliceGraph;
 import gphase.graph.SpliceNode;
@@ -64,7 +64,7 @@ public class GraphAligner {
 		for (int i = 0; i < maps.length; i++) {
 			System.out.println(maps[i]);
 		}
-		GraphView.demo(ge1.getGeneID(), new PFGraph(g1), ge2.getGeneID(), new PFGraph(g2));
+		//GraphView.demo(ge1.getGeneID(), new PFGraph(g1), ge2.getGeneID(), new PFGraph(g2));
 	}
 	
 	SpliceGraph g1, g2;
@@ -145,7 +145,7 @@ public class GraphAligner {
 			if ((nextI+ 1>= listI.length)&& (nextJ+ 1>= listJ.length)) {
 				if (map.getCost()<= ulCost) {
 					if (map.getCost()< ulCost) {
-						if (ulCost!= Integer.MAX_VALUE)
+						if (ulCost!= Double.MAX_VALUE)
 							System.err.println("assertion failed: ulcost gets cheaper!");
 						ulCost= map.getCost();
 					}
