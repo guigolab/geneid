@@ -108,6 +108,14 @@ public class SpliceNode {
 		}
 	}
 	
+	public boolean isTSS() {
+		return (getInDegree()== 0);
+	}
+	
+	public boolean isTES() {
+		return (getOutDegree()== 0);
+	}
+	
 	public void addOutEdge(SpliceEdge newOutEdge) {
 		outEdges= addEdge(outEdges, newOutEdge);
 	}

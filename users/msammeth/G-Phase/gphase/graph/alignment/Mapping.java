@@ -51,27 +51,27 @@ public class Mapping {
 		return map;
 	}
 	
+	public double getCost(SpliceNode nI, SpliceNode nJ) {
+		return getCost_exonicLenPiece(nI, nJ);
+	}
+	
 	public void addMapping(SpliceNode nI, SpliceNode nJ) {
 		
+		cost+= getCost(nI, nJ); // getCost_pathes(nI, nJ);
 		if (nI!= null) {
 			maxI= nI;
 			maxRel= 1;
-			if (nJ== null&& nI.getOutDegree()== 0)
-				cost+= getCost_edge(nI, nJ); // getCost_pathes(nI, nJ);
-		}
+		} 
 		if (nJ!= null) {
 			maxJ= nJ;
 			maxRel= 2;
-			if (nI== null&& nJ.getOutDegree()== 0)
-				cost+= getCost_edge(nI, nJ); // getCost_pathes(nI, nJ);
 		}
-		
 		if (nI!= null&& nJ!= null) {
 			mapTableI.put(nI, nJ);
 			mapTableJ.put(nJ, nI);
 			maxRel= 3;
-			cost+= getCost_edge(nI, nJ); // getCost_pathes(nI, nJ);
-		}
+		} 
+		
 		
 	}
 	
@@ -115,6 +115,244 @@ public class Mapping {
 		}
 		
 		return ctr;
+	}
+
+	int getCost_exonicEdge(SpliceNode nI, SpliceNode nJ) {
+
+		if ((nI!= null&& nI.isAcceptor())|| (nJ!= null&& nJ.isAcceptor()))
+			return 0;	// do not penalize intronic edges
+		
+		if (nI== null) 
+			return nJ.getInDegree();
+		if (nJ== null)
+			return nI.getInDegree();
+		
+			// matched node, compare hits of (mis-)aligned splices
+		int ctr= 0;
+		SpliceEdge[]  edgesI= nI.getInEdges();
+		SpliceEdge[]  edgesJ= nJ.getInEdges();
+		
+		for (int i = 0; edgesI!= null&& i < edgesI.length; i++) {	// check predecessors of i
+			Object o= mapTableI.get(edgesI[i].getTail());
+			if (o== null) {
+				++ctr;
+				//continue;
+			} else {
+				int j;
+				for (j = 0; j < edgesJ.length; j++) 
+					if (edgesJ[j].getTail()== o)	// aligned with a predecesseor of j
+						break;
+				if (j>= edgesJ.length)
+					++ctr;
+			}
+		}
+		for (int i = 0; edgesJ!= null&& i < edgesJ.length; i++) {	// check predecessors of j
+			Object o= mapTableJ.get(edgesJ[i].getTail());
+			if (o== null) {
+				++ctr;
+				//continue;
+			} else {
+				int j;
+				for (j = 0; j < edgesI.length; j++) 
+					if (edgesI[j].getTail()== o)	// aligned with a predecesseor of i
+						break;
+				if (j>= edgesI.length)
+					++ctr;
+			}
+		}
+		
+		return ctr;
+	}
+
+	double getCost_exonicLen_edges(SpliceNode nI, SpliceNode nJ) {
+		double d1= getCost_exonicLen(nI, nJ);
+		int i2= getCost_exonicEdge(nI, nJ);
+		return (d1+ i2);
+	}
+	
+	double getCost_exonicLen(SpliceNode nI, SpliceNode nJ) {
+		
+		assert(!(nI== null&& nJ== null));
+		if ((nI== null&& nJ.getOutDegree()> 0)|| (nJ== null&& nI.getOutDegree()> 0)) {	// end node ??
+			return 0d; 	// not aligned node, no penalty
+		}
+		
+			// get new pathes (since last aligned node or root)
+		SplicePath[] pathesI= null, pathesJ= null;
+		if (nI!= null) {
+			SpliceNode[] src= (SpliceNode[]) gphase.tools.Arrays.toField(mapTableI.keySet());
+			SpliceNode[] roots= g1.getRoots(); 
+			pathesI= fpath(roots, src, nI);
+		}		
+		
+		if (nJ!= null) {
+			SpliceNode[] src= (SpliceNode[]) gphase.tools.Arrays.toField(mapTableJ.keySet());
+			SpliceNode[] roots= g2.getRoots(); 
+			pathesJ= fpath(roots, src, nJ);
+		}
+		
+			// both no valid pathes (eg, src of both graphs)
+		if ((pathesI== null|| pathesI.length== 0)&& (pathesJ== null|| pathesJ.length== 0))
+			return 0d;	// no penalty
+	
+			// only one with valid pathes
+		if (pathesI== null|| pathesI.length== 0) 
+			return (double) pathesJ.length;
+		if (pathesJ== null|| pathesJ.length== 0) 
+			return (double) pathesI.length;
+		
+			// two with valid pathes, match table
+		double[][] exLenDiff= new double[pathesI.length][pathesJ.length];
+		for (int i = 0; i < pathesI.length; i++) {
+			for (int j = 0; j < pathesJ.length; j++) {
+				int vw= Math.abs(pathesI[i].getExonicLength());
+				int tu= Math.abs(pathesJ[j].getExonicLength());
+				if (vw> 0&& tu> 0)
+					exLenDiff[i][j]= 1d-Math.min(((double) tu/ vw), ((double) vw/ tu));
+				else if (vw== 0&& tu== 0)
+					exLenDiff[i][j]= 0d;
+				else {
+					assert (vw== 0^ tu== 0);
+					exLenDiff[i][j]= 1d;
+				}
+			}
+		}
+		
+			// add up minima
+		double sum= 0d;
+		for (int i = 0; i < exLenDiff.length; i++) {
+			double min= 2d;
+			for (int j = 0; j < exLenDiff[i].length; j++) 
+				if (exLenDiff[i][j]< min)
+					min= exLenDiff[i][j];
+			sum+= min/2;
+		}
+		for (int i = 0; i < exLenDiff[0].length; i++) {
+			double min= 2d;
+			for (int j = 0; j < exLenDiff.length; j++) 
+				if (exLenDiff[j][i]< min)
+					min= exLenDiff[j][i];
+			sum+= min/2;
+		}
+		
+		return sum;
+	}
+
+	double getCost_exonicLenPiece(SpliceNode nI, SpliceNode nJ) {
+		
+		assert(!(nI== null&& nJ== null));
+		if ((nI== null&& nJ.getOutDegree()> 0)|| (nJ== null&& nI.getOutDegree()> 0)) {	// end node ??
+			return 0d; 	// not aligned node, no penalty
+		}
+		
+			// get new pathes (since last aligned node or root)
+		SplicePath[] pathesI= null, pathesJ= null;
+		if (nI!= null) {
+			SpliceNode[] src= (SpliceNode[]) gphase.tools.Arrays.toField(mapTableI.keySet());
+			SpliceNode[] roots= g1.getRoots(); 
+			pathesI= fpath(roots, src, nI);
+		}		
+		
+		if (nJ!= null) {
+			SpliceNode[] src= (SpliceNode[]) gphase.tools.Arrays.toField(mapTableJ.keySet());
+			SpliceNode[] roots= g2.getRoots(); 
+			pathesJ= fpath(roots, src, nJ);
+		}
+		
+			// both no valid pathes (eg, src of both graphs)
+		if ((pathesI== null|| pathesI.length== 0)&& (pathesJ== null|| pathesJ.length== 0))
+			return 0d;	// no penalty
+
+			// only one with valid pathes
+		if (pathesI== null|| pathesI.length== 0) 
+			return (double) pathesJ.length* 2;	// 2 for exLen && piece
+		if (pathesJ== null|| pathesJ.length== 0) 
+			return (double) pathesI.length* 2;
+		
+			// two with valid pathes, match table
+		double[][] exLenDiff= new double[pathesI.length][pathesJ.length];
+		for (int i = 0; i < pathesI.length; i++) {
+			for (int j = 0; j < pathesJ.length; j++) {
+				int vw= pathesI[i].getExonicLength();
+				int tu= pathesJ[j].getExonicLength();
+				if (vw> 0&& tu> 0)
+					exLenDiff[i][j]= 1d-Math.min(((double) tu/ vw), ((double) vw/ tu));
+				else if (vw== 0&& tu== 0)
+					exLenDiff[i][j]= 0d;
+				else {
+					assert (vw== 0^ tu== 0);
+					exLenDiff[i][j]= 1d;
+				}
+				
+				int exPiecVW= pathesI[i].getExonicPieces(); 
+				int exPiecTU= pathesJ[j].getExonicPieces();
+				if (exPiecVW> 0&& exPiecTU> 0)
+					exLenDiff[i][j]+= 1d-Math.min(((double) exPiecTU/ exPiecVW), ((double) exPiecVW/ exPiecTU));
+				else if (exPiecVW== 0&& exPiecTU== 0)
+					exLenDiff[i][j]= 0d;
+				else {
+					assert (exPiecVW== 0^ exPiecTU== 0);
+					exLenDiff[i][j]= 1d;	
+				}
+			}
+		}
+		
+			// add up minima
+		double sum= 0d;
+		for (int i = 0; i < exLenDiff.length; i++) {
+			double min= 2d;
+			for (int j = 0; j < exLenDiff[i].length; j++) 
+				if (exLenDiff[i][j]< min)
+					min= exLenDiff[i][j];
+			sum+= min/2;
+		}
+		for (int i = 0; i < exLenDiff[0].length; i++) {
+			double min= 2d;
+			for (int j = 0; j < exLenDiff.length; j++) 
+				if (exLenDiff[j][i]< min)
+					min= exLenDiff[j][i];
+			sum+= min/2;
+		}
+		
+		return sum;
+	}
+	
+	SplicePath[] fpath(SpliceNode[] roots, SpliceNode[] src, SpliceNode n) {
+		
+		SpliceEdge[] edge= n.getInEdges();
+		if (edge== null)
+			return null;
+		
+		if (src!= null)
+			Arrays.sort(src, new SpliceNode.PositionComparator());
+		Vector v= new Vector();
+		for (int i = 0; edge!= null&& i < edge.length; i++) {
+			SplicePath[] pathes= null;
+			if (src!= null)
+				for (int j = src.length- 1; j >= 0; --j) {
+					pathes= g1.findPathes(src[j], edge[i]);
+					if (pathes!= null)
+						break;
+				}
+			if (pathes!= null) {
+				for (int j = 0; j < pathes.length; j++) 
+					v.add(pathes[j]);
+			} else {	// no aligned src found for edge, get from roots || src== null
+				Vector vv= new Vector();
+				for (int k = 0; k < roots.length; k++) {
+					pathes= g1.findPathes(roots[k], edge[i]);
+					if (pathes!= null)
+						for (int j = 0; j < pathes.length; j++) 
+							vv.add(pathes[j]);
+				}
+				pathes= (SplicePath[]) gphase.tools.Arrays.toField(vv);
+				assert(pathes!= null);
+				for (int j = 0; j < pathes.length; j++) 
+					v.add(pathes[j]);
+			}
+		}
+
+		return (SplicePath[]) gphase.tools.Arrays.toField(v);
 	}
 
 	int getCost_weight(SpliceNode nI, SpliceNode nJ) {		
@@ -209,17 +447,17 @@ public class Mapping {
 		SpliceEdge[] edges= path1.getEdges();
 		int exLen1= 0;
 		int inNb1= 0;
-		for (int i = 0; i < edges.length; i++) {
+		for (int i = 0; edges!= null&& i < edges.length; i++) {
 			if (edges[i].isExonic())
 				exLen1+= edges[i].getLength();
 			else
 				++inNb1;
 		}
 		
-		edges= path1.getEdges();
+		edges= path2.getEdges();
 		int exLen2= 0;
 		int inNb2= 0;
-		for (int i = 0; i < edges.length; i++) {
+		for (int i = 0; edges!= null&& i < edges.length; i++) {
 			if (edges[i].isExonic())
 				exLen2+= edges[i].getLength();
 			else

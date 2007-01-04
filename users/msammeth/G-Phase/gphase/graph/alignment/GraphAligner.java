@@ -100,7 +100,11 @@ public class GraphAligner {
 		Mapping map= (Mapping) q.poll();
 		double ulCost= Double.MAX_VALUE;
 		Vector optMaps= new Vector();
+		int maxAli= 5;
 		while (map!= null&& map.getCost()<= ulCost) {
+			
+			if (maxAli> 0&& optMaps.size()== maxAli)
+				break;
 			
 				// generate possibilities for next i, next j
 			int nextI= -1, nextJ= -1;
@@ -144,7 +148,7 @@ public class GraphAligner {
 				// update cheapest path
 			if ((nextI+ 1>= listI.length)&& (nextJ+ 1>= listJ.length)) {
 				if (map.getCost()<= ulCost) {
-					if (map.getCost()< ulCost) {
+					if (maxAli< 0&& map.getCost()< ulCost) {
 						if (ulCost!= Double.MAX_VALUE)
 							System.err.println("assertion failed: ulcost gets cheaper!");
 						ulCost= map.getCost();
@@ -162,10 +166,12 @@ public class GraphAligner {
 	static boolean isAligneable(SpliceNode s1, SpliceNode s2) {
 		
 		if (s1== null|| s2== null)
-			return true;
+			return true;		
 		
-		if ((s1.isDonor()== s2.isDonor())&&
-				(s1.isAcceptor()== s2.isAcceptor()))
+		if ((s1.isDonor()== true&& s2.isDonor()== true)||
+				(s1.isAcceptor()== true&&  s2.isAcceptor()== true)||
+				(s1.isTSS()== true&&  s2.isTSS()== true)||
+				(s1.isTES()== true&&  s2.isTES()== true))
 			return true;
 		return false;
 	}

@@ -19,6 +19,30 @@ public class SplicePath {
 		edgeV= new Vector();
 	}
 	
+	
+	public int getExonicLength() {
+		int len= 0;
+		for (int i = 0; i < edgeV.size(); i++) {
+			SpliceEdge e= (SpliceEdge) edgeV.elementAt(i);
+			if (e.isExonic())
+				len+= e.getLength();
+		}
+		
+		return len;
+	}
+
+
+	public int getExonicPieces() {
+		int sum= 0;
+		for (int i = 0; i < edgeV.size(); i++) {
+			SpliceEdge e= (SpliceEdge) edgeV.elementAt(i);
+			if (e.isExonic())
+				++sum;
+		}
+		
+		return sum;
+	}
+	
 	/**
 	 * creates new path from current one
 	 * @param newEdge
@@ -85,8 +109,9 @@ public class SplicePath {
 	public SplicePath exendPath(SpliceEdge newEdge) {
 		
 			// TODO: ??? chk
-		if (!(newEdge.getTail().getSite() instanceof SpliceSite))	// forbid ...->AS->... transitions
-			return null;
+		// now excluded in graph
+//		if (!(newEdge.getTail().getSite() instanceof SpliceSite))	// forbid ...->AS->... transitions
+//			return null;
 		
 			// update minFlow, intersect edges
 		Transcript[] newTrans= newEdge.getTranscripts();

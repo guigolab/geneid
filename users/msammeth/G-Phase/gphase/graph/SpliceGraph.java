@@ -1641,7 +1641,7 @@ public class SpliceGraph {
 
 	public SplicePath findPath(SpliceNode pSrc, SpliceNode pSnk, Transcript[] pPart) {
 		
-		if (pSrc.getSite().getPos()== pSnk.getSite().getPos())
+		if (pSrc.getSite().getPos()== pSnk.getSite().getPos())	// object id ?!, because of AS ?!!			
 			return null;
 		
 		SpliceNode tmpNode= pSrc;
@@ -1690,6 +1690,34 @@ public class SpliceGraph {
 			return path;
 		return null;
 	}
+
+	public SplicePath[] findPathes(SpliceNode pSrc, SpliceEdge eSnk) {
+		Vector v= new Vector();
+		findPathesRec(pSrc, eSnk, null, v);
+		
+		if (v.size()== 0)
+			return null;
+		return (SplicePath[]) gphase.tools.Arrays.toField(v);
+	}
+	
+	void findPathesRec(SpliceNode node, SpliceEdge eSnk, SplicePath p, Vector v) {
+		
+		SpliceEdge[] edges= node.getOutEdges();
+		for (int i = 0; edges!= null&& i < edges.length; i++) {
+			SplicePath newP= null;
+			if (p== null) 
+				newP= new SplicePath(edges[i]);
+			else 
+				newP= p.exendPath(edges[i]);
+			if (edges[i]== eSnk) {
+				if (newP.getTranscripts().length> 0)
+					v.add(newP);
+				return;
+			} else 
+				findPathesRec(edges[i].getHead(), eSnk, newP, v);
+		}
+	}
+	
 	
 	public boolean intersect(SpliceBubble bub0, SpliceBubble bub1, Vector chkBubV) {
 		
