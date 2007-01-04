@@ -15,7 +15,7 @@ import java.io.Serializable;
  */
 public class DefaultRegion extends AbstractRegion implements Region {
 
-
+	static long serialVersionUID= 6558964245030911377l;
 	String chromosome = null;
 	Species species = null;
 	

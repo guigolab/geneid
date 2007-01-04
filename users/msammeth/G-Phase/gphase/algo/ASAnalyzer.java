@@ -4183,7 +4183,7 @@ public class ASAnalyzer {
 		
 		g= getGraph(INPUT_ENCODE);
 		//g.filterNonCodingTranscripts();
-		g.filterNMDTranscripts();
+		//g.filterNMDTranscripts();
 		//g.filterCodingTranscripts(); 
 		//test04a_determineVarDegree(g, System.out);
 		//test04_checkOutsideEncode(g, System.out);

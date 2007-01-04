@@ -7,18 +7,45 @@ import java.util.Vector;
 
 // import prefuse.data.Graph;
 
+import gphase.algo.ASAnalyzer;
+import gphase.db.EnsemblDBAdaptor;
 import gphase.graph.SpliceGraph;
 import gphase.graph.SpliceNode;
 import gphase.graph.gui.GraphView;
 import gphase.graph.gui.PFGraph;
 import gphase.model.Exon;
 import gphase.model.Gene;
+import gphase.model.Graph;
+import gphase.model.GraphHandler;
 import gphase.model.Species;
 import gphase.model.Transcript;
 
 public class GraphAligner {
 
+	public static void alignENSEMBLHomologGenes() {
+		EnsemblDBAdaptor adaptor= new EnsemblDBAdaptor();
+		Graph g= adaptor.getGraphAllHomologs(EnsemblDBAdaptor.SPECIES_ISMB);
+		GraphHandler.writeOut(g, GraphHandler.getGraphAbsPath(g.getSpecies())+"_download");
+		g.filterNonsense();
+		GraphHandler.writeOut(g, GraphHandler.getGraphAbsPath(g.getSpecies())+"_filt-nons");
+		g.filterNonCodingTranscripts();
+		GraphHandler.writeOut(g, GraphHandler.getGraphAbsPath(g.getSpecies())+"_filt-nons_filt-nc");
+
+		EnsemblDBAdaptor.removeNotAllHomologGenes(g);
+		GraphHandler.writeOut(g, GraphHandler.getGraphAbsPath(g.getSpecies())+"_filt-nons_filt-nc_remAll");
+		
+		Gene[] ge= g.getGenes();
+		System.out.println("Homolog gene nb: "+ge.length);
+		for (int i = 0; i < ge.length; i++) {
+			System.out.println(ge[i].getGeneID());
+		}
+	}
+	
 	public static void main(String[] args) {
+		alignENSEMBLHomologGenes();
+	}
+	
+	public static void test() {
 		Species spec= new Species("human");
 		Gene ge1= new Gene(spec, "ge1");
 		ge1.setChromosome("1");

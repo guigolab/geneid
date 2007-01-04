@@ -2115,7 +2115,7 @@ public class EnsemblDBAdaptor {
 
 	}
 	
-	static void removeNotAllHomologGenes(Graph g) {
+	public static void removeNotAllHomologGenes(Graph g) {
 		Vector v= new Vector();
 		for (int x = 0; x < g.getSpecies().length; x++) {
 			Gene[] ge= g.getSpecies()[x].getGenes();
