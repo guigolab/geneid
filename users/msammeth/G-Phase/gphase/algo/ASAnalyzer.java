@@ -4154,6 +4154,194 @@ public class ASAnalyzer {
 	}
 	
 	public static void main(String[] args) {
+	
+			//getSpliceSites(g, "sylvain_spicesites.gff", "gencode");
+			//output5UTRExonFragments();
+			//outputSpliceSites();
+			//output5UTRIntrons();
+			//outputCDSIntrons();
+	//		if (1== 1)
+	//			System.exit(0);
+			
+			
+			Graph g= null;
+			//g.filterNMDTranscripts();
+			//test02_ss_statistics();
+			//test04_determineVariations_nmd,();
+			//test02_ss_statistics();
+			//test01_clusters_coverage_as();
+			//mvar_output();
+			//test05_GO_splice_utr();
+			//test02_UTRvsCDS_go();
+			//test04_determineVariations_nmd();
+			//test02_ss_statistics();
+			//test05_GO_splice_utr_sigTest();
+			//test05_ASlengthExchange(INPUT_ENCODE);
+			test06_findEvents();
+			if (1== 1)
+				System.exit(0);
+			
+			
+			g= getGraph(INPUT_ENCODE);
+			//g.filterNonCodingTranscripts();
+			//g.filterNMDTranscripts();
+			//g.filterCodingTranscripts(); 
+			//test04a_determineVarDegree(g, System.out);
+			//test04_checkOutsideEncode(g, System.out);
+	
+	//		ASMultiVariation[][] vars= g.getASMultiVariations(-1);	
+	//		ASMultiVariation[][] vars= g.getASMultiVariations(2);	// 2
+			ASMultiVariation[][] vars= g.getASMultiVariations(2);	// 2
+			vars= (ASMultiVariation[][]) Arrays.sort2DFieldRev(vars);
+			for (int i = 0; i < vars.length; i++) {
+				System.out.println(vars[i].length+ "\t"+ vars[i][0]);
+	//			if (vars[i][0].toString().startsWith("(1-2^ // 3-4^)")||
+	//					vars[i][0].toString().startsWith("(1-2^3-4^ // 1-2^ // 3-4^)")||
+	//					vars[i][0].toString().startsWith("(1-2^ // 3-4^ // )")) {
+	//			if ((vars[i][0].toString().startsWith("(1-2^3-4^ // )"))||
+	//					(vars[i][0].toString().startsWith("(1- // 2- // 3-)"))){
+	//				outputMultiVars(vars[i], System.out);
+				String[] s= new String[vars[i].length];
+				if (vars[i][0].toString().equals("(1^4- // 2^3-)")) {
+					for (int j = 0; j < vars[i].length; j++) {
+						s[j]= "";
+						s[j]+= ("\t"+ vars[i][j].getGene().getChromosome()+" ");
+						Transcript[][] t= vars[i][j].getTranscriptsFromHash(); 
+						s[j]+= (t[0][0]+" "+t[1][0]+" ");
+						SpliceSite[] sc1= vars[i][j].getSpliceChains()[0];
+						SpliceSite[] sc2= vars[i][j].getSpliceChains()[1];
+						SpliceSite[][] sc= new SpliceSite[][] {sc1, sc2};
+						if (sc2.length> sc1.length)
+							Arrays.swap(sc);
+						for (int k = 0; k < sc.length; k++) {
+							for (int m = 0; m < sc[k].length; m++) 
+								s[j]+= (sc[k][m]+ " ");
+							s[j]+= (";// ");
+						}
+						//System.out.println();
+					}
+					java.util.Arrays.sort(s);
+					for (int j = 0; j < s.length; j++) {
+						System.out.println(s[j]);
+					}
+				}
+			}
+			
+			ASVariation[][] vars2= g.getASVariations(ASMultiVariation.FILTER_STRUCTURALLY);
+			vars2= (ASVariation[][]) Arrays.sort2DFieldRev(vars2);
+			for (int i = 0; i < vars2.length; i++) {
+				System.out.println(vars2[i].length+ "\t"+ vars2[i][0]);
+				String[] s= new String[vars2[i].length];
+				if (vars2[i][0].toString().equals("(1^4= // 2^3=)")) {
+					for (int j = 0; j < vars2[i].length; j++) {
+						s[j]= "";
+						s[j]+= ("\t"+ vars2[i][j].getGene().getChromosome()+" ");
+						s[j]+= (vars2[i][j].getTranscript1()+" "+vars2[i][j].getTranscript2()+" ");
+						SpliceSite[] sc1= vars2[i][j].getSpliceChain1();
+						SpliceSite[] sc2= vars2[i][j].getSpliceChain2();
+						SpliceSite[][] sc= new SpliceSite[][] {sc1, sc2};
+						if (sc2.length> sc1.length)
+							Arrays.swap(sc);
+						for (int k = 0; k < sc.length; k++) {
+							for (int m = 0; m < sc[k].length; m++) 
+								s[j]+=(sc[k][m]+ " ");
+							s[j]+= ";// ";
+						}
+						//System.out.println();
+					}
+					java.util.Arrays.sort(s);
+					for (int j = 0; j < s.length; j++) {
+						System.out.println(s[j]);
+					}
+				}
+			}
+			
+			
+			
+	//		ASVariation[][] vars= g.getASVariations(ASMultiVariation.FILTER_HIERARCHICALLY);
+	//		for (int i = 0; i < vars.length; i++) {
+	//			if (vars[i][0].toString().equals("(2^ // 1^3=4^)"))
+	//				for (int j = 0; j < vars[i].length; j++) {
+	//					System.out.println(vars[i][j].getGene().getGeneID()+": "+ 
+	//							vars[i][j].getTranscript1().getTranscriptID()+
+	//							vars[i][j].getTranscript2().getTranscriptID());
+	//				}
+	//		}
+			
+			//		filterEvents(new File("human_graph_as_variations_non-redundant.log"));
+	
+			//outputCheckFile();
+			//outputCodingRegions();
+			//output3UTR();
+			
+	//		EnsemblDBAdaptor adaptor= new EnsemblDBAdaptor();
+	//		//Graph g= null;
+	//		Graph g= adaptor.getGraphAllGenes(new Species("chimp"));
+	//		
+	//		lengthPlot(g);
+	//		//determineVariations(g);
+	//		if (1== 1)
+	//			System.exit(0);
+	//		
+	//		determineVariations(g);
+	//		
+	//		ASVariation[] var= findClass(g, "(1^3= // 2^4=)");
+	//
+	//		for (int i = 0;  var!= null&& i < var.length; i++) {
+	//			Gene ge= var[i].getGene();
+	//			SpliceOSigner painter= new SpliceOSigner(ge);
+	//			JFrame frame= new JFrame();
+	//			frame.getContentPane().add(painter);
+	//			frame.pack();
+	//			frame.setVisible(true);
+	//		}
+	//		
+	//		if (1== 1)
+	//			System.exit(0);
+	//		
+	//		ASVariation[][][] clazzes= g.getASEvents();
+	//		try {
+	//			Paparazzi.writeGIF(null, new File("test.gif"));
+	//		} catch (IOException e) {
+	//			// TODO Auto-generated catch block
+	//			e.printStackTrace();
+	//		}
+	//		if (1== 1)
+	//			System.exit(0);
+	//		clazzes= (ASVariation[][][]) Arrays.sort2DField(clazzes);
+	//		System.out.println("asSuperClasses "+ clazzes.length);		
+	//		for (int i = 0; i < clazzes.length; i++) {
+	//			System.out.println(clazzes[i].length+ " "+clazzes[i][0][0].toASEventString());
+	//
+	//			for (int j = 0; j < clazzes[i].length; j++) 
+	//				System.out.println("\t"+ clazzes[i][j].length+ " "+clazzes[i][j][0]);
+	//		}
+	//
+	//		//GraphHandler.writeOut(g);
+	//		
+	//		
+	//		
+	//		
+	//			//System.out.print(ge[i].getStableID()+"\t");
+	////			ASMultiVariation[] as= ge[i].getASComplexes();
+	////			boolean breakk= false;
+	////			for (int j = 0; as!= null&& !breakk&& j < as.length; j++) 
+	////				for (int k = 0; !breakk&& k < as[j].getASVariations().length; k++) 
+	////					for (int l = 0; !breakk&& l < as[j].getASVariations()[k].getASEvents().length; l++) 
+	////						if (as[j].getASVariations()[k].getASEvents()[l].isIntronRetention())
+	////							breakk= true;
+	////			if (ge[i].getStableID().equals("ENSG00000107643")) {
+	////				JFrame myFrame= new JFrame(); 
+	////				myFrame.getContentPane().add(new TranscriptPainter(ge[i]));
+	////				myFrame.pack();
+	////				myFrame.setVisible(true);
+	////			}				
+	////		}
+	////		System.out.println(asevents+ "AS Variation");
+	//		
+		}
+
+	public static void test06_findEvents() {
 
 		//getSpliceSites(g, "sylvain_spicesites.gff", "gencode");
 		//output5UTRExonFragments();
@@ -4165,32 +4353,16 @@ public class ASAnalyzer {
 		
 		
 		Graph g= null;
-		//g.filterNMDTranscripts();
-		//test02_ss_statistics();
-		//test04_determineVariations_nmd,();
-		//test02_ss_statistics();
-		//test01_clusters_coverage_as();
-		//mvar_output();
-		//test05_GO_splice_utr();
-		//test02_UTRvsCDS_go();
-		//test04_determineVariations_nmd();
-		//test02_ss_statistics();
-		//test05_GO_splice_utr_sigTest();
-		//test05_ASlengthExchange(INPUT_ENCODE);
-//		if (1== 1)
-//			System.exit(0);
-		
-		
 		g= getGraph(INPUT_ENCODE);
 		//g.filterNonCodingTranscripts();
-		//g.filterNMDTranscripts();
+		g.filterNMDTranscripts();
 		//g.filterCodingTranscripts(); 
 		//test04a_determineVarDegree(g, System.out);
 		//test04_checkOutsideEncode(g, System.out);
 
 //		ASMultiVariation[][] vars= g.getASMultiVariations(-1);	
 //		ASMultiVariation[][] vars= g.getASMultiVariations(2);	// 2
-		ASMultiVariation[][] vars= g.getASMultiVariations(2);	// 2
+		ASMultiVariation[][] vars= g.getASMultiVariations(-1);	// 2
 		vars= (ASMultiVariation[][]) Arrays.sort2DFieldRev(vars);
 		for (int i = 0; i < vars.length; i++) {
 			System.out.println(vars[i].length+ "\t"+ vars[i][0]);
@@ -4200,144 +4372,32 @@ public class ASAnalyzer {
 //			if ((vars[i][0].toString().startsWith("(1-2^3-4^ // )"))||
 //					(vars[i][0].toString().startsWith("(1- // 2- // 3-)"))){
 //				outputMultiVars(vars[i], System.out);
-			String[] s= new String[vars[i].length];
-			if (vars[i][0].toString().equals("(1^4- // 2^3-)")) {
-				for (int j = 0; j < vars[i].length; j++) {
-					s[j]= "";
-					s[j]+= ("\t"+ vars[i][j].getGene().getChromosome()+" ");
-					Transcript[][] t= vars[i][j].getTranscriptsFromHash(); 
-					s[j]+= (t[0][0]+" "+t[1][0]+" ");
-					SpliceSite[] sc1= vars[i][j].getSpliceChains()[0];
-					SpliceSite[] sc2= vars[i][j].getSpliceChains()[1];
-					SpliceSite[][] sc= new SpliceSite[][] {sc1, sc2};
-					if (sc2.length> sc1.length)
-						Arrays.swap(sc);
-					for (int k = 0; k < sc.length; k++) {
-						for (int m = 0; m < sc[k].length; m++) 
-							s[j]+= (sc[k][m]+ " ");
-						s[j]+= (";// ");
-					}
-					//System.out.println();
-				}
-				java.util.Arrays.sort(s);
-				for (int j = 0; j < s.length; j++) {
-					System.out.println(s[j]);
-				}
-			}
-		}
-		
-		ASVariation[][] vars2= g.getASVariations(ASMultiVariation.FILTER_STRUCTURALLY);
-		vars2= (ASVariation[][]) Arrays.sort2DFieldRev(vars2);
-		for (int i = 0; i < vars2.length; i++) {
-			System.out.println(vars2[i].length+ "\t"+ vars2[i][0]);
-			String[] s= new String[vars2[i].length];
-			if (vars2[i][0].toString().equals("(1^4= // 2^3=)")) {
-				for (int j = 0; j < vars2[i].length; j++) {
-					s[j]= "";
-					s[j]+= ("\t"+ vars2[i][j].getGene().getChromosome()+" ");
-					s[j]+= (vars2[i][j].getTranscript1()+" "+vars2[i][j].getTranscript2()+" ");
-					SpliceSite[] sc1= vars2[i][j].getSpliceChain1();
-					SpliceSite[] sc2= vars2[i][j].getSpliceChain2();
-					SpliceSite[][] sc= new SpliceSite[][] {sc1, sc2};
-					if (sc2.length> sc1.length)
-						Arrays.swap(sc);
-					for (int k = 0; k < sc.length; k++) {
-						for (int m = 0; m < sc[k].length; m++) 
-							s[j]+=(sc[k][m]+ " ");
-						s[j]+= ";// ";
-					}
-					//System.out.println();
-				}
-				java.util.Arrays.sort(s);
-				for (int j = 0; j < s.length; j++) {
-					System.out.println(s[j]);
-				}
-			}
-		}
-		
-		
-		
-//		ASVariation[][] vars= g.getASVariations(ASMultiVariation.FILTER_HIERARCHICALLY);
-//		for (int i = 0; i < vars.length; i++) {
-//			if (vars[i][0].toString().equals("(2^ // 1^3=4^)"))
+//			String[] s= new String[vars[i].length];
+//			if (vars[i][0].toString().equals("(1^4- // 2^3-)")) {
 //				for (int j = 0; j < vars[i].length; j++) {
-//					System.out.println(vars[i][j].getGene().getGeneID()+": "+ 
-//							vars[i][j].getTranscript1().getTranscriptID()+
-//							vars[i][j].getTranscript2().getTranscriptID());
+//					s[j]= "";
+//					s[j]+= ("\t"+ vars[i][j].getGene().getChromosome()+" ");
+//					Transcript[][] t= vars[i][j].getTranscriptsFromHash(); 
+//					s[j]+= (t[0][0]+" "+t[1][0]+" ");
+//					SpliceSite[] sc1= vars[i][j].getSpliceChains()[0];
+//					SpliceSite[] sc2= vars[i][j].getSpliceChains()[1];
+//					SpliceSite[][] sc= new SpliceSite[][] {sc1, sc2};
+//					if (sc2.length> sc1.length)
+//						Arrays.swap(sc);
+//					for (int k = 0; k < sc.length; k++) {
+//						for (int m = 0; m < sc[k].length; m++) 
+//							s[j]+= (sc[k][m]+ " ");
+//						s[j]+= (";// ");
+//					}
+//					//System.out.println();
 //				}
-//		}
+//				java.util.Arrays.sort(s);
+//				for (int j = 0; j < s.length; j++) {
+//					System.out.println(s[j]);
+//				}
+//			}
+		}
 		
-		//		filterEvents(new File("human_graph_as_variations_non-redundant.log"));
-
-		//outputCheckFile();
-		//outputCodingRegions();
-		//output3UTR();
-		
-//		EnsemblDBAdaptor adaptor= new EnsemblDBAdaptor();
-//		//Graph g= null;
-//		Graph g= adaptor.getGraphAllGenes(new Species("chimp"));
-//		
-//		lengthPlot(g);
-//		//determineVariations(g);
-//		if (1== 1)
-//			System.exit(0);
-//		
-//		determineVariations(g);
-//		
-//		ASVariation[] var= findClass(g, "(1^3= // 2^4=)");
-//
-//		for (int i = 0;  var!= null&& i < var.length; i++) {
-//			Gene ge= var[i].getGene();
-//			SpliceOSigner painter= new SpliceOSigner(ge);
-//			JFrame frame= new JFrame();
-//			frame.getContentPane().add(painter);
-//			frame.pack();
-//			frame.setVisible(true);
-//		}
-//		
-//		if (1== 1)
-//			System.exit(0);
-//		
-//		ASVariation[][][] clazzes= g.getASEvents();
-//		try {
-//			Paparazzi.writeGIF(null, new File("test.gif"));
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		if (1== 1)
-//			System.exit(0);
-//		clazzes= (ASVariation[][][]) Arrays.sort2DField(clazzes);
-//		System.out.println("asSuperClasses "+ clazzes.length);		
-//		for (int i = 0; i < clazzes.length; i++) {
-//			System.out.println(clazzes[i].length+ " "+clazzes[i][0][0].toASEventString());
-//
-//			for (int j = 0; j < clazzes[i].length; j++) 
-//				System.out.println("\t"+ clazzes[i][j].length+ " "+clazzes[i][j][0]);
-//		}
-//
-//		//GraphHandler.writeOut(g);
-//		
-//		
-//		
-//		
-//			//System.out.print(ge[i].getStableID()+"\t");
-////			ASMultiVariation[] as= ge[i].getASComplexes();
-////			boolean breakk= false;
-////			for (int j = 0; as!= null&& !breakk&& j < as.length; j++) 
-////				for (int k = 0; !breakk&& k < as[j].getASVariations().length; k++) 
-////					for (int l = 0; !breakk&& l < as[j].getASVariations()[k].getASEvents().length; l++) 
-////						if (as[j].getASVariations()[k].getASEvents()[l].isIntronRetention())
-////							breakk= true;
-////			if (ge[i].getStableID().equals("ENSG00000107643")) {
-////				JFrame myFrame= new JFrame(); 
-////				myFrame.getContentPane().add(new TranscriptPainter(ge[i]));
-////				myFrame.pack();
-////				myFrame.setVisible(true);
-////			}				
-////		}
-////		System.out.println(asevents+ "AS Variation");
-//		
 	}
 
 	public static void mvar_output() {
