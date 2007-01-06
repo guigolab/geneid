@@ -2115,36 +2115,111 @@ public class EnsemblDBAdaptor {
 
 	}
 	
-	public static void removeNotAllHomologGenes(Graph g) {
-		Vector v= new Vector();
-		for (int x = 0; x < g.getSpecies().length; x++) {
-			Gene[] ge= g.getSpecies()[x].getGenes();
-			for (int i = 0; i < ge.length; i++) {
-				int j;
-				for (j = 0; j < g.getSpecies().length; j++) {
-					if (j== x)
-						continue;
-					if (ge[i].getHomologies(g.getSpecies()[j])== null)
-						break;
+	public static void checkHomologGenes(Graph g) {
+			Vector v= new Vector();
+			int ctr= 0;
+			int ctrNeg= 0;
+			for (int x = 0; x < g.getSpecies().length; x++) {
+				Gene[] ge= g.getSpecies()[x].getGenes();
+				for (int i = 0; i < ge.length; i++) {
+					int j;
+					for (j = i+1; j < g.getSpecies().length; j++) {
+						if (ge[i].getHomologies(g.getSpecies()[j])!= null&& ge[i].getHomologies(g.getSpecies()[j]).length> 0) {
+							GeneHomology[] hgg= ge[i].getHomologies(g.getSpecies()[j]);
+							assert(hgg.length== 1);
+							Gene hg= hgg[0].getOtherGene(ge[i]);
+							GeneHomology[] hgg_= hg.getHomologies(g.getSpecies()[x]);
+							assert(hgg_.length== 1);
+							assert(hgg_[0].getOtherGene(hg)== ge[i]);
+							++ctr;
+						} else 
+							++ctrNeg;
+					}
 				}
-				if (j< g.getSpecies().length) {
-					v.add(ge[i]);
-					for (int k = 0; k < g.getSpecies().length; k++) {
-						GeneHomology[] hgg= ge[i].getHomologies(g.getSpecies()[k]);
-						for (int m = 0; hgg!= null&& m < hgg.length; m++) {
-							Gene hg= hgg[m].getOtherGene(ge[i]);
-//							if (hg.getHomologies(ge[i].getSpecies())== null||
-//									hg.getHomologies(ge[i].getSpecies()).length< 1)
-								v.add(hg);
+			}
+			System.out.println(ctr+ " valid Homologies.");
+			System.out.println(ctrNeg+ " empty homology relations.");
+		}
+
+	public static void removeNotAllHomologGenes(Graph g) {
+			System.out.print("removing genes without homologs in a species..");
+			Vector v= new Vector();
+			for (int x = 0; x < g.getSpecies().length; x++) {
+				Gene[] ge= g.getSpecies()[x].getGenes();
+				for (int i = 0; i < ge.length; i++) {
+					int j;
+					for (j = 0; j < g.getSpecies().length; j++) {
+						if (j== x)
+							continue;
+						if (ge[i].getHomologies(g.getSpecies()[j])== null|| ge[i].getHomologies(g.getSpecies()[j]).length== 0)
+							break;
+					}
+					if (j< g.getSpecies().length) {
+						v.add(ge[i]);
+						for (int k = 0; k < g.getSpecies().length; k++) {
+							if (k== x)
+								continue;
+							GeneHomology[] hgg= ge[i].getHomologies(g.getSpecies()[k]);
+							for (int m = 0; hgg!= null&& m < hgg.length; m++) {
+								Gene hg= hgg[m].getOtherGene(ge[i]);
+	//							if (hg.getHomologies(ge[i].getSpecies())== null||
+	//									hg.getHomologies(ge[i].getSpecies()).length< 1)
+									v.add(hg);
+							}
 						}
 					}
 				}
 			}
+			System.out.println(v.size()+" genes.");
+			for (int i = 0; i < v.size(); i++) 
+				g.removeKill((Gene) v.elementAt(i)); 
+			//GraphHandler.writeOut(g, GraphHandler.getGraphAbsPath()); 		// writeGraph();
 		}
+
+	public static void removeNotAllHomologGenes(Graph g, String[] speNames) {
+		
+		String[] speNames2= new String[speNames.length];
+		for (int i = 0; i < speNames2.length; i++) 
+			speNames2[i]= Species.getBinomialForCommonName(speNames[i]);
+		speNames= speNames2;
+		
+		System.out.print("removing genes without homologs in species ");
+		for (int i = 0; i < speNames.length; i++) 
+			System.out.print(speNames[i]+" ");
+		System.out.print(".. ");
+		
+		Vector v= new Vector();
+		for (int x = 0; x < speNames.length; x++) {
+			Species sp= g.getSpeciesByName(speNames[x]);
+			Gene[] ge= sp.getGenes();
+			for (int i = 0; i < ge.length; i++) {
+				int j;
+				for (j = 0; j < speNames.length; j++) {
+					Species sp2= g.getSpeciesByName(speNames[j]);
+					if (j== x)
+						continue;
+					if (ge[i].getHomologies(sp2)== null|| ge[i].getHomologies(sp2).length!= 1)
+						break;
+				}
+				if (j< speNames.length) {
+					v.add(ge[i]);
+//					for (int k = 0; k < speNames.length; k++) {
+//						if (k== x)
+//							continue;
+//						GeneHomology[] hgg= ge[i].getHomologies(g.getSpeciesByName(speNames[k]));
+//						for (int m = 0; hgg!= null&& m < hgg.length; m++) {
+//							Gene hg= hgg[m].getOtherGene(ge[i]);
+//								v.add(hg);
+//						}
+//					}
+				}
+			}
+		}
+		System.out.println(v.size()+" genes.");
 		for (int i = 0; i < v.size(); i++) 
 			g.removeKill((Gene) v.elementAt(i)); 
 		//GraphHandler.writeOut(g, GraphHandler.getGraphAbsPath()); 		// writeGraph();
-	}
+	}	
 	
 	public static void main(String[] args) {
 			

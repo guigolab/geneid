@@ -25,19 +25,50 @@ public class GraphAligner {
 	public static void alignENSEMBLHomologGenes() {
 		EnsemblDBAdaptor adaptor= new EnsemblDBAdaptor();
 		Graph g= adaptor.getGraphAllHomologs(EnsemblDBAdaptor.SPECIES_ISMB);
-		GraphHandler.writeOut(g, GraphHandler.getGraphAbsPath(g.getSpecies())+"_download");
-		g.filterNonsense();
-		GraphHandler.writeOut(g, GraphHandler.getGraphAbsPath(g.getSpecies())+"_filt-nons");
-		g.filterNonCodingTranscripts();
-		GraphHandler.writeOut(g, GraphHandler.getGraphAbsPath(g.getSpecies())+"_filt-nons_filt-nc");
+//		g.filterNonsense();
+//		GraphHandler.writeOut(g, "graph_filt-nons.oos");
+//		g.filterNonCodingTranscripts();
+//		GraphHandler.writeOut(g, "graph_filt-nons_filt-nc.oos");
+//
+		//EnsemblDBAdaptor.removeNotAllHomologGenes(g);
+		// "human", "mouse", "rat", "cow", "dog", "chicken", "frog", "zebrafish", "fruitfly", "mosquito"
+		// 5e "human", "mouse", "rat", "cow", "dog", "chicken", "frog", "zebrafish"
+		String[] speNames= new String[] {"human", "mouse", "dog"};
+		EnsemblDBAdaptor.removeNotAllHomologGenes(g, speNames);
+		//GraphHandler.writeOut(g, "graph_filt-nons_filt-nc_remAll.oos");
 
-		EnsemblDBAdaptor.removeNotAllHomologGenes(g);
-		GraphHandler.writeOut(g, GraphHandler.getGraphAbsPath(g.getSpecies())+"_filt-nons_filt-nc_remAll");
+		int ctr= 0;
+		for (int i = 0; i < speNames.length; i++) {
+			Species sp= g.getSpeciesByName(Species.getBinomialForCommonName(speNames[i]));
+			Gene[] ge= sp.getGenes();
+			for (int j = 0; j < ge.length; j++) {
+				//System.out.println(ge[j].getGeneID());
+				++ctr;
+			}
+		}
+		System.out.println("==\nHomolog gene nb: "+ctr+"/"+speNames.length+"="+(ctr/speNames.length));
 		
-		Gene[] ge= g.getGenes();
-		System.out.println("Homolog gene nb: "+ge.length);
-		for (int i = 0; i < ge.length; i++) {
-			System.out.println(ge[i].getGeneID());
+		Species sp= g.getSpeciesByName(Species.getBinomialForCommonName(speNames[0]));
+		Gene[] ge= sp.getGenes();
+		Vector v= new Vector(ctr/speNames.length);
+		for (int j = 0; j < ge.length; j++) 
+			v.add(ge[j]);
+		
+		alignHomologs((Gene[]) gphase.tools.Arrays.toField(v));
+		
+	}
+	
+	static void alignHomologs(Gene[] hGenes) {
+		for (int i = 0; i < hGenes.length; i++) {
+			for (int j = i+1; j < hGenes.length; j++) {
+				SpliceGraph g1= new SpliceGraph(hGenes[i].getTranscripts());
+				g1.init();
+				SpliceGraph g2= new SpliceGraph(hGenes[j].getTranscripts());
+				g2.init();
+				Mapping[] maps= align(g1, g2, -1);
+				if (maps!= null)
+					System.out.println(maps[0].toString());
+			}
 		}
 	}
 	
@@ -100,7 +131,7 @@ public class GraphAligner {
 		
 	}
 	
-	public static Mapping[] align(SpliceGraph g1, SpliceGraph g2) {
+	public static Mapping[] align(SpliceGraph g1, SpliceGraph g2, int maxAli) {
 		
 		PriorityQueue q= new PriorityQueue(11, new Mapping.PriorityComparator());
 		Comparator compi= new SpliceNode.PositionTypeComparator();
@@ -127,7 +158,7 @@ public class GraphAligner {
 		Mapping map= (Mapping) q.poll();
 		double ulCost= Double.MAX_VALUE;
 		Vector optMaps= new Vector();
-		int maxAli= 5;
+		//int maxAli= 5;
 		while (map!= null&& map.getCost()<= ulCost) {
 			
 			if (maxAli> 0&& optMaps.size()== maxAli)
