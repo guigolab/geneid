@@ -49,6 +49,25 @@ public class SpliceNode {
 		}
 	}
 	
+	public static class PositionASComparator extends PositionComparator {
+		public int compare(Object arg0, Object arg1) {
+			int val= super.compare(arg0, arg1);
+			if (val!= 0)
+				return val;
+			
+			SpliceNode node0= (SpliceNode) arg0;
+			SpliceNode node1= (SpliceNode) arg1;
+			boolean ss0= node0.getSite() instanceof SpliceSite;
+			boolean ss1= node1.getSite() instanceof SpliceSite;
+			
+			if ((!ss0)&& ss1)
+				return 1;	// AS is "after" SS at same point
+			if ((!ss1)&& ss0)
+				return -1;	// AS is "after" SS at same point
+			return 0;
+		}
+	}
+
 	AbstractSite site= null;
 	SpliceEdge[] inEdges= null;
 	SpliceEdge[] outEdges= null;

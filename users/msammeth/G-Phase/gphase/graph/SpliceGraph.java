@@ -47,7 +47,7 @@ public class SpliceGraph {
 		nodeList= new HashMap();	// optimize by providing default size ?!
 	}
 	
-	public void init() {
+	public void init(boolean trimEnds) {
 			// add splice sites
 		for (int i = 0; i < transcripts.length; i++) {
 			SpliceSite[] sss= transcripts[i].getSpliceChain();
@@ -61,6 +61,9 @@ public class SpliceGraph {
 				createEdge(getNode(sss[j-1]), node, new Transcript[] {transcripts[i]});
 			}
 		}
+		
+		if (!trimEnds)
+			return;
 		
 			// add border anchors
 		Vector tssV= new Vector();
@@ -793,11 +796,11 @@ public class SpliceGraph {
 		return (ASMultiVariation[]) gphase.tools.Arrays.toField(multiVars);
 	}
 	
-	void extractVars(int k, SpliceBubble blob, HashMap procH, Vector multiVars) {
+	boolean extractVars(int k, SpliceBubble blob, HashMap procH, Vector multiVars) {
 		
 			// check whether this bubble has already been processed
 		if (procH.get(blob)!= null)
-			return;
+			return false;
 		procH.put(blob, blob);
 		
 		SpliceNode[][] pathes= blob.getPathes();
@@ -816,8 +819,10 @@ public class SpliceGraph {
 		}
 		
 			// generate mvariations
+		boolean mutEx= false;
 		if (k< 2) {	// output max variations
-			multiVars.add(new ASMultiVariation(sc, transHash));	// TODO children !!!?!!
+			if (!blob.hasParents())	// should not happen
+				multiVars.add(new ASMultiVariation(sc, transHash));	// TODO children !!!?!!
 		} else { // generate all k-mers
 				// check for contained subbubbles
 //			SpliceBubble[] sbubl= blob.getChildren();
@@ -837,10 +842,33 @@ public class SpliceGraph {
 					!(blob.getSink().getSite() instanceof SpliceSite))
 				removeInvalidRek(blob.getParents(), blob, transNot);
 			
-			reKmer(k, sc, transHash, 0, new int[0], multiVars, transNot);
+			mutEx= reKmer(k, sc, transHash, 0, new int[0], multiVars, transNot);
+			if (mutEx) {
+				SpliceBubble bub= blob;
+				while (bub.getParents()!= null)
+					bub= bub.getParents()[0];
+				SpliceNode[][] pathes1= bub.getPathes();
+				SpliceSite[][] sc1= new SpliceSite[pathes1.length][];
+				HashMap transHash1= new HashMap();
+				for (int j = 0; j < sc1.length; j++) {
+					if (pathes1[j]== null)
+						sc1[j]= new SpliceSite[0];
+					else {
+						sc1[j]= new SpliceSite[pathes1[j].length];
+						for (int x = 0; x < pathes1[j].length; x++) 
+							sc1[j][x]= (SpliceSite) pathes1[j][x].getSite();
+					}
+					
+					transHash1.put(sc1[j], bub.getTransHash().get(pathes1[j]));
+				}
+				ASMultiVariation var= new ASMultiVariation(sc1, transHash1);	// TODO children !!!?!!
+				System.out.println("*** "+var.toString()+" "+ (bub== blob)+ " "+
+						bub.getSource().getSite()+"x"+bub.getSink().getSite());
+			}
+				
 		}
 		
-
+		return mutEx;
 	}
 	
 	void removeInvalidRek(SpliceBubble[] parents, SpliceBubble blob, Vector transNot) {
@@ -995,7 +1023,7 @@ public class SpliceGraph {
 			collectPartitionsRek(bubs[i].getChildren(), transNot, blob);
 		}
 	}
-	private void reKmer(int maxDepth, SpliceSite[][] sc, HashMap transHash, int minVal, int[] vals, Vector result, Vector transNot) {
+	private boolean reKmer(int maxDepth, SpliceSite[][] sc, HashMap transHash, int minVal, int[] vals, Vector result, Vector transNot) {
 		
 		if (vals.length== maxDepth) {
 			SpliceSite[][] ss= new SpliceSite[vals.length][];
@@ -1010,23 +1038,30 @@ public class SpliceGraph {
 			for (int i = 0; transNot!= null&& i < transNot.size(); i++) {
 				Transcript[][] subublT= (Transcript[][]) transNot.elementAt(i);
 				if (SpliceBubble.atLeastOneContained(thisT, subublT)) {
-					return;	// skip
+					return false;	// skip
 				}
 			}
 			
 				// else add
 		    ASMultiVariation x= new ASMultiVariation(ss, hh);
 			result.add(x);
-			return;
+			
+			if (x.toString().equals("(1-2^ // 3-4^)"))
+				return true;
+			else 
+				return false;
 		}
 		
+		
+		boolean res= false;
 		for (int i = minVal; i <= (sc.length- maxDepth+ 1); i++) {
 			int[] nuVals= new int[vals.length+ 1];
 			for (int j = 0; j < vals.length; j++) 
 				nuVals[j]= vals[j];
 			nuVals[vals.length]= i;
-			reKmer(maxDepth, sc, transHash, i+1, nuVals, result, transNot);
+			res|= reKmer(maxDepth, sc, transHash, i+1, nuVals, result, transNot);
 		}
+		return res;
 	}
 	
 	public SpliceBubble[] getBubbles() {
@@ -1099,7 +1134,8 @@ public class SpliceGraph {
 	SpliceBubble[] cascadeBubblesNew(SpliceBubble[] allBubs) {
 		if (allBubs== null)
 			return allBubs;
-		Comparator compi= new SpliceBubble.SizePartitionSizeComparator();
+		//Comparator compi= new SpliceBubble.SizePartitionSizeComparator();
+		Comparator compi= new SpliceBubble.SizeASComparator();
 		Arrays.sort(allBubs, compi);
 		for (int i = 0; i < allBubs.length; i++) {
 				// AS bub cannot be child
@@ -1107,14 +1143,16 @@ public class SpliceGraph {
 //					(!(allBubs[i].getSink().getSite() instanceof SpliceSite)))
 //				continue;
 			for (int j = i+1; j < allBubs.length; j++) {
-				if (!allBubs[j].containsPreservesPartitions(allBubs[i]))
+				//if (!allBubs[j].containsPreservesPartitions(allBubs[i]))
+				if (!allBubs[j].contains(allBubs[i]))
 					continue;
 				
 				//	is lowest point in hierachy?
 				SpliceBubble[] p= allBubs[i].getParents();
 				int x;
 				for (x = 0; p!= null&& x < p.length; x++) {
-					if (allBubs[j].containsPreservesPartitions(p[x]))
+					//if (allBubs[j].containsPreservesPartitions(p[x]))
+					if (allBubs[j].contains(p[x]))
 						break;
 				}
 				if (p== null|| x== p.length) {
@@ -1143,6 +1181,7 @@ public class SpliceGraph {
 						bub0.getSource():bub1.getSource();	// maxPos of srcs
 				iSnk= (bub0.getSink().getSite().getPos()< bub1.getSink().getSite().getPos())?
 						bub0.getSink():bub1.getSink();	// maxPos of srcs
+					
 						
 					// find intersection partitions
 				Transcript[][] part0= bub0.getTranscriptPartitions();
@@ -1443,7 +1482,7 @@ public class SpliceGraph {
 					SpliceNode[] mKeys= (SpliceNode[]) gphase.tools.Arrays.toField(mList.keySet().toArray());
 					Vector partV= new Vector();	// partitions
 					if (mKeys!= null) { 
-						Arrays.sort(mKeys, new SpliceNode.PositionComparator());
+						Arrays.sort(mKeys, new SpliceNode.PositionASComparator());
 						for (int k = mKeys.length- 1; k >= 0; --k) {	// iterate backwards over from nodes already stored in target
 							Vector mV= (Vector) mList.get(mKeys[k]);		// pathes from a node already leading to target node
 							Vector v= (Vector) newMap.get(mKeys[k]);		// new pathes from same node to target node
@@ -1737,9 +1776,10 @@ public class SpliceGraph {
 			// find intersection nodes
 		SpliceNode iSrc, iSnk;
 			// no abs!! src <-> snk on neg strand !
-		iSrc= (bub0.getSource().getSite().getPos()> bub1.getSource().getSite().getPos())?	
+		Comparator compi= new SpliceNode.PositionASComparator();
+		iSrc= (compi.compare(bub0.getSource(), bub1.getSource())< 0)?	
 				bub0.getSource():bub1.getSource();	// maxPos of srcs
-		iSnk= (bub0.getSink().getSite().getPos()< bub1.getSink().getSite().getPos())?
+		iSnk= (compi.compare(bub0.getSink(), bub1.getSink())< 0)?
 				bub0.getSink():bub1.getSink();	// maxPos of srcs
 				
 				

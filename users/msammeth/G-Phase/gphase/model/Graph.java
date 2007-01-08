@@ -1484,13 +1484,13 @@ public class Graph implements Serializable {
 		return result;
 	}
 
-	public ASMultiVariation[][] getASMultiVariations(int k) {
+	public ASMultiVariation[][] getASMultiVariations(int k, boolean trimEdges) {
 		Gene[] ge= getGenes();
 		int x= 0; 
 		Vector varsV= new Vector();
 		for (x = 0; x < ge.length; x++)  {
 			SpliceGraph gr= new SpliceGraph(ge[x].getTranscripts());
-			gr.init();
+			gr.init(trimEdges);
 			ASMultiVariation[] vars= gr.getMultiVariations(k);
 			
 			for (int i = 0; vars!= null&& i < vars.length; i++) {

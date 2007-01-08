@@ -4191,7 +4191,7 @@ public class ASAnalyzer {
 	
 	//		ASMultiVariation[][] vars= g.getASMultiVariations(-1);	
 	//		ASMultiVariation[][] vars= g.getASMultiVariations(2);	// 2
-			ASMultiVariation[][] vars= g.getASMultiVariations(2);	// 2
+			ASMultiVariation[][] vars= g.getASMultiVariations(2, true);	// 2
 			vars= (ASMultiVariation[][]) Arrays.sort2DFieldRev(vars);
 			for (int i = 0; i < vars.length; i++) {
 				System.out.println(vars[i].length+ "\t"+ vars[i][0]);
@@ -4362,7 +4362,7 @@ public class ASAnalyzer {
 
 //		ASMultiVariation[][] vars= g.getASMultiVariations(-1);	
 //		ASMultiVariation[][] vars= g.getASMultiVariations(2);	// 2
-		ASMultiVariation[][] vars= g.getASMultiVariations(-1);	// 2
+		ASMultiVariation[][] vars= g.getASMultiVariations(2, false);	// 2
 		vars= (ASMultiVariation[][]) Arrays.sort2DFieldRev(vars);
 		for (int i = 0; i < vars.length; i++) {
 			System.out.println(vars[i].length+ "\t"+ vars[i][0]);

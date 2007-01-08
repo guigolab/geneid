@@ -39,9 +39,11 @@ public class SpliceBubble {
 			Transcript[][] t1= bub1.getTranscriptPartitions();
 			Transcript[][] t2= bub2.getTranscriptPartitions();
 			
-			if (t1.length> t2.length)
+			//if (t1.length> t2.length)
+			if (containedPreservesPartitions(t2, t1))
 				return 1;
-			if (t2.length> t1.length)
+			//if (t2.length> t1.length)
+			if (containedPreservesPartitions(t1, t2))
 				return -1;
 			return 0;
 		}
@@ -59,6 +61,43 @@ public class SpliceBubble {
 				return -1;
 			if (size1> size2)
 				return 1;
+			return 0;
+		}
+	}
+
+	public static class SizeASComparator extends SpliceBubble.SizeComparator {
+		public int compare(Object o1, Object o2) {
+			int val= super.compare(o1, o2);
+			if (val!= 0)
+				return val;
+			SpliceBubble bub1= (SpliceBubble) o1;
+			SpliceBubble bub2= (SpliceBubble) o2;
+			boolean src1SS= (bub1.getSource().getSite() instanceof SpliceSite);
+			boolean snk1SS= (bub1.getSink().getSite() instanceof SpliceSite);
+			boolean src2SS= (bub2.getSource().getSite() instanceof SpliceSite);
+			boolean snk2SS= (bub2.getSink().getSite() instanceof SpliceSite);
+			Transcript[][] t1= bub1.getTranscriptPartitions();
+			Transcript[][] t2= bub2.getTranscriptPartitions();
+			
+//			if (SpliceBubble.contained(t2, t1))
+//				return 1;
+//			if (SpliceBubble.contained(t1, t2))
+//				return -1;
+			
+				// AS bubble is bigger
+			if ((!src1SS)&& (!snk1SS))
+				return 1;
+			if ((!src2SS)&& (!snk2SS))
+				return -1;
+			
+			if (((!src1SS)&& (src2SS)&& (!snk2SS))||
+					((!snk1SS)&& (snk2SS)&& (!src2SS)))
+				return 1;
+			if (((!src2SS)&& (src1SS)&& (!snk1SS))||
+					((!snk2SS)&& (snk1SS)&& (!src1SS)))
+				return -1;
+			
+			assert(false);
 			return 0;
 		}
 	}
