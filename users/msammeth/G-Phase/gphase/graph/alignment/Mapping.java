@@ -250,13 +250,13 @@ public class Mapping {
 		if (nI!= null) {
 			SpliceNode[] src= (SpliceNode[]) gphase.tools.Arrays.toField(mapTableI.keySet());
 			SpliceNode[] roots= g1.getRoots(); 
-			pathesI= fpath(roots, src, nI);
+			pathesI= fpath(roots, src, nI, g1);
 		}		
 		
 		if (nJ!= null) {
 			SpliceNode[] src= (SpliceNode[]) gphase.tools.Arrays.toField(mapTableJ.keySet());
 			SpliceNode[] roots= g2.getRoots(); 
-			pathesJ= fpath(roots, src, nJ);
+			pathesJ= fpath(roots, src, nJ, g2);
 		}
 		
 			// both no valid pathes (eg, src of both graphs)
@@ -317,7 +317,7 @@ public class Mapping {
 		return sum;
 	}
 	
-	SplicePath[] fpath(SpliceNode[] roots, SpliceNode[] src, SpliceNode n) {
+	SplicePath[] fpath(SpliceNode[] roots, SpliceNode[] src, SpliceNode n, SpliceGraph g) {
 		
 		SpliceEdge[] edge= n.getInEdges();
 		if (edge== null)
@@ -330,7 +330,7 @@ public class Mapping {
 			SplicePath[] pathes= null;
 			if (src!= null)
 				for (int j = src.length- 1; j >= 0; --j) {
-					pathes= g1.findPathes(src[j], edge[i]);
+					pathes= g.findPathes(src[j], edge[i]);
 					if (pathes!= null)
 						break;
 				}
@@ -340,14 +340,14 @@ public class Mapping {
 			} else {	// no aligned src found for edge, get from roots || src== null
 				Vector vv= new Vector();
 				for (int k = 0; k < roots.length; k++) {
-					pathes= g1.findPathes(roots[k], edge[i]);
+					pathes= g.findPathes(roots[k], edge[i]);
 					if (pathes!= null)
 						for (int j = 0; j < pathes.length; j++) 
 							vv.add(pathes[j]);
 				}
 				pathes= (SplicePath[]) gphase.tools.Arrays.toField(vv);
-				assert(pathes!= null);
-				for (int j = 0; j < pathes.length; j++) 
+				// assert(pathes!= null);	// can happen: tgt== root, no inedge, no path.
+				for (int j = 0; pathes!= null&& j < pathes.length; j++) 
 					v.add(pathes[j]);
 			}
 		}

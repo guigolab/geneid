@@ -59,15 +59,21 @@ public class GraphAligner {
 	}
 	
 	static void alignHomologs(Gene[] hGenes) {
+		int cntFail= 0;
 		for (int i = 0; i < hGenes.length; i++) {
 			for (int j = i+1; j < hGenes.length; j++) {
 				SpliceGraph g1= new SpliceGraph(hGenes[i].getTranscripts());
-				g1.init();
+				g1.init(false);
 				SpliceGraph g2= new SpliceGraph(hGenes[j].getTranscripts());
-				g2.init();
-				Mapping[] maps= align(g1, g2, -1);
-				if (maps!= null)
-					System.out.println(maps[0].toString());
+				g2.init(false);
+				try {
+					Mapping[] maps= align(g1, g2, -1);
+					if (maps!= null)
+						System.out.println(maps[0].toString());
+				} catch (OutOfMemoryError e) {
+					++cntFail; // :)
+					e.printStackTrace();
+				}
 			}
 		}
 	}

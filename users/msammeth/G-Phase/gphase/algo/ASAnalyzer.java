@@ -4353,7 +4353,7 @@ public class ASAnalyzer {
 		
 		
 		Graph g= null;
-		g= getGraph(INPUT_ENCODE);
+		g= getGraph(INPUT_REFSEQ_CODING_FROM_UCSC);
 		//g.filterNonCodingTranscripts();
 		g.filterNMDTranscripts();
 		//g.filterCodingTranscripts(); 
@@ -4362,7 +4362,7 @@ public class ASAnalyzer {
 
 //		ASMultiVariation[][] vars= g.getASMultiVariations(-1);	
 //		ASMultiVariation[][] vars= g.getASMultiVariations(2);	// 2
-		ASMultiVariation[][] vars= g.getASMultiVariations(2, false);	// 2
+		ASMultiVariation[][] vars= g.getASMultiVariations(-1, false);	// 2
 		vars= (ASMultiVariation[][]) Arrays.sort2DFieldRev(vars);
 		for (int i = 0; i < vars.length; i++) {
 			System.out.println(vars[i].length+ "\t"+ vars[i][0]);

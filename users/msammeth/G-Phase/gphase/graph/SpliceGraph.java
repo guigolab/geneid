@@ -1748,6 +1748,8 @@ public class SpliceGraph {
 				newP= new SplicePath(edges[i]);
 			else 
 				newP= p.exendPath(edges[i]);
+			if (newP== null)	// now flow, no path..
+				return;
 			if (edges[i]== eSnk) {
 				if (newP.getTranscripts().length> 0)
 					v.add(newP);
