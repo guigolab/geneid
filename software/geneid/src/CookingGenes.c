@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: CookingGenes.c,v 1.21 2006-12-21 13:56:54 talioto Exp $  */
+/*  $Id: CookingGenes.c,v 1.22 2007-01-11 17:53:00 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -137,6 +137,13 @@ void selectFeatures(char* exonType,
 		  *p1 = gp->AcceptorProfile;
 		  *p2 = gp->DonorProfile;    
 		}
+	  if (!strcmp(exonType,sZEROLENGTH))
+		{
+		  *type1 = ACC;
+		  *type2 = DON;
+		  *p1 = gp->AcceptorProfile;
+		  *p2 = gp->DonorProfile;    
+		}
 	  if (!strcmp(exonType,sTERMINAL))
 		{
 		  *type1 = ACC;
@@ -150,6 +157,13 @@ void selectFeatures(char* exonType,
 		  *type2 = STO;
 		  *p1 = gp->StartProfile;
 		  *p2 = gp->StopProfile;    
+		}
+	  if (!strcmp(exonType,"Intron"))
+		{
+		  *type1 = ACC;
+		  *type2 = DON;
+		  *p1 = gp->AcceptorProfile;
+		  *p2 = gp->DonorProfile;		      
 		}
 	}
   /* Reverse strand */
@@ -169,6 +183,21 @@ void selectFeatures(char* exonType,
 		  *type1 = DON;
 		  *p2 = gp->AcceptorProfile;
 		  *p1 = gp->DonorProfile;    
+		}
+	  if (!strcmp(exonType,sZEROLENGTH))
+		{
+		  *type2 = ACC;
+		  *type1 = DON;
+		  *p2 = gp->AcceptorProfile;
+		  *p1 = gp->DonorProfile;    
+		}
+	  if (!strcmp(exonType,"Intron"))
+		{
+		  *type2 = ACC;
+		  *type1 = DON;
+		  *p2 = gp->AcceptorProfile;
+		  *p1 = gp->DonorProfile;
+		  printMess("Exon is Intron...");
 		}
 	  if (!strcmp(exonType,sTERMINAL))
 		{

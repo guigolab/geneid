@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: PrintExons.c,v 1.14 2006-12-21 13:56:54 talioto Exp $  */
+/*  $Id: PrintExons.c,v 1.15 2007-01-11 17:53:00 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -132,6 +132,8 @@ void PrintExons (exonGFF *e,
     case FIRST: strcpy(Type,sFIRST);
 	  break;
     case INTERNAL:strcpy(Type,sINTERNAL);
+      break;
+    case ZEROLENGTH:strcpy(Type,sZEROLENGTH);
       break;
     case TERMINAL:strcpy(Type,sTERMINAL);
       break;

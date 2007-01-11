@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: SwitchPositions.c,v 1.5 2006-12-11 09:50:48 talioto Exp $  */
+/*  $Id: SwitchPositions.c,v 1.6 2007-01-11 17:53:01 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -50,6 +50,14 @@ void SwitchPositions(packExons* allExons)
       (allExons->InternalExons+i)->Acceptor = 
 	(allExons->InternalExons+i)->Donor;
       (allExons->InternalExons+i)->Donor = c;
+    }
+
+  for (i=0;i<allExons->nZeroLengthExons;i++) 
+    {
+      c = (allExons->ZeroLengthExons+i)->Acceptor; 
+      (allExons->ZeroLengthExons+i)->Acceptor = 
+	(allExons->ZeroLengthExons+i)->Donor;
+      (allExons->ZeroLengthExons+i)->Donor = c;
     }
 
   for (i=0;i<allExons->nTerminalExons;i++) 

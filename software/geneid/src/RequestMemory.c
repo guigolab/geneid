@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: RequestMemory.c,v 1.13 2006-12-13 11:28:13 talioto Exp $  */
+/*  $Id: RequestMemory.c,v 1.14 2007-01-11 17:53:00 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -112,7 +112,13 @@ packExons* RequestMemoryExons()
   if ((allExons->InternalExons = 
        (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
     printError("Not enough memory: internal exons");
-      
+
+  /* ZeroLengthExons */
+  HowMany = (long)(NUMEXONS/RINTER); 
+  if ((allExons->ZeroLengthExons = 
+       (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
+    printError("Not enough memory: zero length exons");
+         
   /* TerminalExons */
   HowMany = (long)(NUMEXONS/RTERMI);
   if ((allExons->TerminalExons = 

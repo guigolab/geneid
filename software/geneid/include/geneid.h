@@ -28,7 +28,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/     
 
-/* $Id: geneid.h,v 1.28 2006-12-21 13:56:54 talioto Exp $ */
+/* $Id: geneid.h,v 1.29 2007-01-11 17:52:56 talioto Exp $ */
 
 /* Required libraries */
 #include <stdlib.h>
@@ -147,8 +147,8 @@ A. DEFINITIONS
 #define U2BP_PENALTY_SCALING_FACTOR 0 /* used to be 15 */
 
 /* Recursive splice site thresholds */
-#define RDT 3 /*donor*/
-#define RAT 3 /*acceptor*/
+#define RDT 4 /*donor*/
+#define RAT 4 /*acceptor*/
 #define sRSSMARKOVSCORE "RSS_Markov_Score"
 
 /* Markov score penalty for unknown symbols */
@@ -289,9 +289,11 @@ A. DEFINITIONS
 #define TERMINAL 2
 #define SINGLE   3
 #define ORF      4
+#define ZEROLENGTH      5
 
 #define sFIRST    "First"              
 #define sINTERNAL "Internal"
+#define sZEROLENGTH "RSS"
 #define sTERMINAL "Terminal"
 #define sSINGLE   "Single"
 #define sORF      "ORF"
@@ -423,11 +425,13 @@ typedef struct s_packExons
 {
   exonGFF* InitialExons;               
   exonGFF* InternalExons;
+  exonGFF* ZeroLengthExons;
   exonGFF* TerminalExons;
   exonGFF* Singles;
   exonGFF* ORFs;
   long nInitialExons;                  
   long nInternalExons;
+  long nZeroLengthExons;
   long nTerminalExons;
   long nSingles;
   long nORFs;
@@ -662,7 +666,13 @@ long BuildInternalExons(site *Acceptor, long nAcceptors,
 			char* ExonType,
 			char* Sequence,
                         exonGFF* Exon,long nexons);
- 
+long BuildZeroLengthExons(site *Acceptor, long nAcceptors, 
+                        site *Donor, long nDonors,
+                        site *Stop, long nStops,
+                        int MaxDonors,
+			char* ExonType,
+			char* Sequence,
+                        exonGFF* Exon,long nexons); 
 long BuildTerminalExons (site *Acceptor, long nAcceptors, 
                          site *Stop, long nStops,
                          long LengthSequence,

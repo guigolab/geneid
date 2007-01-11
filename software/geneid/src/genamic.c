@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: genamic.c,v 1.10 2006-12-21 13:56:54 talioto Exp $  */
+/*  $Id: genamic.c,v 1.11 2007-01-11 17:53:01 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -34,6 +34,15 @@ extern int GENEID;
 extern int RSS;
 extern float U12_SPLICE_SCORE_THRESH;
 extern float U12_EXON_SCORE_THRESH;
+int numRSS(exonGFF* E, int nRSS)
+{
+  int total = nRSS;
+  if ((E->Donor->Position == E->Acceptor->Position - 1)){
+    
+    total = numRSS(E->PreviousExon,++nRSS);
+  }
+  return total;
+}
 void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 {
   long i,j,j2;
@@ -46,7 +55,8 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
   char mess[MAXSTRING];
   int current_exon_is_u12 = 0;
   int thresholdmet = 1;
-   
+
+
   /* 0. Starting process ... */
   printMess("-- Running gene assembling (genamic) --");
 
@@ -96,6 +106,11 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
       (E+i)->PreviousExon = pg->Ghost;
       (E+i)->GeneScore = (E+i)->Score;
       current_exon_is_u12 = 0;
+	printMess(mess);
+      if (!strcmp((E+i)->Type,"Intron")){
+	(E+i)->Donor->class = U2;(E+i)->Acceptor->class = U2;(E+i)->offset1 = 0; (E+i)->offset2 = 0;	
+	printMess(mess);
+      }
       if (!strcmp((E+i)->Type,sEND) || !strcmp((E+i)->Type,sBEGIN)|| !strcmp((E+i)->Type,sSINGLE)){
 	current_exon_is_u12 = 0;
       }else{ 
@@ -110,6 +125,7 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
       }
 	  if (type != NOTFOUND)
 		{
+		  
 		  /* For every equivalent class building the best gene ending with it */
 		  for(h=0; h < gp->ne[type]; h++)
 		    {
@@ -117,71 +133,69 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 		      j = pg->je[etype];
 		      MaxDist = gp->Md[etype];
 		      MinDist = gp->md[etype];
-		      thresholdmet = 1;
-		      /* Checking maximum distance allowed requirement */
-		      if ((MaxDist != INFI) &&
-			  (pg->Ga[etype][frame][spliceclass]->Strand !='*') &&
-			  (pg->Ga[etype][frame][spliceclass]->Donor->Position 
-			   + 
-			   pg->Ga[etype][frame][spliceclass]->offset2) 
-			  < 
-			  ((E+i)->Acceptor->Position + (E+i)->offset1) - MaxDist) 
-			{
-			  /* loop backward searching another best gene matching MAX distance */
-			  pg->Ga[etype][frame][spliceclass] = pg->Ghost; 
-			  j2 = j-1;
-			  while (j2>=0 && j2 < pg->km[etype]  && 
-				 ((pg->d[etype][j2]->Donor->Position 
-				   + pg->d[etype][j2]->offset2)
-				  >= 
-				  ((E+i)->Acceptor->Position + (E+i)->offset1)
-				  - MaxDist))
-			    {
-			      remainder = pg->d[etype][j2]->Remainder;
-			      dclass = pg->d[etype][j2]->Donor->class;
+		      thresholdmet = 1;			  
+			/* Checking maximum distance allowed requirement */
+			if ((MaxDist != INFI) &&
+			    (pg->Ga[etype][frame][spliceclass]->Strand !='*') &&
+			    (pg->Ga[etype][frame][spliceclass]->Donor->Position 
+			     + 
+			     pg->Ga[etype][frame][spliceclass]->offset2) 
+			    < 
+			    ((E+i)->Acceptor->Position + (E+i)->offset1) - MaxDist) 
+			  {
+			    /* loop backward searching another best gene matching MAX distance */
+			    pg->Ga[etype][frame][spliceclass] = pg->Ghost; 
+			    j2 = j-1;
+			    while (j2>=0 && j2 < pg->km[etype]  && 
+				   ((pg->d[etype][j2]->Donor->Position 
+				     + pg->d[etype][j2]->offset2)
+				    >= 
+				    ((E+i)->Acceptor->Position + (E+i)->offset1)
+				    - MaxDist))
+			      {
+				remainder = pg->d[etype][j2]->Remainder;
+				dclass = pg->d[etype][j2]->Donor->class;
 
-			      if ((pg->d[etype][j2]->GeneScore > 
-				   pg->Ga[etype][remainder][dclass] -> GeneScore)
-				  &&
-				  (thresholdmet)  
-				  ){
-				pg->Ga[etype][remainder][dclass] = pg->d[etype][j2];
-			      }
-			      j2--;
-			    }
-			}
-			  
-		      /* Loop forward: One scan over each donor-sort array */
-		      /* while minimum distance allowed requirement is OK */
-		      /* Update best partial genes between current and previous exon */
-		      while(j < pg->km[etype] &&
-			    ((pg->d[etype][j]->Donor->Position 
-			      + pg->d[etype][j]->offset2)
-			     <= 
-			     ((E+i)->Acceptor->Position + (E+i)->offset1) - MinDist))
-			{
-			  remainder = pg->d[etype][j]->Remainder;
-			  dclass = pg->d[etype][j]->Donor->class;
-			  if ((frame == remainder && spliceclass == dclass &&
-			       ((pg->d[etype][j]->Donor->Position 
-				 + pg->d[etype][j]->offset2)
-				< 
-				((E+i)->Acceptor->Position + (E+i)->offset1) - MaxDist)))
-			    {
-			      /* Skip this exon because max distance not ok */
-			    }
-			  else
-			    {
-			      if (pg->d[etype][j]->GeneScore > pg->Ga[etype][remainder][dclass]->GeneScore) 
-				{
-				  pg->Ga[etype][remainder][dclass] = pg->d[etype][j];
+				if ((pg->d[etype][j2]->GeneScore > 
+				     pg->Ga[etype][remainder][dclass] -> GeneScore)
+				    ){
+				  pg->Ga[etype][remainder][dclass] = pg->d[etype][j2];
 				}
-			      													
-			    }
-			  j++;
-			}
-		      pg->je[etype] = j;
+				j2--;
+			      }
+			  }
 			  
+			/* Loop forward: One scan over each donor-sort array */
+			/* while minimum distance allowed requirement is OK */
+			/* Update best partial genes between current and previous exon */
+			while(j < pg->km[etype] &&
+			      ((pg->d[etype][j]->Donor->Position 
+				+ pg->d[etype][j]->offset2)
+			       <= 
+			       ((E+i)->Acceptor->Position + (E+i)->offset1) - MinDist))
+			  {
+			    remainder = pg->d[etype][j]->Remainder;
+			    dclass = pg->d[etype][j]->Donor->class;
+			    if ((frame == remainder && spliceclass == dclass &&
+				 ((pg->d[etype][j]->Donor->Position 
+				   + pg->d[etype][j]->offset2)
+				  < 
+				  ((E+i)->Acceptor->Position + (E+i)->offset1) - MaxDist)))
+			      {
+				/* Skip this exon because max distance not ok */
+			      }
+			    else
+			      {
+				if (pg->d[etype][j]->GeneScore > pg->Ga[etype][remainder][dclass]->GeneScore) 
+				  {
+				    pg->Ga[etype][remainder][dclass] = pg->d[etype][j];
+				  }
+			      													
+			      }
+			    j++;
+			  }
+			pg->je[etype] = j;
+/* 		      } */
 		      /* Assembling the exon with the best compatible gene before it */
 		      /* Verify group rules if there are evidence exons (annotations) */
 		      if (current_exon_is_u12){
@@ -193,10 +207,8 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 			    thresholdmet = 1;
 			  } else {
 			    thresholdmet = 0;
-			    
 			  }
-			} else {
-			  
+			} else {			  
 			  thresholdmet = 0;
 			}			  	
 		      } else {
@@ -214,48 +226,60 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 			  )
 			{
 			  
-			  if (RSS && ((E+i)->Donor->Position == (E+i)->Donor->Position -1)){
-			    (E+i)->GeneScore = pg->Ga[etype][frame][spliceclass]->GeneScore + (E+i)->Score; 
+			  if (!strcmp((E+i)->Type,"Intron")){
+			    (E+i)->GeneScore = pg->Ga[etype][frame][spliceclass]->GeneScore + (E+i)->Score;
 			    (E+i)->PreviousExon = pg->Ga[etype][frame][spliceclass];
 			    (E+i)->Frame = pg->Ga[etype][frame][spliceclass]->Frame;
 			    (E+i)->Remainder = pg->Ga[etype][frame][spliceclass]->Remainder;
 			    (E+i)->lValue = pg->Ga[etype][frame][spliceclass]->lValue;
 			    (E+i)->rValue = pg->Ga[etype][frame][spliceclass]->rValue;
-			  }else{
+			  }else
+			    {if (RSS && ((E+i)->Donor->Position == (E+i)->Acceptor->Position -1)){
+				(E+i)->GeneScore = pg->Ga[etype][frame][spliceclass]->GeneScore + (E+i)->Score;
+				(E+i)->PreviousExon = pg->Ga[etype][frame][spliceclass];
+				(E+i)->Frame = pg->Ga[etype][frame][spliceclass]->Frame;
+				(E+i)->Remainder = pg->Ga[etype][frame][spliceclass]->Remainder;
+				(E+i)->lValue = pg->Ga[etype][frame][spliceclass]->lValue;
+				(E+i)->rValue = pg->Ga[etype][frame][spliceclass]->rValue;
+			      }else{
 
-			    if (((E+i)->Strand == '+') && 
-				((pg->Ga[etype][frame][spliceclass]->rValue == 1 && (E+i)->lValue == 1)
-				 ||
-				 (pg->Ga[etype][frame][spliceclass]->rValue == 2 && (E+i)->lValue == 2)
-				 ||
-				 (pg->Ga[etype][frame][spliceclass]->rValue == 3 && ((E+i)->lValue == 2 || (E+i)->lValue == 3))))
-			      {
-				/* FWD: Avoiding building a stop codon */
-			      }
-			    else
-			      {
-				if (((E+i)->Strand == '-') && 
-				    ((pg->Ga[etype][frame][spliceclass]->lValue == 1 && (E+i)->rValue == 1)
-				     ||
-				     (pg->Ga[etype][frame][spliceclass]->lValue == 2 && (E+i)->rValue == 2)
-				     ||
-				     ((pg->Ga[etype][frame][spliceclass]->lValue == 2 || pg->Ga[etype][frame][spliceclass]->lValue == 3) && (E+i)->rValue == 3)))
-				  {
-				    /* RVS: Avoiding building a stop codon */
-				  }
-				else
-				  {
-				    (E+i)->GeneScore = pg->Ga[etype][frame][spliceclass]->GeneScore + (E+i)->Score;  
-				    (E+i)->PreviousExon = pg->Ga[etype][frame][spliceclass];
-				  }
-			      }
-			  }
+			       if (((E+i)->Strand == '+') && 
+				   ((pg->Ga[etype][frame][spliceclass]->rValue == 1 && (E+i)->lValue == 1)
+				    ||
+				    (pg->Ga[etype][frame][spliceclass]->rValue == 2 && (E+i)->lValue == 2)
+				    ||
+				    (pg->Ga[etype][frame][spliceclass]->rValue == 3 && ((E+i)->lValue == 2 || (E+i)->lValue == 3))))
+				 {
+				   /* FWD: Avoiding building a stop codon */
+				 }
+			       else
+				 {
+				   if (((E+i)->Strand == '-') && 
+				       ((pg->Ga[etype][frame][spliceclass]->lValue == 1 && (E+i)->rValue == 1)
+					||
+					(pg->Ga[etype][frame][spliceclass]->lValue == 2 && (E+i)->rValue == 2)
+					||
+					((pg->Ga[etype][frame][spliceclass]->lValue == 2 || pg->Ga[etype][frame][spliceclass]->lValue == 3) && (E+i)->rValue == 3)))
+				     {
+				       /* RVS: Avoiding building a stop codon */
+				     }
+				   else
+				     {
+				       /* printMess("Exon is Intron..."); */
+				       (E+i)->GeneScore = pg->Ga[etype][frame][spliceclass]->GeneScore + (E+i)->Score;
+				       (E+i)->PreviousExon = pg->Ga[etype][frame][spliceclass];
+
+				     }
+				 }
+			     }
+			    }
 			}
 		    }
 
 		  /* Updating the best gene assembled (final gene) */
-		  if (((E+i)->GeneScore) > (pg->GOptim -> GeneScore))
+		  if (((E+i)->GeneScore) > (pg->GOptim -> GeneScore)){
 		    pg->GOptim = (E+i);
+		  }
 		}
     }
 
