@@ -129,14 +129,6 @@ my $remote_host = $ENV{REMOTE_HOST};
 my $unique_id   = int (rand (9)) . int (rand (9));
 my $request_id  = $starttime . "_" . $unique_id;
 
-# Disable for the time being until i find out how to propagate the request id...
-
-# $moby_logger->info ("$request_id: User request from remote host, $remote_host ($IP_address)");
-# $moby_logger->info ("$request_id: Started at, $starttime");
-
-$moby_logger->info ("User request from remote host, $remote_host ($IP_address)");
-$moby_logger->info ("Started at, $starttime");
-
 # Get the service name
 
 $x->on_action(sub {
@@ -145,8 +137,20 @@ $x->on_action(sub {
     # die "SOAPAction shall match 'uri#method'\n" if $action ne join '#', @_;
     $serviceName = $2;
 
+    # Disable for the time being until i find out how to propagate the request id...
+
     # $moby_logger->info ("$request_id: Executing $serviceName service hosted by service provider authority, $URI");
-    $moby_logger->info ("Executing $serviceName service hosted by service provider authority, $URI");
+    # $moby_logger->info ("$request_id: User request from remote host, $remote_host ($IP_address)");
+    # $moby_logger->info ("$request_id: Started at, $starttime");    
+
+    $moby_logger->info ("START = $starttime");
+    $moby_logger->info ("SERVICE = $serviceName");
+    $moby_logger->info ("URI = $URI");
+    $moby_logger->info ("IP = $IP_address");
+    if (defined $remote_host) {
+      $moby_logger->info ("REMOTEHOST = $remote_host");
+    }
+      
 });
 
 $x->dispatch_with({
@@ -231,6 +235,6 @@ my $endtime;
 
 # $moby_logger->info ("$request_id: Ending at, $endtime");
 # $moby_logger->info ("$request_id: Total execution time: ", timestr (timediff ($endtime_benchmark, $starttime_benchmark)));
-$moby_logger->info ("Ending at, $endtime");
-$moby_logger->info ("Total execution time: ", timestr (timediff ($endtime_benchmark, $starttime_benchmark)));
+$moby_logger->info ("END = $endtime");
+$moby_logger->info ("TOTALEXECUTIONTIME = ", timestr (timediff ($endtime_benchmark, $starttime_benchmark)));
 $moby_logger->info ("#");

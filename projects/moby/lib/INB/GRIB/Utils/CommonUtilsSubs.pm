@@ -995,15 +995,15 @@ sub setMobyResponse {
 	# Check 'error' first then 'warning' or 'information'
 	if (defined $severities{error}) {
 	    my $exception = $severities{error};
-	    $moby_logger->info ("$serviceName failed");
-	    $moby_logger->info ("Exception code, " . $exception->getExceptionCode);
-	    $moby_logger->info ("Exception message, " . $exception->getExceptionMessage);
+	    $moby_logger->info ("RESULT = $serviceName failed");
+	    $moby_logger->info ("STATUS = " . $exception->getExceptionCode);
+	    $moby_logger->info ("STATUSMESSAGE = " . $exception->getExceptionMessage);
 	}
 	elsif (defined $severities{warning} || defined $severities{information}) {
 	    my $exception = $severities{warning} || $severities{information};
-	    $moby_logger->info ("$serviceName terminated successfully with warning or information notes");
-	    $moby_logger->info ("Exception code, " . $exception->getExceptionCode);
-	    $moby_logger->info ("Exception message, " . $exception->getExceptionMessage);
+	    $moby_logger->info ("RESULT = $serviceName terminated successfully with warning or information notes");
+	    $moby_logger->info ("STATUS = " . $exception->getExceptionCode);
+	    $moby_logger->info ("STATUSMESSAGE = " . $exception->getExceptionMessage);
 	}
 	
 	return responseHeader(
@@ -1013,8 +1013,8 @@ sub setMobyResponse {
 	    . $MOBY_RESPONSE . responseFooter;
     }
     else {
-	$moby_logger->info ("$serviceName terminated successfully");
-	$moby_logger->info ("Exception code, 700");
+	$moby_logger->info ("RESULT = $serviceName terminated successfully");
+	$moby_logger->info ("STATUS = 0");
 	
 	my $note = "Service execution succeeded";
 	return responseHeader (
