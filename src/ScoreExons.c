@@ -576,6 +576,9 @@ long Score(exonGFF *Exons,
       if (!(strcmp((Exons+i)->Type,sINTERNAL)))
 		p = gp->Internal;
 
+      if (!(strcmp((Exons+i)->Type,sZEROLENGTH)))
+		p = gp->Internal;
+
       if (!(strcmp((Exons+i)->Type,sTERMINAL)))
 		p = gp->Terminal;
 
@@ -656,7 +659,7 @@ void ScoreExons(char *Sequence,
                 long l1,
                 long l2,
                 int Strand,
-				packExternalInformation* external,
+		packExternalInformation* external,
                 packHSP* hsp,
                 gparam** isochores,
                 int nIsochores,
@@ -704,6 +707,14 @@ void ScoreExons(char *Sequence,
 								 external, hsp, 
 								 isochores, GCInfo);
   sprintf(mess,"Internal Exons \t\t%8ld", allExons->nInternalExons);
+  printRes(mess); 
+   
+  allExons->nZeroLengthExons=Score(allExons->ZeroLengthExons,
+								 allExons->nZeroLengthExons, 
+								 l1, l2, Strand, 
+								 external, hsp, 
+								 isochores, GCInfo);
+  sprintf(mess,"Zero-length Exons \t\t%8ld", allExons->nZeroLengthExons);
   printRes(mess); 
    
   allExons->nTerminalExons=Score(allExons->TerminalExons,

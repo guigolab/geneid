@@ -32,6 +32,9 @@ Exon_factor
 HSP_factor
 1.0 1.0 1.0 1.0
 
+RSS_Markov_Score
+0
+
 U12_Splice_Score_Threshold
 9
 
@@ -20786,6 +20789,9 @@ Exon_factor
 
 HSP_factor
 1.0 1.0 1.0 1.0
+
+RSS_Markov_Score
+0
 
 U12_Splice_Score_Threshold
 9
@@ -41542,6 +41548,9 @@ Exon_factor
 HSP_factor
 1.0 1.0 1.0 1.0
 
+RSS_Markov_Score
+0
+
 U12_Splice_Score_Threshold
 9
 
@@ -62277,8 +62286,8 @@ maximum_number_of_donors_per_acceptor_site
 # GENE MODEL: Rules about gene assembling (GenAmic)
 General_Gene_Model
 # INTRAgenic connections
-First+:Internal+                Internal+:Terminal+             40:40000 block
-Terminal-:Internal-             First-:Internal-                40:40000 blockr
+First+:Internal+                Internal+:Terminal+             20:40000 block
+Terminal-:Internal-             First-:Internal-                20:40000 blockr
 # External features
 Promoter+                       First+:Single+                  50:4000
 Terminal+:Single+               aataaa+                         50:4000

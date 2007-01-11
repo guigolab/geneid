@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: SortExons.c,v 1.12 2006-12-13 11:28:13 talioto Exp $  */
+/*  $Id: SortExons.c,v 1.13 2007-01-11 17:53:00 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -315,6 +315,15 @@ void SortExons(packExons* allExons,
       UpdateList(&(ExonList[acceptor + offset]), allExons->InternalExons+i); 
     }
 
+  for (i=0;i<allExons->nZeroLengthExons;i++) 
+    {
+      acceptor=(allExons->ZeroLengthExons+i)->Acceptor->Position - left;
+      (allExons->ZeroLengthExons+i)->Strand = '+';
+      CorrectExon(allExons->ZeroLengthExons+i);
+      offset = (allExons->ZeroLengthExons+i)->offset1;
+      UpdateList(&(ExonList[acceptor + offset]), allExons->ZeroLengthExons+i); 
+    }
+
   for (i=0;i<allExons->nTerminalExons;i++) 
     {
       acceptor=(allExons->TerminalExons+i)->Acceptor->Position - left;
@@ -362,6 +371,15 @@ void SortExons(packExons* allExons,
       UpdateList(&(ExonList[acceptor + offset]), allExons_r->InternalExons+i); 
     }
 
+  for (i=0;i<allExons_r->nZeroLengthExons;i++) 
+    {
+      acceptor=(allExons_r->ZeroLengthExons+i)->Acceptor->Position - left;
+      (allExons_r->ZeroLengthExons+i)->Strand = '-';
+      CorrectExon(allExons_r->ZeroLengthExons+i);
+      offset = (allExons_r->ZeroLengthExons+i)->offset1;
+      UpdateList(&(ExonList[acceptor + offset]), allExons_r->ZeroLengthExons+i); 
+    }
+
   for (i=0;i<allExons_r->nTerminalExons;i++) 
     {   
       acceptor=(allExons_r->TerminalExons+i)->Acceptor->Position - left;
@@ -394,6 +412,8 @@ void SortExons(packExons* allExons,
   if (EVD && pv != NULL)
     for (i = external->i1vExons; i < external->i2vExons ; i++) 
       {  
+	(pv->vExons + i)->Acceptor->class = U2;
+	(pv->vExons + i)->Donor->class = U2;
 		acceptor=(pv->vExons + i)->Acceptor->Position - left;
 		offset = (pv->vExons + i)->offset1;
 		room = ((acceptor + offset)<0)? 0 : (acceptor + offset);
@@ -423,8 +443,9 @@ void SortExons(packExons* allExons,
 						(pv->vExons + i)->Frame);
 				printMess(mess);
 			  }
-			else
+			else{
 			  UpdateList(&(ExonList[room]), pv->vExons+i);
+			}
 		  }
       }
 

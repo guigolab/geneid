@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: BuildInternalExons.c,v 1.9 2006-12-21 13:56:54 talioto Exp $  */
+/*  $Id: BuildInternalExons.c,v 1.10 2007-01-11 17:53:00 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -52,8 +52,7 @@ long BuildInternalExons(site *Acceptor, long nAcceptors,
   } *LocalExon; 
   int nLocalExons, LowestLocalExon;
   float LowestLocalScore;
-  /* char mess[MAXSTRING]; */
-
+  
   /* Boolean array of windows: closed or opened */ 
   int Frame[FRAMES];
   
@@ -96,28 +95,6 @@ long BuildInternalExons(site *Acceptor, long nAcceptors,
       /* Save counter j for the next iteration */
       js=j;
       
-      /* Skip previous Donors to current Acceptor */
-      while ((k < nDonors) && ((Donor+k)->Position < (Acceptor+i)->Position - 1))
-	k++;
-      if (RSS){
-	if (((Donor+k)->Position == (Acceptor+i)->Position - 1)&&((Donor+k)->Score > RDT) &&((Acceptor+i)->Score > RAT)){
-	  /* Make a zero length exon representing the recursive splice site */
-	  (LocalExon+nLocalExons)->Acceptor=(Acceptor+i);
-	  (LocalExon+nLocalExons)->Donor=(Donor+k);
-					  
-	  /* Saving the exon in the opened frames */
-	  for (ll=0;ll<FRAMES;ll++)
-	    (LocalExon+nLocalExons)->Frame[ll]=Frame[ll];
-					  
-	  /* Updating the worst exon pointer */
-	  if ((Donor+k)->Score < LowestLocalScore)
-	    {
-	      LowestLocalScore = (Donor+k)->Score;
-	      LowestLocalExon = nLocalExons;
-	    }
-	  nLocalExons++;
-	}
-      }
       /* Skip previous Donors to current Acceptor plus minimum exon length */
       /* Minimal length: EXONLENGTH */
       while ((k < nDonors) && ((Donor+k)->Position < (Acceptor+i)->Position + EXONLENGTH))
@@ -275,8 +252,6 @@ long BuildInternalExons(site *Acceptor, long nAcceptors,
 		  if ((Exon+nExon)->Donor->Position == (Exon+nExon)->Acceptor->Position - 1){
 		    (Exon+nExon)->rValue = 0;
 		    (Exon+nExon)->lValue = 0;
-		  }else{
-		    ComputeStopInfo((Exon+nExon),Sequence);
 		  }
 		}
 		nExon++;

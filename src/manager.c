@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/* $Id: manager.c,v 1.10 2006-12-21 13:56:54 talioto Exp $ */
+/* $Id: manager.c,v 1.11 2007-01-11 17:53:01 talioto Exp $ */
 
 #include "geneid.h"
 
@@ -255,7 +255,16 @@ void  manager(char *Sequence,
 					   allExons->InternalExons,NUMEXONS);
   sprintf(mess,"Internal Exons \t\t%8ld", allExons->nInternalExons);
   printRes(mess); 
-  
+
+  allExons->nZeroLengthExons =
+	BuildZeroLengthExons(allSites->AcceptorSites,allSites->nAcceptorSites,
+					   allSites->DonorSites,allSites->nDonorSites,
+					   allSites->StopCodons,allSites->nStopCodons,
+					   gp->MaxDonors,sZEROLENGTH,Sequence,
+					   allExons->ZeroLengthExons,NUMEXONS);
+  sprintf(mess,"Zero-Length Exons \t\t%8ld", allExons->nZeroLengthExons);
+  printRes(mess); 
+    
   allExons->nTerminalExons =
     BuildTerminalExons(allSites->AcceptorSites,allSites->nAcceptorSites,
 					   allSites->StopCodons,allSites->nStopCodons,
@@ -296,6 +305,7 @@ void  manager(char *Sequence,
   allExons->nExons =
     allExons->nInitialExons +
     allExons->nInternalExons +
+    allExons->nZeroLengthExons +
     allExons->nTerminalExons +
     allExons->nSingles +
     allExons->nORFs;

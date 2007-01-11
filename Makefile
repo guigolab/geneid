@@ -13,12 +13,12 @@ HEADERS = $(INCLUDE)/geneid.h
 PROGRAM= geneid
 PRODUCT= $(BIN)/$(PROGRAM)
 CC=gcc
-OPTS=-I$(INCLUDE) -Wall -O3 -g 
+OPTS=-I$(INCLUDE) -Wall -O3  
 ### OPTS=-I$(INCLUDE) -Wall -O3 -g
 #######
 
 OBJECTS = $(OBJ)/BackupGenes.o $(OBJ)/BuildAcceptors.o $(OBJ)/BuildU12Acceptors.o $(OBJ)/BuildDonors.o \
-	$(OBJ)/BuildInitialExons.o $(OBJ)/BuildInternalExons.o \
+	$(OBJ)/BuildInitialExons.o $(OBJ)/BuildInternalExons.o $(OBJ)/BuildZeroLengthExons.o \
 	$(OBJ)/BuildORFs.o $(OBJ)/BuildSingles.o $(OBJ)/BuildSort.o $(OBJ)/BuildTerminalExons.o \
 	$(OBJ)/ComputeStopInfo.o $(OBJ)/CookingGenes.o $(OBJ)/CorrectExon.o \
 	$(OBJ)/Dictionary.o $(OBJ)/DumpHash.o $(OBJ)/FetchSequence.o \
@@ -83,6 +83,9 @@ $(OBJ)/BuildInitialExons.o : $(CDIR)/BuildInitialExons.c $(HEADERS)
 
 $(OBJ)/BuildInternalExons.o : $(CDIR)/BuildInternalExons.c $(HEADERS)
 	$(CC) -c $(OPTS) $(CDIR)/BuildInternalExons.c -o $(OBJ)/BuildInternalExons.o
+
+$(OBJ)/BuildZeroLengthExons.o : $(CDIR)/BuildZeroLengthExons.c $(HEADERS)
+	$(CC) -c $(OPTS) $(CDIR)/BuildZeroLengthExons.c -o $(OBJ)/BuildZeroLengthExons.o
 
 $(OBJ)/BuildORFs.o : $(CDIR)/BuildORFs.c $(HEADERS)	
 	$(CC) -c $(OPTS) $(CDIR)/BuildORFs.c -o $(OBJ)/BuildORFs.o

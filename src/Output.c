@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: Output.c,v 1.16 2006-12-11 09:50:48 talioto Exp $  */
+/*  $Id: Output.c,v 1.17 2007-01-11 17:53:00 talioto Exp $  */
 
 #include "geneid.h"
 extern int U12GTAG;
@@ -184,6 +184,8 @@ void Output(packSites* allSites,
 	  if (EIP){
 		PrintExons(allExons->InternalExons,allExons->nInternalExons,
 				   INTERNAL, Locus, l1, l2, Sequence, dAA);
+		PrintExons(allExons->ZeroLengthExons,allExons->nZeroLengthExons,
+				   ZEROLENGTH, Locus, l1, l2, Sequence, dAA);
       }
 	  if (ETP){
 		PrintExons(allExons->TerminalExons,allExons->nTerminalExons,
@@ -226,6 +228,8 @@ void Output(packSites* allSites,
 	  if (EIP){
 		PrintExons(allExons_r->InternalExons,allExons_r->nInternalExons,
 				   INTERNAL, Locus, l1, l2, Sequence, dAA);
+		PrintExons(allExons_r->ZeroLengthExons,allExons_r->nZeroLengthExons,
+				   ZEROLENGTH, Locus, l1, l2, Sequence, dAA);
       }
 	  if (ETP){
 		PrintExons(allExons_r->TerminalExons,allExons_r->nTerminalExons,
