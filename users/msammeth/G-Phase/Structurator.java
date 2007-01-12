@@ -24,6 +24,7 @@ import gphase.io.gtf.EncodeWrapper;
 import gphase.model.ASMultiVariation;
 import gphase.model.ASVariation;
 import gphase.model.Graph;
+import gphase.model.Species;
 import gphase.model.SpliceSite;
 import gphase.model.Transcript;
 import gphase.tools.Arrays;
@@ -40,6 +41,8 @@ public class Structurator {
 	final static Color ADON_COL= new Color(16, 129, 64);
 	final static Color IR_COL= new Color(246, 235, 22);
 	final static Color OTHERS_COL= new Color(192, 192, 192);
+	
+	static String speStr= Species.SP_UCSC_CGI_STRINGS[0];
 	
 	static void include(PrintStream p, String fName) {
 		
@@ -105,6 +108,7 @@ public class Structurator {
 		int codingCode= ASVariation.TYPE_ALL;
 		String fName= null;
 		boolean html= false;
+		boolean nmd= true;
 		for (int i = 0; i < args.length; i++) {
 			if (args[i].equalsIgnoreCase("-codingTranscripts"))
 				codingTranscripts= true;
@@ -128,8 +132,35 @@ public class Structurator {
 			if (args[i].equalsIgnoreCase("-html"))
 				html= true;
 			
+			if (args[i].equalsIgnoreCase("-nonmd"))
+				nmd= false;
+			if (args[i].equalsIgnoreCase("-nmd"))
+				nmd= true;
+			
 			if (!args[i].startsWith("-")|| args[i].contains(File.separator))
 				fName= args[i];
+
+			if (args[i].equalsIgnoreCase("-species")) {
+				if (i+1>= args.length) {
+					System.err.println("provide species name");
+					break;
+				}
+				String[] spe= Species.SP_NAMES_COMMON;
+				speStr= null;
+				for (int j = 0; j < spe.length; j++) 
+					if (spe[j].equalsIgnoreCase(args[i+1])) {
+						speStr= Species.SP_UCSC_CGI_STRINGS[j];
+						++i;
+						break;
+					}
+				if (speStr== null) {
+					System.err.println("Unknown species: "+args[i+1]);
+					System.err.print("Enter one of the following: ");
+					for (int j = 0; j < spe.length; j++) 
+						System.err.print(spe[j]+" ");
+				}
+				
+			}
 		}
 		
 		if (html&& fName== null) {
@@ -152,6 +183,8 @@ public class Structurator {
 			g.filterNonCodingTranscripts();
 		if (noncodTranscripts)
 			g.filterCodingTranscripts();
+		if (nmd)
+			g.filterNMDTranscripts();
 		
 			// get vars
 		ASVariation[][] vars= g.getASVariations(filterCode);
@@ -165,27 +198,31 @@ public class Structurator {
 			ASAnalyzer.outputVariations(vars, false, false, System.out);
 		
 		long t1= System.currentTimeMillis();
-		System.out.println(t1-t0);
+		System.out.println("time: "+ (t1-t0)+"[msec]");
 	}
 	
 	static void writeHTML(ASVariation[][] vars, String fName) {
 		
-		fName= fName.substring(0, fName.lastIndexOf(File.separator));
+		int pos= fName.lastIndexOf(File.separator);
+		if (pos< 0)
+			fName= "";
+		else
+			fName= fName.substring(0, pos)+ File.separator;
 		
 		PrintStream p;
 		try {
 			writePiePicture(vars, fName);
 			writePictures(vars, fName);
 			
-			p= new PrintStream(fName+ File.separator+ "statistics.html");
+			p= new PrintStream(fName+ "statistics.html");
 			writeHTMLStats(vars, p);
 			p.flush(); p.close();
 			
 			for (int i = 0; vars!= null&& i < vars.length; i++) {
 				String varStr= vars[i][0].toString();
-				String varFStr= varStr.replace('/', '_')+ ".html";
+				String varFStr= convertFName(varStr)+ ".html";	//varStr.replace(' ', '_')+ ;
 				
-				p= new PrintStream(fName+ File.separator+ varFStr);
+				p= new PrintStream(fName+ varFStr);
 				writeHTMLNumbers(vars[i], p);
 				p.flush(); p.close();
 			}
@@ -205,15 +242,15 @@ public class Structurator {
 		
 		int sum= 0;
 		for (int i = 0; vars!= null&& i < vars.length; i++) {
-			if (vars[i][0].toString().equals("( // 1=2^)"))
+			if (vars[i][0].toString().equals("1-2^ , 0"))
 				pie.AddPieSlice(vars[i].length, "exon skipping", EXSKIP_COL);
-			else if (vars[i][0].toString().equals("( // 1=2^3=4^)"))
+			else if (vars[i][0].toString().equals("1-2^3-4^ , 0"))
 				pie.AddPieSlice(vars[i].length, "double skipping", DBLSKIP_COL);
-			else if (vars[i][0].toString().equals("(1= // 2=)"))
+			else if (vars[i][0].toString().equals("1- , 2-"))
 				pie.AddPieSlice(vars[i].length, "alt acceptor", AACC_COL);
-			else if (vars[i][0].toString().equals("(1^ // 2^)"))
+			else if (vars[i][0].toString().equals("1^ , 2^"))
 				pie.AddPieSlice(vars[i].length, "alt donor", ADON_COL);
-			else if (vars[i][0].toString().equals("( // 1^2=)"))
+			else if (vars[i][0].toString().equals("1^2- , 0"))
 				pie.AddPieSlice(vars[i].length, "intron retention", IR_COL);
 			else
 				sum+= vars[i].length;
@@ -230,7 +267,7 @@ public class Structurator {
 //		frame.getContentPane().add(pie);
 //		frame.setVisible(true);
 		try {
-		      File f= new File(path+File.separator+"distribution.png");
+		      File f= new File(path+"distribution.png");
 			  ExportFileType t= (ExportFileType) ExportFileType.getExportFileTypes("png").get(0);
 		      t.exportToFile(f,pie,pie.getParent(),null,null);
 		} catch (Exception e) {
@@ -242,8 +279,8 @@ public class Structurator {
 		for (int i = 0; vars!= null&& i < vars.length; i++) {
 			try {
 			      String varStr= vars[i][0].toString();
-			      String varFStr= varStr.replace('/', '_')+ ".gif";
-			      File f= new File(path+File.separator+varFStr);
+			      String varFStr= convertFName(varStr)+ ".gif";		//varStr.replace(' ', '_');
+			      File f= new File(path+varFStr);
 				  ExportFileType t= (ExportFileType) ExportFileType.getExportFileTypes("gif").get(0);
 			      Component component= new CopyOfSpliceOSigner(vars[i][0]);
 			      component.setSize(component.getPreferredSize());
@@ -295,7 +332,7 @@ public class Structurator {
 				percStr= percStr.substring(0, cutoff)+ "%";
 				p.println("\t<TD align=\"right\" valign=\"center\" width=\"120\">"+ percStr+ "</TD>");
 				String varStr= vars[i][0].toString();
-				String varFStr= varStr.replace('/', '_');
+				String varFStr= convertFName(varStr);	//varStr.replace(' ', '_');
 				p.println("\t<TD align=\"left\" valign=\"center\">"
 						+ "<img src=\""+ varFStr+".gif\"><br>"
 						+ "<a href=\""+ varFStr+".html\">"
@@ -309,6 +346,22 @@ public class Structurator {
 		p.println("</HTML>");
 	}
 
+	private static String convertFName(String in) {
+		StringBuffer sb= new StringBuffer(in);
+			// kill spaces
+		for (int i = 0; i < sb.length(); i++) 
+			if (sb.charAt(i)== ' ')
+				sb.deleteCharAt(i--);
+		String out= sb.toString();
+		out= out.replace('^', 'd');
+		out= out.replace('-', 'a');
+		out= out.replace(',', 'I');
+		if (out.length()> 245)	
+			out= out.substring(0, 245);	// max fname len
+		
+		return out;
+	}
+	
 	static void writeHTMLNumbers(ASVariation[] vars, PrintStream p) {
 		p.println("<HTML>");
 		p.println("<HEAD>");
@@ -331,7 +384,11 @@ public class Structurator {
 			
 				// event
 			SpliceSite[] su= vars[i].getSpliceUniverse();
-			String ucscEvent= "http://genome.ucsc.edu/cgi-bin/hgTracks?org=Homo_sapiens&db=hg17&position=chr"
+				// org=D.+melanogaster
+				// org=Homo_sapiens&db=hg17
+				//&clade=vertebrate&org=Mouse&db=mm8
+			String ucscEvent= "http://genome.ucsc.edu/cgi-bin/hgTracks?" +
+				"org="+ speStr+ "&position=chr"
 				+ vars[i].getGene().getChromosome()+ ":"+Math.abs(su[0].getPos())+"-"+ Math.abs(su[su.length- 1].getPos());
 			p.println("\t<TD bgcolor=\""+colStr+"\" valign=\"middle\" width=\"120\"><a href=\""
 					+ ucscEvent+"\">"+ (i+1)+ "</a></TD>");
@@ -361,7 +418,7 @@ public class Structurator {
 					+ vars[i].getGene().getChromosome()+ ":"+ pos2Str+ "</TD>");
 
 			String varStr= vars[i].toString();
-			String varFStr= varStr.replace('/', '_');
+			String varFStr= convertFName(varStr);	//varStr.replace(' ', '_');
 			p.println("\t<TD bgcolor=\""+colStr+"\" valign=\"top\" width=\"120\">"
 					+ "<img src=\""+ varFStr+".gif\"><br>"
 					+ varStr+ "</TD>");
