@@ -10,6 +10,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
@@ -20,6 +21,7 @@ import javax.swing.JFrame;
 import org.freehep.util.export.ExportFileType;
 
 import gphase.algo.ASAnalyzer;
+import gphase.ext.DevNullReaderThread;
 import gphase.gui.CopyOfSpliceOSigner;
 import gphase.gui.pie.Pie;
 import gphase.io.gtf.EncodeWrapper;
@@ -173,10 +175,12 @@ public class Structurator {
 				System.exit(-1);
 			} else {
 				PrintStream sysOut= System.out;
-				File redStr;
+				PipedInputStream pin= new PipedInputStream();
+				DevNullReaderThread nil= new DevNullReaderThread(pin);
+				nil.start();
 				try {
-					redStr = File.createTempFile(fName, ".delme");
-					System.setOut(new PrintStream(redStr));
+					PipedOutputStream pout= new PipedOutputStream(pin);
+					System.setOut(new PrintStream(pout));
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
