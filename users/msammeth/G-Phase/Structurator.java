@@ -9,6 +9,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PipedOutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.util.Properties;
@@ -129,8 +131,10 @@ public class Structurator {
 			if (args[i].equalsIgnoreCase("-3UTR"))
 				codingCode= ASVariation.TYPE_3UTR;
 
-			if (args[i].equalsIgnoreCase("-html"))
+			if (args[i].equalsIgnoreCase("-html")) {
 				html= true;
+			}
+
 			
 			if (args[i].equalsIgnoreCase("-nonmd"))
 				nmd= false;
@@ -163,10 +167,22 @@ public class Structurator {
 			}
 		}
 		
-		if (html&& fName== null) {
-			System.err.println("Cannot guess output directory for html files");
-			System.exit(-1);
+		if (html) {
+			if (fName== null) {
+				System.err.println("Cannot guess output directory for html files");
+				System.exit(-1);
+			} else {
+				PrintStream sysOut= System.out;
+				File redStr;
+				try {
+					redStr = File.createTempFile(fName, ".delme");
+					System.setOut(new PrintStream(redStr));
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
+
 		
 			// read
 		EncodeWrapper enc;
