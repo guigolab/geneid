@@ -659,6 +659,8 @@ public class Graph implements Serializable {
 				+ Constants.SEQUENCES_SUBDIR+ File.separator
 				+ seqDirName);
 		String[] list= speciesGenome.list();
+		if (list== null)
+			System.err.println("\nSequence Directory not found: "+ speciesGenome.getAbsolutePath()+"\nplease provide build version: "+spe.getBuildVersion());
 		int i;
 		for (i = 0; i < list.length; i++) {
 			if (list[i].indexOf(new Integer(spe.getBuildVersion()).toString())>= 0)	// dateID
@@ -1223,7 +1225,7 @@ public class Graph implements Serializable {
 	 *
 	 */
 	public void filterSingleTranscriptGenes() {
-		System.out.println("filter single transcript genes");
+		System.out.print("filter single transcript genes..");
 		int rgen= 0;
 		Species[] spec= getSpecies();
 		for (int i = 0; i < spec.length; i++) {
@@ -1234,7 +1236,7 @@ public class Graph implements Serializable {
 					++rgen;
 				}
 		}
-		System.out.println("==> "+rgen+"nonAS genes filtered out.");
+		System.out.println(rgen+" genes filtered out.");
 	}
 	
 	public ASVariation[][] search(int[][] pattern) {
@@ -1261,7 +1263,7 @@ public class Graph implements Serializable {
 	 * @return
 	 */
 	public void filterNonsense() {
-			System.out.println("filter nonsense");
+			System.out.print("filter nonsense..");
 			
 			int rgen= 0; 
 			int rtran= 0; 
@@ -1277,8 +1279,8 @@ public class Graph implements Serializable {
 						boolean removeTranscript= false;
 						for (int m = 0; !removeGene && m < tra[k].getExons().length; m++) 
 							if (((m< tra[k].getExons().length- 1)&& 
-									(tra[k].getExons()[m+1].getStart()- tra[k].getExons()[m].getEnd()< Constants.MIN_INTRON_LENGTH))
-								|| tra[k].getExons()[m].getEnd()- tra[k].getExons()[m].getStart()<= Constants.MIN_EXON_LENGTH) {
+									(tra[k].getExons()[m+1].get5PrimeEdge()- tra[k].getExons()[m].get3PrimeEdge()< Constants.MIN_INTRON_LENGTH))
+								|| tra[k].getExons()[m].getLength()<= Constants.MIN_EXON_LENGTH) {
 								removeTranscript= true;
 								break;
 							}
@@ -1318,7 +1320,7 @@ public class Graph implements Serializable {
 				}
 			}
 		
-			System.out.println("==> Nonsense removed "+rgen+" genes and "+rtran+ " transcripts.");
+			System.out.println("removed "+rgen+" genes and "+rtran+ " transcripts.");
 		
 		}
 	

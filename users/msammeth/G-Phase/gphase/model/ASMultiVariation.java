@@ -290,11 +290,10 @@ public class ASMultiVariation implements Serializable {
 					finished= true;
 			}
 			
-			String result= "(";
+			String result= "";
 			for (int i = 0; i < c.length; i++) 
-				result+= c[i]+ " // ";
-			result= result.substring(0, result.length()- 4);
-			result+= ")";
+				result+= c[i]+ " , ";
+			result= result.substring(0, result.length()- 3);
 			
 			relPosStr= result;
 		}

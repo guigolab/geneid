@@ -35,6 +35,35 @@ public class Species implements Serializable {
 	public static final String GENOSCOPE_ID= "GS";
 	public static final String FLYBASE_ID= "C";
 	
+		// org=
+	public static final String[] SP_UCSC_CGI_STRINGS= new String[] {
+			"Homo_sapiens",	// &db=hg18
+			"Chimp",	// db=panTro
+			"Mouse",	// db=mm8
+			"Rat",		// &db=rn4
+			"Dog",		// &db=canFam2
+			"Cow",		//&db=bosTau2
+			"Opossum",	//&db=monDom4
+			
+			"Chicken",	//&db=galGal3
+			"X.+tropicalis",	//&db=xenTro2
+			"Zebrafish",	//&db=danRer4
+			"Fugu",			//&db=fr1
+			"Tetraodon",	//&db=tetNig1
+			
+			"D.+melanogaster",	// db=dm2
+			"A.+gambiae",	//&db=anoGam1
+			"A.+mellifera",  //&db=anoGam1
+			
+			"C.+elegans",	//&db=ce2
+			"S.+cerevisiae"	//&db=sacCer1
+			
+			
+		//&clade=vertebrate&org=Mouse&db=mm8
+		// org=
+
+	};
+	
 	public static final String[] SP_NAMES_ENS_PFX= new String[] {
 			ENS_ID+			"", 
 			ENS_ID+			"PTR",
@@ -691,5 +720,9 @@ public class Species implements Serializable {
 		}
 	
 		return asClasses;
+	}
+
+	public int getSpNumber() {
+		return spNumber;
 	}
 }

@@ -2421,22 +2421,43 @@ public class ASVariation implements Serializable {
 			if (spliceChain1!= null&& p1< spliceChain1.length)
 				if (spliceChain2!= null&& p2< spliceChain2.length)
 					if (spliceChain1[p1].getPos()< spliceChain2[p2].getPos())
-						c1+= spliceChain1[p1++].isDonor()?Integer.toString(ltt)+ "^":Integer.toString(ltt)+ "=";
+						c1+= spliceChain1[p1++].isDonor()?Integer.toString(ltt)+ "^":Integer.toString(ltt)+ "-";
 					else
-						c2+= spliceChain2[p2++].isDonor()?Integer.toString(ltt)+ "^":Integer.toString(ltt)+ "=";
+						c2+= spliceChain2[p2++].isDonor()?Integer.toString(ltt)+ "^":Integer.toString(ltt)+ "-";
 				else
-					c1+= spliceChain1[p1++].isDonor()?Integer.toString(ltt)+ "^":Integer.toString(ltt)+ "=";
+					c1+= spliceChain1[p1++].isDonor()?Integer.toString(ltt)+ "^":Integer.toString(ltt)+ "-";
 			else
-				c2+= spliceChain2[p2++].isDonor()?Integer.toString(ltt)+ "^":Integer.toString(ltt)+ "=";
+				c2+= spliceChain2[p2++].isDonor()?Integer.toString(ltt)+ "^":Integer.toString(ltt)+ "-";
 				
 			ltt++;
 		}
 
-		if (c2.length()< c1.length()) {	// print shortest first
-			String h= c1;
-			c1= c2;
-			c2= h;
-		} else if (c1.length()== c2.length()) {	// sort according to first number
+//		if (c2.length()< c1.length()) {	// print shortest first
+//			String h= c1;
+//			c1= c2;
+//			c2= h;
+//		} else if (c1.length()== c2.length()) {	// sort according to first number
+//			int x= 0;
+//			while (Character.isDigit(c1.charAt(x++)));
+//			int n1= Integer.parseInt(c1.substring(0, x-1));
+//			x= 0;
+//			while (Character.isDigit(c2.charAt(x++)));
+//			int n2= Integer.parseInt(c2.substring(0, x-1));
+//			if (n2< n1)  {
+//				String h= c1;
+//				c1= c2;
+//				c2= h;
+//			}
+//		}
+		if (c1.equals("")|| c2.equals("")) {
+			if (c1.equals("")) {
+				c1= "0";
+				String h= c1;
+				c1= c2;
+				c2= h;
+			} else
+				c2= "0";
+		} else {
 			int x= 0;
 			while (Character.isDigit(c1.charAt(x++)));
 			int n1= Integer.parseInt(c1.substring(0, x-1));
@@ -2449,7 +2470,7 @@ public class ASVariation implements Serializable {
 				c2= h;
 			}
 		}
-		return "("+ c1+ " // "+ c2+ ")";
+		return c1+ " , "+ c2;
 	}
 	
 	/**

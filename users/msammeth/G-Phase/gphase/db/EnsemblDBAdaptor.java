@@ -693,9 +693,10 @@ public class EnsemblDBAdaptor {
 						continue;
 					}
 					
+					//System.out.println(Integer.parseInt(rs.getString(4)));
+					genes[x].setStrand(Integer.parseInt(rs.getString(4)));
 					genes[x].setStart(Integer.parseInt(rs.getString(2)));
 					genes[x].setEnd(Integer.parseInt(rs.getString(3)));
-					genes[x].setStrand(Integer.parseInt(rs.getString(4)));
 					genes[x].setChromosome(rs.getString(5));	// !! also with NT.. genes (see old method)
 //					int chk= genes[x].getConfidence();
 					genes[x].setType(rs.getString(6));
@@ -1466,10 +1467,12 @@ public class EnsemblDBAdaptor {
 							gene1.setType(rs.getString(2));
 							gene1.setConfidence(rs.getString(3));
 							gene1.setChromosome(rs.getString(4));
+							// System.out.println(rs.getString(5));
 							gene1.setStrand(Integer.parseInt(rs.getString(5)));
 							gene1.setStart(Integer.parseInt(rs.getString(6)));
 							gene1.setEnd(Integer.parseInt(rs.getString(7)));
 							g.addGene(gene1);
+							//System.out.println(gene1.getStrand());
 						}
 					}
 					con.close();
