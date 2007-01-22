@@ -981,6 +981,10 @@ sub setMobyResponse {
     my $self = shift;
     my ($MOBY_RESPONSE, $moby_exceptions, $moby_logger, $serviceName) = @_;
     
+    my $request_id = $ENV{REQUEST_ID};
+
+    # print STDERR "request_id, $request_id in setMobyResponse\n";
+    
     if (@$moby_exceptions > 0) {
 	# build the moby exception response
 	my $moby_exception_response = "";
@@ -995,15 +999,15 @@ sub setMobyResponse {
 	# Check 'error' first then 'warning' or 'information'
 	if (defined $severities{error}) {
 	    my $exception = $severities{error};
-	    $moby_logger->info ("RESULT = $serviceName failed");
-	    $moby_logger->info ("STATUS = " . $exception->getExceptionCode);
-	    $moby_logger->info ("STATUSMESSAGE = " . $exception->getExceptionMessage);
+	    $moby_logger->info ("$request_id\tRESULT = $serviceName failed");
+	    $moby_logger->info ("$request_id\tSTATUS = " . $exception->getExceptionCode);
+	    $moby_logger->info ("$request_id\tSTATUSMESSAGE = " . $exception->getExceptionMessage);
 	}
 	elsif (defined $severities{warning} || defined $severities{information}) {
 	    my $exception = $severities{warning} || $severities{information};
-	    $moby_logger->info ("RESULT = $serviceName terminated successfully with warning or information notes");
-	    $moby_logger->info ("STATUS = " . $exception->getExceptionCode);
-	    $moby_logger->info ("STATUSMESSAGE = " . $exception->getExceptionMessage);
+	    $moby_logger->info ("$request_id\tRESULT = $serviceName terminated successfully with warning or information notes");
+	    $moby_logger->info ("$request_id\tSTATUS = " . $exception->getExceptionCode);
+	    $moby_logger->info ("$request_id\tSTATUSMESSAGE = " . $exception->getExceptionMessage);
 	}
 	
 	return responseHeader(
@@ -1013,8 +1017,8 @@ sub setMobyResponse {
 	    . $MOBY_RESPONSE . responseFooter;
     }
     else {
-	$moby_logger->info ("RESULT = $serviceName terminated successfully");
-	$moby_logger->info ("STATUS = 0");
+	$moby_logger->info ("$request_id\tRESULT = $serviceName terminated successfully");
+	$moby_logger->info ("$request_id\tSTATUS = 0");
 	
 	my $note = "Service execution succeeded";
 	return responseHeader (

@@ -126,8 +126,15 @@ my $serviceName = "";
 my $URI         = "genome.imim.es";
 my $IP_address  = $ENV{REMOTE_ADDR};
 my $remote_host = $ENV{REMOTE_HOST};
-my $unique_id   = int (rand (9)) . int (rand (9));
-my $request_id  = $starttime . "_" . $unique_id;
+# my $unique_id   = int (rand (9)) . int (rand (9));
+# my $request_id  = $starttime . "_" . $unique_id;
+# Use the PROCESS_ID ($$) to generate a unique request identifier
+my $request_id = time.substr("00000$$", -5);
+
+# Make it available "globally" - needed in setMobyResponse
+$ENV{REQUEST_ID} = $request_id;
+
+# print STDERR "request_id, $request_id in CGI\n";
 
 # Get the service name
 
@@ -143,12 +150,12 @@ $x->on_action(sub {
     # $moby_logger->info ("$request_id: User request from remote host, $remote_host ($IP_address)");
     # $moby_logger->info ("$request_id: Started at, $starttime");    
 
-    $moby_logger->info ("START = $starttime");
-    $moby_logger->info ("SERVICE = $serviceName");
-    $moby_logger->info ("URI = $URI");
-    $moby_logger->info ("IP = $IP_address");
+    $moby_logger->info ("$request_id\tSTART = $starttime");
+    $moby_logger->info ("$request_id\tSERVICE = $serviceName");
+    $moby_logger->info ("$request_id\tURI = $URI");
+    $moby_logger->info ("$request_id\tIP = $IP_address");
     if (defined $remote_host) {
-      $moby_logger->info ("REMOTEHOST = $remote_host");
+      $moby_logger->info ("$request_id\tREMOTEHOST = $remote_host");
     }
       
 });
@@ -233,8 +240,13 @@ my $endtime;
   $endtime = sprintf "%s%2.2d%2.2d%2.2d%2.2d%2.2d", $year, $mon, $mday, $hour, $min, $sec;
 }
 
+my $total_time = timestr (timediff ($endtime_benchmark, $starttime_benchmark));
+$total_time =~ /.+\s+([^\s]+)\s+CPU/;
+my $t_cpu = $1;
+
 # $moby_logger->info ("$request_id: Ending at, $endtime");
 # $moby_logger->info ("$request_id: Total execution time: ", timestr (timediff ($endtime_benchmark, $starttime_benchmark)));
-$moby_logger->info ("END = $endtime");
-$moby_logger->info ("TOTALEXECUTIONTIME = ", timestr (timediff ($endtime_benchmark, $starttime_benchmark)));
+$moby_logger->info ("$request_id\tEND = $endtime");
+$moby_logger->info ("$request_id\tT_CPU = $t_cpu");
+$moby_logger->info ("$request_id\tTOTALEXECUTIONTIME = ", $total_time);
 $moby_logger->info ("#");
