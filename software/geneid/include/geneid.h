@@ -28,7 +28,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/     
 
-/* $Id: geneid.h,v 1.29 2007-01-11 17:52:56 talioto Exp $ */
+/* $Id: geneid.h,v 1.30 2007-01-23 14:48:14 talioto Exp $ */
 
 /* Required libraries */
 #include <stdlib.h>
@@ -150,6 +150,8 @@ A. DEFINITIONS
 #define RDT 4 /*donor*/
 #define RAT 4 /*acceptor*/
 #define sRSSMARKOVSCORE "RSS_Markov_Score"
+#define sRSS_DONOR_SCORE_CUTOFF "RSS_Donor_Score_Cutoff"
+#define sRSS_ACCEPTOR_SCORE_CUTOFF "RSS_Acceptor_Score_Cutoff"
 
 /* Markov score penalty for unknown symbols */
 #define NULL_OLIGO_SCORE  -4     

@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: genamic.c,v 1.11 2007-01-11 17:53:01 talioto Exp $  */
+/*  $Id: genamic.c,v 1.12 2007-01-23 14:48:14 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -106,10 +106,8 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
       (E+i)->PreviousExon = pg->Ghost;
       (E+i)->GeneScore = (E+i)->Score;
       current_exon_is_u12 = 0;
-	printMess(mess);
       if (!strcmp((E+i)->Type,"Intron")){
 	(E+i)->Donor->class = U2;(E+i)->Acceptor->class = U2;(E+i)->offset1 = 0; (E+i)->offset2 = 0;	
-	printMess(mess);
       }
       if (!strcmp((E+i)->Type,sEND) || !strcmp((E+i)->Type,sBEGIN)|| !strcmp((E+i)->Type,sSINGLE)){
 	current_exon_is_u12 = 0;
@@ -265,7 +263,6 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 				     }
 				   else
 				     {
-				       /* printMess("Exon is Intron..."); */
 				       (E+i)->GeneScore = pg->Ga[etype][frame][spliceclass]->GeneScore + (E+i)->Score;
 				       (E+i)->PreviousExon = pg->Ga[etype][frame][spliceclass];
 

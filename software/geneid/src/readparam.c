@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: readparam.c,v 1.12 2006-12-21 13:56:54 talioto Exp $  */
+/*  $Id: readparam.c,v 1.13 2007-01-23 14:48:14 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -44,6 +44,8 @@ extern float U12_SPLICE_SCORE_THRESH;
 extern float U12_EXON_SCORE_THRESH;
 extern float U12EW;
 extern float RSSMARKOVSCORE;
+extern float RSSDON;
+extern float RSSACC;
 
 /* Numeric values: read one line skipping comments and empty lines */
 void readLine(FILE *File, char* line)
@@ -658,6 +660,24 @@ void ReadIsochore(FILE* RootFile, gparam* gp)
 			printError("Wrong format: RSSMARKOVSCORE value scores (number/type)");  
 
 		  sprintf(mess,"RSSMARKOVSCORE: \t%9.2f",RSSMARKOVSCORE);
+		  printMess(mess);
+	}
+	 /* 1. Read RSS_Donor_Score_Cutoff */
+	if(!strcasecmp(header,sRSS_DONOR_SCORE_CUTOFF)){
+		  readLine(RootFile,line);
+		  if ((sscanf(line,"%f\n", &(RSSDON)))!=1)
+			printError("Wrong format: RSSDON value scores (number/type)");  
+
+		  sprintf(mess,"RSSDON: \t%9.2f",RSSDON);
+		  printMess(mess);
+	}
+	 /* 1. Read RSSMARKOVSCORE for markov score to assign non-exonic recursively spliced elements */
+	if(!strcasecmp(header,sRSS_ACCEPTOR_SCORE_CUTOFF)){
+		  readLine(RootFile,line);
+		  if ((sscanf(line,"%f\n", &(RSSACC)))!=1)
+			printError("Wrong format: RSSACC value scores (number/type)");  
+
+		  sprintf(mess,"RSSACC: \t%9.2f",RSSACC);
 		  printMess(mess);
 	}
 	 /* 1. Read U12_SPLICE_SCORE_THRESH for sum of U12 donor and acceptor splice scores */
