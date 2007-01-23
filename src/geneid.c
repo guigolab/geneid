@@ -29,7 +29,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/* $Id: geneid.c,v 1.22 2006-12-21 14:03:00 talioto Exp $ */
+/* $Id: geneid.c,v 1.23 2007-01-23 14:48:14 talioto Exp $ */
 
 #include "geneid.h"
 /* #include <mcheck.h> */
@@ -64,7 +64,6 @@ int
   BP=0,
   /* Detection of recursive splice sites */
   RSS=0,
-  
   /* Detection of U12 introns */
   U12=0,
   /* Detection of U12gtag sites (acceptor uses BranchPoint)*/
@@ -95,8 +94,12 @@ float EW = NOVALUE;
 float U12EW = 0; 
 float U12_SPLICE_SCORE_THRESH = -1000;
 float U12_EXON_SCORE_THRESH = -1000;
+
+/* Detection of recursive splice sites */
 float RSSMARKOVSCORE = 0;
-				  
+float RSSDON = RDT;
+float RSSACC = RAT;				  
+
 /* Generic maximum values: sites, exons and backup elements */
 long NUMSITES,NUMEXONS,MAXBACKUPSITES,MAXBACKUPEXONS,NUMU12SITES,NUMU12EXONS,NUMU12U12EXONS;
 
@@ -436,8 +439,8 @@ int main (int argc, char *argv[])
 	      if (l2 == upperlimit){
 		nExons = nExons + 2;
 	      }
-	      sprintf(mess,"l1: %ld   ll:%ld   l2: %ld   ul: %ld\n", l1,lowerlimit,l2,upperlimit);
-	      printMess(mess);
+/* 	      sprintf(mess,"l1: %ld   ll:%ld   l2: %ld   ul: %ld\n", l1,lowerlimit,l2,upperlimit); */
+/* 	      printMess(mess); */
 	      sprintf(mess,"Sorting %ld exons\n", nExons);  
 	      printMess(mess);
 			  
