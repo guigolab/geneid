@@ -37,7 +37,7 @@ public class Species implements Serializable {
 	
 		// org=
 	public static final String[] SP_UCSC_CGI_STRINGS= new String[] {
-			"Homo_sapiens",	// &db=hg18
+			"Homo_sapiens;db=hg17",	// &db=hg18 newest, but for gencode..
 			"Chimp",	// db=panTro
 			"Mouse",	// db=mm8
 			"Rat",		// &db=rn4

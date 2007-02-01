@@ -201,7 +201,7 @@ public class ASMultiVariation implements Serializable {
 			//compi= new ASVariation.CodingHierarchyFilter();
 			compi= new ASVariation.HierarchyFilter();
 
-		return removeRedundancy(asVariations, compi);
+		return removeRedundancyHierachically(asVariations, compi);
 	}
 		
 		public ASVariation[] getASVariationsStructurallyFiltered() {

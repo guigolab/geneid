@@ -70,6 +70,13 @@ public class CopyOfSpliceOSigner extends JPanel {
 	
 	protected void paintComponent(Graphics g) {
 
+		Transcript trpt1= null;
+		if (variation.getSpliceChain2().length== 0|| 
+				(variation.getSpliceChain1().length> 0&& variation.getSpliceChain1()[0].getPos()< variation.getSpliceChain2()[0].getPos()))
+			trpt1= variation.getTranscript1();
+		else
+			trpt1= variation.getTranscript2();
+		
 		//super.paintComponent(g);
 		SpliceSite[] su= variation.getSpliceUniverse();
 		
@@ -129,7 +136,7 @@ public class CopyOfSpliceOSigner extends JPanel {
 			}
 			
 			xPos+= delta;
-			if (variation.getTranscript1().containsSS(su[i])) {
+			if (trpt1.containsSS(su[i])) {
 				if (su[i].isDonor()) {
 					exonic1= false;
 					lastX1= xPos;

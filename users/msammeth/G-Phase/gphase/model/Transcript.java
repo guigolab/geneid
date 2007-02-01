@@ -277,6 +277,8 @@ public class Transcript extends DirectedRegion {
 	}
 	
 	public DirectedRegion[] getExonicRegions() {
+		if (exons== null)
+			return null;
 		DirectedRegion[] regs= new DirectedRegion[exons.length];
 		for (int i = 0; i < regs.length; i++) {
 			regs[i]= new DirectedRegion(exons[i].getStart(), exons[i].getEnd(), exons[i].getStrand());
@@ -288,6 +290,8 @@ public class Transcript extends DirectedRegion {
 	
 	public String getSplicedSequence() {
 		DirectedRegion[] regs= getExonicRegions();	// not sorted
+		if (regs== null)
+			return "";
 		java.util.Arrays.sort(regs, new DirectedRegion.DirectedPositionComparator());
 		StringBuffer sb= new StringBuffer();
 		for (int i = 0; i < regs.length; i++) 
@@ -1201,6 +1205,8 @@ public class Transcript extends DirectedRegion {
 	}
 	
 	public Translation[] findORFs(String seq, int frame, boolean openEnded) {
+			if (seq== null|| seq.length()< 1)
+				return null;
 			final int minORFlen= NMDSimulator.MIN_ORF_LENGTH_AA* 3;
 			seq= seq.substring(frame).toUpperCase();
 			Vector startV= new Vector(), stopV= new Vector();

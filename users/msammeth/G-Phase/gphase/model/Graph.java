@@ -501,8 +501,17 @@ public class Graph implements Serializable {
 				s.getPos()+ SpliceSite.SPLICE_SITE_FLANK_SIZE
 		);
 		
-		if (!s.getGene().isForward()) 
-			seq= invertSequence(seq);
+		return seq;
+	}
+	
+	public static String readSequence(SpliceSite s, int flank5, int flank3) {
+		String seq= readSequence(
+				s.getGene().getSpecies(),
+				s.getGene().getChromosome(),
+				s.getGene().isForward(),
+				s.getPos()- flank5,
+				s.getPos()+ flank3
+		);
 		return seq;
 	}
 	
