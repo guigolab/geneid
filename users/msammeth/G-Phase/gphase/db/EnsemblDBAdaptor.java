@@ -93,6 +93,23 @@ public class EnsemblDBAdaptor {
 		// TODO Auto-generated constructor stub
 	}
 	
+	public static void updateFilterAllGraphsNonsense() {
+		EnsemblDBAdaptor adaptor= new EnsemblDBAdaptor();
+		String[] spec= Species.SP_NAMES_COMMON;
+		Graph g;
+		for (int i = 0; i < spec.length; i++) 
+			try {
+				System.out.println(spec[i]);
+				System.out.println(Constants.getDateString()+ " loading Graph");
+				g= GraphHandler.readIn(GraphHandler.getGraphAbsPath(new Species(spec[i]))+"_download");
+				g.filterNonsense();
+				GraphHandler.writeOut(g, GraphHandler.getGraphAbsPath()+"_filtNonsense"); 		// writeGraph();
+				System.out.println();
+			} catch (Throwable e) {
+				e.printStackTrace();
+			}
+	}
+
 	public static void updateAllGraphs() {
 		EnsemblDBAdaptor adaptor= new EnsemblDBAdaptor();
 		String[] spec= Species.SP_NAMES_COMMON;
@@ -1982,7 +1999,7 @@ public class EnsemblDBAdaptor {
 	public Graph getGraphAllGenes(String specName) {
 		return getGraphAllGenes(new Species(specName));
 	}
-	
+
 	public Graph getGraphAllGenes(Species spec) {
 		
 		System.out.println(Constants.getDateString()+ " loading Graph");
@@ -2005,16 +2022,16 @@ public class EnsemblDBAdaptor {
 			graph= retrieveGeneInfo(graph);
 			System.out.println("["+new Date(System.currentTimeMillis())+"] # finished building graph #");
 			
-
+	
 			
 			System.out.println(Constants.getDateString()+ " Graph downloaded");
 			tempExonMap= null;	// remove temporal references
 			tempTranscriptMap= null;
 			System.gc();
-
+	
 			GraphHandler.writeOut(graph, GraphHandler.getGraphAbsPath(spec)+ "_download"); 		// writeGraph();
 			System.out.println(Constants.getDateString()+ " Graph written");
-
+	
 			filter(graph);
 			
 			GraphHandler.writeOut(graph, GraphHandler.getGraphAbsPath(spec)+ "filtered"); 
@@ -2023,6 +2040,22 @@ public class EnsemblDBAdaptor {
 			GraphHandler.writeOut(graph, GraphHandler.getGraphAbsPath(spec)); 		// working copy
 			System.out.println(Constants.getDateString()+ " Graph written");
 		}
+		return graph;		
+	}
+
+	public static Graph testFilter(Species spec) {
+		
+		System.out.println(Constants.getDateString()+ " loading Graph");
+		Graph graph= GraphHandler.readIn(GraphHandler.getGraphAbsPath(spec)+"_download");
+		if (graph== null) {
+			System.err.println("downloaded graph not available!");
+			return null;
+		}
+		
+		System.out.println(graph.countGenesTranscriptsExons());
+		filter(graph);
+		System.out.println(graph.countGenesTranscriptsExons());
+		
 		return graph;		
 	}
 
@@ -2243,7 +2276,9 @@ public class EnsemblDBAdaptor {
 	public static void main(String[] args) {
 			
 		
-			updateAllGraphs();
+			//updateAllGraphs();
+			//testFilter(new Species("Tetraodon"));
+			updateFilterAllGraphsNonsense();
 			if (1== 1)
 				System.exit(0);
 		

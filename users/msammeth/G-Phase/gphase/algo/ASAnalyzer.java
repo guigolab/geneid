@@ -1161,10 +1161,16 @@ public class ASAnalyzer {
 		}
 		
 		Distribution dist= new Distribution(inSizes);
-		System.out.println("Object\tmean\tmedian\tstd dev");
+		System.out.println("[Instance]\tmean\tmedian\tstd dev");
 		p.println("Object\tmean\tmedian\tstd dev");
-		System.out.println("Introns:\t"+dist.getMean()+"\t"+dist.getMedian()+"\t"+dist.getStandardDeviation());
-		p.println("Introns:\t"+dist.getMean()+"\t"+dist.getMedian()+"\t"+dist.getStandardDeviation());
+		String meanStr= new Double(dist.getMean()).toString();
+		meanStr= meanStr.substring(0, meanStr.indexOf('.')+ 2);
+		String medStr= new Double(dist.getMedian()).toString();
+		medStr= medStr.substring(0, medStr.indexOf('.')+ 2);
+		String stdDevStr= new Double(dist.getStandardDeviation()).toString();
+		stdDevStr= stdDevStr.substring(0, stdDevStr.indexOf('.')+ 2);
+		System.out.println("Introns:\t"+meanStr+"\t"+medStr+"\t"+stdDevStr);
+		p.println("Introns:\t"+meanStr+"\t"+medStr+"\t"+stdDevStr);
 	}
 	
 	
