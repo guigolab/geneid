@@ -26,7 +26,7 @@ public class TransSpeciesComparison {
 				String iname= "graph"+ File.separator+ Species.SP_NAMES_COMMON[i];
 				String sfx= ".landscape";
 				PrintStream p= null;
-				p= new PrintStream("graph"+File.separator+"length_distr.txt");
+				p= new PrintStream("graph"+File.separator+Species.SP_NAMES_COMMON[i]+"_length_distr.txt");
 				//ASAnalyzer.test04_determineVariations(g, iname, sfx);
 				ASAnalyzer.test03c_intronSizes(g, p);
 			} catch (Exception e) {
