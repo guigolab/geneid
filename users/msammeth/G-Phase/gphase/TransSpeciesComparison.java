@@ -17,7 +17,7 @@ import gphase.model.Species;
 public class TransSpeciesComparison {
 
 	public static void _00_mainLoop() {
-		for (int i = 14; i < Species.SP_NAMES_COMMON.length; i++) {
+		for (int i = 0; i < Species.SP_NAMES_COMMON.length; i++) {
 			System.out.println(Species.SP_NAMES_COMMON[i]);
 			Graph g= null;
 			EnsemblDBAdaptor adaptor= new EnsemblDBAdaptor();

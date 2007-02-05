@@ -66,6 +66,7 @@ import gphase.regex.Automaton;
 import gphase.regex.ChessMaster;
 import gphase.regex.RegExp;
 import gphase.tools.Arrays;
+import gphase.tools.Distribution;
 import gphase.tools.ENCODE;
 import gphase.tools.Time;
 
@@ -1105,41 +1106,63 @@ public class ASAnalyzer {
 	}
 	
 	public static void test03_lengthVariationModulo(Graph g, PrintStream p) {
-		ASVariation[][] classes= g.getASVariations(1);
-		classes= (ASVariation[][]) Arrays.filter(classes, "isProteinCoding.Arrays");
-		classes= (ASVariation[][]) Arrays.sort2DFieldRev(classes);
-		
-		//ASVariation[] events= getVariation("( // 1^2=)", classes);
-		int cnt0= 0, cnt1= 0, cnt2= 0;
-		int scnt0= 0, scnt1= 0, scnt2= 0, stot= 0;
-		int tot= 0;
-		for (int x = 0; classes!= null&& x < classes.length; x++) {
-			cnt1= 0; cnt2= 0; cnt0= 0;
-			tot= 0;
-			ASVariation[] events= classes[x];
-			p.println(events[0].toString());
-			for (int i = 0; i < events.length; i++) {
-				int[] a= events[i].getLength(true);
-				int[] b= events[i].getLength(false);
-				int diffA= Math.abs(a[0]- a[1]);
-//				if (x== 0)
-//					events[i].outputDetail(System.out);
-//				System.out.println(a[0]+","+a[1]+": "+diffA+"("+(diffA%3)+")");
-				if (diffA%3== 0)
-					cnt0++;
-				if (diffA%3== 1)
-					cnt1++;
-				if (diffA%3== 2)
-					cnt2++;
+			ASVariation[][] classes= g.getASVariations(1);
+			classes= (ASVariation[][]) Arrays.filter(classes, "isProteinCoding.Arrays");
+			classes= (ASVariation[][]) Arrays.sort2DFieldRev(classes);
+			
+			//ASVariation[] events= getVariation("( // 1^2=)", classes);
+			int cnt0= 0, cnt1= 0, cnt2= 0;
+			int scnt0= 0, scnt1= 0, scnt2= 0, stot= 0;
+			int tot= 0;
+			for (int x = 0; classes!= null&& x < classes.length; x++) {
+				cnt1= 0; cnt2= 0; cnt0= 0;
+				tot= 0;
+				ASVariation[] events= classes[x];
+				p.println(events[0].toString());
+				for (int i = 0; i < events.length; i++) {
+					int[] a= events[i].getLength(true);
+					int[] b= events[i].getLength(false);
+					int diffA= Math.abs(a[0]- a[1]);
+	//				if (x== 0)
+	//					events[i].outputDetail(System.out);
+	//				System.out.println(a[0]+","+a[1]+": "+diffA+"("+(diffA%3)+")");
+					if (diffA%3== 0)
+						cnt0++;
+					if (diffA%3== 1)
+						cnt1++;
+					if (diffA%3== 2)
+						cnt2++;
+				}
+				tot+= events.length;
+				p.println("0: "+cnt0+"\t1: "+cnt1+"\t2: "+cnt2+"\t("+tot+"): "+((double) cnt0/ tot));
+				scnt1+= cnt1;
+				scnt0+= cnt0;
+				scnt2+= cnt2;
+				stot+= tot;
 			}
-			tot+= events.length;
-			p.println("0: "+cnt0+"\t1: "+cnt1+"\t2: "+cnt2+"\t("+tot+"): "+((double) cnt0/ tot));
-			scnt1+= cnt1;
-			scnt0+= cnt0;
-			scnt2+= cnt2;
-			stot+= tot;
+			p.println("===> 0: "+scnt0+"\t1: "+scnt1+"\t2: "+scnt2+"\t("+stot+"): "+((double) scnt0/ stot));
 		}
-		p.println("===> 0: "+scnt0+"\t1: "+scnt1+"\t2: "+scnt2+"\t("+stot+"): "+((double) scnt0/ stot));
+
+	public static void test03c_intronSizes(Graph g, PrintStream p) {
+		Gene[] ge= g.getGenes();
+		Vector intronV= new Vector();
+		Comparator compi= new DirectedRegion.PositionComparator();
+		for (int i = 0; i < ge.length; i++) {
+			Transcript[] trpts= ge[i].getTranscripts();
+			for (int j = 0; j < trpts.length; j++) {
+				DirectedRegion[] introns= trpts[j].getIntrons();
+				intronV= Arrays.addUnique(intronV, introns, compi);
+			}
+		}
+		
+		int[] inSizes= new int[intronV.size()];
+		for (int i = 0; i < intronV.size(); i++) {
+			inSizes[i]= ((DirectedRegion) intronV.elementAt(i)).getLength();
+		}
+		
+		Distribution dist= new Distribution(inSizes);
+		System.out.println("Object\tmean\tmedian\tstd dev");
+		System.out.println("Introns:\t"+dist.getMean()+"\t"+dist.getMedian()+"\t"+dist.getStandardDeviation());
 	}
 	
 	
