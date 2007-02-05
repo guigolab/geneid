@@ -68,6 +68,7 @@ import gphase.regex.RegExp;
 import gphase.tools.Arrays;
 import gphase.tools.Distribution;
 import gphase.tools.ENCODE;
+import gphase.tools.IntVector;
 import gphase.tools.Time;
 
 /**
@@ -1143,37 +1144,146 @@ public class ASAnalyzer {
 			p.println("===> 0: "+scnt0+"\t1: "+scnt1+"\t2: "+scnt2+"\t("+stot+"): "+((double) scnt0/ stot));
 		}
 
-	public static void test03c_intronSizes(Graph g, PrintStream p) {
+	public static void test03c_statisticIntrons(Graph g, PrintStream p) {
 		Gene[] ge= g.getGenes();
-		Vector intronV= new Vector();
+		Vector v= new Vector();
+		IntVector vStart= new IntVector();
+		IntVector vEnd= new IntVector();
 		Comparator compi= new DirectedRegion.PositionComparator();
 		for (int i = 0; i < ge.length; i++) {
 			Transcript[] trpts= ge[i].getTranscripts();
 			for (int j = 0; j < trpts.length; j++) {
-				DirectedRegion[] introns= trpts[j].getIntrons();
-				intronV= Arrays.addUnique(intronV, introns, compi);
+				DirectedRegion[] regs= trpts[j].getIntrons();
+				for (int k = 0; k < regs.length; k++) {
+					int oldSize= v.size();
+					v= Arrays.addUnique(v, regs[k], compi);
+					if (v.size()> oldSize) {
+						vStart.add(regs[k].get5PrimeEdge()- ge[i].get5PrimeEdge());
+						vEnd.add(ge[i].get3PrimeEdge()- regs[k].get3PrimeEdge());
+					}
+					
+				}
 			}
 		}
+		System.out.println("[Exons]\tmean\tmedian\tstd dev");
+		p.println("[Exons]\tmean\tmedian\tstd dev");
 		
-		int[] inSizes= new int[intronV.size()];
-		for (int i = 0; i < intronV.size(); i++) {
-			inSizes[i]= ((DirectedRegion) intronV.elementAt(i)).getLength();
-		}
-		
+		int[] inSizes= new int[v.size()];
+		for (int i = 0; i < v.size(); i++) 
+			inSizes[i]= ((DirectedRegion) v.elementAt(i)).getLength();
 		Distribution dist= new Distribution(inSizes);
-		System.out.println("[Instance]\tmean\tmedian\tstd dev");
-		p.println("Object\tmean\tmedian\tstd dev");
-		String meanStr= new Double(dist.getMean()).toString();
-		meanStr= meanStr.substring(0, meanStr.indexOf('.')+ 2);
-		String medStr= new Double(dist.getMedian()).toString();
-		medStr= medStr.substring(0, medStr.indexOf('.')+ 2);
-		String stdDevStr= new Double(dist.getStandardDeviation()).toString();
-		stdDevStr= stdDevStr.substring(0, stdDevStr.indexOf('.')+ 2);
-		System.out.println("Introns:\t"+meanStr+"\t"+medStr+"\t"+stdDevStr);
-		p.println("Introns:\t"+meanStr+"\t"+medStr+"\t"+stdDevStr);
+		String[] statStr= dist.toStatString();
+		System.out.println("len\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		p.println("len\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		
+		dist= new Distribution(vStart.toIntArray());
+		statStr= dist.toStatString();
+		System.out.println("start\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		p.println("start\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		
+		dist= new Distribution(vEnd.toIntArray());
+		statStr= dist.toStatString();
+		System.out.println("end\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		p.println("end\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		
+		System.out.println();
+		p.println();
+	}
+
+	public static void test03c_statisticAll(Graph g, PrintStream p) {
+		test03c_statisticTranscriptsGenes(g, p);
+		test03c_statisticExons(g, p);
+		test03c_statisticIntrons(g, p);
 	}
 	
-	
+	public static void test03c_statisticExons(Graph g, PrintStream p) {
+		Gene[] ge= g.getGenes();
+		Vector v= new Vector();
+		IntVector vStart= new IntVector();
+		IntVector vEnd= new IntVector();
+		Comparator compi= new DirectedRegion.PositionComparator();
+		for (int i = 0; i < ge.length; i++) {
+			Transcript[] trpts= ge[i].getTranscripts();
+			for (int j = 0; j < trpts.length; j++) {
+				DirectedRegion[] regs= trpts[j].getExons();
+				for (int k = 0; k < regs.length; k++) {
+					int oldSize= v.size();
+					v= Arrays.addUnique(v, regs[k], compi);
+					if (v.size()> oldSize) {
+						vStart.add(regs[k].get5PrimeEdge()- ge[i].get5PrimeEdge());
+						vEnd.add(ge[i].get3PrimeEdge()- regs[k].get3PrimeEdge());
+					}
+					
+				}
+			}
+		}
+		System.out.println("[Exons]\tmean\tmedian\tstd dev");
+		p.println("[Exons]\tmean\tmedian\tstd dev");
+		
+		int[] inSizes= new int[v.size()];
+		for (int i = 0; i < v.size(); i++) 
+			inSizes[i]= ((DirectedRegion) v.elementAt(i)).getLength();
+		Distribution dist= new Distribution(inSizes);
+		String[] statStr= dist.toStatString();
+		System.out.println("len\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		p.println("len\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		
+		dist= new Distribution(vStart.toIntArray());
+		statStr= dist.toStatString();
+		System.out.println("start\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		p.println("start\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		
+		dist= new Distribution(vEnd.toIntArray());
+		statStr= dist.toStatString();
+		System.out.println("end\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		p.println("end\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		
+		System.out.println();
+		p.println();
+	}
+
+	public static void test03c_statisticTranscriptsGenes(Graph g, PrintStream p) {
+		Gene[] ge= g.getGenes();
+		Vector v= new Vector();
+		Vector w= new Vector();
+		IntVector x= new IntVector();
+		Comparator compi= new DirectedRegion.PositionComparator();
+		for (int i = 0; i < ge.length; i++) {
+			v= (Vector) Arrays.addAll(v, ge[i].getTranscripts());
+			w.add(ge[i]);
+			x.add(ge[i].getTranscriptCount());
+		}
+		System.out.println("[Genes/Trpts]\tmean\tmedian\tstd dev");
+		p.println("[Genes/Trpts]\tmean\tmedian\tstd dev");
+		
+			// gene length
+		int[] inSizes= new int[w.size()];
+		for (int i = 0; i < w.size(); i++) 
+			inSizes[i]= ((DirectedRegion) w.elementAt(i)).getLength();
+		Distribution dist= new Distribution(inSizes);
+		String[] statStr= dist.toStatString();
+		System.out.println("g-len\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		p.println("g-len\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		
+			// trpt nb
+		dist= new Distribution(x.toIntArray());
+		statStr= dist.toStatString();
+		System.out.println("trpt-nb\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		p.println("trpt-nb\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		
+			// trpt length
+		inSizes= new int[v.size()];
+		for (int i = 0; i < v.size(); i++) 
+			inSizes[i]= ((DirectedRegion) v.elementAt(i)).getLength();
+		dist= new Distribution(inSizes);
+		statStr= dist.toStatString();
+		System.out.println("t-len\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		p.println("t-len\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		
+		System.out.println();
+		p.println();
+	}
+
 	public static void outputCodingRegions() {
 		String fName= "encode/44regions_genes_CHR_coord.gtf";
 		EncodeWrapper myWrapper= new EncodeWrapper(new File(fName).getAbsolutePath()); // testGTF.gtf

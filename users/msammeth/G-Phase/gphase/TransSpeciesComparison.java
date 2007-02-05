@@ -28,7 +28,7 @@ public class TransSpeciesComparison {
 				PrintStream p= null;
 				p= new PrintStream("graph"+File.separator+Species.SP_NAMES_COMMON[i]+"_length_distr.txt");
 				//ASAnalyzer.test04_determineVariations(g, iname, sfx);
-				ASAnalyzer.test03c_intronSizes(g, p);
+				ASAnalyzer.test03c_statisticAll(g, p);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

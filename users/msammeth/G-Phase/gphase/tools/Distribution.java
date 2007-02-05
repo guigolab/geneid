@@ -86,4 +86,19 @@ public class Distribution {
 		sum/= (surface.length- 1);
 		return Math.sqrt(sum);
 	}
+	
+	/**
+	 * 
+	 * @return mean, median, stdDev
+	 */
+	public String[] toStatString() {
+		String[] statStr= new String[3];
+		statStr[0]= new Double(getMean()).toString();
+		statStr[0]= new Double(getMedian()).toString();
+		statStr[0]= new Double(getStandardDeviation()).toString();
+		for (int i = 0; i < statStr.length; i++) 
+			statStr[i]= statStr[i].substring(0, statStr[i].indexOf('.')+ 2);
+
+		return statStr;
+	}
 }

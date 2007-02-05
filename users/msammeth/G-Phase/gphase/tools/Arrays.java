@@ -29,16 +29,20 @@ public class Arrays {
 	public static String reverseComplement(String in) {
 		return reverse(complement(in));
 	}
-	public static Vector addUnique(Collection c, Object[] a, Comparator compi) {
+	public static Vector addUnique(Collection c, Object o, Comparator compi) {
 		Object[] ca= c.toArray();
-		for (int i = 0; a!= null&& i < a.length; i++) {
-			int p= java.util.Arrays.binarySearch(ca, a[i], compi);
-			if (p< 0)
-				ca= insert(ca, a[i], p);
-		}
+		int p= java.util.Arrays.binarySearch(ca, o, compi);
+		if (p< 0)
+			ca= insert(ca, o, p);
 		Vector v= new Vector(ca.length);
 		addAll(v, ca);
 		return v;
+	}
+	
+	public static Vector addUnique(Collection c, Object[] a, Comparator compi) {
+		for (int i = 0; a!= null&& i < a.length; i++) 
+			c= addUnique(c, a[i], compi);
+		return (Vector) c;
 	}
 	
 	
