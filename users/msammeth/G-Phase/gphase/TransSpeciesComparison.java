@@ -16,7 +16,7 @@ import gphase.model.Species;
 
 public class TransSpeciesComparison {
 
-	public static void main(String[] args) {
+	public static void _00_mainLoop() {
 		for (int i = 14; i < Species.SP_NAMES_COMMON.length; i++) {
 			System.out.println(Species.SP_NAMES_COMMON[i]);
 			Graph g= null;
@@ -25,10 +25,17 @@ public class TransSpeciesComparison {
 				g= adaptor.getGraphAllGenes(Species.SP_NAMES_COMMON[i]);
 				String iname= "graph"+ File.separator+ Species.SP_NAMES_COMMON[i];
 				String sfx= ".landscape";
-				ASAnalyzer.test04_determineVariations(g, iname, sfx);
+				PrintStream p= null;
+				p= new PrintStream("graph"+File.separator+"length_distr.txt");
+				//ASAnalyzer.test04_determineVariations(g, iname, sfx);
+				ASAnalyzer.test03c_intronSizes(g, p);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	public static void main(String[] args) {
+		_00_mainLoop();
 	}
 }
