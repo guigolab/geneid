@@ -103,7 +103,7 @@ public class EnsemblDBAdaptor {
 				System.out.println(Constants.getDateString()+ " loading Graph");
 				g= GraphHandler.readIn(GraphHandler.getGraphAbsPath(new Species(spec[i]))+"_download");
 				g.filterNonsense();
-				GraphHandler.writeOut(g, GraphHandler.getGraphAbsPath()+"_filtNonsense"); 		// writeGraph();
+				GraphHandler.writeOut(g, GraphHandler.getGraphAbsPath(new Species(spec[i]))+"_filtNonsense"); 		// writeGraph();
 				System.out.println();
 			} catch (Throwable e) {
 				e.printStackTrace();

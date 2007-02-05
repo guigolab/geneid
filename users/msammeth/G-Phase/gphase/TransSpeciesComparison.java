@@ -22,7 +22,7 @@ public class TransSpeciesComparison {
 			Graph g= null;
 			EnsemblDBAdaptor adaptor= new EnsemblDBAdaptor();
 			try {
-				g= adaptor.getGraphAllGenes(Species.SP_NAMES_COMMON[i]);
+				g= adaptor.getGraphAllGenes(Species.SP_NAMES_COMMON[i]+"_filtNonsense");
 				String iname= "graph"+ File.separator+ Species.SP_NAMES_COMMON[i];
 				String sfx= ".landscape";
 				PrintStream p= null;
