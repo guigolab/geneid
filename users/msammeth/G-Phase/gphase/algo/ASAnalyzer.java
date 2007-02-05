@@ -2248,18 +2248,24 @@ public class ASAnalyzer {
 					String sfx= "_GENCODE_CDS.landscape1";			
 					Graph g= getGraph(iname);
 					
-					PrintStream p= null;
 					
 					g.filterNonCodingTranscripts();
 					g.filterNMDTranscripts();
+					test04_determineVariations(g, iname, sfx);
+				}
+				
+				public static void test04_determineVariations(Graph g, String iname, String sfx) {
 					ASVariation[][] classes= g.getASVariations(ASMultiVariation.FILTER_NONE);
 					classes= (ASVariation[][]) Arrays.sort2DFieldRev(classes);
+					if (classes== null)
+						return;
 					ASVariation[][] filtClasses= new ASVariation[classes.length][];
 					Comparator compx= new ASVariation.HierarchyMergeFlags();
 					for (int i = 0; i < filtClasses.length; i++) 
 						filtClasses[i]= ASMultiVariation.removeRedundancyHierachically(classes[i], compx);
 					classes= filtClasses;
 					
+					PrintStream p= null;
 					try {
 						Method m = classes[0][0].getClass().getMethod("is_all", null);	// warum eigentlich?
 						try {

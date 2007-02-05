@@ -57,6 +57,8 @@ import org.ensembl.driver.compara.HomologyAdaptor;
 import org.ensembl.driver.plugin.standard.BaseDriver;
 import org.ensembl.util.PropertiesUtil;
 
+import prefuse.util.UpdateListener;
+
 import com.sun.org.apache.bcel.internal.generic.GETSTATIC;
 
 import qalign.tools.FASTAWrapper;
@@ -89,6 +91,20 @@ public class EnsemblDBAdaptor {
 	public EnsemblDBAdaptor() {
 		super();
 		// TODO Auto-generated constructor stub
+	}
+	
+	public static void updateAllGraphs() {
+		EnsemblDBAdaptor adaptor= new EnsemblDBAdaptor();
+		String[] spec= Species.SP_NAMES_COMMON;
+		Graph g;
+		for (int i = 0; i < spec.length; i++) 
+			try {
+				g= adaptor.getGraphAllGenes(new Species(spec[i]));
+			} catch (Throwable e) {
+				e.printStackTrace();
+			}
+		
+		adaptor.getGraphAllHomologs(spec);
 	}
 
 	/**
@@ -2226,6 +2242,11 @@ public class EnsemblDBAdaptor {
 	
 	public static void main(String[] args) {
 			
+		
+			updateAllGraphs();
+			if (1== 1)
+				System.exit(0);
+		
 			EnsemblDBAdaptor adaptor= new EnsemblDBAdaptor();
 	//		con= adaptor.connect("homo_sapiens_core");	// homo_sapiens_core_29_35b
 	//		adaptor.testStatement(con);

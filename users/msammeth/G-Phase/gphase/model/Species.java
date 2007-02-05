@@ -53,7 +53,7 @@ public class Species implements Serializable {
 			
 			"D.+melanogaster",	// db=dm2
 			"A.+gambiae",	//&db=anoGam1
-			"A.+mellifera",  //&db=anoGam1
+			"A.+mellifera",  //&db=anoGam1	// not in ensembl
 			
 			"C.+elegans",	//&db=ce2
 			"S.+cerevisiae"	//&db=sacCer1
@@ -103,18 +103,22 @@ public class Species implements Serializable {
 			"bos_taurus",
 			"monodelphis_domestica",
 			
-			"gallus_gallus",	// other chordates
+			"gallus_gallus",	// vertebrates
 			"xenopus_tropicalis",
 			"danio_rerio",
-			"fugu_rubripes",
+			"takifugu_rubripes",
 			"tetraodon_nigroviridis",
 			
 			"drosophila_melanogaster",	// insects
 			"anopheles_gambiae",
-			"apis_mellifera",
+			"apis_mellifera",	// not in ensembl
 			
-			"caenorhabditis_elegans",
-			"saccharomyces_cerevisiae"
+			"caenorhabditis_elegans",	// deuterostome?
+			"saccharomyces_cerevisiae",
+			
+			"ciona_intestinalis",	// chordata?
+			"ciona_savignyi",
+			"ornithorhynchus_anatinus"	// platypus, vertebrate?
 	};
 	
 	// public static final String[] SP_NAMES_ABBREV= new String[] {"hsapiens", "mmusculus", "rnorvegicus"};
@@ -135,9 +139,13 @@ public class Species implements Serializable {
 			
 			"fruitfly",
 			"mosquito",
-			"bee",
+			"bee",		// not in ensembl
 			"worm",
-			"yeast"
+			"yeast",
+			
+			"seasquirt",
+			"seqsquirt2",
+			"platypus"
 	};
 
 	public static Species[] createByBinomialName(String[] binomialNames) {
