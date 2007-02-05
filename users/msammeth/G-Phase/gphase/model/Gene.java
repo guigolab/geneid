@@ -842,8 +842,7 @@ public class Gene extends DirectedRegion {
 
 		Vector v= new Vector();
 		for (int i = 0; i < transcripts.length; i++) 
-			for (int j = 0; transcripts[i].getExons()!= null&& j < transcripts[i].getExons().length; j++) 
-				v= (Vector) gphase.tools.Arrays.addUnique(v, transcripts[i].getIntrons());
+			v= (Vector) gphase.tools.Arrays.addUnique(v, transcripts[i].getExons());
 			
 		Exon[] exons= new Exon[v.size()];
 		for (int i = 0; i < v.size(); i++) 

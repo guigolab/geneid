@@ -1162,7 +1162,9 @@ public class ASAnalyzer {
 		
 		Distribution dist= new Distribution(inSizes);
 		System.out.println("Object\tmean\tmedian\tstd dev");
+		p.println("Object\tmean\tmedian\tstd dev");
 		System.out.println("Introns:\t"+dist.getMean()+"\t"+dist.getMedian()+"\t"+dist.getStandardDeviation());
+		p.println("Introns:\t"+dist.getMean()+"\t"+dist.getMedian()+"\t"+dist.getStandardDeviation());
 	}
 	
 	

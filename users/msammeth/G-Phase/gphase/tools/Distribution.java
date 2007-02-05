@@ -54,6 +54,8 @@ public class Distribution {
 	}
 	
 	public double getMean() {
+		if (surface.length== 0)
+			return 0d;
 		double sum= 0d;
 		for (int i = 0; i < surface.length; i++) 
 			sum+= surface[i];
@@ -61,14 +63,18 @@ public class Distribution {
 	}
 	
 	public double getMedian() {
+		if (surface.length== 0)
+			return 0d;
 		int medPos= surface.length/ 2;
-		if (surface.length% 2== 0)
+		if (surface.length% 2== 0&& (medPos+1)< surface.length)
 			return ((surface[medPos]+ surface[medPos+ 1])/ 2);
 		else
 			return surface[medPos];
 	}
 	
 	public double getStandardDeviation() {
+		if (surface.length== 0)
+			return 0d;
 		double med= getMedian();		
 		double sum= 0d;
 		for (int i = 0; i < surface.length; i++) {
