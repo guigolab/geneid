@@ -58,6 +58,45 @@ public class ASVariation implements Serializable {
 		}
 	}
 
+	/**
+	 * 
+	 * @param reference
+	 * @param intersect
+	 * @return ASVariation[2][], common vars, unique vars in reference
+	 */
+	public static ASVariation[][] commonVariations(ASVariation[] reference, ASVariation[] intersect) {
+		
+		if (reference== null|| intersect== null) {
+			ASVariation[][] res= new ASVariation[2][];
+			res[0]= new ASVariation[0];
+			if (reference== null) 
+				res[1]= new ASVariation[0];
+			else 
+				res[1]= reference;
+			return res;	
+		}
+		
+		Comparator compi= new StructureComparator();
+		Vector comV= new Vector();
+		Vector difV= new Vector();
+		for (int i = 0; i < reference.length; i++) {
+			int j;
+			for (j = 0; j < intersect.length; j++) 
+				if (compi.compare(reference[i], intersect[j])== 0)
+					break;
+			
+			if (j< intersect.length)
+				comV.add(reference[i]);
+			else
+				difV.add(reference[i]);
+		}
+		
+		ASVariation[][] res= new ASVariation[2][];
+		res[0]= (ASVariation[]) gphase.tools.Arrays.toField(comV);
+		res[1]= (ASVariation[]) gphase.tools.Arrays.toField(difV);
+		return res;
+	}
+	
 	public int getLengthDiff(boolean exon) {
 		int[] a= getLength(exon);
 		int diffA= Math.abs(a[0]- a[1]);
@@ -1008,103 +1047,6 @@ public class ASVariation implements Serializable {
 		return true;		
 	}
 
-	public static class StructureComparator implements Comparator {
-		
-		/**
-		 * @return <code>0</code> if both objects are equal, <code>1</code>
-		 * otherwise
-		 */
-		public int compare_old(Object arg0, Object arg1) {
-			
-			ASVariation as1= (ASVariation) arg0;
-			ASVariation as2= (ASVariation) arg1;
-			
-				// find analogs
-			SpliceSite[] sc1= null;
-			if (as1.spliceChain1!= null && as1.spliceChain1.length> 0) 
-				sc1= as1.spliceChain1;
-			else
-				sc1= as1.spliceChain2;	// both cannot be empty
-			SpliceSite[] sc2= as1.getOtherSpliceChain(sc1);
-			
-			SpliceSite[] sc1analog;
-			if (as2.spliceChain1!= null&& as2.spliceChain1.length> 0
-					&& as2.spliceChain1[0]== sc1[0])	// only one sc of as2 can start with the same splice site than sc1 !!
-				sc1analog= as2.spliceChain1;
-			else
-				sc1analog= as2.spliceChain2;
-			SpliceSite[] sc2analog= as2.getOtherSpliceChain(sc1analog);
-
-				// compare analogs
-			Comparator compi= new AbstractSite.PositionComparator();
-			if (sc1.length!= sc1analog.length)
-				return (-1);
-			for (int i = 0; i < sc1.length; i++)	// first pair cannot be empty 
-				for (int j = 0; j < sc1analog.length; j++) 
-					if (compi.compare(sc1[i], sc1analog[i])!= 0)
-						return (-1);
-
-			if ((sc2== null^ sc2analog== null))		// catch nullpointers first..
-				return (-1);
-			if (sc2== null&& sc2analog== null)
-				return 0;
-			if (sc2.length!= sc2analog.length)
-				return (-1);
-			for (int i = 0; i < sc2.length; i++)	 
-				for (int j = 0; j < sc2analog.length; j++) 
-					if (compi.compare(sc2[i], sc2analog[i])!= 0)
-						return (-1);
-			return 0;
-		}
-
-		/**
-		 * @return <code>0</code> if both objects are equal, <code>-1</code>
-		 * otherwise
-		 */
-		public int compare(Object arg0, Object arg1) {
-			
-			ASVariation as1= (ASVariation) arg0;
-			ASVariation as2= (ASVariation) arg1;
-			
-			Comparator compi= new SpliceChainComparator();
-			SpliceSite[][] s1= new SpliceSite[][] {as1.spliceChain1, as1.spliceChain2};
-			SpliceSite[][] s2= new SpliceSite[][] {as2.spliceChain1, as2.spliceChain2};
-			if (((compi.compare(s1[0], s2[0])== 0)&& (compi.compare(s1[1], s2[1])== 0))||
-				((compi.compare(s1[1], s2[0])== 0)&& (compi.compare(s1[0], s2[1])== 0)))
-				return 0;
-			return -1;
-			
-			// compare splice universees
-			// night of 6.6.06: NO! dbl exon skip/mut exclusive			
-//			SpliceSite[] su1= as1.getSpliceUniverse();
-//			SpliceSite[] su2= as2.getSpliceUniverse();
-//			if (su1.length!= su2.length)
-//				return -1;
-			
-				// check also flanking sites (not tss, tes)
-				// night of 6.6.06: no longer check flanking sites
-//			SpliceSite[] flank= as1.getFlankingSpliceSites();
-//			if (flank[0]!= null)
-//				su1= (SpliceSite[]) gphase.tools.Arrays.add(su1, flank[0]);
-//			if (flank[1]!= null)
-//				su1= (SpliceSite[]) gphase.tools.Arrays.add(su1, flank[1]);
-//			Comparator compi= new AbstractSite.PositionComparator();
-//			Arrays.sort(su1, compi);
-//			flank= as2.getFlankingSpliceSites();
-//			if (flank[0]!= null)
-//				su2= (SpliceSite[]) gphase.tools.Arrays.add(su2, flank[0]);
-//			if (flank[1]!= null)
-//				su2= (SpliceSite[]) gphase.tools.Arrays.add(su2, flank[1]);
-//			Arrays.sort(su2, compi);
-//			if (su1.length!= su2.length)
-//				return -1;
-			
-//			for (int i = 0; i < su2.length; i++) 
-//				if (su1[i].getPos()!= su2[i].getPos())
-//					return -1;
-//			return 0;
-		}
-	}
 	public static class CodingHierarchyFilter extends StructureComparator {
 			
 			public int compare(Object arg0, Object arg1) {
@@ -1307,6 +1249,104 @@ public class ASVariation implements Serializable {
 			return 2;
 		}
 	}
+
+	public static class StructureComparator implements Comparator {
+			
+			/**
+			 * @return <code>0</code> if both objects are equal, <code>1</code>
+			 * otherwise
+			 */
+			public int compare_old(Object arg0, Object arg1) {
+				
+				ASVariation as1= (ASVariation) arg0;
+				ASVariation as2= (ASVariation) arg1;
+				
+					// find analogs
+				SpliceSite[] sc1= null;
+				if (as1.spliceChain1!= null && as1.spliceChain1.length> 0) 
+					sc1= as1.spliceChain1;
+				else
+					sc1= as1.spliceChain2;	// both cannot be empty
+				SpliceSite[] sc2= as1.getOtherSpliceChain(sc1);
+				
+				SpliceSite[] sc1analog;
+				if (as2.spliceChain1!= null&& as2.spliceChain1.length> 0
+						&& as2.spliceChain1[0]== sc1[0])	// only one sc of as2 can start with the same splice site than sc1 !!
+					sc1analog= as2.spliceChain1;
+				else
+					sc1analog= as2.spliceChain2;
+				SpliceSite[] sc2analog= as2.getOtherSpliceChain(sc1analog);
+	
+					// compare analogs
+				Comparator compi= new AbstractSite.PositionComparator();
+				if (sc1.length!= sc1analog.length)
+					return (-1);
+				for (int i = 0; i < sc1.length; i++)	// first pair cannot be empty 
+					for (int j = 0; j < sc1analog.length; j++) 
+						if (compi.compare(sc1[i], sc1analog[i])!= 0)
+							return (-1);
+	
+				if ((sc2== null^ sc2analog== null))		// catch nullpointers first..
+					return (-1);
+				if (sc2== null&& sc2analog== null)
+					return 0;
+				if (sc2.length!= sc2analog.length)
+					return (-1);
+				for (int i = 0; i < sc2.length; i++)	 
+					for (int j = 0; j < sc2analog.length; j++) 
+						if (compi.compare(sc2[i], sc2analog[i])!= 0)
+							return (-1);
+				return 0;
+			}
+	
+			/**
+			 * @return <code>0</code> if both objects are equal, <code>-1</code>
+			 * otherwise
+			 */
+			public int compare(Object arg0, Object arg1) {
+				
+				ASVariation as1= (ASVariation) arg0;
+				ASVariation as2= (ASVariation) arg1;
+				
+				Comparator compi= new SpliceChainComparator();
+				SpliceSite[][] s1= new SpliceSite[][] {as1.spliceChain1, as1.spliceChain2};
+				SpliceSite[][] s2= new SpliceSite[][] {as2.spliceChain1, as2.spliceChain2};
+				if (((compi.compare(s1[0], s2[0])== 0)&& (compi.compare(s1[1], s2[1])== 0))||
+					((compi.compare(s1[1], s2[0])== 0)&& (compi.compare(s1[0], s2[1])== 0)))
+					return 0;
+				return -1;
+				
+				// compare splice universees
+				// night of 6.6.06: NO! dbl exon skip/mut exclusive			
+	//			SpliceSite[] su1= as1.getSpliceUniverse();
+	//			SpliceSite[] su2= as2.getSpliceUniverse();
+	//			if (su1.length!= su2.length)
+	//				return -1;
+				
+					// check also flanking sites (not tss, tes)
+					// night of 6.6.06: no longer check flanking sites
+	//			SpliceSite[] flank= as1.getFlankingSpliceSites();
+	//			if (flank[0]!= null)
+	//				su1= (SpliceSite[]) gphase.tools.Arrays.add(su1, flank[0]);
+	//			if (flank[1]!= null)
+	//				su1= (SpliceSite[]) gphase.tools.Arrays.add(su1, flank[1]);
+	//			Comparator compi= new AbstractSite.PositionComparator();
+	//			Arrays.sort(su1, compi);
+	//			flank= as2.getFlankingSpliceSites();
+	//			if (flank[0]!= null)
+	//				su2= (SpliceSite[]) gphase.tools.Arrays.add(su2, flank[0]);
+	//			if (flank[1]!= null)
+	//				su2= (SpliceSite[]) gphase.tools.Arrays.add(su2, flank[1]);
+	//			Arrays.sort(su2, compi);
+	//			if (su1.length!= su2.length)
+	//				return -1;
+				
+	//			for (int i = 0; i < su2.length; i++) 
+	//				if (su1[i].getPos()!= su2[i].getPos())
+	//					return -1;
+	//			return 0;
+			}
+		}
 
 	public Gene getGene() {
 		Gene g1= trans1.getGene();
@@ -2843,7 +2883,7 @@ public class ASVariation implements Serializable {
 	 * Representation with absolute (chromosomal) coordinates for each splice site. 
 	 */
 	public String toStringCoordinates() {
-
+	
 		String result= getDegree()+ ":( ";
 		for (int j = 0; j < spliceChain1.length; j++) {
 			result+= spliceChain1[j].getPos();
@@ -2862,6 +2902,24 @@ public class ASVariation implements Serializable {
 		}
 		result+= ")";
 		
+		return result;
+	}
+
+	/**
+	 * Representation with absolute (chromosomal) coordinates for each splice site. 
+	 */
+	public String toStringUCSC() {
+		
+		String result= "chr"+ trans1.getChromosome()+ ":";
+		SpliceSite[] su= getSpliceUniverse();
+		int left= Math.abs(su[0].getPos());
+		int right= Math.abs(su[su.length- 1].getPos());
+		if (left> right) {
+			int h= left;
+			left= right;
+			right= h;
+		}
+		result+= left+ "-"+ right;
 		return result;
 	}
 	

@@ -175,8 +175,8 @@ public class Gene extends DirectedRegion {
 	
 	public SpliceSite[] getSpliceSites(int spliceType, int regionType) {
 		SpliceSite[] sites= getSpliceSites(spliceType);
-		DirectedRegion[] regions= getRegion(regionType);
-		return (SpliceSite[]) DirectedRegion.contained(regions, sites);
+		DirectedRegion region= getRegion(regionType);
+		return (SpliceSite[]) DirectedRegion.contained(region, sites);
 	}
 	
 	public SpliceSite[] getSpliceSites(DirectedRegion[] target, int type) {
@@ -436,6 +436,65 @@ public class Gene extends DirectedRegion {
 			return spliceSites[p]; 	// bullshit, add first and remove afterwards when filtering!
 		}
 		return null;
+	}
+	
+	public int[] getTranslationInitSites() {
+		int[] met= new int[0];
+		for (int i = 0; i < getTranscripts().length; i++) {
+			if (getTranscripts()[i].isNonCoding())
+				continue;
+			Translation tln= getTranscripts()[i].getTranslations()[0];
+			if (tln.isOpenEnded5()|| !getTranscripts()[i].isATGStart())	// exclude truncated 
+				continue;
+			met= gphase.tools.Arrays.addUnique(met, tln.get5PrimeEdge());
+		}
+		return met;
+	}
+	
+	public TranslationLocus[] getTranslationLoci() {
+		int[] met= getTranslationInitSites();
+		Vector v= new Vector();
+		for (int i = 0; i < met.length; i++) 
+			v.add(getTranscripts(met[i]));
+		Transcript[] nc= getNonCodingTranscripts();
+		if (nc!= null&& nc.length> 0)
+			v.add(nc);
+		
+		TranslationLocus[] tls= new TranslationLocus[v.size()];
+		for (int i = 0; i < tls.length; i++) 
+			tls[i]= new TranslationLocus(
+					this, (Transcript[]) v.elementAt(i));
+		return tls;
+	}
+	
+	public Transcript[] getTranscripts(int tlnInit) {
+		Vector v= new Vector();
+		for (int i = 0; i < getTranscripts().length; i++) {
+			if (getTranscripts()[i].isNonCoding())
+				continue;
+			Translation tln= getTranscripts()[i].getTranslations()[0];
+			if (tln.isOpenEnded5())	// exclude truncated 
+				continue;
+			if (tln.get5PrimeEdge()== tlnInit)
+				v.add(getTranscripts()[i]);
+		}
+		return ((Transcript[]) gphase.tools.Arrays.toField(v));
+	}
+	
+	public int countCodingSpliceForms() {
+		int cnt= 0;
+		for (int i = 0; i < getTranscripts().length; i++) 
+			if (getTranscripts()[i].isCoding())
+				++cnt;
+		return cnt;
+	}
+	
+	public Transcript[] getNonCodingTranscripts() {
+		Vector v= new Vector();
+		for (int i = 0; i < getTranscripts().length; i++) 
+			if (getTranscripts()[i].isNonCoding())
+				v.add(getTranscripts()[i]);
+		return ((Transcript[]) gphase.tools.Arrays.toField(v));
 	}
 	
 	public boolean addSpliceSite(SpliceSite ss) {
@@ -783,9 +842,8 @@ public class Gene extends DirectedRegion {
 
 		Vector v= new Vector();
 		for (int i = 0; i < transcripts.length; i++) 
-			for (int j = 0; transcripts[i].getExons()!= null&&
-					j < transcripts[i].getExons().length; j++) 
-				v.add(transcripts[i].getExons()[j]);
+			for (int j = 0; transcripts[i].getExons()!= null&& j < transcripts[i].getExons().length; j++) 
+				v= (Vector) gphase.tools.Arrays.addUnique(v, transcripts[i].getIntrons());
 			
 		Exon[] exons= new Exon[v.size()];
 		for (int i = 0; i < v.size(); i++) 
@@ -971,7 +1029,9 @@ public class Gene extends DirectedRegion {
 				as= asm[i].getASVariationsHierarchicallyFiltered();
 			else if (codingCode== ASMultiVariation.FILTER_HIERARCHICALLY)
 				as= asm[i].getASVariationsClusteredCoding();
-			for (int j = 0; j < as.length; j++) 
+			else if (codingCode== ASMultiVariation.FILTER_STRUCTURALLY)
+				as= asm[i].getASVariationsStructurallyFiltered();
+			for (int j = 0; as!= null&& j < as.length; j++) 
 				resVec.add(as[j]);
 		}
 			
@@ -1478,20 +1538,48 @@ public class Gene extends DirectedRegion {
 	
 	public Exon[] getExons(int region) {
 		Vector v= new Vector();
+		Comparator compi= new DirectedRegion.PositionComparator();
 		for (int i = 0; i < transcripts.length; i++) 
-			v= (Vector) gphase.tools.Arrays.addAll(v, transcripts[i].getExons());
+			v= (Vector) gphase.tools.Arrays.addUnique(v, transcripts[i].getExons(), compi);
 			
 		DirectedRegion reg= getRegion(region);
 		if (reg== null)
 			return null;
 		for (int i = 0; i < v.size(); i++) 
-			if (!reg.contains((Exon) v.elementAt(i)))
+			if (!reg.contains((Exon) v.elementAt(i))) {
 				v.remove(i--);
+				break;
+			}
 		
 		return  (Exon[]) gphase.tools.Arrays.toField(v);
 	}
 	
-	public DirectedRegion[] getRegion(int regionID) {
+	public DirectedRegion[] getIntrons(int region) {
+		Vector v= new Vector();
+		Comparator compi= new DirectedRegion.PositionComparator();
+		for (int i = 0; i < transcripts.length; i++) 
+			v= (Vector) gphase.tools.Arrays.addUnique(v, transcripts[i].getIntrons(), compi);
+			
+		DirectedRegion reg= getRegion(region);
+		if (reg== null)
+			return null;
+		for (int i = 0; i < v.size(); i++) 
+			if (!reg.contains((DirectedRegion) v.elementAt(i))) {
+				v.remove(i--);
+				break;
+			}
+		
+		return  (DirectedRegion[]) gphase.tools.Arrays.toField(v);
+	}
+	
+	
+	/**
+	 * just returning global regions, eg real/max/transcript utr/cds
+	 * intronic/exonic arrays delegated to submethods..
+	 * @param regionID
+	 * @return
+	 */
+	public DirectedRegion getRegion(int regionID) {
 		
 		Object o= null;
 		if (regionID== REGION_REAL_5UTR)
@@ -1505,9 +1593,7 @@ public class Gene extends DirectedRegion {
 		else if (regionID== REGION_COMPLETE_GENE)
 			o= this;	// new DirectedRegion(getStart(), getEnd(), getStrand());
 		
-		if (o!= null&& !o.getClass().isArray())
-			o= new DirectedRegion[] {(DirectedRegion) o};
-		return (DirectedRegion[]) o;
+		return (DirectedRegion) o;
 	}
 	
 

@@ -40,6 +40,9 @@ public class Arrays {
 		addAll(v, ca);
 		return v;
 	}
+	
+	
+	
 	/**
 	 * assumes not sorted arrays
 	 * @param c
@@ -179,6 +182,24 @@ public class Arrays {
 		return oo;
 	}	
 	
+	public static int[] add(int[] a, int o) {
+		int[] newA= new int[a.length+ 1];
+		for (int i = 0; i < a.length; i++) 
+			newA[i]= a[i];
+		newA[a.length]= o;
+		return newA;
+	}
+	
+	public static int[] addUnique(int[] a, int o) {
+		int[] newA= new int[a.length+ 1];
+		for (int i = 0; i < a.length; i++) {
+			if (a[i]== o)
+				return a;
+			newA[i]= a[i];
+		}
+		newA[a.length]= o;
+		return newA;
+	}
 	
 	public static Object[] add(Object[] a, Object o) {
 		if (a== null)

@@ -4,7 +4,7 @@ public class IntVector {
 
 	static final int DEFAULT_LOAD_FACTOR= 13;
 	int[] vector;
-	int size= -1;
+	public int length= -1;
 	int incrementSize;
 	
 	public IntVector() {
@@ -18,13 +18,13 @@ public class IntVector {
 	public IntVector(int initialCapacity, int loadFactor) {
 		vector= new int[initialCapacity];
 		incrementSize= loadFactor;
-		size= 0;
+		length= 0;
 	}
 	
 	public void add(int x) {
-		if (size== vector.length)
+		if (length== vector.length)
 			extendVector();
-		vector[size++]= x;
+		vector[length++]= x;
 	}
 	
 	void extendVector() {
@@ -35,13 +35,13 @@ public class IntVector {
 	}
 	
 	public int size() {
-		return size;
+		return length;
 	}
 	
 	public int remove(int pos) {
 		int result= vector[pos];
-		--size;
-		for (int i = pos; i < size; i++) 
+		--length;
+		for (int i = pos; i < length; i++) 
 			vector[pos]= vector[pos+1];
 		return result;
 	}
@@ -51,9 +51,25 @@ public class IntVector {
 	}
 	
 	public int[] toIntArray() {
-		int[] result= new int[size];
-		for (int i = 0; i < size; i++) 
+		int[] result= new int[length];
+		for (int i = 0; i < length; i++) 
 			result[i]= vector[i];
 		return result;
+	}
+
+	public void insert(int val, int p) {
+		
+		if (p< 0)
+			p= (p+1)* (-1);
+		
+		int[] newA= new int[vector.length+ 1];
+		for (int i = 0; i < p; i++) 
+			newA[i]= vector[i];
+		newA[p]= val;
+		for (int i = p+1; i < newA.length; i++) 
+			newA[i]= vector[i-1];
+		
+		vector= newA;
+		length= newA.length;
 	}
 }

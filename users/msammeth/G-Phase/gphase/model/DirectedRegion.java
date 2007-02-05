@@ -59,6 +59,113 @@ public class DirectedRegion extends DefaultRegion {
 		return (AbstractSite[]) Arrays.toField(v);
 	}
 	
+	/**
+	 * deletes contained regions, concatenates overlapping regions, st every nt is only covered once
+	 * @param regs
+	 * @return
+	 */
+	public static DirectedRegion[] getUniqueRegions(DirectedRegion[] regs) {
+		if (regs== null)
+			return null;
+		regs= filterContainedRegions(regs);
+		Comparator compi= new PositionComparator();
+		java.util.Arrays.sort(regs, compi);
+		Vector remV= new Vector(regs.length);
+		Vector addV= new Vector();
+		for (int i = 0; i < regs.length; i++) {
+			int j;
+			for (j = 0; j < remV.size(); j++) 
+				if (remV.elementAt(j)== regs[i])
+					break;
+			if (j< remV.size())	// already concatenated
+				continue;
+			
+			DirectedRegion concatReg= (DirectedRegion) regs[i].clone();
+			for (j = (i+1); j < regs.length; j++) {
+				if (concatReg.overlaps(regs[j])) {
+					concatReg= concatenate(concatReg, regs[j]);
+					remV.add(regs[j]);
+				}
+			}
+			if (compi.compare(regs[i], concatReg)== 0) {
+				remV.add(regs[i]);
+				addV.add(concatReg);
+			}
+		}
+		
+		Vector keepV= new Vector(regs.length- remV.size());
+		for (int i = 0; i < regs.length; i++) {
+			int j;
+			for (j = 0; j < remV.size(); j++) 
+				if (remV.elementAt(j)== regs[i])
+					break;
+			if (j== remV.size())
+				keepV.add(regs[i]);
+		}
+		
+		for (int j = 0; j < addV.size(); j++) 
+			keepV.add(addV.elementAt(j));
+		
+		return (DirectedRegion[]) Arrays.toField(keepV);
+	}
+
+	public static DirectedRegion[] filterIdenticalRegions(DirectedRegion[] regs) {
+		if (regs== null)
+			return null;
+		Comparator compi= new PositionComparator();
+		Vector remV= new Vector(regs.length);
+		for (int i = 0; i < regs.length; i++) 
+			for (int j = i+1; j < regs.length; j++) 
+				if (compi.compare(regs[i], regs[j])== 0)
+					remV.add(regs[j]);
+		
+		Vector keepV= new Vector(regs.length- remV.size());
+		for (int i = 0; i < regs.length; i++) {
+			int j;
+			for (j = 0; j < remV.size(); j++) 
+				if (regs[i]== remV.elementAt(j))
+					break;
+			if (j== remV.size())
+				keepV.add(regs[i]);
+		}
+		return (DirectedRegion[]) Arrays.toField(keepV);
+	}
+	
+	public static DirectedRegion[] filterContainedRegions(DirectedRegion[] regs) {
+		if (regs== null)
+			return null;
+		regs= filterIdenticalRegions(regs);
+		java.util.Arrays.sort(regs, new LengthComparator());
+		
+		Comparator compi= new PositionComparator();
+		Vector remV= new Vector(regs.length);
+		for (int i = 0; i < regs.length; i++) 
+			for (int j = i+1; j < regs.length; j++) 
+				if (regs[i].contains(regs[j]))
+					remV.add(regs[j]);
+		
+		Vector keepV= new Vector(regs.length- remV.size());
+		for (int i = 0; i < regs.length; i++) {
+			int j;
+			for (j = 0; j < remV.size(); j++) 
+				if (regs[i]== remV.elementAt(j))
+					break;
+			if (j== remV.size())
+				keepV.add(regs[i]);
+		}
+		return (DirectedRegion[]) Arrays.toField(keepV);
+	}
+	
+	public static DirectedRegion concatenate(DirectedRegion reg0, DirectedRegion reg1) {
+		DirectedRegion reg= new DirectedRegion(
+				Math.min(reg0.getStart(), reg1.getStart()),
+				Math.max(reg0.getEnd(), reg1.getEnd()),
+				reg0.getStrand());
+		reg.setChromosome(reg0.getChromosome());
+		reg.setSpecies(reg0.getSpecies());
+		return reg;
+	}
+	
 	public static AbstractSite[] contained(DirectedRegion dir, AbstractSite[] s) {
 		if (dir== null|| s== null)
 			return null;
@@ -422,6 +529,10 @@ public class DirectedRegion extends DefaultRegion {
 			setEnd(val);
 		else
 			setStart(val);
+	}
+	
+	public String toUCSCString() {
+		return "chr"+ getChromosome()+":"+Math.abs(getStart())+"-"+Math.abs(getEnd());
 	}
 	
 	public int get3PrimeEdge() {

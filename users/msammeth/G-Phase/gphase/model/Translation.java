@@ -7,7 +7,9 @@
 package gphase.model;
 
 import gphase.NMDSimulator;
+import gphase.StopCodons;
 import gphase.tools.Arrays;
+import gphase.tools.IntVector;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -28,6 +30,70 @@ public class Translation extends DirectedRegion {
 	String translationID= null;
 	Transcript transcript= null;
 	int splicedLength= -1;
+	
+	public static int[] getCodonCount(String[] codons, String seq) {
+		int[] res= new int[3];
+		for (int i = 0; i < res.length; i++) 
+			res[i]= getCodonCount(codons, seq, i);
+		return res;
+	}
+	
+	public static int getCodonCount(String[] codons, String seq, int frame) {
+		seq= seq.toUpperCase();
+		int cnt= 0;
+		for (int i = frame; i < seq.length()- 2; i+= 3) {
+			String cod= seq.substring(i, i+3);
+			int j;
+			for (j = 0; j < codons.length; j++) 
+				if (codons[j].equals(cod))
+					break;
+			if (j< codons.length)
+				++cnt;
+		}
+		return cnt;
+	}
+
+	/**
+	 * condenses all 3 frames to one position array
+	 * @param codons
+	 * @param seq
+	 * @return
+	 */
+	public static int[] getCodonPositions(String[] codons, String seq) {
+		IntVector res= new IntVector();
+		for (int i = 0; i < 3; i++) { 
+			int[] pos= getCodonPositions(codons, seq, i);
+			for (int j = 0; j < pos.length; j++) {
+				int ins= java.util.Arrays.binarySearch(res.toIntArray(), pos[j]);
+				if (ins< 0) 
+					res.insert(pos[j], ins);
+			}
+		}
+		return res.toIntArray();
+	}
+	
+	public static int[] getCodonPositions(String[] codons, String seq, int frame) {
+		seq= seq.toUpperCase();
+		IntVector pos= new IntVector();
+		for (int i = frame; i < seq.length()- 2; i+= 3) {
+			String cod= seq.substring(i, i+3);
+			int j;
+			for (j = 0; j < codons.length; j++) 
+				if (codons[j].equals(cod))
+					break;
+			if (j< codons.length)
+				pos.add(i);
+		}
+		return pos.toIntArray();
+	}
+	
+	public static int[] getStartCount(String seq) {
+		return getCodonCount(new String[] {START_CODON}, seq);
+	}
+	
+	public static int[] getStopCount(String seq) {
+		return getCodonCount(STOP_CODONS, seq);
+	}
 	
 	public Translation(Transcript newTranscript, int newStart, int newEnd, int newStrand) {
 		super(newStart, newEnd, newStrand);
@@ -111,7 +177,7 @@ public class Translation extends DirectedRegion {
 	public boolean isOpenEnded5() {
 		return (get5PrimeEdge()== transcript.get5PrimeEdge());
 	}
-	
+
 	public boolean isOpenEnded3() {
 		return (get3PrimeEdge()== transcript.get3PrimeEdge());
 	}

@@ -693,6 +693,19 @@ public class Transcript extends DirectedRegion {
 		return exons;
 	}
 	
+	
+	public boolean isATGStart() {
+		if (!isCoding())
+			return false;
+		int tis= getExonicPosition(getTranslations()[0].get5PrimeEdge());
+		String startCodon= getSplicedSequence().substring(tis, tis+3);
+		if (startCodon.equalsIgnoreCase(Translation.START_CODON))
+			return true;
+		return false;
+	}
+	
+
+	
 	public DirectedRegion[] getIntrons() {
 		if (exons== null|| exons.length< 2)
 			return null;
@@ -704,6 +717,8 @@ public class Transcript extends DirectedRegion {
 				introns[i]= new DirectedRegion(pos1, pos2, getStrand());
 			else
 				introns[i]= new DirectedRegion(pos2, pos1, getStrand());
+			introns[i].setChromosome(getChromosome());
+			introns[i].setSpecies(getSpecies());
 		}
 		return introns;
 	}
