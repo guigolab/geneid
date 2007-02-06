@@ -405,7 +405,9 @@ public class EnsemblDBAdaptor {
 						start= -start;
 						end= -end;
 					}
-					Exon e= trans.getGene().getExon(start, end); // exon exists?
+					Exon e= null;
+					// deactivated for different frames..
+					//trans.getGene().getExon(start, end); // exon exists?
 					
 					if (e== null) {						
 						e= new Exon(trans, rs.getString(1), start, end);	// stableID
