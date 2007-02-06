@@ -6,7 +6,12 @@
  */
 package gphase.io.gtf;
 
+import gphase.Constants;
 import gphase.io.DefaultIOWrapper;
+import gphase.model.Exon;
+import gphase.model.Gene;
+import gphase.model.Species;
+import gphase.model.Transcript;
 import gphase.tools.Arrays;
 
 import java.io.BufferedReader;
@@ -46,6 +51,30 @@ public class GTFWrapper extends DefaultIOWrapper {
 	}
 	public GTFWrapper(String absFName) {
 		super(absFName);
+	}
+	public GTFWrapper(File absPath, Species spec) {
+		super(absPath+ File.separator+ spec.getCommonName()+ "_"+ spec.getBuildVersion());
+		addGTFObject(spec.getGenes());
+	}
+	
+	public void addGTFObject(Gene[] genes) {
+		Vector gtfsV= new Vector(genes.length);
+		for (int i = 0; i < genes.length; i++) {
+			gtfsV.add(GTFObject.createGTFObjects(genes[i])[0]);
+			Transcript[] trpts= genes[i].getTranscripts();
+			for (int j = 0; j < trpts.length; j++) {
+				gtfsV.add(GTFObject.createGTFObjects(trpts[j])[0]);
+				Exon[] exns= trpts[j].getExons();
+				for (int k = 0; k < exns.length; k++) {
+					GTFObject[] obj= GTFObject.createGTFObjects(exns[k]);
+					for (int m = 0; m < obj.length; m++) 
+						gtfsV.add(obj[m]);
+				}
+			}
+		}
+		
+		GTFObject[] objs= (GTFObject[]) Arrays.toField(gtfsV);
+		this.gtfObj= objs;
 	}
 	
 	public GTFWrapper() {

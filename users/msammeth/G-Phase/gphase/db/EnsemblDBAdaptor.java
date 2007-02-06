@@ -136,7 +136,7 @@ public class EnsemblDBAdaptor {
 				}
 				
 				for (int j = 0; j < ge.length; j++) {
-					Transcript[] trpt= ge[i].getTranscripts();
+					Transcript[] trpt= ge[j].getTranscripts();
 					for (int k = 0; k < trpt.length; k++) 	// remove old
 						if (trpt[k].getTranslations()!= null) 
 							trpt[k].setTranslations(null);

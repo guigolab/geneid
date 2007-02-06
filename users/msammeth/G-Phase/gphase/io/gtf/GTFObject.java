@@ -7,14 +7,12 @@
 package gphase.io.gtf;
 
 import gphase.model.AbstractSite;
-import gphase.model.CDS;
-import gphase.model.DefaultRegion;
 import gphase.model.DirectedRegion;
 import gphase.model.Exon;
 import gphase.model.Gene;
 import gphase.model.SpliceSite;
 import gphase.model.Transcript;
-import gphase.model.Translation;
+import gphase.tools.Arrays;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -132,8 +130,9 @@ public class GTFObject {
 		return gtf;
 	}
 
-	public static GTFObject createGTFObject(DirectedRegion reg) {
+	public static GTFObject[] createGTFObjects(DirectedRegion reg) {
 		GTFObject obj= new GTFObject();
+		obj.setSeqname(reg.getChromosome());
 		int start= Math.abs(reg.getStart());
 		int end= Math.abs(reg.getEnd());
 		if (start> end) {
@@ -143,14 +142,46 @@ public class GTFObject {
 		}
 		obj.setStart(start);
 		obj.setEnd(end);
-		
+		try {
+			obj.setStrand(reg.getStrand());
+			obj.setFeature(reg.getID());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		Vector addObjV= new Vector();
 		if (reg instanceof Gene) {
-			obj.setFeature(GENE_ID_TAG);
+			obj.addAttribute(GENE_ID_TAG, ((Gene) reg).getGeneID());
 		} else if (reg instanceof Transcript) {
-			obj.setFeature(TRANSCRIPT_ID_TAG);
+			obj.addAttribute(GENE_ID_TAG, ((Transcript) reg).getGene().getGeneID());
+			obj.addAttribute(TRANSCRIPT_ID_TAG, ((Transcript) reg).getTranscriptID());
 		} else if (reg instanceof Exon) {
-			obj.setFeature(EXON_ID_TAG);
+			Exon exon= ((Exon) reg);
+			obj.addAttribute(GENE_ID_TAG, exon.getGene().getGeneID());
+			obj.addAttribute(EXON_ID_TAG, exon.getExonID());
+			
+			GTFObject ex= (GTFObject) obj.clone();
+			ex.addAttribute(TRANSCRIPT_ID_TAG, exon.getTranscripts()[0].getTranscriptID());
+			addObjV.add(ex);
+			
+			GTFObject cds= (GTFObject) ex.clone();
+			cds.setFeature("CDS");
+			int st= Math.abs(exon.getStartCDS());
+			int nd= Math.abs(exon.getEndCDS());
+			if (st> nd) {
+				int h= st;
+				st= nd;
+				nd= h;
+			}
+			cds.setStart(st);
+			cds.setEnd(nd);
+			addObjV.add(cds);
 		} 
+		
+		if (addObjV.size()== 0)
+			return new GTFObject[] {obj};
+		else
+			return (GTFObject[]) Arrays.toField(addObjV);
 	}
 	
 	public static GTFObject createGFFObject(SpliceSite site, String source) {
@@ -243,6 +274,23 @@ public class GTFObject {
 			value= value.substring(1, value.length()- 1);	// remove quota
 		
 		getAttributes().put(name, value);
+	}
+	
+	public Object clone() {
+		GTFObject obj= new GTFObject();
+		obj.attributes= (HashMap) attributes.clone(); 
+		obj.comments= comments;
+		obj.end= end;
+		obj.feature= feature;
+		obj.frame= frame;
+		obj.gff= gff;
+		obj.score= score;
+		obj.seqname= seqname;
+		obj.source= source;
+		obj.start= start;
+		obj.strand= strand;
+		
+		return obj;
 	}
 	
 	public boolean equals(Object obj) {
