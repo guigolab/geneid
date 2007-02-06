@@ -10,6 +10,7 @@ import gphase.Constants;
 
 import gphase.algo.ASAnalyzer;
 import gphase.io.gtf.GTFObject;
+import gphase.io.gtf.GTFWrapper;
 import gphase.model.ASMultiVariation;
 import gphase.model.ASVariation;
 import gphase.model.Exon;
@@ -110,8 +111,27 @@ public class EnsemblDBAdaptor {
 			}
 	}
 
-	public static void correctTranslations() {
+	public static void serializeGraphs() {
 		
+		EnsemblDBAdaptor adaptor= new EnsemblDBAdaptor();
+		String[] spec= Species.SP_NAMES_COMMON;
+		spec= new String[] {"yeast"};
+		Graph g;
+		for (int i = 0; i < spec.length; i++) 
+			try {
+				System.out.println(spec[i]);
+				System.out.println(Constants.getDateString()+ " loading Graph");
+				Species sp= new Species(spec[i]);
+				g= GraphHandler.readIn(GraphHandler.getGraphAbsPath(sp)+"_download");
+				GTFWrapper wrapper= new GTFWrapper(new File(GraphHandler.getGraphAbsPath()), sp);
+				System.out.println(Constants.getDateString()+ " writing GTF");
+				wrapper.write();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+	}
+	public static void correctTranslations() {
+
 		EnsemblDBAdaptor adaptor= new EnsemblDBAdaptor();
 		//String[] spec= Species.SP_NAMES_COMMON;
 		String[] spec= new String[] {"fruitfly"};
@@ -2342,7 +2362,8 @@ public class EnsemblDBAdaptor {
 			//updateAllGraphs();
 			//testFilter(new Species("Tetraodon"));
 			//updateFilterAllGraphsNonsense();
-			correctTranslations();
+			//correctTranslations();
+			serializeGraphs();
 			if (1== 1)
 				System.exit(0);
 		
