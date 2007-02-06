@@ -560,21 +560,29 @@ public class Transcript extends DirectedRegion {
 	}
 	
 	public boolean addTranslation(Translation newTrans) {
+
+		// search transcript for same translation, not necessary
 		
 			// new transcipt array
 		if (translations== null) {
 			translations= new Translation[] {newTrans};
-			return true;
+		} else {	// add
+			Translation[] nTranslations= new Translation[translations.length+ 1];
+			for (int i= 0; i < translations.length; i++) 
+				nTranslations[i]= translations[i];
+			nTranslations[nTranslations.length- 1]= newTrans;
+			translations= nTranslations;
 		}
-			
-			// search transcript for same translation, not necessary
-			
-			// add translation
-		Translation[] nTranslations= new Translation[translations.length+ 1];
-		for (int i= 0; i < translations.length; i++) 
-			nTranslations[i]= translations[i];
-		nTranslations[nTranslations.length- 1]= newTrans;
-		translations= nTranslations;
+		
+			// set CDS for each exon, philosophy, also for GTF..
+		for (int i = 0; i < exons.length; i++) {
+			if (newTrans.overlaps(exons[i])) {
+				int st= Math.max(exons[i].getStart(), newTrans.getStart());
+				int nd= Math.min(exons[i].getEnd(), newTrans.getEnd());
+				exons[i].setStartCDS(st);
+				exons[i].setEndCDS(nd);
+			}
+		}
 		return true;
 	}
 	

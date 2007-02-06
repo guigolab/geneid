@@ -396,6 +396,15 @@ public class EnsemblDBAdaptor {
 					
 					int start= Integer.parseInt(rs.getString(2));
 					int end= Integer.parseInt(rs.getString(3));
+					if (start> end) {
+						int h= start;
+						start= end;
+						end= h;
+					}
+					if (trans.getStrand()< 0) {
+						start= -start;
+						end= -end;
+					}
 					Exon e= trans.getGene().getExon(start, end); // exon exists?
 					
 					if (e== null) {						
@@ -612,9 +621,11 @@ public class EnsemblDBAdaptor {
 				}
 				while(rs.next()) {
 					gene= spec.getGene(rs.getString(5));
-					Transcript transcript= new Transcript(gene, rs.getString(1)
-							Integer.parseInt(rs.getString(2)), Integer.parseInt(rs.getString(3)), gene.getStrand());	// stableID
-					//transcript.setGene(gene);		// stableID
+					Transcript transcript= new Transcript(gene, rs.getString(1));
+					transcript.setStrand(Integer.parseInt(rs.getString(4)));
+					transcript.setStart(Integer.parseInt(rs.getString(2)));
+					transcript.setEnd(Integer.parseInt(rs.getString(3)));
+					//transcript.setGene(Integer.parseInt(rs.getString(5)));		// stableID
 					transcript.setType(rs.getString(6));
 					transcript.setConfidence(rs.getString(7));
 					

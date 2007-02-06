@@ -7,9 +7,14 @@
 package gphase.io.gtf;
 
 import gphase.model.AbstractSite;
+import gphase.model.CDS;
 import gphase.model.DefaultRegion;
 import gphase.model.DirectedRegion;
+import gphase.model.Exon;
+import gphase.model.Gene;
 import gphase.model.SpliceSite;
+import gphase.model.Transcript;
+import gphase.model.Translation;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -126,6 +131,28 @@ public class GTFObject {
 			gtf.addAttribute("modality", "alternative");
 		return gtf;
 	}
+
+	public static GTFObject createGTFObject(DirectedRegion reg) {
+		GTFObject obj= new GTFObject();
+		int start= Math.abs(reg.getStart());
+		int end= Math.abs(reg.getEnd());
+		if (start> end) {
+			int h= start;
+			start= end;
+			end= h;
+		}
+		obj.setStart(start);
+		obj.setEnd(end);
+		
+		if (reg instanceof Gene) {
+			obj.setFeature(GENE_ID_TAG);
+		} else if (reg instanceof Transcript) {
+			obj.setFeature(TRANSCRIPT_ID_TAG);
+		} else if (reg instanceof Exon) {
+			obj.setFeature(EXON_ID_TAG);
+		} 
+	}
+	
 	public static GTFObject createGFFObject(SpliceSite site, String source) {
 		GTFObject gtf= createGFFObject(site);
 		gtf.setSource(source);
@@ -322,10 +349,10 @@ public String getFeature() {
 /**
  * @param feature The feature to set.
  */
-public void setFeature(String feature) throws Exception {
+public void setFeature(String feature) {
 	
 	if (!isGff()) {
-		Exception e;
+		//Exception e;
 		int i;
 		for (i = 0; i < GTFObject.FEATURE_VALID.length; i++) { 
 			if (feature.equals(GTFObject.FEATURE_VALID[i]))
@@ -334,8 +361,8 @@ public void setFeature(String feature) throws Exception {
 				System.err.println("check case spelling for "+feature);
 		}
 		if (i== GTFObject.FEATURE_VALID.length) {
-			e= new Exception("no valid entry for feature\n\t"+ feature);
-			throw(e);
+			System.err.println("no valid entry for feature\n\t"+ feature);
+			//throw(e);
 		}
 	}
 	this.feature = feature;
