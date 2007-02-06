@@ -340,11 +340,12 @@ public class DirectedRegion extends DefaultRegion {
 	}
 	public DirectedRegion(int newStart, int newEnd, int strand) {
 		setStrand(strand);
-		if(Math.abs(newStart)> Math.abs(newEnd)) {
-			int h= newStart;
-			newStart= newEnd;
-			newEnd= h;
-		}
+		// now checked in setStart(), setEnd()
+//		if(Math.abs(newStart)> Math.abs(newEnd)) {
+//			int h= newStart;
+//			newStart= newEnd;
+//			newEnd= h;
+//		}
 		setStart(newStart);
 		setEnd(newEnd);
 	}
@@ -483,6 +484,12 @@ public class DirectedRegion extends DefaultRegion {
 			this.end = Math.abs(end);	// force pos
 		else if (strand< 0)
 			this.end= -Math.abs(end);	// force neg
+		
+		if (this.start!= 0&& Math.abs(end)< Math.abs(start)) {
+			int h= this.start;
+			this.start= this.end;
+			this.end= h;
+		}
 	}
 
 	/**
@@ -496,6 +503,12 @@ public class DirectedRegion extends DefaultRegion {
 			this.start = Math.abs(start);	// force pos
 		else if (strand< 0)
 			this.start= -Math.abs(start);	// force neg
+		
+		if (this.end!= 0&& Math.abs(end)< Math.abs(start)) {
+			int h= this.start;
+			this.start= this.end;
+			this.end= h;
+		}
 	}
 	
 	public Region getAbsoluteRegion() {

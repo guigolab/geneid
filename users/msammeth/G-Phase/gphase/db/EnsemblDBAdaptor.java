@@ -77,7 +77,7 @@ public class EnsemblDBAdaptor {
 	static int ensemblVersion= -1;
 	
 	Graph graph= null;
-	HashMap tempTranscriptMap= null, tempExonMap= null;
+	HashMap tempTranscriptMap= null;	// , tempExonMap= null, unused now?!!
 	public static final String[] SPECIES_ALL_SHORT = { "agambiae", "amellifera", "celegans", "cfamiliaris", "dmelanogaster", "drerio", "frubripes", "hsapiens", "mmusculus", "ptroglodytes", "rnorvegicus", "scerevisiae", "tnigroviridis" };
 	public static final String[] SPECIES_ENCODE = { Species.SP_NAMES_BINOMIAL[0], Species.SP_NAMES_BINOMIAL[1], Species.SP_NAMES_BINOMIAL[2], Species.SP_NAMES_BINOMIAL[3], Species.SP_NAMES_BINOMIAL[4], Species.SP_NAMES_BINOMIAL[5], Species.SP_NAMES_BINOMIAL[6], Species.SP_NAMES_BINOMIAL[7], Species.SP_NAMES_BINOMIAL[8], Species.SP_NAMES_BINOMIAL[9], Species.SP_NAMES_BINOMIAL[10], Species.SP_NAMES_BINOMIAL[11] };
 	public static final String[] SPECIES_ENSEMBL = { Species.SP_NAMES_BINOMIAL[0], Species.SP_NAMES_BINOMIAL[1], Species.SP_NAMES_BINOMIAL[2], Species.SP_NAMES_BINOMIAL[3], Species.SP_NAMES_BINOMIAL[4], Species.SP_NAMES_BINOMIAL[5], Species.SP_NAMES_BINOMIAL[6], Species.SP_NAMES_BINOMIAL[7], Species.SP_NAMES_BINOMIAL[8], Species.SP_NAMES_BINOMIAL[9], Species.SP_NAMES_BINOMIAL[10], Species.SP_NAMES_BINOMIAL[11] };
@@ -104,6 +104,45 @@ public class EnsemblDBAdaptor {
 				g= GraphHandler.readIn(GraphHandler.getGraphAbsPath(new Species(spec[i]))+"_download");
 				g.filterNonsense();
 				GraphHandler.writeOut(g, GraphHandler.getGraphAbsPath(new Species(spec[i]))+"_filtNonsense"); 		// writeGraph();
+				System.out.println();
+			} catch (Throwable e) {
+				e.printStackTrace();
+			}
+	}
+
+	public static void correctTranslations() {
+		
+		EnsemblDBAdaptor adaptor= new EnsemblDBAdaptor();
+		//String[] spec= Species.SP_NAMES_COMMON;
+		String[] spec= new String[] {"fruitfly"};
+		Graph g;
+		for (int i = 0; i < spec.length; i++) 
+			try {
+				System.out.println(spec[i]);
+				System.out.println(Constants.getDateString()+ " loading Graph");
+				g= GraphHandler.readIn(GraphHandler.getGraphAbsPath(new Species(spec[i]))+"_download");
+				Gene[] ge= g.getGenes();
+				
+				String specName= new Species(spec[i]).getBinomialName();
+				// connect
+				Connection con= adaptor.connect(specName+ "_core");	// reconnect to species-db
+				try {
+					adaptor.checkVersion(Integer.parseInt(
+						con.getCatalog().substring(
+								con.getCatalog().indexOf("_core")+ 6,
+								con.getCatalog().lastIndexOf('_'))));	// e.g. "homo_sapiens_core_31_35d"
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+				
+				for (int j = 0; j < ge.length; j++) {
+					Transcript[] trpt= ge[i].getTranscripts();
+					for (int k = 0; k < trpt.length; k++) 	// remove old
+						if (trpt[k].getTranslations()!= null) 
+							trpt[k].setTranslations(null);
+					adaptor.retrieveTranslations(con, trpt);	// get new
+				}
+				GraphHandler.writeOut(g, GraphHandler.getGraphAbsPath(new Species(spec[i]))+"_download"); 		// writeGraph();
 				System.out.println();
 			} catch (Throwable e) {
 				e.printStackTrace();
@@ -330,8 +369,8 @@ public class EnsemblDBAdaptor {
 		ResultSet rs= null;
 		int pctCtr= 0;
 		int pctBase= transcr.length/ 100;
-		if (tempExonMap== null) 	// get or create transcript map
-			tempExonMap= new HashMap(tempTranscriptMap.size()* 5, tempTranscriptMap.size()* 7);	// ?5,7
+//		if (tempExonMap== null) 	// get or create transcript map
+//			tempExonMap= new HashMap(tempTranscriptMap.size()* 5, tempTranscriptMap.size()* 7);	// ?5,7
 		for (int i= 0; i < transcr.length; i++) {
 			Transcript trans= transcr[i];
 			try {
@@ -373,7 +412,7 @@ public class EnsemblDBAdaptor {
 //						System.err.println("Strand mismatch of transcript "+trans.getStableID()
 //							+" with exon "+ e.getStableID());
 					
-					tempExonMap.put(rs.getString(1), e);
+					//tempExonMap.put(rs.getString(1), e);
 				}
 				
 				if (pctBase== 0) {
@@ -398,8 +437,8 @@ public class EnsemblDBAdaptor {
 
 		int pctCtr= 0;
 		int pctBase= transcr.length/ 100;
-		if (tempExonMap== null) 	// get or create transcript map
-			tempExonMap= new HashMap(tempTranscriptMap.size()* 5, tempTranscriptMap.size()* 7);
+//		if (tempExonMap== null) 	// get or create transcript map
+//			tempExonMap= new HashMap(tempTranscriptMap.size()* 5, tempTranscriptMap.size()* 7);
 		for (int i= 0; i < transcr.length; i++) {
 			Transcript trans= transcr[i];
 			try {
@@ -407,15 +446,15 @@ public class EnsemblDBAdaptor {
 							ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 												// only one ResultSet per Statement possible
 					// skippped: ,start_exon_id,end_exon_id
-				String query= "SELECT translation_stable_id.stable_id,translation.seq_start,translation.seq_end,ex1.seq_region_start,ex2.seq_region_start "+
+				String query= "SELECT translation_stable_id.stable_id,translation.seq_start,translation.seq_end,ex1.seq_region_start,ex1.seq_region_end,ex2.seq_region_start,ex2.seq_region_end "+
 								"FROM translation,translation_stable_id,transcript,transcript_stable_id,exon as ex1,exon as ex2 "+	// ,exon_id,exon_stable_id 
-								"WHERE translation_stable_id.translation_id=translation.translation_id"+
+								"WHERE transcript_stable_id.stable_id=\""+ trans.getStableID()+ "\""+
+								" AND translation_stable_id.translation_id=translation.translation_id"+
 								" AND transcript.transcript_id=translation.transcript_id"+
 								" AND transcript.transcript_id=transcript_stable_id.transcript_id"+
 //								" AND exon.exon_id=exon_stable_id.exon_id"+
 //								" AND exon.exon_id=translation.start_exon_id"+
 //								" AND exon.exon_id=translation.end_exon_id"+
-								" AND transcript_stable_id.stable_id=\""+ trans.getStableID()+ "\""+
 								" AND translation.start_exon_id=ex1.exon_id AND translation.end_exon_id=ex2.exon_id";
 
 				rs = stmt.executeQuery(query);	// TYPE and CONCUR value given by Statement
@@ -427,10 +466,22 @@ public class EnsemblDBAdaptor {
 
 				while(rs.next()) {
 					
-					Translation l= new Translation(trans, rs.getString(1));	// stableID)
+					String id= rs.getString(1);
+					Translation l= new Translation(trans, id);	// stableID)
 					//l.setTranscript(trans);
-					l.setStart(Integer.parseInt(rs.getString(2))+ Integer.parseInt(rs.getString(4)));
-					l.setEnd(Integer.parseInt(rs.getString(3))+ Integer.parseInt(rs.getString(5)));
+					int tlnStart= Integer.parseInt(rs.getString(2));
+					int tlnEnd= Integer.parseInt(rs.getString(3));
+					int ex1start= Integer.parseInt(rs.getString(4));
+					int ex1end= Integer.parseInt(rs.getString(5));
+					int ex2start= Integer.parseInt(rs.getString(6));
+					int ex2end= Integer.parseInt(rs.getString(7));
+					if (trans.getStrand()> 0) {
+						l.setStart(ex1start+ tlnStart- 1);
+						l.setEnd(ex2start+ tlnEnd- 1);
+					} else {
+						l.setStart(ex1end- tlnStart+ 1);
+						l.setEnd(ex2end- tlnEnd+ 1);
+					}
 					trans.addTranslation(l);
 				}
 				
@@ -561,10 +612,9 @@ public class EnsemblDBAdaptor {
 				}
 				while(rs.next()) {
 					gene= spec.getGene(rs.getString(5));
-					Transcript transcript= new Transcript(gene, rs.getString(1));	// stableID
+					Transcript transcript= new Transcript(gene, rs.getString(1)
+							Integer.parseInt(rs.getString(2)), Integer.parseInt(rs.getString(3)), gene.getStrand());	// stableID
 					//transcript.setGene(gene);		// stableID
-					transcript.setStart(Integer.parseInt(rs.getString(2)));
-					transcript.setEnd(Integer.parseInt(rs.getString(3)));
 					transcript.setType(rs.getString(6));
 					transcript.setConfidence(rs.getString(7));
 					
@@ -693,7 +743,7 @@ public class EnsemblDBAdaptor {
 		}
 
 			// build query
-		for (int i= 1; i < genes.length; i++) {	// 1000
+		for (int i= 0; i < genes.length; i++) {	// 1000, was 1.. ?!!
 			StringBuffer sb= new StringBuffer("SELECT gene_stable_id.stable_id,gene.seq_region_start,gene.seq_region_end,gene.seq_region_strand,seq_region.name,gene.biotype,gene.status ");		// 
 			sb.append("FROM gene,gene_stable_id,seq_region "); 
 			sb.append("WHERE gene.gene_id=gene_stable_id.gene_id");
@@ -1943,7 +1993,7 @@ public class EnsemblDBAdaptor {
 
 			
 			System.out.println(Constants.getDateString()+ " Graph downloaded");
-			tempExonMap= null;	// remove temporal references
+			//tempExonMap= null;	// remove temporal references
 			tempTranscriptMap= null;
 			System.gc();
 
@@ -2025,7 +2075,7 @@ public class EnsemblDBAdaptor {
 	
 			
 			System.out.println(Constants.getDateString()+ " Graph downloaded");
-			tempExonMap= null;	// remove temporal references
+			//tempExonMap= null;	// remove temporal references
 			tempTranscriptMap= null;
 			System.gc();
 	
@@ -2098,7 +2148,7 @@ public class EnsemblDBAdaptor {
 
 			
 			System.out.println(Constants.getDateString()+ " Graph downloaded");
-			tempExonMap= null;	// remove temporal references
+			//tempExonMap= null;	// remove temporal references
 			tempTranscriptMap= null;
 			System.gc();
 
@@ -2278,7 +2328,8 @@ public class EnsemblDBAdaptor {
 		
 			//updateAllGraphs();
 			//testFilter(new Species("Tetraodon"));
-			updateFilterAllGraphsNonsense();
+			//updateFilterAllGraphsNonsense();
+			correctTranslations();
 			if (1== 1)
 				System.exit(0);
 		

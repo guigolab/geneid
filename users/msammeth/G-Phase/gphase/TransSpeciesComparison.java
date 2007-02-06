@@ -11,7 +11,10 @@ import java.io.PrintStream;
 
 import gphase.algo.ASAnalyzer;
 import gphase.db.EnsemblDBAdaptor;
+import gphase.model.ASMultiVariation;
+import gphase.model.ASVariation;
 import gphase.model.Graph;
+import gphase.model.GraphHandler;
 import gphase.model.Species;
 
 public class TransSpeciesComparison {
@@ -22,7 +25,7 @@ public class TransSpeciesComparison {
 			Graph g= null;
 			EnsemblDBAdaptor adaptor= new EnsemblDBAdaptor();
 			try {
-				g= adaptor.getGraphAllGenes(Species.SP_NAMES_COMMON[i]+"_filtNonsense");
+				g= GraphHandler.readIn(GraphHandler.getGraphAbsPath(new Species(Species.SP_NAMES_COMMON[i]))+"_filtNonsense");
 				String iname= "graph"+ File.separator+ Species.SP_NAMES_COMMON[i];
 				String sfx= ".landscape";
 				PrintStream p= null;
@@ -36,6 +39,28 @@ public class TransSpeciesComparison {
 	}
 	
 	public static void main(String[] args) {
-		_00_mainLoop();
+		//_00_mainLoop();
+		_01_testDroso(); 
+	}
+
+	public static void _01_testDroso() {
+		Graph g= null;
+		EnsemblDBAdaptor adaptor= new EnsemblDBAdaptor();
+		try {
+			g= GraphHandler.readIn(GraphHandler.getGraphAbsPath(new Species("fruitfly"))+"_download");
+			ASVariation[][] vars= g.getASVariations(ASMultiVariation.FILTER_STRUCTURALLY);
+
+			for (int i = 0; i < vars.length; i++) {
+				if (!vars[i][0].isIntronRetention())
+					continue;
+				for (int j = 0; j < vars[i].length; j++) {
+					if (vars[i][j].is_affecting_5UTR()&& !(vars[i][j].is_contained_in_5UTR())&&
+							!(vars[i][j].is_affecting_CDS()))
+						System.out.println(vars[i][j].getSsRegionIDs()+"\t"+vars[i][j].toStringUCSC());
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }

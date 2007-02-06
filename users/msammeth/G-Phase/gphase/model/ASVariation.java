@@ -36,6 +36,8 @@ public class ASVariation implements Serializable {
 	public static final int TYPE_5UTR= 3;
 	public static final int TYPE_3UTR= 4;
 	
+	public static final String CODE_INTRON_RETENTION= "1^2- , 0";
+	
 	byte ssRegionID3UTR= 0;
 	byte ssRegionIDCDS= 0;
 	byte ssRegionID5UTR= 0;
@@ -101,6 +103,12 @@ public class ASVariation implements Serializable {
 		int[] a= getLength(exon);
 		int diffA= Math.abs(a[0]- a[1]);
 		return diffA;
+	}
+	
+	public boolean isIntronRetention() {
+		if (toString().equals(CODE_INTRON_RETENTION))
+			return true;
+		return false;
 	}
 	
 	public DirectedRegion getRegion() {
@@ -2979,6 +2987,11 @@ public class ASVariation implements Serializable {
 
 	public void setSsRegionID5UTR(byte ssRegionID5UTR) {
 		this.ssRegionID5UTR = ssRegionID5UTR;
+	}
+
+	public String getSsRegionIDs() {
+		String s= ssRegionID5UTR+" "+ssRegionIDCDS+" "+ssRegionID3UTR;
+		return s;
 	}
 
 	public void setSsRegionIDCDS(byte ssRegionIDCDS) {

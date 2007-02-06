@@ -29,22 +29,34 @@ public class Arrays {
 	public static String reverseComplement(String in) {
 		return reverse(complement(in));
 	}
-	public static Vector addUnique(Collection c, Object o, Comparator compi) {
-		Object[] ca= c.toArray();
-		int p= java.util.Arrays.binarySearch(ca, o, compi);
+	public static Vector addUnique(Vector v, Object o, Comparator compi) {
+		int p= binSearch(v, o, compi);
 		if (p< 0)
-			ca= insert(ca, o, p);
-		Vector v= new Vector(ca.length);
-		addAll(v, ca);
+			v.insertElementAt(o, -(p+ 1));
+		return v;
+	}
+	public static Vector addUnique(Vector v, Object[] a, Comparator compi) {
+		for (int i = 0; a!= null&& i < a.length; i++) 
+			addUnique(v, a[i], compi);
 		return v;
 	}
 	
-	public static Vector addUnique(Collection c, Object[] a, Comparator compi) {
-		for (int i = 0; a!= null&& i < a.length; i++) 
-			c= addUnique(c, a[i], compi);
-		return (Vector) c;
-	}
-	
+    static int binSearch(Vector v, Object key, Comparator compi) {
+    	return binSearch(v, key, compi, 0, v.size());
+    }
+    static int binSearch(Vector v, Object key, Comparator compi, int lo, int hi) {
+        // possible key indices in [lo, hi)
+        if (hi == lo)	// cannot be smaller 
+        	return (-hi- 1);
+        int mid = lo + (hi - lo) / 2;
+        int cmp = compi.compare(v.elementAt(mid), key);
+        if (cmp > 0) 
+        	return binSearch(v, key, compi, lo, mid);
+        else 
+        	if (cmp < 0) return binSearch(v, key, compi, mid+1, hi);
+        else              
+        	return mid;
+    }	
 	
 	
 	/**

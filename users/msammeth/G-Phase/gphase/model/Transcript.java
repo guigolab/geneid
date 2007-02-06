@@ -578,6 +578,10 @@ public class Transcript extends DirectedRegion {
 		return true;
 	}
 	
+	public void setTranslations(Translation[] tln) {
+		translations= tln;
+	}
+	
 	public Translation[] getTranslation(int start, int end) {
 		if (translations== null)
 			return null;

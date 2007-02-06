@@ -99,8 +99,8 @@ public abstract class AbstractRegion implements Region {
 		return false;
 	}
 
-	int end = Integer.MIN_VALUE;
-	int start = Integer.MAX_VALUE;
+	int end = 0;	// Integer.MAX ???? removed
+	int start = 0;
 	/**
 	 * @return Returns the end.
 	 */

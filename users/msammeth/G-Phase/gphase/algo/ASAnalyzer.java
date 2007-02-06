@@ -1149,12 +1149,19 @@ public class ASAnalyzer {
 		Vector v= new Vector();
 		IntVector vStart= new IntVector();
 		IntVector vEnd= new IntVector();
+		IntVector vPTrans= new IntVector();
+		IntVector vPGene= new IntVector();
 		Comparator compi= new DirectedRegion.PositionComparator();
 		for (int i = 0; i < ge.length; i++) {
 			Transcript[] trpts= ge[i].getTranscripts();
+			int sum= 0;
 			for (int j = 0; j < trpts.length; j++) {
 				DirectedRegion[] regs= trpts[j].getIntrons();
-				for (int k = 0; k < regs.length; k++) {
+				if (regs!= null) {
+					sum+= regs.length;
+					vPTrans.add(regs.length);
+				}
+				for (int k = 0; regs!= null&& k < regs.length; k++) {
 					int oldSize= v.size();
 					v= Arrays.addUnique(v, regs[k], compi);
 					if (v.size()> oldSize) {
@@ -1164,9 +1171,10 @@ public class ASAnalyzer {
 					
 				}
 			}
+			vPGene.add(sum);
 		}
-		System.out.println("[Exons]\tmean\tmedian\tstd dev");
-		p.println("[Exons]\tmean\tmedian\tstd dev");
+		System.out.println("[Introns]\tmean\tmedian\tstd dev");
+		p.println("[Introns]\tmean\tmedian\tstd dev");
 		
 		int[] inSizes= new int[v.size()];
 		for (int i = 0; i < v.size(); i++) 
@@ -1185,6 +1193,16 @@ public class ASAnalyzer {
 		statStr= dist.toStatString();
 		System.out.println("end\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
 		p.println("end\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		
+		dist= new Distribution(vPTrans.toIntArray());
+		statStr= dist.toStatString();
+		System.out.println("pTrpt\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		p.println("pTrpt\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		
+		dist= new Distribution(vPGene.toIntArray());
+		statStr= dist.toStatString();
+		System.out.println("pGene\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		p.println("pGene\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
 		
 		System.out.println();
 		p.println();
@@ -1201,12 +1219,19 @@ public class ASAnalyzer {
 		Vector v= new Vector();
 		IntVector vStart= new IntVector();
 		IntVector vEnd= new IntVector();
+		IntVector vPTrans= new IntVector();
+		IntVector vPGene= new IntVector();
 		Comparator compi= new DirectedRegion.PositionComparator();
 		for (int i = 0; i < ge.length; i++) {
 			Transcript[] trpts= ge[i].getTranscripts();
+			int sum= 0;
 			for (int j = 0; j < trpts.length; j++) {
 				DirectedRegion[] regs= trpts[j].getExons();
-				for (int k = 0; k < regs.length; k++) {
+				if (regs!= null) {
+					sum+= regs.length;
+					vPTrans.add(regs.length);
+				}
+				for (int k = 0; regs!= null&& k < regs.length; k++) {
 					int oldSize= v.size();
 					v= Arrays.addUnique(v, regs[k], compi);
 					if (v.size()> oldSize) {
@@ -1216,6 +1241,7 @@ public class ASAnalyzer {
 					
 				}
 			}
+			vPGene.add(sum);
 		}
 		System.out.println("[Exons]\tmean\tmedian\tstd dev");
 		p.println("[Exons]\tmean\tmedian\tstd dev");
@@ -1237,6 +1263,16 @@ public class ASAnalyzer {
 		statStr= dist.toStatString();
 		System.out.println("end\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
 		p.println("end\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		
+		dist= new Distribution(vPTrans.toIntArray());
+		statStr= dist.toStatString();
+		System.out.println("pTrpt\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		p.println("pTrpt\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		
+		dist= new Distribution(vPGene.toIntArray());
+		statStr= dist.toStatString();
+		System.out.println("pGene\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		p.println("pGene\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
 		
 		System.out.println();
 		p.println();

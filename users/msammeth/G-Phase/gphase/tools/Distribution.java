@@ -94,8 +94,8 @@ public class Distribution {
 	public String[] toStatString() {
 		String[] statStr= new String[3];
 		statStr[0]= new Double(getMean()).toString();
-		statStr[0]= new Double(getMedian()).toString();
-		statStr[0]= new Double(getStandardDeviation()).toString();
+		statStr[1]= new Double(getMedian()).toString();
+		statStr[2]= new Double(getStandardDeviation()).toString();
 		for (int i = 0; i < statStr.length; i++) 
 			statStr[i]= statStr[i].substring(0, statStr[i].indexOf('.')+ 2);
 
