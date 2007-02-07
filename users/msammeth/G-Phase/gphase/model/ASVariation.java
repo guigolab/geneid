@@ -1993,7 +1993,8 @@ public class ASVariation implements Serializable {
 	
 	public boolean is_affecting_3UTR() {
 		if (ssRegionID3UTR== 0) {
-			SpliceSite[] su= getSpliceUniversePlusFlanks();
+			//SpliceSite[] su= getSpliceUniversePlusFlanks();
+			SpliceSite[] su= getSpliceUniverse();
 			int i;
 			for (i = 0; i < su.length; i++) 
 				if ((trans1.getTranslations()!= null&& trans1.getTranslations()[0].get3PrimeEdge()< su[i].getPos())||
@@ -2009,7 +2010,7 @@ public class ASVariation implements Serializable {
 
 	public boolean is_affecting_5UTR() {
 		if (ssRegionID5UTR== 0) {
-			SpliceSite[] su= getSpliceUniversePlusFlanks();
+			SpliceSite[] su= getSpliceUniverse();	//getSpliceUniversePlusFlanks();
 			int i;
 			for (i = 0; i < su.length; i++) 
 				if ((trans1.getTranslations()!= null&& trans1.getTranslations()[0].get5PrimeEdge()> su[i].getPos())||

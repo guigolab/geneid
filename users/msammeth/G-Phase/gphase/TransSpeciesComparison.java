@@ -21,17 +21,19 @@ public class TransSpeciesComparison {
 
 	public static void _00_mainLoop() {
 		for (int i = 0; i < Species.SP_NAMES_COMMON.length; i++) {
+			if (!Species.SP_NAMES_COMMON[i].equals("fruitfly"))
+				continue;
 			System.out.println(Species.SP_NAMES_COMMON[i]);
 			Graph g= null;
 			EnsemblDBAdaptor adaptor= new EnsemblDBAdaptor();
 			try {
-				g= GraphHandler.readIn(GraphHandler.getGraphAbsPath(new Species(Species.SP_NAMES_COMMON[i]))+"_filtNonsense");
+				g= GraphHandler.readIn(GraphHandler.getGraphAbsPath(new Species(Species.SP_NAMES_COMMON[i]))+"_download");
 				String iname= "graph"+ File.separator+ Species.SP_NAMES_COMMON[i];
 				String sfx= ".landscape";
 				PrintStream p= null;
 				p= new PrintStream("graph"+File.separator+Species.SP_NAMES_COMMON[i]+"_length_distr.txt");
-				//ASAnalyzer.test04_determineVariations(g, iname, sfx);
-				ASAnalyzer.test03c_statisticAll(g, p);
+				ASAnalyzer.test04_determineVariations(g, iname, sfx);
+				//ASAnalyzer.test03c_statisticAll(g, p);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -39,8 +41,8 @@ public class TransSpeciesComparison {
 	}
 	
 	public static void main(String[] args) {
-		//_00_mainLoop();
-		_01_testDroso(); 
+		_00_mainLoop();
+		//_01_testDroso(); 
 	}
 
 	public static void _01_testDroso() {
