@@ -1991,6 +1991,88 @@ public class ASVariation implements Serializable {
 		return true;
 	}
 	
+	public DirectedRegion[] getAlternativeIntrons() {
+		AbstractSite[] flanks= getFlankingSites();
+		Vector regV= new Vector();		
+		for (int i = 0; i < getSpliceChain1().length; i++) {
+			if (getSpliceChain1()[i].isDonor())
+				continue;
+			int start;
+			if (i== 0)
+				start= flanks[0].getPos();
+			else
+				start= getSpliceChain1()[i-1].getPos();
+			
+			++start;
+			int end= getSpliceChain1()[i].getPos()- 1;
+			DirectedRegion reg= new DirectedRegion(start, end, getTranscript1().getStrand());
+			reg.setSpecies(getTranscript1().getSpecies());
+			reg.setChromosome(getTranscript1().getChromosome());
+			regV.add(reg);
+		}
+		for (int i = 0; i < getSpliceChain2().length; i++) {
+			if (getSpliceChain2()[i].isDonor())
+				continue;
+			int start;
+			if (i== 0)
+				start= flanks[0].getPos();
+			else
+				start= getSpliceChain2()[i-1].getPos();
+				
+			++start;
+			int end= getSpliceChain2()[i].getPos()- 1;
+			DirectedRegion reg= new DirectedRegion(start, end, getTranscript2().getStrand());
+			reg.setSpecies(getTranscript1().getSpecies());
+			reg.setChromosome(getTranscript1().getChromosome());
+			regV.add(reg);
+		}
+		if ((getSpliceChain1().length> 0&& getSpliceChain1()[getSpliceChain1().length-1].isDonor())
+				|| (getSpliceChain2().length> 0&& getSpliceChain2()[getSpliceChain2().length-1].isDonor())) {
+			int start;
+			if (getSpliceChain1().length< 1)
+				start= flanks[0].getPos();
+			else
+				start= getSpliceChain1()[getSpliceChain1().length- 1].getPos();
+
+			++start;
+			int end= flanks[1].getPos()- 1;
+			DirectedRegion reg= new DirectedRegion(start, end,getTranscript1().getStrand());
+			reg.setSpecies(getTranscript1().getSpecies());
+			reg.setChromosome(getTranscript1().getChromosome());
+			regV.add(reg);
+			
+			if (getSpliceChain2().length< 1)
+				start= flanks[0].getPos();
+			else
+				start= getSpliceChain2()[getSpliceChain2().length- 1].getPos();
+
+			++start;
+			end= flanks[1].getPos()- 1;
+			reg= new DirectedRegion(start, end, getTranscript2().getStrand());
+			reg.setSpecies(getTranscript1().getSpecies());
+			reg.setChromosome(getTranscript1().getChromosome());
+			regV.add(reg);
+		}
+			
+		return (DirectedRegion[]) gphase.tools.Arrays.toField(regV);
+	}
+	
+	public boolean has_nonGTAG_Intron() {
+		DirectedRegion[] regs= getAlternativeIntrons();
+		if (regs== null)
+			return false;
+		for (int i = 0; i < regs.length; i++) {
+			String seq= Graph.readSequence(regs[i]);
+			if (seq.length()< 4)// GTAG
+				return true;
+			String don= seq.substring(0, 2);
+			String acc= seq.substring(seq.length()- 2, seq.length());
+			if ((!don.equalsIgnoreCase("GT"))|| (!acc.equalsIgnoreCase("AG")))
+				return true;
+		}
+		return false;		
+	}
+	
 	public boolean is_affecting_3UTR() {
 		if (ssRegionID3UTR== 0) {
 			//SpliceSite[] su= getSpliceUniversePlusFlanks();

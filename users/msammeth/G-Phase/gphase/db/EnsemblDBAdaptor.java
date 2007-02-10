@@ -123,21 +123,61 @@ public class EnsemblDBAdaptor {
 				System.out.println(Constants.getDateString()+ " loading Graph");
 				Species sp= new Species(spec[i]);
 				g= GraphHandler.readIn(GraphHandler.getGraphAbsPath(sp)+"_download");
-				GTFWrapper wrapper= new GTFWrapper(new File(GraphHandler.getGraphAbsPath()), sp);
+				GTFWrapper wrapper= new GTFWrapper(new File(GraphHandler.getGraphAbsPath()+"_download.gtf"), sp);
 				System.out.println(Constants.getDateString()+ " writing GTF");
 				wrapper.write();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 	}
-	public static void correctTranslations() {
+
+	public static void filter() {
+		
+		String[] spec= Species.SP_NAMES_COMMON;
+		//spec= new String[] {"fruitfly"};
+		Graph g;
+		for (int i = 0; i < spec.length; i++) {
+			if (spec[i].equals("platypus"))
+				continue;
+			try {
+				System.out.println("***"+spec[i]+"***");
+				System.out.println(Constants.getDateString()+ " loading Graph");
+				Species sp= new Species(spec[i]);
+				g= GraphHandler.readIn(GraphHandler.getGraphAbsPath(sp)+"_download");
+				System.out.println(Constants.getDateString()+ " filtering");
+				g.filter();
+				System.out.println(Constants.getDateString()+ " writing");
+				GraphHandler.writeOut(g, GraphHandler.getGraphAbsPath(sp)+"_filtered");
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	static void correctBuildVersion() {
+		String[] spec= Species.SP_NAMES_COMMON;
+		Graph g;
+		for (int i = 0; i < spec.length; i++) {
+//			if (!spec[i].equals("tetraodon"))
+//				continue;
+			try {
+				g= GraphHandler.readIn(GraphHandler.getGraphAbsPath(new Species(spec[i]))+"_download");
+				g.getSpecies()[0].setBuildVersion(42);
+				GraphHandler.writeOut(g, GraphHandler.getGraphAbsPath(new Species(spec[i]))+"_download");
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+	}
+	static void correctTranslations() {
 
 		EnsemblDBAdaptor adaptor= new EnsemblDBAdaptor();
-		//String[] spec= Species.SP_NAMES_COMMON;
-		String[] spec= new String[] {"fruitfly"};
+		String[] spec= Species.SP_NAMES_COMMON;
 		Graph g;
 		for (int i = 0; i < spec.length; i++) 
 			try {
+				
 				System.out.println(spec[i]);
 				System.out.println(Constants.getDateString()+ " loading Graph");
 				g= GraphHandler.readIn(GraphHandler.getGraphAbsPath(new Species(spec[i]))+"_download");
@@ -161,6 +201,37 @@ public class EnsemblDBAdaptor {
 						if (trpt[k].getTranslations()!= null) 
 							trpt[k].setTranslations(null);
 					adaptor.retrieveTranslations(con, trpt);	// get new
+				}
+				GraphHandler.writeOut(g, GraphHandler.getGraphAbsPath(new Species(spec[i]))+"_download"); 		// writeGraph();
+				System.out.println();
+			} catch (Throwable e) {
+				e.printStackTrace();
+			}
+	}
+
+	static void correctExonCDS() {
+
+		String[] spec= Species.SP_NAMES_COMMON;
+		Graph g;
+		for (int i = 0; i < spec.length; i++) 
+			try {
+				
+				System.out.println(spec[i]);
+				System.out.println(Constants.getDateString()+ " loading Graph");
+				g= GraphHandler.readIn(GraphHandler.getGraphAbsPath(new Species(spec[i]))+"_download");
+				Gene[] ge= g.getGenes();
+				
+				String specName= new Species(spec[i]).getBinomialName();
+				
+				for (int j = 0; j < ge.length; j++) {
+					Transcript[] trpt= ge[j].getTranscripts();
+					for (int k = 0; k < trpt.length; k++) {
+						Exon[] ex= trpt[k].getExons();
+						for (int m = 0; m < ex.length; m++) {
+							ex[m].setStartCDS(ex[m].getStartCDS());
+							ex[m].setEndCDS(ex[m].getEndCDS());
+						}
+					}
 				}
 				GraphHandler.writeOut(g, GraphHandler.getGraphAbsPath(new Species(spec[i]))+"_download"); 		// writeGraph();
 				System.out.println();
@@ -676,100 +747,22 @@ public class EnsemblDBAdaptor {
 			return Transcript.toTranscriptArray(transVec);
 		}
 
-	static GTFObject[] getTranslations(Connection con, Species spec, Gene[] genes) {
-		
-		ResultSet rs= null;
-
-			// build query
-		StringBuffer sb= new StringBuffer("SELECT transcript_stable_id.stable_id,transcript.seq_region_start,transcript.seq_region_end,transcript.seq_region_strand,gene_stable_id.stable_id,transcript.biotype,transcript.status ");	//
-		sb.append("FROM gene,gene_stable_id,transcript,transcript_stable_id "); 
-		sb.append("WHERE transcript.gene_id=gene.gene_id");
-		sb.append(" AND gene.gene_id=gene_stable_id.gene_id");
-		sb.append(" AND transcript.transcript_id=transcript_stable_id.transcript_id ");
-		Gene gene= genes[0];
-		sb.append(" AND (gene_stable_id.stable_id=\""); 
-		sb.append(gene.getStableID()); 
-		sb.append("\"");
-		for (int i= 1; i < genes.length; i++) {
-			gene= genes[i];
-			sb.append(" OR gene_stable_id.stable_id=\"");
-			sb.append(gene.getStableID());
-			sb.append("\"");
-		}
-		sb.append(")");
-	
-			// execute query
-		Vector transVec= new Vector();
-		try {
-			Statement stmt = con.createStatement(
-						ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-											// only one ResultSet per Statement possible
-	
-			rs = stmt.executeQuery(sb.toString());	// TYPE and CONCUR value given by Statement
-			if (rs== null) {
-				System.err.println("No result for Transcripts!");
-				return null;
-			}
-				
-				// store result
-			if (tempTranscriptMap== null) {
-				int ctr= countResults(rs);
-				tempTranscriptMap= new HashMap(ctr, (int) (1.3* ctr));
-				rs.beforeFirst();
-			}
-			while(rs.next()) {
-				gene= spec.getGene(rs.getString(5));
-				Transcript transcript= new Transcript(gene, rs.getString(1));	// stableID
-				//transcript.setGene(gene);		// stableID
-				transcript.setStart(Integer.parseInt(rs.getString(2)));
-				transcript.setEnd(Integer.parseInt(rs.getString(3)));
-				transcript.setType(rs.getString(6));
-				transcript.setConfidence(rs.getString(7));
-				
-					
-				if (gene== null) {
-					System.err.println("EnsemblDBAdaptor.getTranscripts(): no gene found for "+ rs.getString(5));
-					continue;
-				}
-				gene.addTranscript(transcript);
-				
-				if (!transcript.checkStrand(rs.getString(4)))
-					System.err.println("Strand mismatch gene "+gene.getStableID()
-						+"("+(transcript.getGene().isForward()?"fwd":"rev")
-						+") with transcript "+ transcript.getStableID()
-						+"("+(rs.getString(4).trim().equals("1")?"fwd":"rev"));
-				
-				tempTranscriptMap.put(rs.getString(1), transcript);
-				transVec.add(transcript);
-			}
-			
-			// do not close - connection is needed for translations and exons
-		} catch (SQLException e) { 			// thrown by both methods
-			System.err.println("Error fetching transcripts: "+ e);
-		}
-		
-		return Transcript.toTranscriptArray(transVec);
-	}
-	
-
-
 	/**
 	 * get Genes in single: whole bulk suddenly did not run anymore!
 	 */
 	Gene[] retrieveGenes_single(Connection con, Gene[] genes) {
 		
 		try {
-			checkVersion(Integer.parseInt(
-				con.getCatalog().substring(
-						con.getCatalog().indexOf("_core")+ 6,
-						con.getCatalog().lastIndexOf('_'))));	// e.g. "homo_sapiens_core_31_35d" = Ensembl ver 31, based on NCBI genome 35
-			String s= con.getCatalog().substring(
-					con.getCatalog().lastIndexOf('_')+ 1,
-					con.getCatalog().length()); // e.g. "homo_sapiens_core_31_35d"
-			if (Character.isLetter(s.charAt(s.length()- 1)))
-				s= s.substring(0, s.length()- 1); // quit last letter if present (e.g., the "d")
-			genes[0].getSpecies().setBuildVersion(
-				Integer.parseInt(s));
+//			String s= con.getCatalog().substring(
+//			con.getCatalog().lastIndexOf('_')+ 1,
+//			con.getCatalog().length()); // e.g. "homo_sapiens_core_31_35d"
+//	if (Character.isLetter(s.charAt(s.length()- 1)))
+//		s= s.substring(0, s.length()- 1); // quit last letter if present (e.g., the "d")
+			int x= Integer.parseInt(con.getCatalog().substring(
+					con.getCatalog().indexOf("_core")+ 6,
+					con.getCatalog().lastIndexOf('_')));
+			checkVersion(x);	// e.g. "homo_sapiens_core_31_35d" = Ensembl ver 31, based on NCBI genome 35
+			genes[0].getSpecies().setBuildVersion(x);
 					
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -2363,7 +2356,12 @@ public class EnsemblDBAdaptor {
 			//testFilter(new Species("Tetraodon"));
 			//updateFilterAllGraphsNonsense();
 			//correctTranslations();
-			serializeGraphs();
+			//serializeGraphs();
+			//filterNonGTAG();
+			//correctBuildVersion();
+			filter();
+			//correctExonCDS();
+			//serializeGraphs();
 			if (1== 1)
 				System.exit(0);
 		

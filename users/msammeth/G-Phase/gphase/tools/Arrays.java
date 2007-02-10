@@ -79,8 +79,8 @@ public class Arrays {
 	}
 	
 	public static String complement(String in){
-		String normal= "ACGTN-acgt";
-		String reverse= "TGCAN-tgca";
+		String normal= "ACGTN-acgtn";
+		String reverse= "TGCAN-tgcan";
 		StringBuffer buffy= new StringBuffer(in.length());
 		for (int i = 0; i < in.length(); i++) 
 			buffy.append(reverse.charAt(normal.indexOf(in.charAt(i))));

@@ -387,7 +387,7 @@ public class Exon extends DirectedRegion {
 
 	public void setEndCDS(int endCDS) {
 		if (getGene().getStrand()< 0)
-			endCDS= -endCDS;
+			endCDS= -Math.abs(endCDS);
 		this.endCDS = endCDS;
 	}
 
@@ -397,7 +397,7 @@ public class Exon extends DirectedRegion {
 
 	public void setStartCDS(int startCDS) {
 		if (getGene().getStrand()< 0)
-			startCDS= -startCDS;
+			startCDS= -Math.abs(startCDS);
 		this.startCDS = startCDS;
 	}
 	

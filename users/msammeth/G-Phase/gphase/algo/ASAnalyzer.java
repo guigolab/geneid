@@ -2271,7 +2271,8 @@ public class ASAnalyzer {
 			try {
 				Method m = classes[0][0].getClass().getMethod("isTrue", null);
 				ASVariation[][] filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
-				outputVariationsDegree(filtClasses, p);	//false, true, 
+				outputVariations(filtClasses, false, false, p);
+				//outputVariationsDegree(filtClasses, p);	//false, true, 
 				
 //				m = classes[0][0].getClass().getMethod("isProteinCoding_old_publ", null);
 //				filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
@@ -2428,10 +2429,10 @@ public class ASAnalyzer {
 					
 					g.filterNonCodingTranscripts();
 					g.filterNMDTranscripts();
-					test04_determineVariations(g, iname, sfx);
+					test04_determineVariations(g, iname, sfx, false);
 				}
 				
-				public static void test04_determineVariations(Graph g, String iname, String sfx) {
+				public static void test04_determineVariations(Graph g, String iname, String sfx, boolean filtNonGTAG) {
 					ASVariation[][] classes= g.getASVariations(ASMultiVariation.FILTER_NONE);
 					classes= (ASVariation[][]) Arrays.sort2DFieldRev(classes);
 					if (classes== null)
@@ -2441,6 +2442,26 @@ public class ASAnalyzer {
 					for (int i = 0; i < filtClasses.length; i++) 
 						filtClasses[i]= ASMultiVariation.removeRedundancyHierachically(classes[i], compx);
 					classes= filtClasses;
+					if (filtNonGTAG) {
+						Vector v= new Vector();
+						int cntFiltEv= 0;
+						int cntAllEv= 0;
+						for (int i = 0; i < classes.length; i++) { 
+							ASVariation[] filtClas= ASMultiVariation.filterNonGTAG(classes[i]);
+							if (filtClas== null)
+								cntFiltEv+= classes[i].length;
+							else
+								cntFiltEv+= classes[i].length- filtClas.length;
+							cntAllEv+= classes[i].length;
+							if (filtClas!= null&& filtClas.length> 0)
+								v.add(filtClas);
+						}
+						classes= (ASVariation[][]) Arrays.toField(v);
+						filtClasses= classes;
+						String percStr= Float.toString((cntFiltEv* 100f)/ cntAllEv);
+						percStr= percStr.substring(0, percStr.indexOf('.')+ 2);
+						System.out.println("filtered out "+cntFiltEv+" ("+percStr+"%) involving nonGT/AG introns.");
+					}
 					
 					PrintStream p= null;
 					try {

@@ -11,7 +11,7 @@ public class Renamer {
 	public static void main(String[] args) {
 		
 		if (args.length< 2) {
-			System.out.println("Usage: Renamer [path] [outPath] pattern substitute\ne.g. Renamer /home/ug/root .tmp .del");
+			System.out.println("Usage: Renamer [path] [outPath] pattern(-a for append to all files) substitute\ne.g. Renamer /home/ug/root .tmp .del");
 			System.exit(0);
 		}
 		
@@ -40,9 +40,13 @@ public class Renamer {
 				StringBuffer sb= new StringBuffer(dir[i]);
 				int x= -1;
 				//while (i= sb.indexOf(args[1], i+1)>= 0)	// can have recursive impliction if (pattern contains substitute)
-				x= sb.indexOf(pattern, x+1);
-				if (x>= 0)
-					sb.replace(x, x+ pattern.length(), subst);
+				if (pattern.equals("-a")) {
+					sb.append(subst);
+				} else {
+					x= sb.indexOf(pattern, x+1);
+					if (x>= 0)
+						sb.replace(x, x+ pattern.length(), subst);
+				}
 				
 				File f= new File(fPath+ File.separator+ dir[i]);
 				String outName= outPath+ File.separator+ sb.toString();

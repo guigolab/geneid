@@ -35,7 +35,11 @@ public class Species implements Serializable {
 	public static final String GENOSCOPE_ID= "GS";
 	public static final String FLYBASE_ID= "C";
 	
-		// org=
+	public static final String[] ASSEMBLY_PFX= new String[] {
+		"ENSEMBL", "HG", "NCBI", "golden_path_", "WASHUC", "JGI", "Zv", "FUGU"
+	};
+	
+	// org=
 	public static final String[] SP_UCSC_CGI_STRINGS= new String[] {
 			"Homo_sapiens;db=hg17",	// &db=hg18 newest, but for gencode..
 			"Chimp",	// db=panTro
@@ -118,7 +122,9 @@ public class Species implements Serializable {
 			
 			"ciona_intestinalis",	// chordata?
 			"ciona_savignyi",
-			"ornithorhynchus_anatinus"	// platypus, vertebrate?
+			"ornithorhynchus_anatinus",	// platypus, vertebrate?
+			
+			"arabidopsis_thaliana"
 	};
 	
 	// public static final String[] SP_NAMES_ABBREV= new String[] {"hsapiens", "mmusculus", "rnorvegicus"};
@@ -145,7 +151,9 @@ public class Species implements Serializable {
 			
 			"seasquirt",
 			"seqsquirt2",
-			"platypus"
+			"platypus",
+			
+			"cress"
 	};
 
 	public static Species[] createByBinomialName(String[] binomialNames) {
@@ -512,6 +520,17 @@ public class Species implements Serializable {
 		return geneHash.values().iterator();
 	}
 
+	public String[] getChromosomes() {
+		Gene[] ge= getGenes();
+		HashMap chrMap= new HashMap();
+		for (int i = 0; i < ge.length; i++) {
+			Object o= chrMap.get(ge[i].getChromosome());
+			if (o== null)
+				chrMap.put(ge[i].getChromosome(), ge[i].getChromosome());
+		}
+		
+		return (String[]) Arrays.toField(chrMap.keySet());
+	}
 
 	public boolean addGene(Gene newGene) {
 		
@@ -634,6 +653,165 @@ public class Species implements Serializable {
 		}
 	}
 	
+	public void filter() {
+		String cname= SP_NAMES_COMMON[getSpNumber()];
+		Gene[] ge= getGenes();
+		Vector hNames= new Vector();
+		Vector otherNames= new Vector();
+		int hCtr= 0;
+		Vector remChrV= new Vector();
+		int b4GenNb= ge.length, b4TrptNb= getTranscriptCount();
+		for (int i = 0; i < ge.length; i++) {			
+			String chr= ge[i].getChromosome();
+			
+			if (cname.equalsIgnoreCase("cow")) {
+			if (ge[i].getChromosome().equals("30"))
+				ge[i].setChromosome("X");	// ENSEMBL is funny
+			}
+			
+				// accept: integers
+			boolean isInt= true;
+			try {  Integer.parseInt(chr);}
+			catch (NumberFormatException e) {isInt= false;}
+			if (isInt)
+				continue;
+			
+				// accept: integers+ char
+			String pfx= chr.substring(0, chr.length()- 1);
+			isInt= true;
+			try {  Integer.parseInt(pfx);}
+			catch (NumberFormatException e) {isInt= false;}
+			if (isInt) {
+				if (chr.charAt(chr.length()-1)!= 'h')	// Droso, heterochromatin..
+					continue;
+				else {
+					++hCtr;
+					remChrV= Arrays.addUnique(remChrV, chr, String.CASE_INSENSITIVE_ORDER);
+					hNames.add(ge[i].getGeneID());
+					remove(ge[i], true);
+					continue;
+				}
+			}
+			
+				// accept: roman numbers
+			String[] romanNb= new String[] {
+				"I", "II", "III", "IV", "V",
+				"VI", "VII", "VIII", "IX", "X",
+				"XI", "XII", "XIII", "XIV", "XV",
+				"XVI", "XVII", "XVIII", "XIX", "XX",
+				"XXI", "XXII", "XXIII", "XXIV", "XXV",
+				"XXVI", "XXVII", "XXVIII", "XXIX", "XXX"
+			};
+			int j;
+			for (j = 0; j < romanNb.length; j++) 
+				if (chr.equalsIgnoreCase(romanNb[j]))
+					break;
+			if (j< romanNb.length)
+				continue;
+			
+			// accept: extra chromosomes
+			String[] extraChr= new String[] {
+				"W", "X", "Y", "Z" 
+			};
+			for (j = 0; j < extraChr.length; j++) {
+				if (chr.equalsIgnoreCase(extraChr[j]))
+					break;
+				if (chr.equalsIgnoreCase(extraChr[j]+"h")) {
+					++hCtr;
+					remChrV= Arrays.addUnique(remChrV, chr, String.CASE_INSENSITIVE_ORDER);
+					hNames.add(ge[i].getGeneID());
+					remove(ge[i], true);
+					continue;
+				}
+			}
+			if (j< extraChr.length)
+				continue;
+			
+			
+				// remove
+			String[] noIDs= new String[] {
+					"M", "Mt", "MtDNA",	// mitochondrial
+					"U", "Un", "Unkn"	// un-...
+			};
+			for (j = 0; j < noIDs.length; j++) 				
+				if (chr.equalsIgnoreCase(noIDs[j]))
+					break;
+			if (j< noIDs.length|| (chr.indexOf("_random")== (chr.length()- 7))) {
+				++hCtr;
+				remChrV= Arrays.addUnique(remChrV, chr, String.CASE_INSENSITIVE_ORDER);
+				hNames.add(ge[i].getGeneID());
+				remove(ge[i], true);
+				continue;
+			}
+
+				// rest
+			if (chr.startsWith("scaffold_")|| chr.startsWith("reftig_")|| 
+					chr.startsWith("Contig")|| chr.startsWith("contig"))
+				continue;
+			else {
+				++hCtr;
+				remChrV= Arrays.addUnique(remChrV, chr, String.CASE_INSENSITIVE_ORDER);
+				hNames.add(ge[i].getGeneID());
+				remove(ge[i], true);
+				continue;
+			}
+//			if (cname.equalsIgnoreCase("fruitfly")) {
+//				String chr= ge[i].getChromosome();
+//				if (Character.toLowerCase(chr.charAt(chr.length()- 1))== 'h') {
+//					++hCtr;
+//					hNames.add(ge[i].getGeneID());
+//					remove(ge[i], true);
+//				} else
+//					otherNames.add(ge[i].getGeneID());
+//			}
+//			
+//			
+//			if (cname.equalsIgnoreCase("human")|| cname.equalsIgnoreCase("mouse")
+//					|| cname.equalsIgnoreCase("cow")|| cname.equalsIgnoreCase("zebrafish")) {
+//				String chr= ge[i].getChromosome();
+//				try {
+//					Integer.parseInt(chr);
+//				} catch (NumberFormatException e) {
+//						// zebrafish doesnt have X,Y, but igual
+//					String[] otherChr= new String[] {"X", "Y"};	
+//					int j;
+//					for (j = 0; j < otherChr.length; j++) 
+//						if (otherChr[j].equalsIgnoreCase(chr))
+//							break;
+//					if (j== otherChr.length) {
+//						++hCtr;
+//						hNames.add(ge[i].getGeneID());
+//						remove(ge[i], true);
+//					} else
+//						otherNames.add(ge[i].getGeneID());
+//				}
+//			}
+		}
+
+		if (remChrV.size()> 0)
+			System.out.print("Dont know what is");
+		for (int i = 0; i < remChrV.size(); i++) 
+			 System.out.print(" chr"+remChrV.elementAt(i));
+		if (remChrV.size()> 0)
+			System.out.println(", removing it");
+		
+		int ctrDup= 0;
+		for (int i = 0; i < hNames.size(); i++) {
+			int j;
+			for (j = 0; j < otherNames.size(); j++) 
+				if (((String) hNames.elementAt(i)).equalsIgnoreCase((String) otherNames.elementAt(j)))
+					break;
+			if (j< otherNames.size())
+				++ctrDup;
+		}		
+		
+		String percGen= Float.toString(((float) hCtr* 100f)/ b4GenNb);
+		percGen= percGen.substring(0, percGen.indexOf('.'));
+		if (hCtr> 0)
+			System.out.println(SP_NAMES_COMMON[getSpNumber()]+" removed "+hCtr+" genes ("+percGen+"%) in strange DNA (heterochromatin, fragments, etc.), "+ctrDup+" of them with duplicates in chromosomal data.");
+	}
+
+	
 	public void recluster() {
 		Gene[] ge= getGenes();
 		for (int i = 0; i < ge.length; i++) {
@@ -732,5 +910,56 @@ public class Species implements Serializable {
 
 	public int getSpNumber() {
 		return spNumber;
+	}
+
+	/**
+	 */
+	public HashMap filterNonGTAGIntrons() {
+		
+		String[] chroms= getChromosomes();
+		HashMap chrHash= new HashMap(chroms.length);
+		for (int i = 0; i < chroms.length; i++) {
+			int[] ratio= new int[2];
+			ratio[0]= 0;
+			ratio[1]= 0;
+			chrHash.put(chroms[i], ratio);
+		}
+		
+		int ctrTrpt= 0, ctrGene= 0;
+		Gene[] ge= getGenes();
+		for (int i = 0; i < ge.length; i++) {
+			Transcript[] trans= ge[i].getTranscripts();
+			for (int j = 0; j < trans.length; j++) {
+				if (trans[j].getNonGTAGIntron(chrHash)) {
+					ge[i].removeTranscript(trans[j]);
+					++ctrTrpt;
+				}
+			}
+			if (ge[i].getTranscriptCount()< 1) {	// remove gene if there are no more transcripts
+				remove(ge[i], true);
+				++ctrGene;
+			}
+		}
+		recluster();
+		
+		
+		Object[] keys= chrHash.keySet().toArray();
+		java.util.Arrays.sort(keys);
+		int nonGTAG= 0, total= 0;
+		for (int i = 0; i < keys.length; i++) {
+			int[] ratio= (int[]) chrHash.get(keys[i]);
+			String rat= Float.toString((ratio[0]* 100f)/ ratio[1]);
+			rat= rat.substring(0, rat.indexOf('.')+ 2);
+			if (keys.length< 50)
+				System.out.print(keys[i]+": "+ratio[0]+"/"+ratio[1]+" ("+rat+"%)  ");
+			nonGTAG+= ratio[0]; 
+			total+= ratio[1];
+		}
+		String rat= Float.toString((nonGTAG* 100f)/ total);
+		rat= rat.substring(0, rat.indexOf('.')+ 2);
+		System.out.println("\n=> total "+nonGTAG+"/"+total+" ("+rat+"%)");
+		System.out.println(SP_NAMES_COMMON[getSpNumber()]+" removed "+ctrTrpt+" transcripts, by this "+ctrGene+" complete genes" +
+				" due to non-GT/AG introns.");
+		return chrHash;
 	}
 }

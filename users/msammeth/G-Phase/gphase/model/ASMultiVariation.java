@@ -176,6 +176,13 @@ public class ASMultiVariation implements Serializable {
 		return (ASVariation[]) Arrays.toField(v);
 	}
 
+	public static ASVariation[] filterNonGTAG(ASVariation[] vars) {
+		Vector v= new Vector();
+		for (int i = 0; i < vars.length; i++) 
+			if (!vars[i].has_nonGTAG_Intron())
+				v.add(vars[i]);
+		return (ASVariation[]) Arrays.toField(v);
+	}
 	public static ASVariation[] removeRedundancy(ASVariation[] vars, Comparator compi) {
 		
 		Vector v= new Vector(vars.length);

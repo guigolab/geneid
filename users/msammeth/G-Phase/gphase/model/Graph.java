@@ -8,6 +8,7 @@ package gphase.model;
 
 import gphase.Constants;
 import gphase.NMDSimulator;
+import gphase.NMDSimulator2;
 
 import gphase.algo.AlignmentGenerator;
 import gphase.algo.AlignmentWrapper;
@@ -614,11 +615,14 @@ public class Graph implements Serializable {
 			start--;
 			if (chromosome.equals("MT"))	// correct Ensembl to GRIB jargon
 				chromosome= "M";
+			if ((!chromosome.startsWith("scaffold"))&& (!chromosome.startsWith("reftig"))
+					&& (!chromosome.startsWith("contig"))&& (!chromosome.startsWith("Contig"))) 
+				chromosome= "chr"+ chromosome;
 			byte[] seq= new byte[end- start];
 			try {
 //				System.out.println(getSequenceDirectory(speRealName)+ File.separator+ "chr"+ chromosome+ Constants.CHROMOSOME_EXT);
 //				System.out.println(start+"-"+end);
-				String fName= getSequenceDirectory(spe)+File.separator+ "chr"+ chromosome+ Constants.CHROMOSOME_EXT;
+				String fName= getSequenceDirectory(spe)+File.separator+ chromosome+ Constants.CHROMOSOME_EXT;
 				RandomAccessFile raf= new RandomAccessFile(new File(fName),"r");
 				
 				String read= raf.readLine();
@@ -630,7 +634,8 @@ public class Graph implements Serializable {
 					read= raf.readLine();
 				int line= read.length();
 				
-				raf.seek(offset+1+start+ (start/line));	// fpointer is different from reading point!
+				int p= offset+1+start+ (start/line);
+				raf.seek(p);	// fpointer is different from reading point!
 				int pos= 0;
 				int nextN= (line- (start%line));				// read (end of) first line
 				while (pos+ nextN< seq.length) {		// full lines
@@ -655,30 +660,52 @@ public class Graph implements Serializable {
 	public static String getSequenceDirectory(Species spe) {
 
 		// Species spe= getSpeciesByName(realName);
-		String realName= spe.getBinomialName();
+		String bin= spe.getBinomialName();
+		int binSep= bin.indexOf('_');
+		String bin1= bin.substring(0, binSep);
+		String bin2= bin.substring(binSep+1, bin.length());
 //		HashMap hm= (HashMap) buildMap.get(realName);
 //		Object o= hm.get(new Integer(spe.getBuildVersion()));
 //		int dateID= ((Integer) ((HashMap) buildMap.get(realName))
 //						.get(new Integer(spe.getBuildVersion()))).intValue();		// extract ID (date of build)
 		
 		
-		String seqDirName= Character.toUpperCase(realName.charAt(0))+ "."
-				+ realName.substring(realName.indexOf('_')+ 1);
+		String seqDirName= Character.toUpperCase(bin.charAt(0))+ "."+ bin2;
 		File speciesGenome= new File(Constants.DATA_DIR+ File.separator
 				+ Constants.SEQUENCES_SUBDIR+ File.separator
 				+ seqDirName);
 		String[] list= speciesGenome.list();
 		if (list== null)
 			System.err.println("\nSequence Directory not found: "+ speciesGenome.getAbsolutePath()+"\nplease provide build version: "+spe.getBuildVersion());
+		
+		String oneLetterPFX= ""+ bin1.charAt(0)+ bin2.charAt(0);
+		String threeLetterPFX= ""+ bin1.substring(0,3)+ bin2.substring(0,3);
+		String oneThreeLetterPFX= ""+ bin1.charAt(0)+ bin2.substring(0,3);
+		Vector combiVec= new Vector();
+		int x= spe.getBuildVersion();
+		for (int i = 0; i< Species.ASSEMBLY_PFX.length; i++) 
+			combiVec.add(Species.ASSEMBLY_PFX[i].toUpperCase()+x);
+		combiVec.add(oneLetterPFX.toUpperCase()+x);
+		combiVec.add(threeLetterPFX.toUpperCase()+x);
+		combiVec.add(oneThreeLetterPFX.toUpperCase()+x);
 		int i;
 		for (i = 0; i < list.length; i++) {
-			if (list[i].indexOf(new Integer(spe.getBuildVersion()).toString())>= 0)	// dateID
+			int j;
+			for (j = 0; j < combiVec.size(); j++) {
+				String s= (String) combiVec.elementAt(j);
+				int p= list[i].toUpperCase().indexOf(s);
+				if (p>= 0&& (p+ s.length()== list[i].length()|| list[i].charAt(p+s.length())== '_'))	// dateID
+					break;
+			}
+			if (j< combiVec.size())
 				break;
 		}
 		if (i> list.length- 1) {
-			System.err.println("Build not found: "+ realName+" ("+spe.getBuildVersion()+")");
-		}
-		
+			System.err.print("Build not found: "+ bin+" ( ");
+			for (int j = 0; j < combiVec.size(); j++) 
+				System.out.print(combiVec.elementAt(j));
+			System.out.println(")");
+		}		
 		
 		return speciesGenome.getAbsolutePath()+ File.separator
 				+ list[i]+ File.separator+ Constants.CHROMOSOME_DIR;
@@ -1354,6 +1381,21 @@ public class Graph implements Serializable {
 		recluster();
 	}
 
+	
+	
+	/**
+	 */
+	public void filterNonGTAGIntrons() {
+		System.out.println("filter non-GTAG introns");
+		Iterator iter= speciesHash.values().iterator();
+		int ctrTrpt= 0, ctrGene= 0;
+		while (iter.hasNext()) {
+			Species spec= (Species) iter.next();
+			spec.filterNonGTAGIntrons();
+		}
+		System.out.println("Filter nonGT/AG removed in total "+ctrTrpt+" transcript, "+ctrGene+" genes.");
+	}
+
 	/**
 	 */
 	public void filterNMDTranscripts() {
@@ -1364,15 +1406,22 @@ public class Graph implements Serializable {
 		int ctrFilt= 0;
 		int ctrLocus= 0;
 		Iterator iter= speciesHash.values().iterator();
-		NMDSimulator nmd;
+		NMDSimulator2 nmd;
 		while (iter.hasNext()) {
 			Species spec= (Species) iter.next();
 			Gene[] ge= spec.getGenes();
+			int geCtr= 0;
 			for (int i = 0; i < ge.length; i++) {
+				int act= (i* 10)/ ge.length;
+				if (act> geCtr) {
+					System.out.print("*");
+					System.out.flush();
+					geCtr= act;
+				}
 				Transcript[] trans= ge[i].getTranscripts();
 				for (int j = 0; j < trans.length; j++) {
 					++ctr;
-					nmd= new NMDSimulator(trans[j]);
+					nmd= new NMDSimulator2(trans[j]);
 					Translation tln;
 					if (trans[j].getTranslations()== null|| trans[j].getTranslations()[0]== null)
 						tln= trans[j].findHavanaORF();	// *
@@ -1391,6 +1440,16 @@ public class Graph implements Serializable {
 		}
 		System.out.println(" removed "+ctrFilt+"/"+ctr+" trpts, eliminated "+ctrLocus+" loci.");
 		recluster();
+	}
+	
+	public void filter() {
+		System.out.println("filtering graph");
+		Iterator iter= speciesHash.values().iterator();
+		while (iter.hasNext()) {
+			Species spec= (Species) iter.next();
+			spec.filter();	// spec-specific filters
+			spec.filterNonGTAGIntrons();
+		}
 	}
 	
 	public void filterCodingTranscripts() {

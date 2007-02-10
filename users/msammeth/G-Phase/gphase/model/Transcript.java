@@ -614,6 +614,47 @@ public class Transcript extends DirectedRegion {
 		return (translations== null|| translations.length== 0);
 	}
 	
+	public boolean hasNonGTAGIntron() {
+		DirectedRegion[] regs= getIntrons();
+		if (regs== null)
+			return false;
+		for (int i = 0; i < regs.length; i++) {
+			String seq= Graph.readSequence(regs[i]);
+			if (seq.length()< 4)// GTAG
+				return true;
+			String don= seq.substring(0, 2);
+			String acc= seq.substring(seq.length()- 2, seq.length());
+			if ((!don.equalsIgnoreCase("GT"))|| (!acc.equalsIgnoreCase("AG")))
+				return true;
+		}
+		return false;
+	}
+	
+	public boolean getNonGTAGIntron(HashMap chrMap) {
+		DirectedRegion[] regs= getIntrons();
+		boolean hasNonGTAG= false;
+		if (regs== null)
+			return hasNonGTAG;
+		
+		for (int i = 0; i < regs.length; i++) {
+			int[] ratio= (int[]) chrMap.get(getChromosome());
+			++ratio[1];
+			String seq= Graph.readSequence(regs[i]);
+			if (seq.length()< 4) {// GTAG
+				++ratio[0];
+				hasNonGTAG|= true;
+				continue;
+			}
+			String don= seq.substring(0, 2);
+			String acc= seq.substring(seq.length()- 2, seq.length());
+			if ((!don.equalsIgnoreCase("GT"))|| (!acc.equalsIgnoreCase("AG"))) { 
+				++ratio[0];
+				hasNonGTAG|= true;	
+			}
+		}
+		return hasNonGTAG;
+	}
+	
 	public boolean is5UTR(int pos) {
 		
 		if (translations== null)
