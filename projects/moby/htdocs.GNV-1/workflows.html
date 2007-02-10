@@ -87,30 +87,31 @@ if (typeof(mylink) == 'string')
 		
 		<span class="textorosa"><strong>Promoter analysis<br>
 		<img src="images/linea_rosa.gif" height="1" width="281"></strong>
-		  <ul class="textogris">
+		<ul class="textogris">
 		  <li><b>co-expressed genes clustering workflows:</b><br><br>
 		  <a href="workflows/GeneClustering_Protocol.png" target="_blank">Protocol description</a>: clustering of  genes based on
 the pairwise alignment of their TFBSs maps. Such protocol can be used to validate the clustering of gene expression data.<br><br>
 		  To facilitate its execution, we have prepared a <a href="/cgi-bin/moby/GeneClustering_DataSubmission.cgi">data submission page</a>. You can either submit a list of ENSEMBL genes or a set of FASTA promoter sequences.<br>
 
 		  <br>
-		  The protocol has also been implemented using <a href="clients.html">taverna</a> software. You can download the workflows and load them in your local taverna installation. You must have the latest version of taverna (v1.4).
+		  The protocol has also been implemented using <a href="clients.html">taverna</a> software. You can download the workflows and load them in your local taverna installation.
+		  
 		  <ul>
 		  	<li>Workflow implemented with a <a href="http://genome.imim.es/webservices/workflows/icapture/PromoterAnalysisWorkflow_coexpressedGenesMode_Fasta_Version.xml"> set of FASTA promoter sequences</a> input
-		  	<li>Workflow implemented with a <a
-href="http://genome.imim.es/webservices/workflows/icapture/PromoterAnalysisWorkflow_coexpressedGenesMode.xml"> list of gene identifiers</a> input
+		  	<li>Workflow implemented with a <a href="http://genome.imim.es/webservices/workflows/icapture/PromoterAnalysisWorkflow_coexpressedGenesMode.xml"> list of gene identifiers</a> input
 		  </ul>
 		  <br>
 		  Taverna Input document examples:
 		  <ul>
-		  	<li>List of genes: <a
-href="examples/coexpressed_genes_Document.xml">breast and placenta tissue specific genes.</a>
-		  	<li>FASTA promoter sequences: <a
-href="examples/ENSG00000174697.orthologs.500_Document.xml">Human Leptin gene and its orthologs 500 bp promoter sequences</a>
+		  	<li>List of genes: <a href="examples/coexpressed_genes_Document.xml">breast and placenta tissue specific genes.</a>
+		  	<li>FASTA promoter sequences: <a href="examples/ENSG00000174697.orthologs.500_Document.xml">Human Leptin gene and its orthologs 500 bp promoter sequences</a>
 		  </ul>
-		  </li><br>                 
+		  </li>
+		  <br>
+		These workflows have been successfully tested with the latest taverna release, currently being v1.5.1.
 		</ul>
-		
+		<br>
+
 		<span class="textorosa"><strong>ESTs assembly<br>
 		<img src="images/linea_rosa.gif" height="1" width="281"></strong>
 		  <ul class="textogris">
