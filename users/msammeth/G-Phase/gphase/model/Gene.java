@@ -813,6 +813,13 @@ public class Gene extends DirectedRegion {
 		return flag;
 	}
 	
+	public void repairAlignmentErrors() {
+		SpliceSite[] ss= getSpliceSites();
+		for (int i = 0; i < ss.length; i++) {
+			
+		}
+	}
+	
 	public boolean removeHomology(Gene hgene) {
 		
 		if (homologies== null|| homologies.get(hgene.getSpecies())== null)

@@ -41,13 +41,14 @@ public class TransSpeciesComparison {
 			try {
 				String iname= "graph"+ File.separator+ Species.SP_NAMES_COMMON[i];
 				Species dummySpec= new Species(Species.SP_NAMES_COMMON[i]);
-				g= GraphHandler.readIn(GraphHandler.getGraphAbsPath(dummySpec)+"_download");
-				g.getSpecies()[0].filter();
-				GraphHandler.writeOut(g, GraphHandler.getGraphAbsPath(dummySpec)+"_filtDNA");
-				g.filterNMDTranscripts();
-				GraphHandler.writeOut(g, GraphHandler.getGraphAbsPath(dummySpec)+"_filtDNA_NMD");
+				g= GraphHandler.readIn(GraphHandler.getGraphAbsPath(dummySpec)+"_filtDNA_NMD");
+//				g= GraphHandler.readIn(GraphHandler.getGraphAbsPath(dummySpec)+"_download");
+//				g.getSpecies()[0].filter();
+//				GraphHandler.writeOut(g, GraphHandler.getGraphAbsPath(dummySpec)+"_filtDNA");
+//				g.filterNMDTranscripts();
+//				GraphHandler.writeOut(g, GraphHandler.getGraphAbsPath(dummySpec)+"_filtDNA_NMD");
 				String sfx= ".landscape.GTAGonly.NMD";
-				//ASAnalyzer.test04_determineVariations(g, iname, sfx, true);
+				ASAnalyzer.test04_determineVariations(g, iname, sfx, false);
 				
 //				String sfx= ".landscape";
 //				ASAnalyzer.test04_determineVariations(g, iname, sfx, false);
@@ -81,9 +82,25 @@ public class TransSpeciesComparison {
 //		g.getSpecies()[0].filter();
 //		g.filterNMDTranscripts();
 		
-		_00_mainLoop();
+		_01_testCiona();
+		//_00_mainLoop();
 		//_01_testDroso();
 		//_01_testAthaliana();
+	}
+
+	public static void _01_testCiona() {
+		Graph g= null;
+		try {
+			//"C_intestinalis_RefSeqGenes_from_UCSC.gtf"
+			//"C_intestinalis_RefSeqGenes_from_UCSC.gtf"
+			// "C_intestinalis_splicedESTs_from_UCSC.gtf"
+			g= ASAnalyzer.getGraph("graph"+File.separator+
+					"C_intestinalis_splicedESTs_from_UCSC.gtf");
+			ASAnalyzer.test04_determineVariations(g, System.out);
+			System.currentTimeMillis();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	public static void _01_testDroso() {

@@ -94,6 +94,9 @@ public class EnsemblDBAdaptor {
 		// TODO Auto-generated constructor stub
 	}
 	
+	public static Graph repairAlignmentErrors(Graph g) {
+	}
+	
 	public static void updateFilterAllGraphsNonsense() {
 		EnsemblDBAdaptor adaptor= new EnsemblDBAdaptor();
 		String[] spec= Species.SP_NAMES_COMMON;

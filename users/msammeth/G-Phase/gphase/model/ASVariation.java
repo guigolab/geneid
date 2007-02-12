@@ -2073,6 +2073,10 @@ public class ASVariation implements Serializable {
 		return false;		
 	}
 	
+	public boolean isAlignmentArtefact() {
+		return false;
+	}
+	
 	public boolean is_affecting_3UTR() {
 		if (ssRegionID3UTR== 0) {
 			//SpliceSite[] su= getSpliceUniversePlusFlanks();

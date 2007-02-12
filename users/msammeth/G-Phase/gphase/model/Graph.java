@@ -1452,6 +1452,13 @@ public class Graph implements Serializable {
 		}
 	}
 	
+	public void repairAlignmentErrors() {
+		Gene[] ge= getGenes();
+		for (int i = 0; i < ge.length; i++) {
+			ge[i].repairAlignmentErrors();
+		}
+	}
+	
 	public void filterCodingTranscripts() {
 		System.out.println("filter coding transcripts");
 		Iterator iter= speciesHash.values().iterator();
