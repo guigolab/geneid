@@ -79,11 +79,18 @@ public class Arrays {
 	}
 	
 	public static String complement(String in){
-		String normal= "ACGTN-acgtn";
-		String reverse= "TGCAN-tgcan";
+		String normal= "ACGTN-acgtnMmKk";	// M spotted in refseq intron annotation of human
+		String reverse= "TGCAN-tgcanKkMm";
 		StringBuffer buffy= new StringBuffer(in.length());
-		for (int i = 0; i < in.length(); i++) 
-			buffy.append(reverse.charAt(normal.indexOf(in.charAt(i))));
+		for (int i = 0; i < in.length(); i++) {
+			int p= normal.indexOf(in.charAt(i));
+			if (p< 0) {
+				System.err.println("Complement: unknown symbol "+ in.charAt(i));
+				buffy.append("N");
+				continue;
+			}
+			buffy.append(reverse.charAt(p));
+		}
 		return buffy.toString();
 	}
 	public static String reverse(String in) {

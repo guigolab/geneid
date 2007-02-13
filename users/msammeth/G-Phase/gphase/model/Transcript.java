@@ -30,6 +30,25 @@ import com.sun.org.apache.xerces.internal.impl.xs.opti.DefaultDocument;
  */
 public class Transcript extends DirectedRegion {
 
+	public static class SpliceChainComparator implements Comparator {
+		public int compare(Object o1, Object o2) {
+			SpliceSite[] sc1= ((Transcript) o1).getSpliceChain();
+			SpliceSite[] sc2= ((Transcript) o2).getSpliceChain();
+			
+			if (sc1== null|| sc1.length< sc2.length)
+				return -1;
+			if (sc2== null|| sc2.length< sc1.length)
+				return 1;
+			
+			for (int i = 0; i < sc2.length; i++) {
+				if (sc1[i].getPos()!= sc2[i].getPos())
+					return -1;
+			}
+			return 0;
+		}
+	}
+	
+	
 	static final long serialVersionUID = 2863324463934791891L;
 	int type = Constants.NOINIT;
 	int confidence = Constants.NOINIT;
@@ -640,6 +659,8 @@ public class Transcript extends DirectedRegion {
 			int[] ratio= (int[]) chrMap.get(getChromosome());
 			++ratio[1];
 			String seq= Graph.readSequence(regs[i]);
+			if (seq== null)
+				return true;	// throw away
 			if (seq.length()< 4) {// GTAG
 				++ratio[0];
 				hasNonGTAG|= true;

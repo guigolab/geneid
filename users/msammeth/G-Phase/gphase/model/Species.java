@@ -170,7 +170,7 @@ public class Species implements Serializable {
 	
 	EncodeRegion[] encodeRegions= null;
 	
-	int spNumber= -1;
+	public int spNumber= -1;
 
 	
 	public static HashMap basePairMapping= new HashMap(5);

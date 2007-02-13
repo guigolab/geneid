@@ -12,6 +12,7 @@ import java.io.PrintStream;
 import gphase.algo.ASAnalyzer;
 import gphase.db.EnsemblDBAdaptor;
 import gphase.io.gtf.ArabidopsisGFFReader;
+import gphase.io.gtf.GTFWrapper;
 import gphase.model.ASMultiVariation;
 import gphase.model.ASVariation;
 import gphase.model.Graph;
@@ -94,12 +95,38 @@ public class TransSpeciesComparison {
 			//"C_intestinalis_RefSeqGenes_from_UCSC.gtf"
 			//"C_intestinalis_RefSeqGenes_from_UCSC.gtf"
 			// "C_intestinalis_splicedESTs_from_UCSC.gtf"
-			g= ASAnalyzer.getGraph("graph"+File.separator+
-					"C_intestinalis_splicedESTs_from_UCSC.gtf");
+			String fName= "/home/msammeth/annotations"+File.separator+
+			"C_intestinalis_splicedESTs_from_UCSC_200503.gtf";
+			System.out.println("Reading annotation: "+ fName);
+			g= ASAnalyzer.getGraph(fName);
+			//g.getSpecies()[0].setBuildVersion(200503);
+			//g.getSpecies()[0].spNumber= 17;	
+			//g.filter();	// reading errors, EOF
+			g.filterUnInformative();	// ESTs
+//			try {
+//				GTFWrapper wrapper= new GTFWrapper("Ciona_filtered.gtf");
+//				wrapper.addGTFObject(g.getGenes());
+//				wrapper.writeGTF();
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
 			ASAnalyzer.test04_determineVariations(g, System.out);
-			System.currentTimeMillis();
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+		
+		String path= "/home/msammeth/annotations";
+		String[] list= new File(path).list();
+		for (int i = 0; i < list.length; i++) {
+			try {
+				String fName= path+File.separator+list[i];
+				System.out.println("Reading annotation: "+fName);
+				g= ASAnalyzer.getGraph(fName);
+				g.filterUnInformative();	// ESTs
+				ASAnalyzer.test04_determineVariations(g, System.out);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
 

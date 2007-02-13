@@ -615,10 +615,15 @@ public class Graph implements Serializable {
 			start--;
 			if (chromosome.equals("MT"))	// correct Ensembl to GRIB jargon
 				chromosome= "M";
+			if (chromosome.startsWith("0"))
+				chromosome= chromosome.substring(1, chromosome.length());
 			if ((!chromosome.startsWith("scaffold"))&& (!chromosome.startsWith("reftig"))
 					&& (!chromosome.startsWith("contig"))&& (!chromosome.startsWith("Contig"))) 
 				chromosome= "chr"+ chromosome;
+			
 			byte[] seq= new byte[end- start];
+			String s= null;
+			int p= -1;
 			try {
 //				System.out.println(getSequenceDirectory(speRealName)+ File.separator+ "chr"+ chromosome+ Constants.CHROMOSOME_EXT);
 //				System.out.println(start+"-"+end);
@@ -634,7 +639,7 @@ public class Graph implements Serializable {
 					read= raf.readLine();
 				int line= read.length();
 				
-				int p= offset+1+start+ (start/line);
+				p= offset+1+start+ (start/line);
 				raf.seek(p);	// fpointer is different from reading point!
 				int pos= 0;
 				int nextN= (line- (start%line));				// read (end of) first line
@@ -646,14 +651,15 @@ public class Graph implements Serializable {
 				}
 				raf.readFully(seq,pos,seq.length- pos);	// read start of last line
 				raf.close();
+				
+				s= new String(seq);
+				if (!forwardStrand) 
+					s= gphase.tools.Arrays.reverseComplement(s);
 			} catch (Exception e) {
-				System.err.println("Problems reading sequence "+ e.getMessage());
+				System.err.println("Problems reading sequence "+ chromosome+": pos "+p+", len "+seq.length);
 				e.printStackTrace();
 			}
 			
-			String s= new String(seq);
-			if (!forwardStrand) 
-				s= gphase.tools.Arrays.reverseComplement(s);
 			return s;
 		}
 
@@ -1450,6 +1456,47 @@ public class Graph implements Serializable {
 			spec.filter();	// spec-specific filters
 			spec.filterNonGTAGIntrons();
 		}
+	}
+	
+	public void filterUnInformative() {
+		System.out.print("filtering graph for uninformative transcripts..");
+		System.out.flush();
+		Iterator iter= speciesHash.values().iterator();
+		Comparator compi= new DirectedRegion.PositionComparator();
+		Comparator scCompi= new Transcript.SpliceChainComparator();
+		int cnt= 0;
+		int total= 0 ;
+		while (iter.hasNext()) {
+			Species spec= (Species) iter.next();
+			Gene[] ge= spec.getGenes();
+			for (int i = 0; i < ge.length; i++) {
+				Transcript[] trpts= ge[i].getTranscripts();
+				Arrays.sort(trpts, compi);
+				Vector trptV= new Vector(trpts.length);
+				trptV= (Vector) gphase.tools.Arrays.addAll(trptV, trpts);
+				for (int j = 0; j < trptV.size(); j++) {
+					Transcript tmpTrpt= (Transcript) trptV.elementAt(j);
+					if (tmpTrpt.getSpliceChain()== null|| tmpTrpt.getSpliceChain().length< 1) {
+						++cnt;
+						trptV.remove(j--);
+						continue;
+					}
+					int up= tmpTrpt.getSpliceChain()[0].getPos();
+					for (int k = j+1; k < trptV.size(); k++) {
+						Transcript tmpTrpt2= (Transcript) trptV.elementAt(k);
+						if (tmpTrpt2.get5PrimeEdge()>= up)
+							break;
+						if (scCompi.compare(tmpTrpt, tmpTrpt2)== 0&&
+								tmpTrpt2.get3PrimeEdge()< tmpTrpt.get3PrimeEdge()) {
+							++cnt;
+							trptV.remove(k--);
+						}
+					}
+				}
+			}
+		}
+		System.out.println("removed "+cnt+" forms.");
+		//recluster();	// not necessary
 	}
 	
 	public void repairAlignmentErrors() {

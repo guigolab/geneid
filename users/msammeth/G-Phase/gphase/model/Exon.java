@@ -323,6 +323,10 @@ public class Exon extends DirectedRegion {
 		return transcripts;
 	}
 
+	public int getStrand() {
+		return transcripts[0].getGene().getStrand();
+	}
+	
 	/**
 	 * @param transcripts
 	 */

@@ -107,13 +107,16 @@ public class GTFWrapper extends DefaultIOWrapper {
 			BufferedWriter buffy= new BufferedWriter(new FileWriter(outName));
 			for (int i = 0; i < gtfObj.length; i++) {
 				// <seqname> <source> <feature> <start> <end> <score> <strand> <frame> [attributes] [comments]
+				String scoreStr= ".";
+				if (gtfObj[i].getScore()!= Float.NaN)
+					scoreStr= Float.toString(gtfObj[i].getScore());
 				buffy.write(
 						gtfObj[i].seqname+ "\t"+	//!! getter removes "chr"
 						gtfObj[i].getSource()+ "\t"+
 						gtfObj[i].getFeature()+ "\t"+
 						gtfObj[i].getStart()+ "\t"+
 						gtfObj[i].getEnd()+ "\t"+
-						gtfObj[i].getScore()+ "\t"+
+						scoreStr+ "\t"+
 						gtfObj[i].getStrand()+ "\t"+
 						gtfObj[i].getFrame()+ "\t"
 				);
