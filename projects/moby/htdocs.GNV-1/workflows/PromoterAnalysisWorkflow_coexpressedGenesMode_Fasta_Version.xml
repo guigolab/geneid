@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <s:scufl xmlns:s="http://org.embl.ebi.escience/xscufl/0.1alpha" version="0.2" log="0">
-  <s:workflowdescription lsid="urn:lsid:www.mygrid.org.uk:operation:SSAVFCN82D1" author="" title="" />
+  <s:workflowdescription lsid="urn:lsid:www.mygrid.org.uk:operation:SSAVFCN82D1" author="Arnaud Kerhornou" title="Clustering of co-expressing genes in subsets showing similar configurations  of TFBSs.">Input: 
+  * a set of upstream sequences in FASTA format.
+  * a namespace.
+
+Output: 
+  * a list of gene sub-clusters
+
+See, http://genome.imim.es/webservices/workflows.html page for more details.</s:workflowdescription>
   <s:processor name="articleName" boring="true">
     <s:stringconstant>sequences</s:stringconstant>
   </s:processor>
@@ -19,6 +26,9 @@
   <s:processor name="parse_moby_gene_clusters">
     <s:local>org.biomoby.client.taverna.plugin.ExtractMobyData</s:local>
   </s:processor>
+  <s:processor name="parse_moby_meta_gff">
+    <s:local>org.biomoby.client.taverna.plugin.ExtractMobyData</s:local>
+  </s:processor>
   <s:processor name="fromFASTAToDNASequenceCollection">
     <s:description>Converts a FASTA_NA_multi object into a collection of DNASequence moby objects</s:description>
     <s:biomobywsdl>
@@ -33,18 +43,10 @@
       <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
       <s:serviceName>runMatScanGFFCollection</s:serviceName>
       <s:authorityName>genome.imim.es</s:authorityName>
-      <s:Parameter s:name="threshold">0.85</s:Parameter>
-      <s:Parameter s:name="strand">Both</s:Parameter>
-      <s:Parameter s:name="motif database">Transfac</s:Parameter>
       <s:Parameter s:name="matrix mode">log-likelihood</s:Parameter>
-    </s:biomobywsdl>
-  </s:processor>
-  <s:processor name="fromMetaAlignmentsToTextScoreMatrix">
-    <s:description>Parses a collection of meta-alignment outputs to produce a text-formatted sequence similarity score matrix</s:description>
-    <s:biomobywsdl>
-      <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
-      <s:serviceName>fromMetaAlignmentsToTextScoreMatrix</s:serviceName>
-      <s:authorityName>genome.imim.es</s:authorityName>
+      <s:Parameter s:name="strand">Both</s:Parameter>
+      <s:Parameter s:name="threshold">0.85</s:Parameter>
+      <s:Parameter s:name="motif database">Transfac</s:Parameter>
     </s:biomobywsdl>
   </s:processor>
   <s:processor name="runMultiPairwiseMetaAlignment">
@@ -53,9 +55,20 @@
       <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
       <s:serviceName>runMultiPairwiseMetaAlignment</s:serviceName>
       <s:authorityName>genome.imim.es</s:authorityName>
-      <s:Parameter s:name="mu penalty">0.1</s:Parameter>
-      <s:Parameter s:name="alpha penalty">0.5</s:Parameter>
       <s:Parameter s:name="lamba penalty">0.1</s:Parameter>
+      <s:Parameter s:name="alpha penalty">0.5</s:Parameter>
+      <s:Parameter s:name="mu penalty">0.1</s:Parameter>
+    </s:biomobywsdl>
+  </s:processor>
+  <s:processor name="runMultiPairwiseMetaAlignmentGFF">
+    <s:description>Runs Meta-alignment software on a multiple running mode, receiving a collection of maps, making pairs of them and, foreach pair, producing, in GFF format, alignments of sequences of TF binding sites</s:description>
+    <s:biomobywsdl>
+      <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
+      <s:serviceName>runMultiPairwiseMetaAlignmentGFF</s:serviceName>
+      <s:authorityName>genome.imim.es</s:authorityName>
+      <s:Parameter s:name="mu penalty">0.1</s:Parameter>
+      <s:Parameter s:name="lamba penalty">0.1</s:Parameter>
+      <s:Parameter s:name="alpha penalty">0.5</s:Parameter>
     </s:biomobywsdl>
   </s:processor>
   <s:processor name="runKMeansClustering">
@@ -64,9 +77,9 @@
       <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
       <s:serviceName>runKMeansClustering</s:serviceName>
       <s:authorityName>genome.imim.es</s:authorityName>
+      <s:Parameter s:name="iterations number">200</s:Parameter>
       <s:Parameter s:name="gene centering">None</s:Parameter>
       <s:Parameter s:name="clusters number">10</s:Parameter>
-      <s:Parameter s:name="iterations number">200</s:Parameter>
     </s:biomobywsdl>
   </s:processor>
   <s:processor name="String">
@@ -77,6 +90,14 @@
       <s:authorityName />
     </s:biomobyobject>
   </s:processor>
+  <s:processor name="fromMetaAlignmentsToTextScoreMatrix">
+    <s:description>Parses a collection of meta-alignment outputs to produce a text-formatted sequence similarity score matrix</s:description>
+    <s:biomobywsdl>
+      <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
+      <s:serviceName>fromMetaAlignmentsToTextScoreMatrix</s:serviceName>
+      <s:authorityName>genome.imim.es</s:authorityName>
+    </s:biomobywsdl>
+  </s:processor>
   <s:processor name="FASTA_NA_multi">
     <s:description>FASTA formatted sequence</s:description>
     <s:biomobyobject>
@@ -84,20 +105,6 @@
       <s:serviceName>FASTA_NA_multi</s:serviceName>
       <s:authorityName />
     </s:biomobyobject>
-  </s:processor>
-  <s:processor name="runMultiPairwiseMetaAlignmentGFF">
-    <s:description>Runs Meta-alignment software on a multiple running mode, receiving a collection of maps, making pairs of them and, foreach pair, producing, in GFF format, alignments of sequences of TF binding sites</s:description>
-    <s:biomobywsdl>
-      <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
-      <s:serviceName>runMultiPairwiseMetaAlignmentGFF</s:serviceName>
-      <s:authorityName>genome.imim.es</s:authorityName>
-      <s:Parameter s:name="alpha penalty">0.5</s:Parameter>
-      <s:Parameter s:name="mu penalty">0.1</s:Parameter>
-      <s:Parameter s:name="lamba penalty">0.1</s:Parameter>
-    </s:biomobywsdl>
-  </s:processor>
-  <s:processor name="parse_moby_meta_gff">
-    <s:local>org.biomoby.client.taverna.plugin.ExtractMobyData</s:local>
   </s:processor>
   <s:link source="String:mobyData" sink="FASTA_NA_multi:String(content)" />
   <s:link source="identifier" sink="FASTA_NA_multi:id" />
@@ -109,6 +116,11 @@
   <s:link source="fromFASTAToDNASequenceCollection:DNASequence(Collection - 'sequences')" sink="runMatScanGFFCollection:DNASequence(Collection - 'sequences')" />
   <s:link source="fromMetaAlignmentsToTextScoreMatrix:MicroArrayData_Text(microarraydata)" sink="parse_moby_score_matrix:mobydata" />
   <s:link source="fromMetaAlignmentsToTextScoreMatrix:MicroArrayData_Text(microarraydata)" sink="runKMeansClustering:MicroArrayData_Text(gene_score_matrix)" />
+  <s:link source="parse_moby_gene_clusters:value" sink="gene_clusters" />
+  <s:link source="parse_moby_matscan_gff:value" sink="matscan_gff" />
+  <s:link source="parse_moby_meta:value" sink="meta-alignment" />
+  <s:link source="parse_moby_meta_gff:value" sink="meta-alignment_GFF" />
+  <s:link source="parse_moby_score_matrix:value" sink="score_matrix" />
   <s:link source="runKMeansClustering:List_Text(Collection - 'gene_clusters' As Simples)" sink="parse_moby_gene_clusters:mobydata" />
   <s:link source="runMatScanGFFCollection:GFF(Collection - 'matscan_predictions' As Simples)" sink="parse_moby_matscan_gff:mobydata" />
   <s:link source="runMatScanGFFCollection:GFF(Collection - 'matscan_predictions')" sink="runMultiPairwiseMetaAlignment:GFF(Collection - 'maps')" />
@@ -116,11 +128,6 @@
   <s:link source="runMultiPairwiseMetaAlignment:Meta_Alignment_Text(Collection - 'meta_predictions' As Simples)" sink="parse_moby_meta:mobydata" />
   <s:link source="runMultiPairwiseMetaAlignment:Meta_Alignment_Text(Collection - 'meta_predictions')" sink="fromMetaAlignmentsToTextScoreMatrix:Meta_Alignment_Text(Collection - 'similarity_results')" />
   <s:link source="runMultiPairwiseMetaAlignmentGFF:GFF(Collection - 'meta_predictions' As Simples)" sink="parse_moby_meta_gff:mobydata" />
-  <s:link source="parse_moby_gene_clusters:value" sink="gene_clusters" />
-  <s:link source="parse_moby_matscan_gff:value" sink="matscan_gff" />
-  <s:link source="parse_moby_meta:value" sink="meta-alignment" />
-  <s:link source="parse_moby_meta_gff:value" sink="meta-alignment_GFF" />
-  <s:link source="parse_moby_score_matrix:value" sink="score_matrix" />
   <s:source name="namespace" />
   <s:source name="sequences_fasta" />
   <s:source name="identifier" />
