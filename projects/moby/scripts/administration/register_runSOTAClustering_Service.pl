@@ -33,7 +33,7 @@ Description: Register a service in Moby Central
 	-s Service Name
 	
 	Examples using some combinations:
-	perl registerService.pl -x 2 -s runKMeansClustering
+	perl registerService.pl -x 2 -s runSOTAClustering
 
 END_HELP
 
@@ -151,7 +151,7 @@ my ($REG) = $Central->registerService(
 				      serviceType  => $serviceType,
 				      authURI      => $::authURI,
 				      contactEmail => $::contactEmail,
-				      description  => "Runs cluster v3.0 that implements SOTA algorithm to partition the gene space into subclusters. The input is a gene score matrix represented as a MicroArrayData_Text object.",
+				      description  => "Runs SOTA algorithm to partition the gene space into subclusters. The input is a gene score matrix represented as a MicroArrayData_Text object.",
 				      category     => "moby",
 				      URL          => $::URL,
 				      input		=> [
@@ -161,18 +161,10 @@ my ($REG) = $Central->registerService(
 							    ['gene_clusters', [['List_Text' => \@namespaces]]]
 							   ],
 				      secondary => {
-                                          'gene centering' => {
+                                          'distance' => {
                                               datatype => 'String',
-                                              enum     => ['None', 'K-means', 'K-Medians'],
-                                              default  => 'None',
-                                          },
-                                          'iterations number' => {
-                                              datatype => 'Integer',
-                                              default  => 200,
-                                          },
-					  'clusters number' => {
-                                              datatype => 'Integer',
-                                              default  => 10,
+                                              enum     => ['euclidean', 'square', 'correlation', 'offset', 'spearman', 'jackknife'],
+                                              default  => 'euclidean',
                                           },
                                       }
 
