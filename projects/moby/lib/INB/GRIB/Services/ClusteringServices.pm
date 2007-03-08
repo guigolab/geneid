@@ -1,4 +1,4 @@
-# $Id: ClusteringServices.pm,v 1.3 2006-07-19 18:25:33 gmaster Exp $
+# $Id: ClusteringServices.pm,v 1.4 2007-03-08 16:39:40 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -425,7 +425,7 @@ sub runKMeansClustering {
     
     my $_output_format = "List_Text";
     my $moby_logger    = get_logger ("MobyServices");
-    my $serviceName    = "runKMeans";
+    my $serviceName    = "runKMeansClustering";
     
     if ($_debug) {
 	print STDERR "processing Moby runKMeansClustering query...\n";
