@@ -1,4 +1,4 @@
-# $Id: AssemblyServices.pm,v 1.3 2006-06-07 15:56:55 gmaster Exp $
+# $Id: AssemblyServices.pm,v 1.4 2007-03-13 18:20:07 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -475,10 +475,33 @@ sub _do_query_Phrap {
 	
 	# Check also they have the same number of sequences
 	
-	# to do !!!
-	
 	my $nb_sequences = -1;
 	my $nb_quality_sequences = -1;
+	
+	# nb occurrences of '>' to extract the number of sequences
+	$nb_sequences = ($fasta_sequences_str =~ tr/>//);
+	
+	print STDERR "Number of sequences submitted for $serviceName execution is $nb_sequences\n";
+	
+	if ($nb_sequences > 5000) {
+	    my $note = "The number of DNA sequences, $nb_sequences is not supported, the maximum limit of input sequences is 5000\n";
+	    print STDERR "$note\n";
+	    my $code = "201";
+	    
+	    $MOBY_RESPONSE     = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_DOUBLE_SIMPLE_RESPONSE ($queryID, $sequences_output_article_name, $phrap_output_article_name);
+	    my $moby_exception = INB::Exceptions::MobyException->new (
+								      code    => $code,
+								      type    => 'error',
+								      queryID => $queryID,
+								      message => "$note",
+								      );
+	    push (@$moby_exceptions, $moby_exception);
+	    
+	    return ($MOBY_RESPONSE, $moby_exceptions);
+	}
+	
+	$nb_quality_sequences = ($fasta_quality_data_str =~ tr/>//);
+	
 	if ($nb_sequences != $nb_quality_sequences) {
 	    my $note = "The number of DNA sequences, $nb_sequences, doesn't match the number of quality data sequences, $nb_quality_sequences...\n";
 	    print STDERR "$note\n";
