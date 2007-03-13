@@ -222,6 +222,7 @@ $x->dispatch_with({
     'http://biomoby.org/#filterSequencesAndQualityDataByLength'  => 'INB::GRIB::Services::FilteringServices',
     
     'http://biomoby.org/#runKMeansClustering'                    => 'INB::GRIB::Services::ClusteringServices',
+    'http://biomoby.org/#runSOTAClustering'                      => 'INB::GRIB::Services::ClusteringServices',
 
     'http://biomoby.org/#runGFF2JPEG'                            => 'INB::GRIB::Services::GFF2PSServices',
     
