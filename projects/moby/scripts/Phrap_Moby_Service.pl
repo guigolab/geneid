@@ -45,7 +45,7 @@ Usage:
 	-i Sequence(s) input file, in FASTA format - optional
 	
 Examples using some combinations:
-	perl Phrap_Moby_service.pl -x 1 -s runPhrap -f /home/ug/arnau/data/Assembly_Galicia/seqs.fa
+	perl Phrap_Moby_service.pl -x 1 -s runPhrap -f /home/ug/arnau/data/Assembly_Galicia_Testing/seqs.fa
 
 END_HELP
 
@@ -88,7 +88,7 @@ my $input_sequences_object_type = "FASTA_NA_multi";
 my $input_quality_object_type   = "FASTA_Base_Quality_multi";
 $::authURI = 'genome.imim.es';
 
-my $in_file    = $opt_f || "/home/ug/arnau/data/Assembly_Galicia/seqs.fa";
+my $in_file    = $opt_f || "/home/ug/arnau/data/Assembly_Galicia_Testing/seqs.fa";
 my $in_quality_file = $in_file . ".qual";
 my $datasource = "INB";
 my $seqId = "assembly_00001";
