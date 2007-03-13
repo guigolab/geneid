@@ -236,7 +236,8 @@ my $result = qx/cd $archive_path; zip -r $archive_path\/$archive_filename $outpu
 
 print $out_fh "<html><head><title>Gene clustering results</title></head>\n<body>";
 
-print $out_fh "There is an <a href=\"$archive_URL\">archive</a> available to download all the results\n";
+# print $out_fh "There is an <a href=\"$archive_URL\">archive</a> available to download all the results\n";
+print $out_fh "The results may be downloaded as an <a href=\"$archive_URL\">archive file</a>\n";
 
 if ($_debug) {
     print STDERR "Archive done!\n";
