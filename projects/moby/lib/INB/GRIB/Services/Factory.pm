@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.109 2007-03-08 17:58:42 gmaster Exp $
+# $Id: Factory.pm,v 1.110 2007-03-13 21:59:19 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -3607,6 +3607,7 @@ sub SOTA_call {
     
     # output specs declaration
     my $gene_clusters_aref = [];
+    my $gene_tree          = undef;
     my $moby_exceptions    = [];
     
     # relleno los parametros por defecto de SOTA_call
@@ -3636,7 +3637,7 @@ sub SOTA_call {
 								  queryID    => $queryID,
 								  message    => "$note",
 								  );
-	return (undef, [$moby_exception]);
+	return (undef, undef, [$moby_exception]);
     }
     
     # Create the temp sequences file
@@ -3655,7 +3656,7 @@ sub SOTA_call {
 								  queryID    => $queryID,
 								  message    => "$note",
 								  );
-	return (undef, [$moby_exception]);
+	return (undef, undef, [$moby_exception]);
     }
     
     # Be careful, i add an extra tabulation because the xml parsing didn't keep in place !!!
@@ -3672,7 +3673,7 @@ sub SOTA_call {
 								  queryID    => $queryID,
 								  message    => "$note",
 								      );
-	return (undef, [$moby_exception]);
+	return (undef, undef, [$moby_exception]);
     }
     
     # output prefix
@@ -3682,7 +3683,7 @@ sub SOTA_call {
     $_cluster_args     .= " -u $_output_prefix";
     
     if ($debug) {
-	print STDERR "Running k-means clustering, with this command:\n";
+	print STDERR "Running SOTA clustering, with this command:\n";
 	print STDERR "$_cluster_dir\/$_cluster_bin -f $gene_matrix_file $_cluster_args\n";
     }
     
@@ -3694,7 +3695,7 @@ sub SOTA_call {
     }
     
     if (! -f $output_filename) {
-	my $note = "Internal System Error. K-means clustering has failed, here the error that has been given back by cluster software, '$result'\n";
+	my $note = "Internal System Error. SOTA clustering has failed, here the error that has been given back by SOTA software, '$result'\n";
 	print STDERR "$note\n";
 	my $code = 701;
 	my $moby_exception = INB::Exceptions::MobyException->new (
@@ -3704,7 +3705,7 @@ sub SOTA_call {
 								  message    => "$note",
 								  );
 	
-	return (undef, [$moby_exception]);
+	return (undef, undef, [$moby_exception]);
     }
     else {
 	$result    = qx/cat $output_filename/;
@@ -3712,7 +3713,7 @@ sub SOTA_call {
 	# set up the array of clusters
 	
 	if ($debug) {
-	    print STDERR "parsing k-means clustering output file...\n";
+	    print STDERR "parsing SOTA clustering output file...\n";
 	}
 	
 	my @lines = split ('\n', $result);
@@ -3766,7 +3767,7 @@ sub SOTA_call {
 	    unlink $gene_matrix_file . "_K_G" . $cluster_number . ".cdt";
 	}
 	
-	return ($gene_clusters_aref, $moby_exceptions);
+	return ($gene_clusters_aref, $gene_tree, $moby_exceptions);
     }
 }
 

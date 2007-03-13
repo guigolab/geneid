@@ -1,4 +1,4 @@
-# $Id: ClusteringServices.pm,v 1.5 2007-03-08 17:58:42 gmaster Exp $
+# $Id: ClusteringServices.pm,v 1.6 2007-03-13 21:59:19 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -604,7 +604,7 @@ sub _do_query_SOTA {
     # Una vez recogido todos los parametros necesarios, llamamos a
     # la funcion que nos devuelve el report.
     
-    my ($gene_clusters_aref, $moby_exceptions_tmp) = SOTA_call (gene_matrix  => $gene_matrix, queryID => $queryID, debug => $_debug, parameters => \%parameters);
+    my ($gene_clusters_aref, $gene_tree, $moby_exceptions_tmp) = SOTA_call (gene_matrix  => $gene_matrix, queryID => $queryID, debug => $_debug, parameters => \%parameters);
     push (@$moby_exceptions, @$moby_exceptions_tmp);
     
     # Ahora que tenemos la salida en el formato de la aplicacion XXXXXXX
