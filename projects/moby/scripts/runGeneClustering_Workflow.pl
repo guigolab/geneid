@@ -18,6 +18,14 @@ use vars qw /$gmaster_home/;
 # $gmaster_home = $ENV{'HOME'};
 $gmaster_home = "/home/ug/gmaster";
 
+my $_path_to_script = $gmaster_home . "/projects/moby/prod/scripts/workflows_implementations";
+
+my $APACHE_ROOT = $ENV{'APACHE_ROOT'};
+# $APACHE_ROOT = "/usr/local/Install/apache2";
+
+my $FRAME  = "$APACHE_ROOT/htdocs/software/geneid/Plantilla.html";
+my $FRAME2 = "$APACHE_ROOT/htdocs/software/geneid/Plantilla2.html";
+
 my $_debug = 0;
 
 my $seqfile;
@@ -63,12 +71,6 @@ defined $options{i} and $iteration_number = $options{i};
 defined $options{n} and $cluster_number = $options{n};
 defined $options{g} and $gamma = $options{g};
 defined $options{r} and $non_colinear = $options{r};
-
-my $_path_to_script = $gmaster_home . "/projects/moby/prod/scripts/workflows_implementations";
-
-my $APACHE_ROOT = "/usr/local/Install/apache2";
-my $FRAME  = "$APACHE_ROOT/htdocs/software/geneid/Plantilla.html";
-my $FRAME2 = "$APACHE_ROOT/htdocs/software/geneid/Plantilla2.html";
 
 ##############################
 #
@@ -179,9 +181,9 @@ if ($_debug) {
     print STDERR "executing the gene clustering workflow...\n";
 }
 
-my $gene_clustering_output_dir = tempdir( "/usr/local/Install/apache2/htdocs/webservices/workflows/results/GENE_CLUSTERING_OUTPUT.XXXXXX" );
+my $gene_clustering_output_dir = tempdir( $APACHE_ROOT . "/htdocs/webservices/workflows/results/GENE_CLUSTERING_OUTPUT.XXXXXX" );
 my $gene_clustering_output_dirname = $gene_clustering_output_dir;
-$gene_clustering_output_dirname =~ s/\/usr\/local\/Install\/apache2\/htdocs\/webservices\/workflows\/results\///;
+$gene_clustering_output_dirname =~ s/$APACHE_ROOT\/htdocs\/webservices\/workflows\/results\///;
 
 # Make the arguments line
 
@@ -227,9 +229,9 @@ if ($_debug) {
 
 # Make an archive
 
-my $archive_path = "/usr/local/Install/apache2/htdocs/webservices/workflows/results";
+my $archive_path = $APACHE_ROOT . "/htdocs/webservices/workflows/results";
 my $output_dir_name = $gene_clustering_output_dir;
-$output_dir_name =~ s/\/usr\/local\/Install\/apache2\/htdocs\/webservices\/workflows\/results\///;
+$output_dir_name =~ s/$APACHE_ROOT\/htdocs\/webservices\/workflows\/results\///;
 my $archive_filename = $output_dir_name . ".zip";
 my $archive_URL = "http://genome.imim.es/webservices/workflows/results/" . $archive_filename;
 
@@ -293,7 +295,7 @@ while ($cluster_index <= $cluster_number) {
 	    
 	    # JPEG
 	    
-	    my $cluster_image_filepath = "/usr/local/Install/apache2/htdocs/webservices/workflows/results/$gene_clustering_output_dirname/$cluster_directory_name/" . $cluster_index . ".TFBSs_maps.jpg";
+	    my $cluster_image_filepath = $APACHE_ROOT . "/htdocs/webservices/workflows/results/$gene_clustering_output_dirname/$cluster_directory_name/" . $cluster_index . ".TFBSs_maps.jpg";
 	    my $cluster_image_webpath = "/webservices/workflows/results/$gene_clustering_output_dirname/$cluster_directory_name/" . $cluster_index . ".TFBSs_maps.jpg";
 	    
 	    if ($_debug) {
