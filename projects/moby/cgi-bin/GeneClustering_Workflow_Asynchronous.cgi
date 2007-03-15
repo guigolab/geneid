@@ -6,7 +6,8 @@ use EnvServices;
 BEGIN {
   load_environment();
   
-  use vars qw /$gmaster_home/;
+  use vars qw /$gmaster_home $APACHE_ROOT/;
+  $APACHE_ROOT = $ENV{APACHE_ROOT};
   # $gmaster_home = $ENV{'HOME'};
   $gmaster_home = "/home/ug/gmaster";
   
@@ -44,7 +45,7 @@ my @params = $cgi->param;
 
 my ($out_fh, $outfile);
 eval {
-    ($out_fh, $outfile) = tempfile("/usr/local/Install/apache2/htdocs/webservices/workflows/results/GENE_CLUSTERING.XXXXXX", UNLINK => 0);
+    ($out_fh, $outfile) = tempfile($APACHE_ROOT . "/htdocs/webservices/workflows/results/GENE_CLUSTERING.XXXXXX", UNLINK => 0);
 };
 if ($@) {
   print STDERR "Error, can't create a temporary file\n";
@@ -79,7 +80,7 @@ my ($seq_fh, $seqfile);
 eval {
     ($seq_fh, $seqfile) = tempfile("/tmp/GENE_CLUSTERING_INPUT.XXXXXX", UNLINK => 0);
     # for testing benchmarking using NFS!
-    # ($seq_fh, $seqfile) = tempfile("/usr/local/Install/apache2/htdocs/test/GENE_CLUSTERING_INPUT.XXXXXX", UNLINK => 0);
+    # ($seq_fh, $seqfile) = tempfile($APACHE_ROOT . "/htdocs/test/GENE_CLUSTERING_INPUT.XXXXXX", UNLINK => 0);
 };
 
 if ($_debug) {
@@ -331,7 +332,7 @@ if ($_debug) {
     print STDERR "Make a HTML page...\n";
 }
 
-my $_template_page = "/usr/local/Install/apache2/cgi-bin/moby/template/workflow_result.tmpl";
+my $_template_page = $APACHE_ROOT . "/cgi-bin/moby/template/workflow_result.tmpl";
 
 # open the html template
 my $template = HTML::Template->new(filename => $_template_page);

@@ -20,8 +20,8 @@ my $_debug = 0;
 my $cgi    = new CGI;
 my @params = $cgi->param;
 
-my $_template_page = "/usr/local/Install/apache2/cgi-bin/moby/template/workflow_result.tmpl";
-my $_path_to_html_page = "/usr/local/Install/apache2/htdocs/webservices/workflows/results";
+my $_template_page = "$APACHE_ROOT/cgi-bin/moby/template/workflow_result.tmpl";
+my $_path_to_html_page = "$APACHE_ROOT/htdocs/webservices/workflows/results";
 my $jobid;
 
 if (defined($cgi->param ('jobid'))) {
