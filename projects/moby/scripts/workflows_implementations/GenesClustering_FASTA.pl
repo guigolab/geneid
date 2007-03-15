@@ -95,7 +95,10 @@ END_HELP
 BEGIN {
 	
     # Determines the options with values from program
-    use vars qw/$opt_h $opt_x $opt_f $opt_c $opt_t $opt_d $opt_a $opt_l $opt_u $opt_m $opt_g $opt_r $opt_n $opt_i $opt_o $opt_z $output_dir/;
+    use vars qw/$opt_h $opt_x $opt_f $opt_c $opt_t $opt_d $opt_a $opt_l $opt_u $opt_m $opt_g $opt_r $opt_n $opt_i $opt_o $opt_z $output_dir $gmaster_home/;
+    
+    # $gmaster_home = $ENV{'HOME'};
+    $gmaster_home = "/home/ug/gmaster";
     
     # these are switches taking an argument (a value)
     my $switches = 'x:zhf:c:t:d:a:l:u:m:g:r:n:i:o:';
@@ -120,7 +123,7 @@ my $_debug = 0;
 my $_verbose = 0;
 
 # Need meta-alignment software because it is run locally, in case there are too many input sequences!
-my $_meta_dir = "/home/ug/gmaster/projects/Meta/bin";
+my $_meta_dir = $gmaster_home . "/projects/Meta/bin";
 my $_meta_bin = "meta";
 
 if (! -f "$_meta_dir/$_meta_bin") {
