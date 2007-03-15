@@ -11,9 +11,13 @@ use Benchmark;
 
 my $t1 = Benchmark->new ();
 
+use vars qw /$gmaster_home/;
+# $gmaster_home = $ENV{'HOME'};
+$gmaster_home = "/home/ug/gmaster";
+
 my $_debug = 0;
 
-my $_path_to_script = "/home/ug/gmaster/projects/moby/prod/scripts/workflows_implementations";
+my $_path_to_script = $gmaster_home . "/projects/moby/prod/scripts/workflows_implementations";
 
 my $APACHE_ROOT = $ENV{'APACHE_ROOT'};
 my $FRAME  = "$APACHE_ROOT/htdocs/software/geneid/Plantilla.html";

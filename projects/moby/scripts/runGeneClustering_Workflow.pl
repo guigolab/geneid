@@ -14,6 +14,10 @@ use Benchmark;
 
 my $t1 = Benchmark->new ();
 
+use vars qw /$gmaster_home/;
+# $gmaster_home = $ENV{'HOME'};
+$gmaster_home = "/home/ug/gmaster";
+
 my $_debug = 0;
 
 my $seqfile;
@@ -60,7 +64,7 @@ defined $options{n} and $cluster_number = $options{n};
 defined $options{g} and $gamma = $options{g};
 defined $options{r} and $non_colinear = $options{r};
 
-my $_path_to_script = "/home/ug/gmaster/projects/moby/prod/scripts/workflows_implementations";
+my $_path_to_script = $gmaster_home . "/projects/moby/prod/scripts/workflows_implementations";
 
 my $APACHE_ROOT = "/usr/local/Install/apache2";
 my $FRAME  = "$APACHE_ROOT/htdocs/software/geneid/Plantilla.html";

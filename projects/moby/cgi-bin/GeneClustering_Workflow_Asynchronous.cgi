@@ -5,6 +5,11 @@ use EnvServices;
 
 BEGIN {
   load_environment();
+  
+  use vars qw /$gmaster_home/;
+  # $gmaster_home = $ENV{'HOME'};
+  $gmaster_home = "/home/ug/gmaster";
+  
 }
 
 use CGI;
@@ -21,7 +26,7 @@ my $t1 = Benchmark->new ();
 
 my $_debug = 0;
 
-my $_path_to_script = "/home/ug/gmaster/projects/moby/prod/scripts";
+my $_path_to_script = $gmaster_home . "/projects/moby/prod/scripts";
 my $_script_name = "runGeneClustering_Workflow.pl";
 
 my $APACHE_ROOT = $ENV{'APACHE_ROOT'};
