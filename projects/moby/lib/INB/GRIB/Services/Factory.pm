@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.111 2007-03-16 17:30:10 gmaster Exp $
+# $Id: Factory.pm,v 1.112 2007-03-16 17:42:36 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -146,7 +146,6 @@ our @EXPORT = qw(
 
 our $VERSION = '1.00';
 
-
 ###############################################################################
 sub _exists_env {
 	my $var_name = shift;
@@ -160,6 +159,11 @@ BEGIN {
 	## Ejemplo:  my @needed_vars = qw(DIR DATADIR);
 	my @needed_vars = qw();
 	_exists_env($_) foreach @needed_vars;
+	
+	use vars qw /$gmaster_home/;
+	# $gmaster_home = $ENV{HOME};
+	$gmaster_home = "/home/ug/gmaster";
+	
 }
 
 ###############################################################################
@@ -266,7 +270,7 @@ sub GeneID_call {
     my $engine      = $parameters->{engine};
     
     # Llama a GeneID en local
-    my $_geneid_dir  = "/home/ug/gmaster/projects/geneid";
+    my $_geneid_dir  = $gmaster_home . "/projects/geneid";
     my $_geneid_bin  = "bin/geneid_latest_withGFF3output";
     my $_geneid_args = "";
     
@@ -514,7 +518,7 @@ sub SGP2_call {
 	# print STDERR "GeneID parameters (profile, format): $profile, $format.\n";
 	
 	# Llama a SGP2 localmente
-	my $_sgp2_dir  = "/home/ug/gmaster/projects/sgp2/";
+	my $_sgp2_dir  = $gmaster_home . "/projects/sgp2/";
 	$_sgp2_dir     = $ENV{SGP2};
 	my $_sgp2_bin  = "bin/sgp2";
 	my $_sgp2_args = "";
@@ -699,7 +703,7 @@ sub GOstat_call {
     my $queryID            = $args{queryID}         || "";
 
     # Llama a GOstat localmente
-    my $_gostat_dir  = "/home/ug/gmaster/projects/gostat";
+    my $_gostat_dir  = $gmaster_home . "/projects/gostat";
     my $_gostat_bin  = "gostat.pl";
     my $_gostat_args = "";
 
@@ -754,8 +758,8 @@ sub TranslateGeneIDPredictions_call {
 	$translation_code = 1;
     }
 
-    # Llama a GOstat localmente
-    my $_translateGeneID_dir  = "/home/ug/gmaster/projects/GFF_Translations";
+    # Llama a GeneID translation process localmente
+    my $_translateGeneID_dir  = $gmaster_home . "/projects/GFF_Translations";
     my $_translateGeneID_bin  = "GFF_Features_Translation.pl";
     my $_translateGeneID_args = "-t $translation_code";
 
@@ -881,7 +885,7 @@ sub PromoterExtraction_call {
     my $orthologous_mode  = $parameters->{orthologous_mode};
     
     # Llama a GeneID en local
-    my $_promExtraction_dir  = "/home/ug/gmaster/projects/promoter_extraction";
+    my $_promExtraction_dir  = $gmaster_home . "/projects/promoter_extraction";
     my $_promExtraction_bin  = "promoter_extraction.pl";
     my $_promExtraction_args = "";
     
@@ -1028,7 +1032,7 @@ sub MatScan_call {
     }
     
     # Llama a MatScan en local
-    my $_matscan_dir  = "/home/ug/gmaster/projects/Meta/";
+    my $_matscan_dir  = $gmaster_home . "/projects/Meta/";
     my $_matscan_bin  = "bin/matscan";
     my $_matscan_args = "-T $threshold";
     
@@ -1275,7 +1279,7 @@ sub Clover_call {
     }
     
     # Llama a Clover en local
-    my $_clover_dir  = "/home/ug/gmaster/projects/Clover";
+    my $_clover_dir  = $gmaster_home . "/projects/Clover";
     my $_clover_bin  = "bin/clover";
     my $_clover_args = "-t $pvalue_threshold -s $score_threshold";
     
@@ -1298,7 +1302,7 @@ sub Clover_call {
     
     # Clover_to_GFF perl script
     
-    my $_clover_to_gff_bin = "/home/ug/gmaster/projects/clover_to_GFF/clover_to_GFF.pl";
+    my $_clover_to_gff_bin = $gmaster_home . "/projects/clover_to_GFF/clover_to_GFF.pl";
     
     if (! -f "$_clover_to_gff_bin") {
 	my $note = "Internal System Error. Clover Output to GFF conversion script not found";
@@ -1536,7 +1540,7 @@ sub MetaAlignment_call {
     my $output_format  = $parameters->{output_format};
 
     # Llama a Meta-alignment en local
-    my $_meta_alignment_dir  = "/home/ug/gmaster/projects/Meta";
+    my $_meta_alignment_dir  = $gmaster_home . "/projects/Meta";
     my $_meta_alignment_bin  = "bin/meta";
     my $_meta_alignment_args = "-a $alpha_penalty -l $lambda_penalty -m $mu_penalty";
 
@@ -1722,7 +1726,7 @@ sub MultiMetaAlignment_call {
     my $output_format  = $parameters->{output_format};
 
     # Llama a Multiple-Meta-alignment en local
-    my $_mmeta_alignment_dir  = "/home/ug/gmaster/projects/MultiMeta";
+    my $_mmeta_alignment_dir  = $gmaster_home . "/projects/MultiMeta";
     my $_mmeta_alignment_bin  = "bin/mmeta";
     my $_mmeta_alignment_args = "-a $alpha_penalty -l $lambda_penalty -m $mu_penalty -p $gap_penalty -c $non_colinear_penalty";
     
@@ -1870,7 +1874,7 @@ sub generateScoreMatrix_call {
   my $debug              = $args{debug}       || 0;
   
   # Llama a generateScoreMatrix script en local
-  my $_application_dir  = "/home/ug/gmaster/projects/generateScoreMatrices";
+  my $_application_dir  = $gmaster_home . "/projects/generateScoreMatrices";
   my $_application_bin  = "generateScoreMatrix.pl";
   my $_application_args    = "";
   
@@ -2215,7 +2219,7 @@ sub meme2matrix_call {
     my $matrix_mode = $parameters->{matrix_mode};
 
     # Llama a Meme2matrix en local
-    my $_meme2matrix_dir  = "/home/ug/gmaster/projects/meme2matrix";
+    my $_meme2matrix_dir  = $gmaster_home . "/projects/meme2matrix";
     my $_meme2matrix_bin  = "meme2matrix.pl";
     my $_meme2matrix_args = "";
     
@@ -2513,7 +2517,7 @@ sub Dust_call {
     # No parameters
     
     # Llama a Dust en local
-    my $_dust_dir  = "/home/ug/gmaster/projects/bin";
+    my $_dust_dir  = $gmaster_home . "/projects/bin";
     my $_dust_bin  = "dust";
     
     # Check that the binary is in place
@@ -2628,7 +2632,7 @@ sub Dust_FASTA_call {
     # No parameters
     
     # Llama a Dust en local
-    my $_dust_dir  = "/home/ug/gmaster/projects/bin";
+    my $_dust_dir  = $gmaster_home . "/projects/bin";
     my $_dust_bin  = "dust";
     
     # Check that the binary is in place
@@ -2733,7 +2737,7 @@ sub CrossMatchToScreenVector_call {
     my $_cross_match_dir    = "/usr/local/molbio/Install/cross_match";
     my $_cross_match_bin    = "cross_match";
     my $_cross_match_args   = "-screen ";
-    my $_cross_match_vectors = "/home/ug/gmaster/projects/assembly/data_libraries/UniVec_Core.fa";
+    my $_cross_match_vectors = $gmaster_home . "/projects/assembly/data_libraries/UniVec_Core.fa";
 
     if (defined $minmatch) {
 	$_cross_match_args .= "-minmatch $minmatch ";
@@ -3013,7 +3017,7 @@ sub Phrap_call {
 	print STDERR "pattern, $pattern\n";
     }
     
-    my $sequence_search_bin = "/home/ug/gmaster/projects/bin/sequence_search.pl";
+    my $sequence_search_bin = $gmaster_home . "/projects/bin/sequence_search.pl";
     
     # Extract the singlet sequences from the sequences input file
     my $extra_singlets_seqs = qx/$sequence_search_bin -f $sequences_phrap_file -h -p \"$pattern\"/;
@@ -3098,7 +3102,7 @@ sub Phred_call {
     my $_phred_dir     = "/usr/local/molbio/Install/phred-0.020425.c";
     my $_phred_bin     = "phred";
     my $_phred_args    = "";
-    my $_phred_config_file = "/home/ug/gmaster/projects/assembly/phredpar.dat";
+    my $_phred_config_file = $gmaster_home . "/projects/assembly/phredpar.dat";
     my $_phd2fasta_bin = "phd2fasta";
     
     if ($trim_alt) {
@@ -3191,8 +3195,12 @@ sub Phred_call {
     if (! $debug) {
 	unlink $seq_fasta_file;
 	unlink $qual_fasta_file;
-	# doesn't work !!!????
-	# rmtree (["$phred_input_dir", "$phred_output_dir"], 1, 1);
+	if ((-d $phred_input_dir) && ($phred_input_dir =~ /^\/tmp\/PHRED/)) {
+	  rmtree ("$phred_input_dir");
+        }
+        if ((-d $phred_output_dir) && ($phred_input_dir =~ /^\/tmp\/PHRED/)) {
+          rmtree ("$phred_output_dir");
+        }
     }
     
     if ((! defined $fasta_sequences) || (length $fasta_sequences < 1)) {
@@ -3234,7 +3242,7 @@ sub SequenceFilteringByLength_call {
     my $length_cutoff       = $parameters->{length_cutoff};
     
     # Llama a sequence filtering script en local
-    my $_sequence_filtering_dir    = "/home/ug/gmaster/projects/bin";
+    my $_sequence_filtering_dir    = $gmaster_home . "/projects/bin";
     my $_sequence_filtering_bin    = "filter_sequences_by_length.pl";
     my $_sequence_filtering_args   = "-c $length_cutoff";
     
@@ -3434,7 +3442,7 @@ sub KMeans_call {
     my $cluster_number   = $parameters->{cluster_number};
     
     # Llama a cluster binary en local
-    my $_cluster_dir    = "/home/ug/gmaster/projects/cluster";
+    my $_cluster_dir    = $gmaster_home . "/projects/cluster";
     my $_cluster_bin    = "cluster";
     my $_cluster_args   = "-k $cluster_number -r $iteration_number";
     
@@ -3758,7 +3766,7 @@ sub GFF2JPEG_call {
     my $title              = $args{title}      || "annotations maps";
     
     # Llama a cluster binary en local
-    my $_gff2ps_dir    = "/home/ug/gmaster/projects/gff2ps";
+    my $_gff2ps_dir    = $gmaster_home . "/projects/gff2ps";
     my $_gff2ps_bin    = "bin/gff2ps";
     my $_gff2ps_params = "params/matrices.gff2ps.param";
     my $_gff2ps_data   = "data/empty.gff";
