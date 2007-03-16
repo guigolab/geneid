@@ -1,4 +1,4 @@
-# $Id: ClusteringServices.pm,v 1.6 2007-03-13 21:59:19 gmaster Exp $
+# $Id: ClusteringServices.pm,v 1.7 2007-03-16 17:30:10 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -458,6 +458,7 @@ sub _do_query_SOTA {
     
     # Aqui escribimos las variables que necesitamos para la funcion.
     my $distance;
+    my $resource_threshold;
     my $sequenceIdentifier;
     
     # Variables that will be passed to SOTA_call
@@ -475,7 +476,7 @@ sub _do_query_SOTA {
 	$distance = "euclidean";
     }
     elsif (! (($distance =~ /^euclidean$/i) || ($distance =~ /^square$/i) || ($distance =~ /^correlation$/i) || ($distance =~ /^offset$/i) || ($distance =~ /^spearman$/i) || ($distance =~ /^jackknife$/i))) {
-	my $note = "'gene centering' parameter, '$distance', not accepted should be part of ['euclidean', 'square', 'correlation', 'offset', 'spearman', 'jackknife']";
+	my $note = "'distance' parameter, '$distance', not accepted should be part of ['euclidean', 'square', 'correlation', 'offset', 'spearman', 'jackknife']";
 	print STDERR "$note\n";
 	my $code = "222";
 	my $moby_exception = INB::Exceptions::MobyException->new (
@@ -493,13 +494,40 @@ sub _do_query_SOTA {
 	return ($MOBY_RESPONSE, $moby_exceptions);
     }
     
+    ($resource_threshold)   = getNodeContentWithArticle($queryInput_DOM, "Parameter", "resource threshold (%)");
+
+    if (not defined $resource_threshold) {
+	$resource_threshold = 10;
+    }
+    elsif (! (($resource_threshold >= 0) && ($resource_threshold <= 100))) {
+	my $note = "'resource threshold' parameter, '$resource_threshold', not accepted, it should an percentage Integer between [0,100]";
+	print STDERR "$note\n";
+	my $code = "222";
+	my $moby_exception = INB::Exceptions::MobyException->new (
+								  refElement => "resource threshold (%)",
+								  code       => $code,
+								  type       => 'error',
+								  queryID    => $queryID,
+								  message    => "$note",
+								  );
+	push (@$moby_exceptions, $moby_exception);
+	
+	# Return an empty moby data object, as well as an exception telling why nothing got returned
+	
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
+	return ($MOBY_RESPONSE, $moby_exceptions);
+    }
+    
+    
     # Add the parsed parameters in a hash table
     
     if ($_debug) {
-	print STDERR "distance, $distance\n";
+        print STDERR "distance, distance\n";
+	print STDERR "resource_threshold, $resource_threshold\n";
     }
     
-    $parameters{distance}   = $distance;
+    $parameters{distance} = $distance;
+    $parameters{resource_threshold} = $resource_threshold;
     
     $parameters{output_format} = $_moby_output_format;
     

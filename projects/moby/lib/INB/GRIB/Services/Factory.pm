@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.110 2007-03-13 21:59:19 gmaster Exp $
+# $Id: Factory.pm,v 1.111 2007-03-16 17:30:10 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -3619,12 +3619,16 @@ sub SOTA_call {
     
     # parameters
     
-    my $distance   = $parameters->{distance};
+    my $distance           = $parameters->{distance};
+    my $resource_threshold = $parameters->{resource_threshold};
+    
+    # my $variabilityT = 0;
+    # _calculateSOTAVariabilityThreshold (?)
     
     # Llama a cluster binary en local
     my $_cluster_dir    = "/home/ug/gmaster/projects/sotarray/bin";
     my $_cluster_bin    = "sotarray";
-    my $_cluster_args   = "$distance -e 0.0001 -a 0.01 0.005 0.001";
+    my $_cluster_args   = "$distance -e 0.0001 -a 0.01 0.005 0.001 -r resource_threshold";
     
     # Check that the binary is in place
     if (! -f "$_cluster_dir/$_cluster_bin") {
@@ -3676,23 +3680,27 @@ sub SOTA_call {
 	return (undef, undef, [$moby_exception]);
     }
     
-    # output prefix
+    # output filename
     
-    my $_output_prefix  = $gene_matrix_file;
-    my $output_filename = $_output_prefix . "_K_G" . $cluster_number . ".kgg";
-    $_cluster_args     .= " -u $_output_prefix";
+    my $output_filename = $gene_matrix_file . ".nw";
     
     if ($debug) {
 	print STDERR "Running SOTA clustering, with this command:\n";
-	print STDERR "$_cluster_dir\/$_cluster_bin -f $gene_matrix_file $_cluster_args\n";
+	print STDERR "$_cluster_dir\/$_cluster_bin $gene_matrix_file $output_filename $_cluster_args\n";
     }
     
-    my $result = qx/$_cluster_dir\/$_cluster_bin -f $gene_matrix_file $_cluster_args/;
+    my $result = qx/$_cluster_dir\/$_cluster_bin $gene_matrix_file $_cluster_args/;
     chomp $result;
     
     if ($debug) {
 	print STDERR "clustering result, $result\n";
     }
+    
+    # SOTA generates three files:
+    # * $output_filename (Tree in Newick format)
+    # * "$output_filename".sot (SOTA output, the file to parse to get the list of clusters)
+    # * "$output_filename".cod
+    
     
     if (! -f $output_filename) {
 	my $note = "Internal System Error. SOTA clustering has failed, here the error that has been given back by SOTA software, '$result'\n";
@@ -3708,54 +3716,15 @@ sub SOTA_call {
 	return (undef, undef, [$moby_exception]);
     }
     else {
-	$result    = qx/cat $output_filename/;
+	$gene_tree = qx/cat $output_filename/;
 	
 	# set up the array of clusters
 	
 	if ($debug) {
-	    print STDERR "parsing SOTA clustering output file...\n";
+	    print STDERR "parsing SOTA clustering output file, $output_filename.sot...\n";
 	}
 	
-	my @lines = split ('\n', $result);
-	my $cluster_index;
-	my $cluster = "";
-	foreach my $line (@lines) {
-	    if ($line =~ /^([^\t]+)\t(\d+)/) {
-		my $gene_identifier    = $1;
-		my $cluster_index_tmp  = $2;
-		
-		if (defined $cluster_index_tmp) {
-
-		    if ($debug) {
-			print STDERR "gene identifier, $gene_identifier\n";
-			print STDERR "cluster index, $cluster_index_tmp\n";
-		    }
-		    
-		    if (! defined $cluster_index || $cluster_index eq $cluster_index_tmp) {
-			# Same cluster
-			$cluster .= "$gene_identifier\n";
-			$cluster_index = $cluster_index_tmp;
-		    }
-		    else {
-			# new cluster
-			push (@$gene_clusters_aref, $cluster);
-			
-			# Initialisation
-			$cluster = "";
-			
-			$cluster .= "$gene_identifier\n";
-			$cluster_index = $cluster_index_tmp;
-		    }
-		}
-		else {
-		    print STDERR "problem parsing cluster info line, $line\n";
-		}
-	    }
-	}
-	
-	if (defined $cluster_index) {
-	    push (@$gene_clusters_aref, $cluster);
-	}
+	$gene_clusters_aref = _parseSOTAClusters ($output_filename . ".sot");
 	
 	if ($debug) {
 	    print STDERR "parsing done!\n";
@@ -3763,8 +3732,10 @@ sub SOTA_call {
 	
 	if (! $debug) {
 	    unlink $gene_matrix_file;
+
 	    unlink $output_filename;
-	    unlink $gene_matrix_file . "_K_G" . $cluster_number . ".cdt";
+	    unlink $output_filename . ".sot";
+	    unlink $output_filename . ".cod";
 	}
 	
 	return ($gene_clusters_aref, $gene_tree, $moby_exceptions);
@@ -4102,6 +4073,23 @@ sub _is_in {
     }
     
     return 0;
+}
+
+sub _parseSOTAClusters {
+  my ($filename)    = @_;
+  my @gene_clusters = ();
+  
+  # ...
+  
+  return \@gene_clusters;
+}
+
+sub _calculateSOTAVariabilityThreshold {
+  my $vt = 0;
+  
+  # ...
+  
+  return $vt;
 }
 
 1;
