@@ -109,7 +109,10 @@ PRT
 
 # ['euclidean', 'square', 'correlation', 'offset', 'spearman', 'jackknife']
 my $distance = "euclidean";
-my $distance_xml = "<Value>euclidean</Value>";
+my $distance_xml = "<Value>$distance</Value>";
+
+my $resource_threshold = 20;
+my $resource_threshold_xml = "<Value>$resource_threshold</Value>";
 
 ##################################################################
 #
@@ -246,7 +249,7 @@ my $Service = MOBY::Client::Service->new(service => $wsdl);
 ##################################################################
 
 my $result = $Service->execute(XMLinputlist => [
-						["$articleName", $score_matrix_xml, "distance", $distance_xml]
+						["$articleName", $score_matrix_xml, "distance", $distance_xml, "resource threshold (%)", $resource_threshold]
 					       ]);
 
 ##################################################################
