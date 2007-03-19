@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.112 2007-03-16 17:42:36 gmaster Exp $
+# $Id: Factory.pm,v 1.113 2007-03-19 22:45:57 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -3636,7 +3636,7 @@ sub SOTA_call {
     # Llama a cluster binary en local
     my $_cluster_dir    = "/home/ug/gmaster/projects/sotarray/bin";
     my $_cluster_bin    = "sotarray";
-    my $_cluster_args   = "$distance -e 0.0001 -a 0.01 0.005 0.001 -r resource_threshold";
+    my $_cluster_args   = "$distance -e 0.0001 -a 0.01 0.005 0.001 -r $resource_threshold";
     
     # Check that the binary is in place
     if (! -f "$_cluster_dir/$_cluster_bin") {
@@ -3697,7 +3697,7 @@ sub SOTA_call {
 	print STDERR "$_cluster_dir\/$_cluster_bin $gene_matrix_file $output_filename $_cluster_args\n";
     }
     
-    my $result = qx/$_cluster_dir\/$_cluster_bin $gene_matrix_file $_cluster_args/;
+    my $result = qx/$_cluster_dir\/$_cluster_bin $gene_matrix_file $output_filename $_cluster_args/;
     chomp $result;
     
     if ($debug) {
