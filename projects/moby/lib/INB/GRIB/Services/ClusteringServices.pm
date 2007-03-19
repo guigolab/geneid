@@ -1,4 +1,4 @@
-# $Id: ClusteringServices.pm,v 1.7 2007-03-16 17:30:10 gmaster Exp $
+# $Id: ClusteringServices.pm,v 1.8 2007-03-19 22:46:39 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -448,13 +448,15 @@ PRT
 sub _do_query_SOTA {
     # $queryInput_DOM es un objeto DOM::Node con la informacion de una query biomoby
     my $queryInput_DOM      = shift @_;
-    # The moby output format
-    my $_moby_output_format = shift @_;
+    # The moby output formats
+    my $_moby_output_format_1 = shift @_;
+    my $_moby_output_format_2 = shift @_;
     
     # Output definition
     my $MOBY_RESPONSE   = "";     # set empty response
     my $moby_exceptions = [];
-    my $output_article_name = "gene_clusters";
+    my $output_article_name_1 = "gene_tree";
+    my $output_article_name_2 = "gene_clusters";
     
     # Aqui escribimos las variables que necesitamos para la funcion.
     my $distance;
@@ -490,21 +492,21 @@ sub _do_query_SOTA {
 	
 	# Return an empty moby data object, as well as an exception telling why nothing got returned
 	
-	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_SIMPLE_COLLECTION_RESPONSE ($queryID, $output_article_name_1, $output_article_name_2);
 	return ($MOBY_RESPONSE, $moby_exceptions);
     }
     
-    ($resource_threshold)   = getNodeContentWithArticle($queryInput_DOM, "Parameter", "resource threshold (%)");
+    ($resource_threshold)   = getNodeContentWithArticle($queryInput_DOM, "Parameter", "resource_threshold_percentage");
 
     if (not defined $resource_threshold) {
 	$resource_threshold = 10;
     }
     elsif (! (($resource_threshold >= 0) && ($resource_threshold <= 100))) {
-	my $note = "'resource threshold' parameter, '$resource_threshold', not accepted, it should an percentage Integer between [0,100]";
+	my $note = "'resource_threshold_percentage' parameter, '$resource_threshold', not accepted, it should an percentage Integer between [0,100]";
 	print STDERR "$note\n";
 	my $code = "222";
 	my $moby_exception = INB::Exceptions::MobyException->new (
-								  refElement => "resource threshold (%)",
+								  refElement => "resource_threshold_percentage",
 								  code       => $code,
 								  type       => 'error',
 								  queryID    => $queryID,
@@ -514,7 +516,7 @@ sub _do_query_SOTA {
 	
 	# Return an empty moby data object, as well as an exception telling why nothing got returned
 	
-	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_SIMPLE_COLLECTION_RESPONSE ($queryID, $output_article_name_1, $output_article_name_2);
 	return ($MOBY_RESPONSE, $moby_exceptions);
     }
     
@@ -529,7 +531,8 @@ sub _do_query_SOTA {
     $parameters{distance} = $distance;
     $parameters{resource_threshold} = $resource_threshold;
     
-    $parameters{output_format} = $_moby_output_format;
+    $parameters{output_format_1} = $_moby_output_format_1;
+    $parameters{output_format_2} = $_moby_output_format_2;
     
     # Tratamos a cada uno de los articulos
     foreach my $article (@articles) {
@@ -561,13 +564,14 @@ sub _do_query_SOTA {
 	    
 	    # Return an empty moby data object, as well as an exception telling what nothing got returned
 	    
-	    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
+	    $MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_SIMPLE_COLLECTION_RESPONSE ($queryID, $output_article_name_1, $output_article_name_2);
 	    return ($MOBY_RESPONSE, $moby_exceptions);
 	}
-	
+		
 	if (($articleName eq "gene_score_matrix") || isSimpleArticle ($DOM)) {
 	    
 	    if ($_debug) {
+	        print STDERR "articleName, $articleName\n";
 		print STDERR "node ref, " . ref ($DOM) . "\n";
 		print STDERR "DOM: " . $DOM->toString () . "\n";
 	    }
@@ -589,7 +593,7 @@ sub _do_query_SOTA {
 		push (@$moby_exceptions, $moby_exception);
 		
 		# Simple Response doesn't fit !! (the simple article is not empty as it should be!), so we need to create the string from scratch !
-		$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
+		$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_SIMPLE_COLLECTION_RESPONSE ($queryID, $output_article_name_1, $output_article_name_2);
 		return ($MOBY_RESPONSE, $moby_exceptions);
 	    }
 	    
@@ -625,7 +629,7 @@ sub _do_query_SOTA {
 	push (@$moby_exceptions, $moby_exception);
 	
 	# Return an empty moby data object, as well as an exception telling what nothing got returned	
-	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_SIMPLE_COLLECTION_RESPONSE ($queryID, $output_article_name_1, $output_article_name_2);
 	return ($MOBY_RESPONSE, $moby_exceptions);
     }
     
@@ -639,42 +643,55 @@ sub _do_query_SOTA {
     # nos queda encapsularla en un Objeto bioMoby. Esta operacio
     # la podriamos realizar en una funcion a parte si fuese compleja.
     
-    if (defined $gene_clusters_aref) {
+    if ((defined $gene_clusters_aref) && (defined $gene_tree)) {
 	
 	if ($_debug) {
-	    print STDERR "gene clusters output defined\n";
+	    print STDERR "gene clusters & gene tree outputs defined\n";
 	}
 	
 	my $namespace = "";
+
+	# Build the gene tree Moby Object
+	
+	my $gene_tree_xml =  <<PRT;
+<moby:$_moby_output_format_1 namespace='' id='$sequenceIdentifier'>
+<String namespace='' id='' articleName='content'>
+<![CDATA[ 
+$gene_tree
+]]>
+</String>
+</moby:$_moby_output_format_1>
+PRT
+
 	my $inputs = [];
 	
 	foreach my $gene_list (@$gene_clusters_aref) {
 	    
-	    # Build the Moby object
+	    # Build the gen clusters Moby object
 	    
 	    my $input = <<PRT;
-<moby:$_moby_output_format namespace='' id='$sequenceIdentifier'>
+<moby:$_moby_output_format_2 namespace='' id='$sequenceIdentifier'>
 <String namespace='' id='' articleName='content'>
 <![CDATA[
 $gene_list
 ]]>
 </String>
-</moby:$_moby_output_format>
+</moby:$_moby_output_format_2>
 PRT
 
             push (@$inputs, $input);
 
         }
 	
-        $MOBY_RESPONSE = collectionResponse($inputs, $output_article_name, $queryID);
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_SIMPLE_COLLECTION_RESPONSE ($queryID, $output_article_name_1, $gene_tree_xml, $output_article_name_2, $inputs);
     }
     else {
 	
 	if ($_debug) {
-	    print STDERR "no gene clusters defined\n";
+	    print STDERR "no gene clusters & gene tree defined\n";
 	}
 	
-	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_COLLECTION_RESPONSE ($queryID, $output_article_name);
+	$MOBY_RESPONSE = INB::GRIB::Utils::CommonUtilsSubs->MOBY_EMPTY_SIMPLE_COLLECTION_RESPONSE ($queryID, $output_article_name_1, $output_article_name_2);
     }
     
     # Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda
@@ -753,7 +770,8 @@ sub runSOTAClustering {
     # El parametro $message es un texto xml con la peticion.
     my ($caller, $message) = @_; # get the incoming MOBY query XML
     
-    my $_output_format = "List_Text";
+    my $_output_format_1 = "Newick_Text";
+    my $_output_format_2 = "List_Text";
     my $moby_logger    = get_logger ("MobyServices");
     my $serviceName    = "runSOTAClustering";
     
@@ -790,7 +808,7 @@ sub runSOTAClustering {
 	    print STDERR "query text: $query_str\n";
 	}
 
-	my ($query_response, $moby_exceptions_tmp) = _do_query_SOTA ($queryInput, $_output_format);
+	my ($query_response, $moby_exceptions_tmp) = _do_query_SOTA ($queryInput, $_output_format_1, $_output_format_2);
 	push (@$moby_exceptions, @$moby_exceptions_tmp);
 	
 	# $query_response es un string que contiene el codigo xml de
