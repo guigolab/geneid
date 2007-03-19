@@ -77,7 +77,7 @@ my $_debug = 0;
 my $centre = "imim";
 my $serviceName = "runSOTAClustering";
 my $articleName = undef;
-if ($centre eq "imim") {
+if ($centre eq "cipf") {
   $articleName = "microarraydata";
   $::authURI   = 'bioinfo.cipf.es';
 }
@@ -249,7 +249,7 @@ my $Service = MOBY::Client::Service->new(service => $wsdl);
 ##################################################################
 
 my $result = $Service->execute(XMLinputlist => [
-						["$articleName", $score_matrix_xml, "distance", $distance_xml, "resource threshold (%)", $resource_threshold]
+						["$articleName", $score_matrix_xml, 'distance', $distance_xml, 'resource_threshold_percentage', $resource_threshold_xml]
 					       ]);
 
 ##################################################################
