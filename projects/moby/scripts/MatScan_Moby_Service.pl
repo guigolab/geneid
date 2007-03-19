@@ -43,7 +43,7 @@ Usage:
 	-m the Matrices in xml format
 	
 Examples using some combinations:
-	perl MatScan_Moby_Service.pl -x 2 -s runMatScanGFFCollectionVsInputMatrices -f /home/ug/arnau/data/promoterExtraction/ENSG00000197785.upstream_region.5000.fa -m /home/ug/arnau/data/MeMe/meme2matrix.xml
+	perl MatScan_Moby_Service.pl -x 2 -s runMatScanGFFCollectionVsInputMatrices -f /home/ug/arnau/data/GeneClusteringControl/ENSRNOG00000007728.HumanRatMouse.500.fa -m /home/ug/arnau/data/MeMe/meme2matrix.xml
 
 END_HELP
 
@@ -91,7 +91,7 @@ if ($serviceName =~ /collection/i) {
     $serviceType = "Collection";
 }
 
-my $in_file_1    = $opt_f || "/home/ug/arnau/data/promoterExtraction/ENSG00000197785.upstream_region.5000.fa";
+my $in_file_1    = $opt_f || "/home/ug/arnau/data/GeneClusteringControl/ENSRNOG00000007728.HumanRatMouse.500.fa";
 my $matrix_file  = $opt_m || "/home/ug/arnau/data/MeMe/meme_motifs.collection.xml";
 my $datasource   = "EMBL";
 
