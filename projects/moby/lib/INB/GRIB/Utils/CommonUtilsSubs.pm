@@ -56,6 +56,8 @@ our @EXPORT = qw(
   &MOBY_EMPTY_COLLECTION_RESPONSE
   &MOBY_EMPTY_DOUBLE_SIMPLE_RESPONSE
   &MOBY_DOUBLE_SIMPLE_RESPONSE
+  &MOBY_EMPTY_SIMPLE_COLLECTION_RESPONSE
+  &MOBY_SIMPLE_COLLECTION_RESPONSE
   &convert_tabularPositionWeightMatrix_into_MobyMatrix
   &convert_tabularScoreMatrix_into_MobyMatrix
   &convert_MobyMatrix_into_tabularMatrix
@@ -144,6 +146,29 @@ sub MOBY_DOUBLE_SIMPLE_RESPONSE {
     my ($output_object_1, $output_article_name_1, $output_object_2, $output_article_name_2, $queryID) = @_;
     
     return "<moby:mobyData moby:queryID='$queryID'><moby:Simple moby:articleName='$output_article_name_1'>$output_object_1</moby:Simple><moby:Simple moby:articleName='$output_article_name_2'>$output_object_2</moby:Simple></moby:mobyData>";
+}
+
+sub MOBY_EMPTY_SIMPLE_COLLECTION_RESPONSE {
+    my $self = shift;
+    my ($queryID, $output_article_name_1, $output_article_name_2) = @_;
+    return "<moby:mobyData moby:queryID='$queryID'><moby:Simple moby:articleName='$output_article_name_1'/><moby:Collection moby:articleName='$output_article_name_2'/></moby:mobyData>";
+}
+
+sub MOBY_SIMPLE_COLLECTION_RESPONSE {
+    my $self = shift;
+    my ($queryID, $output_article_name_1, $output_object_1, $output_article_name_2, $output_object_2_aref) = @_;
+    my $prefix = "<moby:mobyData moby:queryID='$queryID'><moby:Simple moby:articleName='$output_article_name_1'>$output_object_1</moby:Simple><moby:Collection moby:articleName='$output_article_name_2'>";
+    my $suffix = "</moby:Collection></moby:mobyData>";
+    
+    my $output_xml = "$prefix";
+    
+    foreach my $simple_output_object (@$output_object_2_aref) {
+      $output_xml .= "<moby:Simple>$simple_output_object</moby:Simple>"
+    }
+    
+    $output_xml .= $suffix;
+    
+    return "$output_xml\n";
 }
 
 # Works for both raw text content and CDATA bloc
