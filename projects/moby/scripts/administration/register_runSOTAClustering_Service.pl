@@ -158,13 +158,18 @@ my ($REG) = $Central->registerService(
 							    ['gene_score_matrix', ['MicroArrayData_Text' => \@namespaces]]
 							   ],
 				      output		=> [
-							    ['gene_clusters', [['List_Text' => \@namespaces]]]
+							    ['gene_clusters', [['List_Text' => \@namespaces]]],
+							    ['gene_tree', ['Newick_Text' => \@namespaces]]
 							   ],
 				      secondary => {
                                           'distance' => {
                                               datatype => 'String',
                                               enum     => ['euclidean', 'square', 'correlation', 'offset', 'spearman', 'jackknife'],
                                               default  => 'euclidean',
+                                          },
+                                          'resource_threshold_percentage' => {
+                                              datatype => 'Integer',
+                                              default  => '10',
                                           },
                                       }
 
