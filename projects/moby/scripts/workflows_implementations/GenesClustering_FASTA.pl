@@ -65,7 +65,7 @@ return <<"END_HELP";
 Description: Execute a gene clustering workflow, based on patterns found in the upstream regions of a given set of genes. This workflow takes a set of gene upstream sequences in FASTA format and return in STDOUT a clustering tree picture in PNG format.
 Usage:
 
-    GenesClustering_FASTA.pl [-h] -x {Moby Central} -f {sequence FASTA file} -t {MatScan threshold} -d {MatScan database} -a {meta-alignment alpha penalty} -l {meta-alignment lambda penalty} -u {meta-alignment mu penalty} -g {multiple meta-alignment gamma penalty} -r {non-collinearity penalty} -m {Hierarchical clustering method} -n {Number of K-means clusters} -i {Number of K-means iterations} -o {Output directory}
+    GenesClustering_FASTA.pl [-h] -x {Moby Central} -f {sequence FASTA file} -t {MatScan threshold} -d {MatScan database} -a {meta-alignment alpha penalty} -l {meta-alignment lambda penalty} -u {meta-alignment mu penalty} -g {multiple meta-alignment gamma penalty} -r {non-collinearity penalty} -m {Hierarchical clustering method} -s {sota distance function} -p {sota resource threshold} -o {Output directory}
 	-h help
 	-x MOBY Central: Inab, BioMoby, Mobydev (optional - Default is BioMoby registry)
 		<1> or Inab
@@ -80,13 +80,13 @@ Usage:
 	-g Multiple meta-alignment gamma penalty (Default is -10)
 	-r Multiple meta-alignment non-collinearity penalty (Default is 100)
         -m HierarchicalCluster method, e.g nearest neighbour joining or furthest neighbour joining [nearest, furthest] (Default is nearest)
-	-n Number of clusters returned by the k-means algorithm (Default is 10)
-	-i Number of k-means iterations (Default is 200)
+        -s sota distance function ['euclidean', 'square', 'correlation', 'offset', 'spearman', 'jackknife'] (Default is 'euclidean')
+        -p sota resource threshold percentage (Default is 10)
         -o Output directory name, if not specified, the output is turned off, the script will just return a tree clustering picture in STDOUT.
 	-c workflow configuration file (default is \$HOME/.workflow.config)
 
 Examples using some combinations:
-	perl GenesClustering_FASTA.pl -x 2 -f /home/ug/arnau/data/ENSRNOG00000007726.orthoMode.withRat.1000.fa -c \$HOME/.workflow.config -t 0.80 -d jaspar -a 0.5 -l 0.1 -u 0.1 -g -10 -r 100 -m nearest -n 4 -i 200 -o output
+	perl GenesClustering_FASTA.pl -x 2 -f /home/ug/arnau/data/ENSRNOG00000007726.orthoMode.withRat.1000.fa -c \$HOME/.workflow.config -t 0.80 -d jaspar -a 0.5 -l 0.1 -u 0.1 -g -10 -r 100 -m nearest -s euclidean -p 20 -o output
 
 END_HELP
 
@@ -95,13 +95,13 @@ END_HELP
 BEGIN {
 	
     # Determines the options with values from program
-    use vars qw/$opt_h $opt_x $opt_f $opt_c $opt_t $opt_d $opt_a $opt_l $opt_u $opt_m $opt_g $opt_r $opt_n $opt_i $opt_o $opt_z $output_dir $gmaster_home/;
+    use vars qw/$opt_h $opt_x $opt_f $opt_c $opt_t $opt_d $opt_a $opt_l $opt_u $opt_m $opt_g $opt_r $opt_s $opt_p $opt_o $opt_z $output_dir $gmaster_home/;
     
     # $gmaster_home = $ENV{'HOME'};
     $gmaster_home = "/home/ug/gmaster";
     
     # these are switches taking an argument (a value)
-    my $switches = 'x:zhf:c:t:d:a:l:u:m:g:r:n:i:o:';
+    my $switches = 'x:zhf:c:t:d:a:l:u:m:g:r:s:p:o:';
     
     # Get the switches
     getopts($switches);
@@ -212,12 +212,12 @@ my $alpha_xml  = "<Value>$alpha</Value>";
 my $lambda_xml = "<Value>$lambda</Value>";
 my $mu_xml     = "<Value>$mu</Value>";
 
-# K-means parameters
+# SOTA parameters
 
-my $cluster_number       = $opt_n || 10;
-my $cluster_number_xml   = "<Value>$cluster_number</Value>";
-my $iteration_number     = $opt_i || 200;
-my $iteration_number_xml = "<Value>$iteration_number</Value>";
+my $distance = $opt_s || "euclidean";
+my $distance_xml = "<Value>$distance</Value>";
+my $resource_threshold_percentage = $opt_p || 10;
+my $resource_threshold_percentage_xml = "<Value>$resource_threshold_percentage</Value>";
 
 # Multiple Meta-alignment parameters
 
@@ -808,24 +808,24 @@ if ($_verbose) {
   print STDERR "Third step done!\n\n";
 }
 
-# runKMeansClustering
+# runSOTAClustering
 
 if ($_verbose) {
-  print STDERR "Fourth step, gene clustering using a k-means clustering algorithm...\n";
+  print STDERR "Fourth step, gene clustering using sota clustering algorithm...\n";
 }
 
 if ($_debug) {
-  print STDERR "\nExecuting runKMeansClustering...\n\n";
+  print STDERR "\nExecuting runSOTAClustering...\n\n";
 }
 
-$serviceName   = "runKMeansClustering";
+$serviceName   = "runSOTAClustering";
 $authURI       = $parameters{$serviceName}->{authURI}     || die "no URI for $serviceName\n";
 $articleName   = $parameters{$serviceName}->{articleName} || "";
 
 $Service = getService ($C, $serviceName, $authURI);
 
 $moby_response = $Service->execute (XMLinputlist => [
-						     ["$articleName", "$input_xml\n", "clusters number", $cluster_number_xml, 'iterations number', $iteration_number_xml]
+						     ["$articleName", "$input_xml\n", "distance", $distance_xml, 'resource_threshold_percentage', $resource_threshold_percentage_xml]
 						     ]);
 
 if ($_debug) {
