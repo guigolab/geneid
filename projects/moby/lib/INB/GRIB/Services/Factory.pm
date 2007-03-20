@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.113 2007-03-19 22:45:57 gmaster Exp $
+# $Id: Factory.pm,v 1.114 2007-03-20 11:57:53 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -3732,7 +3732,7 @@ sub SOTA_call {
 	    print STDERR "parsing SOTA clustering output file, $output_filename.sot...\n";
 	}
 	
-	$gene_clusters_aref = _parseSOTAClusters ($output_filename . ".sot");
+	$gene_clusters_aref = _parseSOTAClusters ($output_filename . ".sot", $debug);
 	
 	if ($debug) {
 	    print STDERR "parsing done!\n";
@@ -4084,10 +4084,55 @@ sub _is_in {
 }
 
 sub _parseSOTAClusters {
-  my ($filename)    = @_;
+  my ($filename, $debug) = @_;
+  my $gene_clusters = {};
   my @gene_clusters = ();
   
-  # ...
+  open FILE, "$filename" or die "can't open sota file, $filename!\n";
+  while (<FILE>) {
+    my $line = $_;
+    chomp $line;
+    
+    if ($line =~ /goes to/) {
+      
+      if ($debug) {
+        print STDERR "parsing line, $line\n";
+      }
+        
+      $line =~ /^([^\?]+)\?\d goes to (\d+) .+/;
+      my $gene_id = $1;
+      my $cluster_id = $2;
+      
+      if ($debug) {
+        print STDERR "gene_id, $gene_id\n";
+        print STDERR "cluster_id, $cluster_id\n";
+      }
+      
+      if (exists $gene_clusters->{$cluster_id}) {
+        
+        if ($debug) {
+          print STDERR "already in there\n";
+        }
+        
+        my $aref = $gene_clusters->{$cluster_id};
+        push (@$aref, $gene_id);
+      }
+      else {
+        my $aref = [];
+        push (@$aref, $gene_id);
+        
+        $gene_clusters->{$cluster_id} = $aref;
+      }
+    }
+  }
+  close FILE;
+  
+  my @cluster_ids = keys (%$gene_clusters);
+  foreach my $cluster_id (@cluster_ids) {
+    my @gene_ids = @{$gene_clusters->{$cluster_id}};
+    my $gene_ids = join ("\n" , @gene_ids);
+    push (@gene_clusters, $gene_ids);
+  }
   
   return \@gene_clusters;
 }
