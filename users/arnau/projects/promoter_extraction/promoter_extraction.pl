@@ -173,7 +173,7 @@ BEGIN {
 ## Benchmarking code
 my $time0 = new Benchmark;
 
-$_debug            = 0;
+$_debug            = 1;
 $upstream_length   = 2000;
 $downstream_length = 0;
 $report_features   = 0;
@@ -224,9 +224,17 @@ else {
     $dbpassword = $dbpassword_default;
 }
 
-my $dbh = Mysql->connect($dbhost, "", $dbuser, "$dbpassword");
+my $dbport = "3306";
+my $dbh;
 
-my @database_names = $dbh->listdbs;
+# Use of MySQL.pm module is obsolete
+# use DBI instead
+
+# $dbh = Mysql->connect($dbhost, $dbport, $dbuser, "$dbpassword");
+# my @database_names = $dbh->listdbs;
+
+my $attributes = {host => "$dbhost", port => "$dbport", user => "$dbuser"};
+my @database_names = DBI->data_sources ('mysql', $attributes);
 
 if ($_debug) {
     print STDERR "database names: @database_names.\n";
