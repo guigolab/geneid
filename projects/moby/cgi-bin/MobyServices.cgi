@@ -7,17 +7,18 @@
 # For copyright and disclaimer see below.
 # 
 
-use strict;
 use EnvServices;
-use FindBin qw($Bin);
-use lib "$Bin";
-use SOAP::Transport::HTTP;
-use POSIX qw(setsid);
 
 ###############################################################################
 BEGIN {
     load_environment();
 }
+
+use strict;
+use FindBin qw($Bin);
+use lib "$Bin";
+use SOAP::Transport::HTTP;
+use POSIX qw(setsid);
 
 # Statistics and logs managment
 use Benchmark;
