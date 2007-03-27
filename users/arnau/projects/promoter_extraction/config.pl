@@ -4,12 +4,10 @@
 #
 ##################################################################################
 
-# bioperl libraries - at least bioperl v1.2 is required
-use lib "/usr/local/Install/perl-5.8.6/lib/site_perl/5.8.6/";
 
 # Data::UUID
 # required for Ensembl compara
-use lib "/home/ug/gmaster/lib/site_perl/5.8.5/i686-linux-thread-multi";
+# use lib "/home/ug/gmaster/lib/site_perl/5.8.5/i686-linux-thread-multi";
 
 #########################################
 #
@@ -17,11 +15,10 @@ use lib "/home/ug/gmaster/lib/site_perl/5.8.5/i686-linux-thread-multi";
 #
 #########################################
 
-$_libraries_path = "/home/ug/gmaster/projects/promoter_extraction/lib";
-# $_libraries_path = "/home/ug/arnau/no_backup/cvs";
+$_libraries_path = $ENV{HOME} . "/projects/promoter_extraction/lib/";
 
-use lib "/home/ug/gmaster/projects/promoter_extraction/lib/ensembl-38/modules";
-use lib "/home/ug/gmaster/projects/promoter_extraction/lib/ensembl-compara-38/modules";
+use lib $ENV{HOME} . "/projects/promoter_extraction/lib/ensembl-38/modules";
+use lib $ENV{HOME} . "/projects/promoter_extraction/lib/ensembl-compara-38/modules";
 
 # Latest Ensembl release
 
