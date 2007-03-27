@@ -26,7 +26,9 @@ if (!defined $APACHE_ROOT) {
   $APACHE_ROOT = "/Library/WebServer";  
 }
 else {
-  print STDERR "APACHE_ROOT: $APACHE_ROOT\n";
+  if ($_debug) {
+    print STDERR "APACHE_ROOT: $APACHE_ROOT\n";
+  }
 }
 
 my $FRAME  = "$APACHE_ROOT/htdocs/software/geneid/Plantilla.html";
@@ -63,10 +65,6 @@ exit 0;
 sub check_datatype {
   my ($input_type) = @_;
   my $data_input_html;
-
-  if ($_debug) {
-    print STDERR "APACHE_ROOT, $APACHE_ROOT\n";
-  }
 
   if ($_debug && defined $input_type) {
     print STDERR "checking datatype, $input_type\n";
