@@ -288,14 +288,40 @@ if ($_debug) {
 
 my $result;
 if ($serviceName =~ /collection/i) {
-    $result = $Service->execute(XMLinputlist => [
+    if ($serviceName =~ /^runrepeatmasker/i) {
+    
+	    print STDERR "running repeatmasker service\n";
+    
+	    $result = $Service->execute(XMLinputlist => [
 						 ["$articleName", $input_xmls, 'engine', $engine_xml]
 						 ]);
+    }
+    else {
+    
+    	print STDERR "running dust service\n";
+    
+    	$result = $Service->execute(XMLinputlist => [
+    	                                                 ["$articleName", $input_xmls]
+						    ]);
+    }
 }
 else {
-    $result = $Service->execute(XMLinputlist => [
+    if ($serviceName =~ /^runrepeatmasker/i) {
+    
+	    print STDERR "running repeatmasker service\n";
+    
+	    $result = $Service->execute(XMLinputlist => [
 						 ["$articleName", $input_xml, 'engine', $engine_xml]
 						 ]);
+    }
+    else {
+    
+    	print STDERR "running dust service\n";
+    
+    	$result = $Service->execute(XMLinputlist => [
+    	                                                 ["$articleName", $input_xml]
+						    ]);
+    }
 }
 
 ##################################################################
