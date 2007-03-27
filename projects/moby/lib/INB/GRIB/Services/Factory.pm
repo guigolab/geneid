@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.114 2007-03-20 11:57:53 gmaster Exp $
+# $Id: Factory.pm,v 1.115 2007-03-27 18:53:50 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -160,9 +160,10 @@ BEGIN {
 	my @needed_vars = qw();
 	_exists_env($_) foreach @needed_vars;
 	
-	use vars qw /$gmaster_home/;
-	# $gmaster_home = $ENV{HOME};
-	$gmaster_home = "/home/ug/gmaster";
+	use vars qw /$gmaster_home $molbio_path/;
+	$gmaster_home = $ENV{HOME};
+	$molbio_path = "/usr/local/molbio/Install/";
+	# $gmaster_home = "/home/ug/gmaster";
 	
 }
 
@@ -1967,7 +1968,7 @@ sub MEME_call {
     my $background_order      = $parameters->{background_order};
 
     # Llama a Meme en local
-    my $_meme_dir   = "/usr/local/molbio/Install/meme-3.5.2";
+    my $_meme_dir   = "$molbio_path/meme";
     my $_meme_bin  = "bin/meme";
     my $_meme_args = "-nostatus -time 160 -maxiter 20 ";
     
@@ -2377,7 +2378,7 @@ sub RepeatMasker_call {
     my $engine  = $parameters->{engine};
     
     # Llama a RepeatMasker en local
-    my $_repeatmasker_dir  = "/usr/local/molbio/Install/repeatmasker-3.1.5";
+    my $_repeatmasker_dir  = "$molbio_path/repeatmasker-3.1.6";
     my $_repeatmasker_bin  = "RepeatMasker";
     my $_repeatmasker_args = "";
     
@@ -2734,7 +2735,7 @@ sub CrossMatchToScreenVector_call {
     my $minscore = $parameters->{minscore};
     
     # Llama a Cross_Match en local
-    my $_cross_match_dir    = "/usr/local/molbio/Install/cross_match";
+    my $_cross_match_dir    = "$molbio_path/cross_match-0.990329";
     my $_cross_match_bin    = "cross_match";
     my $_cross_match_args   = "-screen ";
     my $_cross_match_vectors = $gmaster_home . "/projects/assembly/data_libraries/UniVec_Core.fa";
@@ -2853,7 +2854,7 @@ sub Phrap_call {
     my $node_space = $parameters->{node_space};
     
     # Llama a Phrap en local
-    my $_phrap_dir    = "/usr/local/molbio/Install/cross_match";
+    my $_phrap_dir    = "$molbio_path/cross_match-0.990329";
     my $_phrap_bin    = "phrap";
     # $_phrap_bin    = "phrap.bigmalloc";
     # $_phrap_bin    = "phrap.manyreads";
@@ -3099,7 +3100,7 @@ sub Phred_call {
     my $trim_cutoff = $parameters->{trim_cutoff};
     
     # Llama a Phred en local
-    my $_phred_dir     = "/usr/local/molbio/Install/phred-0.020425.c";
+    my $_phred_dir     = "$molbio_path/phred-020425.c";
     my $_phred_bin     = "phred";
     my $_phred_args    = "";
     my $_phred_config_file = $gmaster_home . "/projects/assembly/phredpar.dat";
@@ -3692,7 +3693,7 @@ sub SOTA_call {
     
     my $output_filename = $gene_matrix_file . ".nw";
     
-    if ($debug) {
+    if (1 || $debug) {
 	print STDERR "Running SOTA clustering, with this command:\n";
 	print STDERR "$_cluster_dir\/$_cluster_bin $gene_matrix_file $output_filename $_cluster_args\n";
     }
