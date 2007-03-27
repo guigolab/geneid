@@ -15,8 +15,8 @@ use Benchmark;
 my $t1 = Benchmark->new ();
 
 use vars qw /$gmaster_home/;
-# $gmaster_home = $ENV{'HOME'};
-$gmaster_home = "/home/ug/gmaster";
+$gmaster_home = $ENV{HOME};
+# $gmaster_home = "/home/ug/gmaster";
 
 my $_path_to_script = $gmaster_home . "/projects/moby/prod/scripts/workflows_implementations";
 

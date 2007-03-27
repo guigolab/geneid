@@ -8,8 +8,8 @@ BEGIN {
   
   use vars qw /$gmaster_home $APACHE_ROOT/;
   $APACHE_ROOT = $ENV{APACHE_ROOT};
-  # $gmaster_home = $ENV{'HOME'};
-  $gmaster_home = "/home/ug/gmaster";
+  $gmaster_home = $ENV{HOME};
+  # $gmaster_home = "/home/ug/gmaster";
   
 }
 
