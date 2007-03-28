@@ -1353,7 +1353,7 @@ sub parseResults {
     my $size = $elements->size();
     
     if ($size == 0) {
-	$elements = $XML->getElementsByTagName( "object_type" );
+	$elements = $XML->getElementsByTagName( "$object_type" );
 	$size = $elements->size();
 	if ($size == 0) {
 	    print STDERR "Error, can't parse the moby output from the moby XML...\n";
