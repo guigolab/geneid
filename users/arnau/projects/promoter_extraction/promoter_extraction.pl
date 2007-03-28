@@ -68,7 +68,7 @@ Dependencies:
 
   cvs -d :pserver:cvsuser@cvs.sanger.ac.uk:/cvsroot/ensembl co -r branch-ensembl-31 ensembl-compara
 
-  * DBI and depedencies, DBD::MySQL, MySQL
+  * DBI and depedencies, DBD::MySQL
 
 =head1 AUTHOR
 
@@ -158,7 +158,7 @@ BEGIN {
     }
 
     $_config_file_path = "/home/ug/gmaster/projects/promoter_extraction/config.pl";
-    $_config_file_path = "/home/ug/arnau/cvs/GRIB/users/arnau/projects/promoter_extraction/config.pl";
+    # $_config_file_path = "/home/ug/arnau/cvs/GRIB/users/arnau/projects/promoter_extraction/config.pl";
     
     if (-f "$_config_file_path") {
         require "$_config_file_path";
@@ -173,7 +173,7 @@ BEGIN {
 ## Benchmarking code
 my $time0 = new Benchmark;
 
-$_debug            = 1;
+$_debug            = 0;
 $upstream_length   = 2000;
 $downstream_length = 0;
 $report_features   = 0;
@@ -197,10 +197,7 @@ if ($_debug) {
     print STDERR "connecting to Ensembl MySQL server to get the database name...\n";
 }
 
-use Mysql;
-
-# connect to Madrid if it is the latest
-# Otherwise connect to Sanger
+# connect to Madrid if it is the latest Otherwise connect to Sanger
 
 my $dbhost = $dbhost_default;
 my $dbuser = $dbuser_default;
@@ -230,6 +227,7 @@ my $dbh;
 # Use of MySQL.pm module is obsolete
 # use DBI instead
 
+# use Mysql;
 # $dbh = Mysql->connect($dbhost, $dbport, $dbuser, "$dbpassword");
 # my @database_names = $dbh->listdbs;
 
