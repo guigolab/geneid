@@ -234,11 +234,16 @@ my $dbh;
 my $attributes = {host => "$dbhost", port => "$dbport", user => "$dbuser"};
 my @database_names = DBI->data_sources ('mysql', $attributes);
 
+# get rid of the prefix 'DBI:mysql:'
+# Otherwise getting sequences from compara will not work
+my $dbname_pattern = '\w+_\w+' . "_core_" . $release . '_\w+';
+@database_names = map {/($dbname_pattern)/} @database_names;
+
 if ($_debug) {
     print STDERR "database names: @database_names.\n";
 }
 
-my $dbname_pattern = $species . "_core_" . $release . '_\w+';
+$dbname_pattern = $species . "_core_" . $release . '_\w+';
 my ($dbensembl) = map {/($dbname_pattern)/} @database_names;
 
 if ($_debug) {
@@ -250,9 +255,6 @@ if (not defined $dbensembl) {
     print STDERR "contact gmaster\@imim.es for help!\n";
     exit 0;
 }
-
-# Keep it to initialise the compara part in case the ortholog mode is on
-# undef @database_names;
 
 #
 # Instanciate the Ensembl DB objects adaptors
