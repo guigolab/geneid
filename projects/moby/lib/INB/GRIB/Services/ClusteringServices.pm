@@ -1,4 +1,4 @@
-# $Id: ClusteringServices.pm,v 1.8 2007-03-19 22:46:39 gmaster Exp $
+# $Id: ClusteringServices.pm,v 1.9 2007-03-28 20:35:25 gmaster Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -496,17 +496,17 @@ sub _do_query_SOTA {
 	return ($MOBY_RESPONSE, $moby_exceptions);
     }
     
-    ($resource_threshold)   = getNodeContentWithArticle($queryInput_DOM, "Parameter", "resource_threshold_percentage");
+    ($resource_threshold)   = getNodeContentWithArticle($queryInput_DOM, "Parameter", "resource_threshold");
 
     if (not defined $resource_threshold) {
-	$resource_threshold = 10;
+	$resource_threshold = 35;
     }
-    elsif (! (($resource_threshold >= 0) && ($resource_threshold <= 100))) {
-	my $note = "'resource_threshold_percentage' parameter, '$resource_threshold', not accepted, it should an percentage Integer between [0,100]";
+    elsif (! (($resource_threshold >= 0) && ($resource_threshold <= 1000))) {
+	my $note = "'resource_threshold' parameter, '$resource_threshold', not accepted, it should an Integer between [0,1000]";
 	print STDERR "$note\n";
 	my $code = "222";
 	my $moby_exception = INB::Exceptions::MobyException->new (
-								  refElement => "resource_threshold_percentage",
+								  refElement => "resource_threshold",
 								  code       => $code,
 								  type       => 'error',
 								  queryID    => $queryID,
