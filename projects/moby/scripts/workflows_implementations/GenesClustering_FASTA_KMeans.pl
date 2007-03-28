@@ -24,11 +24,12 @@ methods. Internal methods are usually preceded with a _
 
 =cut
 
-##################################################################
-#
-# GenericSequence to FASTA conversion Moby Service Client
-#
-##################################################################
+use lib $ENV{HOME} . "/projects/moby/biomoby.0.8.2a/Perl";
+# use lib "/home/ug/gmaster/projects/moby/biomoby.0.8.2a/Perl";
+
+# SOAP v0.60 in gmaster
+use lib $ENV{HOME} . "/projects/lib/5.8.8/x86_64-linux-thread-multi";
+use lib $ENV{HOME} . "/projects/lib/site_perl/5.8.8";
 
 use strict;
 use Data::Dumper;
@@ -1349,11 +1350,10 @@ sub parseResults {
     my $doc    = $parser->parse_string( $XML );
     $XML       = $doc->getDocumentElement();
     my $elements = $XML->getElementsByTagName( "moby:$object_type" );
-    
     my $size = $elements->size();
     
     if ($size == 0) {
-	$elements = $XML->getElementsByTagName( "object_type" );
+	$elements = $XML->getElementsByTagName( "$object_type" );
 	$size = $elements->size();
 	if ($size == 0) {
 	    print STDERR "Error, can't parse the moby output from the moby XML...\n";
@@ -1362,13 +1362,15 @@ sub parseResults {
     
     my $i = 0;
     while ($i < $size) {
-	my $element   = $elements->get_node ($i);
+	my $element   = $elements->get_node ($i);	
+	$element   = $elements->[$i];
+	
 	my $input_xml = $element->toString();
 	push (@$inputs_xml, $input_xml);
 	
 	$i++;
     }
-    
+
     return $inputs_xml;
 }
 
