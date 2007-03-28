@@ -167,9 +167,9 @@ my ($REG) = $Central->registerService(
                                               enum     => ['euclidean', 'square', 'correlation', 'offset', 'spearman', 'jackknife'],
                                               default  => 'euclidean',
                                           },
-                                          'resource_threshold_percentage' => {
+                                          'resource_threshold' => {
                                               datatype => 'Integer',
-                                              default  => '10',
+                                              default  => '35',
                                           },
                                       }
 
