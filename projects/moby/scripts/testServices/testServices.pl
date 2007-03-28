@@ -84,12 +84,13 @@ my $ENSG00000197785_matscan_xml_file           = "ENSG00000197785.runMatScanGFF.
 my $ENSPTRG00000000031_matscan_xml_file        = "ENSPTRG00000000031.runMatScanGFF.xml";
 my $ENSG00000197785_fasta_xml_file             = "ENSG00000197785.fa.xml";
 my $Dmel_MultiMeta_xml_file   = "Dmel.MultiMetaOutput.xml";
+my $Lep_Gasdermin_score_matrix_xml_file        = "Lep_Gasdermin_score_matrix.xml";
 
 # Check that the files exist !!!
 
-if ((not -f "$input_data_dir/$nucleotide_sequence_xml_file") || (not -f "$input_data_dir/$tblastx_output_xml_file") || (not -f "$input_data_dir/$geneIds_lst_xml_file") || (not -f "$input_data_dir/$GeneIDGFF_xml_file") || (not -f "$input_data_dir/$gostat_regulated_xml_file") || (not -f "$input_data_dir/$gostat_allArray_xml_file") || (not -f "$input_data_dir/$ENSG00000197785_upstream_sequence_xml_file") || (not -f "$input_data_dir/$ENSG00000197785_matscan_xml_file") || (not -f "$input_data_dir/$ENSPTRG00000000031_matscan_xml_file") || (not -f "$input_data_dir/$ENSG00000197785_fasta_xml_file") || (not -f "$input_data_dir/$Dmel_MultiMeta_xml_file")) {
+if ((not -f "$input_data_dir/$nucleotide_sequence_xml_file") || (not -f "$input_data_dir/$tblastx_output_xml_file") || (not -f "$input_data_dir/$geneIds_lst_xml_file") || (not -f "$input_data_dir/$GeneIDGFF_xml_file") || (not -f "$input_data_dir/$gostat_regulated_xml_file") || (not -f "$input_data_dir/$gostat_allArray_xml_file") || (not -f "$input_data_dir/$ENSG00000197785_upstream_sequence_xml_file") || (not -f "$input_data_dir/$ENSG00000197785_matscan_xml_file") || (not -f "$input_data_dir/$ENSPTRG00000000031_matscan_xml_file") || (not -f "$input_data_dir/$ENSG00000197785_fasta_xml_file") || (not -f "$input_data_dir/$Dmel_MultiMeta_xml_file") || (not -f "$input_data_dir/$Lep_Gasdermin_score_matrix_xml_file")) {
     print STDERR "Error, can't find one of the input files in directory, $input_data_dir!\n";
-    exit 0;
+    exit 1;
 }
 
 my $tblastx_output_xml   = qx/cat $input_data_dir\/$tblastx_output_xml_file/;
@@ -103,6 +104,7 @@ my $ENSG00000197785_matscan_xml           = qx/cat $input_data_dir\/$ENSG0000019
 my $ENSPTRG00000000031_matscan_xml        = qx/cat $input_data_dir\/$ENSPTRG00000000031_matscan_xml_file/;
 my $ENSG00000197785_fasta_xml             = qx/cat $input_data_dir\/$ENSG00000197785_fasta_xml_file/;
 my $Dmel_MultiMeta_xml   = qx/cat $input_data_dir\/$Dmel_MultiMeta_xml_file/;
+my $Lep_Gasdermin_score_matrix_xml        = qx/cat $input_data_dir\/$Lep_Gasdermin_score_matrix_xml_file/;
 
 my $runGeneID_control_file                  = "Hsap_BTK.msk.runGeneID.control";
 my $runGeneIDGFF_control_file               = "Hsap_BTK.msk.runGeneIDGFF.control";
@@ -120,6 +122,7 @@ my $fromFASTAToDNASequenceCollection_control_file    = "ENSG00000197785.fromFAST
 my $fromMetaAlignmentsToTextScoreMatrix_control_file = "mut1_downreg.fbgn.ScoresMatrix.control";
 my $runRepeatMasker_control_file = "ENSG00000197785.runRepeatMasker.control";
 my $runDust_control_file = "ENSG00000197785.runDust.control";
+my $runSOTAClustering_control_file = "Lep_Gasdermin.runSOTAClustering.control";
 
 ##################################################################
 #
@@ -743,6 +746,42 @@ if (defined $service) {
     }
 
 }
+
+print  "\ntesting runSOTAClustering...\n\n";
+
+$service = MobyServiceInstantiation ($C, "runSOTAClustering", $AUTH);
+if (defined $service) {
+    my $result = $service->execute(
+				   XMLinputlist => [
+						    ['sequence', $Lep_Gasdermin_score_matrix_xml]
+						    ]
+				   );
+
+    my ($results_fh, $results_file) = tempfile ("/tmp/MOBY_RESULTS.XXXXX", UNLINK => 0);
+
+    print $results_fh "$result\n";
+
+    my @diff_results = qx/diff $control_data_dir\/$runSOTAClustering_control_file $results_file/;
+
+    if ((@diff_results > 0) && (! ($diff_results[1] =~ /date/))) {
+	print STDERR "runSOTAClustering service failed!\n";
+	print STDERR "diff_results: @diff_results\n";
+
+	close $results_fh;
+	unlink $results_file;
+
+    }
+    else {
+
+	print  "runSOTAClustering okay...\n";
+
+	close $results_fh;
+	unlink $results_file;
+    }
+
+}
+
+
 
 if (($opt_x == 1) || ($opt_x eq 'Chirimoyo')) {
 
