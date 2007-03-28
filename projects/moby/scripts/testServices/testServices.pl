@@ -22,7 +22,7 @@ use File::Temp qw/tempfile/;
 
 sub help {
 return <<"END_HELP";
-Description: Execute GeneID Moby services available from genome.imim.es
+Description: Execute Moby services available from genome.imim.es
 Usage:
 
     testServices.pl [-h] -x {Moby Central}
@@ -32,7 +32,6 @@ Usage:
 		<2> or Mobydev
 		<3> or Inab
 		<4> or BioMoby
-	-s Service Name
 
 Examples using some combinations:
 	testServices -x 1
@@ -119,6 +118,8 @@ my $runMetaAlignment_control_file           = "ENSG00000197785.runMetaAlignment.
 my $runMetaAlignmentGFF_control_file        = "ENSG00000197785.runMetaAlignmentGFF.control";
 my $fromFASTAToDNASequenceCollection_control_file    = "ENSG00000197785.fromFASTAToDNASequenceCollection.control";
 my $fromMetaAlignmentsToTextScoreMatrix_control_file = "mut1_downreg.fbgn.ScoresMatrix.control";
+my $runRepeatMasker_control_file = "ENSG00000197785.runRepeatMasker.control";
+my $runDust_control_file = "ENSG00000197785.runDust.control";
 
 ##################################################################
 #
@@ -666,6 +667,76 @@ if (defined $service) {
     else {
 
 	print  "runSGP2GFF okay...\n";
+
+	close $results_fh;
+	unlink $results_file;
+    }
+
+}
+
+# Execute runRepeatMasker Web service
+
+print  "\ntesting runRepeatMasker...\n\n";
+
+$service = MobyServiceInstantiation ($C, "runRepeatMasker", $AUTH);
+if (defined $service) {
+    my $result = $service->execute(
+				   XMLinputlist => [
+						    ['sequence', $ENSG00000197785_upstream_sequence_xml]
+						    ]
+				   );
+
+    my ($results_fh, $results_file) = tempfile ("/tmp/MOBY_RESULTS.XXXXX", UNLINK => 0);
+
+    print $results_fh "$result\n";
+
+    my @diff_results = qx/diff $control_data_dir\/$runRepeatMasker_control_file $results_file/;
+
+    if ((@diff_results > 0) && (! ($diff_results[1] =~ /date/))) {
+	print STDERR "runRepeatMasker service failed!\n";
+	print STDERR "diff_results: @diff_results\n";
+
+	close $results_fh;
+	unlink $results_file;
+
+    }
+    else {
+
+	print  "runRepeatMasker okay...\n";
+
+	close $results_fh;
+	unlink $results_file;
+    }
+
+}
+
+print  "\ntesting runDust...\n\n";
+
+$service = MobyServiceInstantiation ($C, "runDust", $AUTH);
+if (defined $service) {
+    my $result = $service->execute(
+				   XMLinputlist => [
+						    ['sequence', $ENSG00000197785_upstream_sequence_xml]
+						    ]
+				   );
+
+    my ($results_fh, $results_file) = tempfile ("/tmp/MOBY_RESULTS.XXXXX", UNLINK => 0);
+
+    print $results_fh "$result\n";
+
+    my @diff_results = qx/diff $control_data_dir\/$runDust_control_file $results_file/;
+
+    if ((@diff_results > 0) && (! ($diff_results[1] =~ /date/))) {
+	print STDERR "runDust service failed!\n";
+	print STDERR "diff_results: @diff_results\n";
+
+	close $results_fh;
+	unlink $results_file;
+
+    }
+    else {
+
+	print  "runDust okay...\n";
 
 	close $results_fh;
 	unlink $results_file;
