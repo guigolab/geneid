@@ -2,14 +2,8 @@
 <String namespace='' id='' articleName='content'>
 <![CDATA[ 
 (
-(
-Leptin_Rat?1=5.713283|Leptin_Mouse?1=5.718263:11.263324,
-Leptin_Human?1=0.000195:14.628680)
-:27.574404,
-(
-Gasdermin_Human?1=0.000175:16.964788,
-Gasdermin_Rat?1=1.642218|Gasdermin_Mouse?1=1.623342:14.259667)
-:20.227692);
+Leptin_Rat?1=11.219126|Leptin_Human?1=15.675780|Leptin_Mouse?1=12.241227:27.135462,
+Gasdermin_Rat?1=12.615579|Gasdermin_Human?1=18.264891|Gasdermin_Mouse?1=11.875430:19.861399);
 
 ]]>
 </String>
@@ -18,6 +12,7 @@ Gasdermin_Rat?1=1.642218|Gasdermin_Mouse?1=1.623342:14.259667)
 <String namespace='' id='' articleName='content'>
 <![CDATA[
 Leptin_Rat
+Leptin_Human
 Leptin_Mouse
 ]]>
 </String>
@@ -25,22 +20,9 @@ Leptin_Mouse
 </moby:Simple><moby:Simple><moby:List_Text namespace='' id=''>
 <String namespace='' id='' articleName='content'>
 <![CDATA[
-Gasdermin_Human
-]]>
-</String>
-</moby:List_Text>
-</moby:Simple><moby:Simple><moby:List_Text namespace='' id=''>
-<String namespace='' id='' articleName='content'>
-<![CDATA[
 Gasdermin_Rat
+Gasdermin_Human
 Gasdermin_Mouse
-]]>
-</String>
-</moby:List_Text>
-</moby:Simple><moby:Simple><moby:List_Text namespace='' id=''>
-<String namespace='' id='' articleName='content'>
-<![CDATA[
-Leptin_Human
 ]]>
 </String>
 </moby:List_Text>
