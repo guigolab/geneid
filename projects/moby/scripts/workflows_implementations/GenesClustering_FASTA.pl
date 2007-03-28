@@ -24,11 +24,12 @@ methods. Internal methods are usually preceded with a _
 
 =cut
 
-##################################################################
-#
-# GenericSequence to FASTA conversion Moby Service Client
-#
-##################################################################
+use lib $ENV{HOME} . "/projects/moby/biomoby.0.8.2a/Perl";
+# use lib "/home/ug/gmaster/projects/moby/biomoby.0.8.2a/Perl";
+
+# SOAP v0.60 in gmaster
+use lib $ENV{HOME} . "/projects/lib/5.8.8/x86_64-linux-thread-multi";
+use lib $ENV{HOME} . "/projects/lib/site_perl/5.8.8";
 
 use strict;
 use Data::Dumper;
