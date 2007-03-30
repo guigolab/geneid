@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: CookingGenes.c,v 1.22 2007-01-11 17:53:00 talioto Exp $  */
+/*  $Id: CookingGenes.c,v 1.23 2007-03-30 15:09:29 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -35,8 +35,7 @@ extern int GFF3;
 extern int XML;
 extern int cDNA;
 extern int PSEQ;
-extern int INTRON;
-
+extern int PRINTINT;
 
 /* Local data structure to record stats about every gene */
 typedef struct s_gene
@@ -52,39 +51,44 @@ void printProt(char* Name,
                long ngen,
                char* prot,
                long nAA,
-               int mode)
+               int mode,
+	       char* GenePrefix)
 {
   long j;
   char header[MAXLINE];
   
   /* 1. Print the header(geneid format): protein or genomic sequence */
   if (GFF3){
-  	  if (mode == PROT)
-		sprintf(header,"\n>%s_predicted_protein_%s_%ld\n",
-				VERSION,
-				Name,
-				ngen);
-	  else
-		sprintf(header,"\n>%s_predicted_cDNA_%s_%ld\n",
-				VERSION,
-				Name,
-				ngen);
+    if (mode == PROT)
+      sprintf(header,"\n>%s_predicted_protein_%s%s_%ld\n",
+	      VERSION,
+	      GenePrefix,
+	      Name,
+	      ngen);
+    else
+      sprintf(header,"\n>%s_predicted_cDNA_%s%s_%ld\n",
+	      VERSION,
+	      GenePrefix,
+	      Name,
+	      ngen);
 
   } else {
-	  if (mode == PROT)
-		sprintf(header,"\n>%s_%ld|%s_predicted_protein_%ld|%ld_AA\n",
-				Name,
-				ngen,
-				VERSION,
-				ngen,
-				nAA);
-	  else
-		sprintf(header,"\n>%s_%ld|%s_predicted_cDNA_%ld|%ld_NN\n",
-				Name,
-				ngen,
-				VERSION,
-				ngen,
-				nAA);
+    if (mode == PROT)
+      sprintf(header,"\n>%s%s_%ld|%s_predicted_protein_%ld|%ld_AA\n",
+	      GenePrefix,
+	      Name,
+	      ngen,
+	      VERSION,
+	      ngen,
+	      nAA);
+    else
+      sprintf(header,"\n>%s%s_%ld|%s_predicted_cDNA_%ld|%ld_NN\n",
+	      GenePrefix,
+	      Name,
+	      ngen,
+	      VERSION,
+	      ngen,
+	      nAA);
   }
   /* Header left out in XML format */
   if (!XML)
@@ -197,7 +201,7 @@ void selectFeatures(char* exonType,
 		  *type1 = DON;
 		  *p2 = gp->AcceptorProfile;
 		  *p1 = gp->DonorProfile;
-		  printMess("Exon is Intron...");
+/* 		  printMess("Exon is Intron..."); */
 		}
 	  if (!strcmp(exonType,sTERMINAL))
 		{
@@ -227,8 +231,9 @@ long CookingInfo(exonGFF* eorig,
   
   int stop,stop1,stop2;
   exonGFF* e;
-  
+  /* char mess[MAXSTRING]; */
   /* Reset counters into the gene information structure */
+  
   *artScore = 0.0;
   e = eorig;
   for(igen=0; igen < MAXGENE; igen++)
@@ -274,11 +279,14 @@ long CookingInfo(exonGFF* eorig,
 		  else
 			{
 			  /* C. Reverse Genes: (BOTTOM) First->Internal->...->Terminal (TOP) */
+			  
 			  if (e->Strand == '-')
 				{
 				  info[igen].start = e;
 				  info[igen].end = e;
-				  info[igen].nexons++;
+				  if (strcmp(e->Type,"Intron")){
+				    info[igen].nexons++;
+				  }
 				  /* Evidences (annotations) not added if infinitum score */
 				  if (e->Score==MAXSCORE)
 					*artScore = *artScore + MAXSCORE;
@@ -297,8 +305,11 @@ long CookingInfo(exonGFF* eorig,
 						   e->Strand == '+'); 
 				  while( !stop && !stop1 )
 					{  
-					  info[igen].nexons++;
-					  /* Evidences (annotations) not sumed if infinitum score */
+
+					  if (strcmp(e->Type,"Intron")){
+					    info[igen].nexons++;
+					  }
+					  /* Evidences (annotations) not summed if infinite score */
 					  if (e->Score==MAXSCORE)
 						*artScore = *artScore + MAXSCORE;
 					  else
@@ -321,7 +332,9 @@ long CookingInfo(exonGFF* eorig,
 				  {
 					info[igen].start = e;
 					info[igen].end = e;
-					info[igen].nexons++;
+					if (strcmp(e->Type,sINTRON)){
+					  info[igen].nexons++;
+					}
 					if (e->Score==MAXSCORE)
 					  *artScore = *artScore + MAXSCORE;
 					else
@@ -338,22 +351,25 @@ long CookingInfo(exonGFF* eorig,
 							 e->Strand == '-'); 
 					while( !stop && !stop2 )
 					  { 
-						info[igen].nexons++;
-						/* Evidences (annotations) not added if infinitum score */
-						if (e->Score==MAXSCORE)
-						  *artScore = *artScore + MAXSCORE;
-						else
-						  info[igen].score += e->Score;
-						info[igen].end = e;
+					    
+					    if (strcmp(e->Type,"Intron")){
+					      info[igen].nexons++;
+					    }
+					    /* Evidences (annotations) not added if infinitum score */
+					    if (e->Score==MAXSCORE)
+					      *artScore = *artScore + MAXSCORE;
+					    else
+					      info[igen].score += e->Score;
+					    info[igen].end = e;
 						
-						/* JUMP loop! */
-						e = (e-> PreviousExon);
-						stop = (e->Strand == '*');
-						stop2 = (!strcmp(e->Type,sTERMINAL) ||
-							     !strcmp(e->Type,sSINGLE) ||
-								 !strcmp(e->Type,sPROMOTER) || 
-								 !strcmp(e->Type,sBEGIN) ||
-								 e->Strand == '-'); 
+					    /* JUMP loop! */
+					    e = (e-> PreviousExon);
+					    stop = (e->Strand == '*');
+					    stop2 = (!strcmp(e->Type,sTERMINAL) ||
+						     !strcmp(e->Type,sSINGLE) ||
+						     !strcmp(e->Type,sPROMOTER) || 
+						     !strcmp(e->Type,sBEGIN) ||
+						     e->Strand == '-'); 
 					  }	
 				  }
 			}
@@ -376,7 +392,9 @@ void PrintGene(exonGFF* start,
                long nAA,
                int** tAA,
                int nExon,
-               int nExons)
+	       int nPrintExon,
+               int nExons,
+	       char* GenePrefix)
 {
   exonGFF* eaux;
   profile* p1;
@@ -391,70 +409,73 @@ void PrintGene(exonGFF* start,
   if (start != end)
     {
       if (start->Strand == '+'){
-	nint = nExons - nExon - 1;
+	if (strcmp(start->Type,sINTRON)){nint = nExons - nPrintExon;nPrintExon++;}
 	nex = nint + 1;
       }else{
-	nint = nExon + 1;
+	if (strcmp(start->Type,sINTRON)){nint = nPrintExon + 1;nPrintExon++;}
       }
       eaux = start -> PreviousExon;
       /* a.1. Recursive call to print before the rest of the gene */
-      PrintGene(eaux,end,Name,s,gp,dAA,igen,nAA,tAA,nExon+1,nExons);
-
-      /* a.2. printing this exon: XML, extend, gff or geneid format */      
-      if (XML)
-        {
-		  selectFeatures(start->Type,start->Strand,
-						 &p1,&p2,&type1,&type2,&strand,gp);
-		  PrintXMLExon(start,Name,igen,nExon+1,type1,type2,nExons);
-        }
-      else 
-		if (X10)
-          {
-			/* Print both sites of exon Start */
-			selectFeatures(start->Type,start->Strand,
-						   &p1,&p2,&type1,&type2,&strand,gp);
-			PrintSite(start->Acceptor,type1,Name,strand,s,p1);
-			PrintGExon(start,Name,s,dAA,igen,tAA[nExon][0],tAA[nExon][1],nAA, nint);
-			PrintSite(start->Donor,type2,Name,strand,s,p2);
-          }
-		else {
-		  if (INTRON) { PrintGIntron(eaux,start,Name,igen,nint); }
-		  PrintGExon(start,Name,s,dAA,igen,tAA[nExon][0],tAA[nExon][1],nAA,nint);
-		}
+      PrintGene(eaux,end,Name,s,gp,dAA,igen,nAA,tAA,nExon+1,nPrintExon,nExons,GenePrefix);
+      
+      if (strcmp(start->Type,sINTRON)){
+	/* a.2. printing this exon: XML, extend, gff or geneid format */      
+	if (XML)
+	  {
+	    selectFeatures(start->Type,start->Strand,
+			   &p1,&p2,&type1,&type2,&strand,gp);
+	    PrintXMLExon(start,Name,igen,nExon+1,type1,type2,nExons,GenePrefix);
+	  }
+	else 
+	  if (X10)
+	    {
+	      /* Print both sites of exon Start */
+	      selectFeatures(start->Type,start->Strand,
+			     &p1,&p2,&type1,&type2,&strand,gp);
+	      PrintSite(start->Acceptor,type1,Name,strand,s,p1);
+	      PrintGExon(start,Name,s,dAA,igen,tAA[nExon][0],tAA[nExon][1],nAA, nint,GenePrefix);
+	      PrintSite(start->Donor,type2,Name,strand,s,p2);
+	    }
+	  else {
+	    if (PRINTINT) { PrintGIntron(eaux,start,Name,igen,nint,GenePrefix); }
+	    PrintGExon(start,Name,s,dAA,igen,tAA[nExon][0],tAA[nExon][1],nAA,nint,GenePrefix);
+	  }
+      }
     }
   else
     {
       if (start->Strand == '+'){
-	nint = nExons - nExon - 1;
+	if (strcmp(start->Type,sINTRON)){nint = nExons - nPrintExon;nPrintExon++;}
 	nex = nint + 1;
       }else{
-	nint = nExon + 1;
+	if (strcmp(start->Type,sINTRON)){nint = nPrintExon + 1;nPrintExon++;}
       }
-      /* b. Trivial case: not recursive */
-      /* b.1. printing this exon: XML, extend, gff or geneid format */      
-      if (XML)
-        {
-          selectFeatures(end->Type,end->Strand,
-						 &p1,&p2,&type1,&type2,&strand,gp);
-          PrintXMLExon(end,Name,igen,nExon+1,type1,type2,nExons);
-        }
-      else 
-		if (X10)
-		  {
-			/* Print both sites of exon End */
-			selectFeatures(end->Type,end->Strand,
-						   &p1,&p2,&type1,&type2,&strand,gp);
-			PrintSite(end->Acceptor,type1,Name,strand,s,p1);
-			PrintGExon(end,Name,s,dAA,igen,tAA[nExon][0],tAA[nExon][1],nAA, nint);
-			PrintSite(end->Donor,type2,Name,strand,s,p2);
-		  }
-		else {
+      if (strcmp(start->Type,sINTRON)){
+	/* b. Trivial case: not recursive */
+	/* b.1. printing this exon: XML, extend, gff or geneid format */      
+	if (XML)
+	  {
+	    selectFeatures(end->Type,end->Strand,
+			   &p1,&p2,&type1,&type2,&strand,gp);
+	    PrintXMLExon(end,Name,igen,nExon+1,type1,type2,nExons,GenePrefix);
+	  }
+	else 
+	  if (X10)
+	    {
+	      /* Print both sites of exon End */
+	      selectFeatures(end->Type,end->Strand,
+			     &p1,&p2,&type1,&type2,&strand,gp);
+	      PrintSite(end->Acceptor,type1,Name,strand,s,p1);
+	      PrintGExon(end,Name,s,dAA,igen,tAA[nExon][0],tAA[nExon][1],nAA, nint,GenePrefix);
+	      PrintSite(end->Donor,type2,Name,strand,s,p2);
+	    }
+	  else {
 
-			PrintGExon(end,Name,s,dAA,igen,tAA[nExon][0],tAA[nExon][1],nAA, nint);
+	    PrintGExon(end,Name,s,dAA,igen,tAA[nExon][0],tAA[nExon][1],nAA, nint,GenePrefix);
 		    
-		}
+	  }
+      }
     }
-
 } 
 
 /* Main routine: post-processing of predicted genes to display them */
@@ -462,7 +483,8 @@ void CookingGenes(exonGFF* e,
                   char Name[],
                   char* s,
                   gparam* gp,
-                  dict* dAA)
+                  dict* dAA,
+		  char* GenePrefix)
 {
   long igen;
   long ngen;
@@ -525,8 +547,9 @@ void CookingGenes(exonGFF* e,
       
       /* Gene header */
       if (XML)
-		printf("   <gene idGene=\"%s.G%ld\" strand =\"%s\" exons=\"%ld\" score=\"%.2f\">\n",
-			   Name,
+		printf("   <gene idGene=\"%s%s.G%ld\" strand =\"%s\" exons=\"%ld\" score=\"%.2f\">\n",
+		       GenePrefix,
+		       Name,
 			   ngen-igen,
 			   (info[igen].start->Strand == '+')? xmlFORWARD : xmlREVERSE, 
 			   info[igen].nexons,
@@ -540,8 +563,8 @@ void CookingGenes(exonGFF* e,
 				 nAA,
 				 info[igen].score);
 			if (GFF3){
-				PrintGGene(info[igen].start,info[igen].end,Name,ngen-igen,info[igen].score);
-				PrintGmRNA(info[igen].start,info[igen].end,Name,ngen-igen,info[igen].score);
+				PrintGGene(info[igen].start,info[igen].end,Name,ngen-igen,info[igen].score,GenePrefix);
+				PrintGmRNA(info[igen].start,info[igen].end,Name,ngen-igen,info[igen].score,GenePrefix);
 				if (info[igen].start->Strand == '+'){
 					if (!(!strcmp(info[igen].end->Type,sSINGLE)||!strcmp(info[igen].end->Type,sFIRST))){
 						/* printf("# 5 prime partial: %s\n",info[igen].end->Type); */
@@ -569,7 +592,7 @@ void CookingGenes(exonGFF* e,
 				 nAA*3);
 	  	}
       PrintGene(info[igen].start, info[igen].end, Name, s, gp, dAA, ngen-igen,
-				nAA,tAA,0,info[igen].nexons);
+		nAA,tAA,0,0,info[igen].nexons,GenePrefix);
 	  if (GFF3)
     	printf ("###\n");
       /* [cDNA] and translated protein */
@@ -579,7 +602,7 @@ void CookingGenes(exonGFF* e,
 			{
 			  printf("      <cDNA length=\"%ld\">\n",nNN);
 			  /* cDNA in FASTA format */
-			  printProt(Name,ngen-igen,tmpDNA,nNN,cDNA);
+			  printProt(Name,ngen-igen,tmpDNA,nNN,cDNA,GenePrefix);
 			  printf("      </cDNA>\n");
 			}
 		  if (PSEQ) {
@@ -587,7 +610,7 @@ void CookingGenes(exonGFF* e,
 				{
 				  printf("      <protein length=\"%ld\">\n",nAA);
 				  /* Protein in FASTA format */
-				  printProt(Name,ngen-igen,prot,nAA,PROT);
+				  printProt(Name,ngen-igen,prot,nAA,PROT,GenePrefix);
 				  printf("      </protein>\n");
 				}
 		  }
@@ -598,12 +621,12 @@ void CookingGenes(exonGFF* e,
 		  {
 			/* cDNA */
 			if (cDNA)
-			  printProt(Name,ngen-igen,tmpDNA,nNN,cDNA);
+			  printProt(Name,ngen-igen,tmpDNA,nNN,cDNA,GenePrefix);
 			
 			/* Protein in FASTA format (except promoters) */
 			if (PSEQ) {
 				if (strcmp(info[igen].start->Type,sPROMOTER))
-				  printProt(Name,ngen-igen,prot,nAA,PROT);
+				  printProt(Name,ngen-igen,prot,nAA,PROT,GenePrefix);
 			}
 			else
 			  if (!cDNA)
@@ -621,7 +644,7 @@ void CookingGenes(exonGFF* e,
 				TranslateGene(info[igen].start,s,dAA,info[igen].nexons,tAA,prot,&nAA);
 			  /* Protein in FASTA format (except promoters) */
 				if (strcmp(info[igen].start->Type,sPROMOTER))
-				  printProt(Name,ngen-igen,prot,nAA,PROT);
+				  printProt(Name,ngen-igen,prot,nAA,PROT,GenePrefix);
 
 			}
 		}
@@ -630,7 +653,7 @@ void CookingGenes(exonGFF* e,
 		  for(igen=ngen-1; igen>=0; igen--)
 			{
     		  GetcDNA(info[igen].start,s,info[igen].nexons, tmpDNA, &nNN);
-			  printProt(Name,ngen-igen,tmpDNA,nNN,cDNA);
+		  printProt(Name,ngen-igen,tmpDNA,nNN,cDNA,GenePrefix);
 
 			}
 		}

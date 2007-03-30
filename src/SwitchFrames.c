@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: SwitchFrames.c,v 1.6 2006-12-18 12:02:38 talioto Exp $  */
+/*  $Id: SwitchFrames.c,v 1.7 2007-03-30 15:09:30 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -42,18 +42,27 @@ void SwitchFrames(exonGFF* e, long n)
     {      
       if ((e+i)->Strand == '-')
 	{
-	  f=(e+i)->Frame;
-
-	  (e+i)->Frame=(e+i)->Remainder;
-	  (e+i)->Remainder=f;
-
+	  if (!strcmp((e+i)->Type,sINTRON)){
+	    f=(e+i)->Frame;
+	    (e+i)->Remainder=f;
+	    /* (e+i)->Frame = ( 3 - (e+i)->Remainder )%3; */
+	  }else{
+	    f=(e+i)->Frame;
+	    (e+i)->Frame=(e+i)->Remainder;
+	    (e+i)->Remainder=f;
+	  }
 /* 	  score=(e+i)->Donor->Score; */
 /* 	  class=(e+i)->Donor->class; */
 /* 	  (e+i)->Donor->Score = (e+i)->Acceptor->Score; */
 /* 	  (e+i)->Donor->class = (e+i)->Acceptor->class; */
 /* 	  (e+i)->Acceptor->Score = score; */
 /* 	  (e+i)->Acceptor->class = class; */
-	}
+	}else{
+	if (!strcmp((e+i)->Type,sINTRON)){
+	    f=(e+i)->Frame;
+	    (e+i)->Remainder=f;
+	  }
+      }
 
       /* Mark exon as prediction in the current fragment */
       (e+i)->selected = 0;
