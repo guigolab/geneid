@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: genamic.c,v 1.12 2007-01-23 14:48:14 talioto Exp $  */
+/*  $Id: genamic.c,v 1.13 2007-03-30 15:09:30 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -43,6 +43,17 @@ int numRSS(exonGFF* E, int nRSS)
   }
   return total;
 }
+int CountNumConstraints(exonGFF* E, int nC)
+{
+  int total = nC;
+  if (E->Strand == '*'){
+    return nC;
+  }else{
+    total = CountNumConstraints(E->PreviousExon,nC);
+  }
+  if (E->Score == MAXSCORE){total++;}
+  return total;
+}
 void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 {
   long i,j,j2;
@@ -55,7 +66,7 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
   char mess[MAXSTRING];
   int current_exon_is_u12 = 0;
   int thresholdmet = 1;
-
+  int DEBUG = 0;
 
   /* 0. Starting process ... */
   printMess("-- Running gene assembling (genamic) --");
@@ -96,19 +107,41 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
   for(i=0; i< nExons; i++)
     {
       /* What is the type of this exon? */
+      if (strcmp((E+i)->Type,"")){
       saux[0]='\0';
       strcpy (saux, (E+i)->Type);
       strcat (saux, &((E+i)->Strand));
       type = getkeyDict(gp->D,saux);
       frame = (E+i)->Frame;      
     /*   if sclass = 0; */
-      spliceclass = (E+i)->Acceptor->class;
+      
       (E+i)->PreviousExon = pg->Ghost;
       (E+i)->GeneScore = (E+i)->Score;
       current_exon_is_u12 = 0;
       if (!strcmp((E+i)->Type,"Intron")){
-	(E+i)->Donor->class = U2;(E+i)->Acceptor->class = U2;(E+i)->offset1 = 0; (E+i)->offset2 = 0;	
+	printMess("Intron");
+	(E+i)->Donor->class = U2;
+	(E+i)->Acceptor->class = U2;
+	(E+i)->offset1 = -1; 
+	(E+i)->offset2 = -1;
+	/* (E+i)->Remainder = (3-((E+i)->Frame))%3; */
+	if (DEBUG){
+	  printMess("-----");
+	  PrintExonGFF((E+i),"NA","CurrentIntron");
+	  sprintf(mess,"frame %i   remainder %i spliceclass %i",(E+i)->Frame,(E+i)->Remainder,(E+i)->Acceptor->class);
+	  printMess(mess);
+	}
+	
+      }else{
+	printMess("Exon");
+	if (DEBUG){
+	  printMess("-----");
+	  PrintExonGFF((E+i),"NA","CurrentExon");
+	  sprintf(mess,"frame %i   remainder %i",(E+i)->Frame,(E+i)->Remainder);
+	  printMess(mess);
+	}
       }
+      spliceclass = (E+i)->Acceptor->class;
       if (!strcmp((E+i)->Type,sEND) || !strcmp((E+i)->Type,sBEGIN)|| !strcmp((E+i)->Type,sSINGLE)){
 	current_exon_is_u12 = 0;
       }else{ 
@@ -132,6 +165,10 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 		      MaxDist = gp->Md[etype];
 		      MinDist = gp->md[etype];
 		      thresholdmet = 1;			  
+		      if (DEBUG){
+				  printMess("checking out...");
+				  PrintExonGFF(pg->Ga[etype][frame][spliceclass],"NA","best");
+				}
 			/* Checking maximum distance allowed requirement */
 			if ((MaxDist != INFI) &&
 			    (pg->Ga[etype][frame][spliceclass]->Strand !='*') &&
@@ -142,6 +179,7 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 			    ((E+i)->Acceptor->Position + (E+i)->offset1) - MaxDist) 
 			  {
 			    /* loop backward searching another best gene matching MAX distance */
+			    if (DEBUG){printMess("looping backward");}
 			    pg->Ga[etype][frame][spliceclass] = pg->Ghost; 
 			    j2 = j-1;
 			    while (j2>=0 && j2 < pg->km[etype]  && 
@@ -166,6 +204,7 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 			/* Loop forward: One scan over each donor-sort array */
 			/* while minimum distance allowed requirement is OK */
 			/* Update best partial genes between current and previous exon */
+			if (DEBUG){printMess("looping forward");}
 			while(j < pg->km[etype] &&
 			      ((pg->d[etype][j]->Donor->Position 
 				+ pg->d[etype][j]->offset2)
@@ -181,6 +220,10 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 				  ((E+i)->Acceptor->Position + (E+i)->offset1) - MaxDist)))
 			      {
 				/* Skip this exon because max distance not ok */
+				if (DEBUG){
+				  printMess("skipping...");
+				  PrintExonGFF(pg->d[etype][j],"NA","d-exon");
+				}
 			      }
 			    else
 			      {
@@ -214,23 +257,45 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 			  thresholdmet = 0;
 			}
 		      }
-
+		      if (DEBUG){
+			printMess("Checking requirements for adding exon to best in class");
+			PrintExonGFF((E+i)->PreviousExon,"NA","NA");
+			PrintExonGFF((E+i),"NA","NA");
+			sprintf(mess,"eScore:%4.3f GeneScore:%4.3f BestGeneScore:%4.3f ExonConstraints:%i minConstraints:%i AcceptorPos:%ld  posMinConstraint:%ld",(E+i)->Score,(E+i)->GeneScore,pg->Ga[etype][frame][spliceclass]->GeneScore,CountNumConstraints(pg->Ga[etype][frame][spliceclass],0),pg->nmc,(E+i)->Acceptor->Position,pg->pmc);
+			printMess(mess);
+		      }
 		      if ((!(strcmp(pg->Ga[etype][frame][spliceclass]->Group,(E+i)->Group))
 			   || gp->block[etype] == NONBLOCK)
 			  &&
 			  ((pg->Ga[etype][frame][spliceclass]->GeneScore + (E+i)->Score) > (E+i)->GeneScore)
 			  &&
 			  (thresholdmet) 
+			  
+/* 			  && */
+/* 			  ((E+i)->Acceptor->Position >= pg->pmc) */
+/* 			  && */
+/* 			  ((CountNumConstraints(pg->Ga[etype][frame][spliceclass],0)) >= pg->nmc) */
 			  )
 			{
 			  
 			  if (!strcmp((E+i)->Type,"Intron")){
+			    if (DEBUG){printMess("intron");}
 			    (E+i)->GeneScore = pg->Ga[etype][frame][spliceclass]->GeneScore + (E+i)->Score;
 			    (E+i)->PreviousExon = pg->Ga[etype][frame][spliceclass];
-			    (E+i)->Frame = pg->Ga[etype][frame][spliceclass]->Frame;
-			    (E+i)->Remainder = pg->Ga[etype][frame][spliceclass]->Remainder;
+/* 			    (E+i)->Frame = pg->Ga[etype][frame][spliceclass]->Frame; */
+/* 			    (E+i)->Remainder = pg->Ga[etype][frame][spliceclass]->Remainder; */
 			    (E+i)->lValue = pg->Ga[etype][frame][spliceclass]->lValue;
 			    (E+i)->rValue = pg->Ga[etype][frame][spliceclass]->rValue;
+			    if (!((E+i)->Score == MAXSCORE)&&(pg->Ga[etype][frame][spliceclass]->Score == MAXSCORE)){
+			      pg->pmc = (E+i)->Acceptor->Position;
+			      if ( CountNumConstraints((E+i),0) > pg->nmc){
+				pg->nmc = CountNumConstraints((E+i),0);
+			      }
+			    }
+			    printMess("here");
+			    if (DEBUG){sprintf(mess, "Intron Genescore = %4.3f Optimal score = %4.3f",(E+i)->GeneScore,pg->GOptim->GeneScore);
+			      printMess(mess);
+			    }
 			  }else
 			    {if (RSS && ((E+i)->Donor->Position == (E+i)->Acceptor->Position -1)){
 				(E+i)->GeneScore = pg->Ga[etype][frame][spliceclass]->GeneScore + (E+i)->Score;
@@ -248,7 +313,7 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 				    ||
 				    (pg->Ga[etype][frame][spliceclass]->rValue == 3 && ((E+i)->lValue == 2 || (E+i)->lValue == 3))))
 				 {
-				   /* FWD: Avoiding building a stop codon */
+				   /* FWD: Avoiding building a stop codon */  
 				 }
 			       else
 				 {
@@ -265,7 +330,12 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 				     {
 				       (E+i)->GeneScore = pg->Ga[etype][frame][spliceclass]->GeneScore + (E+i)->Score;
 				       (E+i)->PreviousExon = pg->Ga[etype][frame][spliceclass];
-
+				       if (!((E+i)->Score == MAXSCORE)&&(pg->Ga[etype][frame][spliceclass]->Score == MAXSCORE)){
+					 pg->pmc = (E+i)->Acceptor->Position;
+					 if ( CountNumConstraints((E+i),0) > pg->nmc){
+					   pg->nmc = CountNumConstraints((E+i),0);
+					 }
+				       }
 				     }
 				 }
 			     }
@@ -274,10 +344,23 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 		    }
 
 		  /* Updating the best gene assembled (final gene) */
-		  if (((E+i)->GeneScore) > (pg->GOptim -> GeneScore)){
-		    pg->GOptim = (E+i);
+		  if ((((E+i)->GeneScore) > (pg->GOptim -> GeneScore))
+		      /* &&((CountNumConstraints((E+i),0)) >= pg->nmc) */
+		      ){
+		    if (((E+i)->PreviousExon->Strand == '*')&&(!strcmp((E+i)->Type,"Intron"))){
+			
+		    }else{
+		      pg->GOptim = (E+i);
+		      if (DEBUG){printMess("optimal");
+			sprintf(mess,"Optimal Score: %f",pg->GOptim->GeneScore);
+			printMess(mess);
+			PrintGeneGFF(E+i,"NA","NA"); printMess("end optimal");
+		
+		      }
+		    }
 		  }
 		}
+      }
     }
 
   /* 3. Undo the change between frame and remainder */

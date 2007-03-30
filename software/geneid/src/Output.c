@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: Output.c,v 1.17 2007-01-11 17:53:00 talioto Exp $  */
+/*  $Id: Output.c,v 1.18 2007-03-30 15:09:29 talioto Exp $  */
 
 #include "geneid.h"
 extern int U12GTAG;
@@ -153,7 +153,8 @@ void Output(packSites* allSites,
             long lowerlimit,
             char* Sequence,
             gparam* gp,
-            dict* dAA)
+            dict* dAA, 
+	    char* GenePrefix)
 {
   /* 1. Printing Forward */
   if (FWD)
@@ -179,24 +180,24 @@ void Output(packSites* allSites,
       /* exons */
       if (EFP){
 		PrintExons(allExons->InitialExons,allExons->nInitialExons,
-				   FIRST, Locus, l1, l2, Sequence, dAA);
+				   FIRST, Locus, l1, l2, Sequence, dAA, GenePrefix);
       }
 	  if (EIP){
 		PrintExons(allExons->InternalExons,allExons->nInternalExons,
-				   INTERNAL, Locus, l1, l2, Sequence, dAA);
+				   INTERNAL, Locus, l1, l2, Sequence, dAA, GenePrefix);
 		PrintExons(allExons->ZeroLengthExons,allExons->nZeroLengthExons,
-				   ZEROLENGTH, Locus, l1, l2, Sequence, dAA);
+				   ZEROLENGTH, Locus, l1, l2, Sequence, dAA, GenePrefix);
       }
 	  if (ETP){
 		PrintExons(allExons->TerminalExons,allExons->nTerminalExons,
-				   TERMINAL, Locus, l1, l2, Sequence, dAA);
+				   TERMINAL, Locus, l1, l2, Sequence, dAA, GenePrefix);
       }
 	  if (ESP)
 		PrintExons(allExons->Singles,allExons->nSingles,
-				   SINGLE, Locus, l1, l2, Sequence, dAA);
+				   SINGLE, Locus, l1, l2, Sequence, dAA, GenePrefix);
       if (EOP)
 		PrintExons(allExons->ORFs,allExons->nORFs,
-				   ORF, Locus, l1, l2, Sequence, dAA);
+				   ORF, Locus, l1, l2, Sequence, dAA, GenePrefix);
     }
   
   /* 2. Printing Reverse */
@@ -223,24 +224,24 @@ void Output(packSites* allSites,
       /* exons */
       if (EFP){
 		PrintExons(allExons_r->InitialExons,allExons_r->nInitialExons,
-				   FIRST, Locus, l1, l2, Sequence, dAA);
+				   FIRST, Locus, l1, l2, Sequence, dAA, GenePrefix);
       }
 	  if (EIP){
 		PrintExons(allExons_r->InternalExons,allExons_r->nInternalExons,
-				   INTERNAL, Locus, l1, l2, Sequence, dAA);
+				   INTERNAL, Locus, l1, l2, Sequence, dAA, GenePrefix);
 		PrintExons(allExons_r->ZeroLengthExons,allExons_r->nZeroLengthExons,
-				   ZEROLENGTH, Locus, l1, l2, Sequence, dAA);
+				   ZEROLENGTH, Locus, l1, l2, Sequence, dAA, GenePrefix);
       }
 	  if (ETP){
 		PrintExons(allExons_r->TerminalExons,allExons_r->nTerminalExons,
-				   TERMINAL, Locus, l1, l2, Sequence, dAA);
+				   TERMINAL, Locus, l1, l2, Sequence, dAA, GenePrefix);
       }
       if (ESP)
 		PrintExons(allExons_r->Singles,allExons_r->nSingles,
-				   SINGLE, Locus, l1, l2, Sequence, dAA);
+				   SINGLE, Locus, l1, l2, Sequence, dAA, GenePrefix);
       if (EOP)
 		PrintExons(allExons_r->ORFs,allExons_r->nORFs,
-				   ORF, Locus, l1, l2, Sequence, dAA);
+				   ORF, Locus, l1, l2, Sequence, dAA, GenePrefix);
     }
   
   /* 3. Print all exons */
@@ -248,7 +249,7 @@ void Output(packSites* allSites,
     {
       printMess("Printing all predicted Exons of current split\n");   
       PrintExons(exons, nExons, FIRST + INTERNAL + TERMINAL + SINGLE + ORF, 
-				 Locus, l1, l2, Sequence, dAA);
+				 Locus, l1, l2, Sequence, dAA, GenePrefix);
     }
 }
 
@@ -258,13 +259,14 @@ void OutputGene(packGenes* pg,
                 char* Locus,
                 char* Sequence,
                 gparam* gp,
-                dict* dAA)
+                dict* dAA,
+		char* GenePrefix)
 {
   /* Retrieving the best predicted genes recursively */
   if (nExons>0)
     {
       printMess("Recovering gene-solution...");
-      CookingGenes(pg->GOptim, Locus, Sequence, gp, dAA);
+      CookingGenes(pg->GOptim, Locus, Sequence, gp, dAA, GenePrefix);
       if (XML)
 		printf("</prediction>\n");
     }

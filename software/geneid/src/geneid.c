@@ -29,7 +29,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/* $Id: geneid.c,v 1.23 2007-01-23 14:48:14 talioto Exp $ */
+/* $Id: geneid.c,v 1.24 2007-03-30 15:09:30 talioto Exp $ */
 
 #include "geneid.h"
 /* #include <mcheck.h> */
@@ -41,7 +41,7 @@ int
   /* exons to print */
   EFP=0, EIP=0, ETP=0, EXP=0, ESP=0, EOP = 0,
   /* introns to print */
-  INTRON = 0,
+  PRINTINT = 0,
   /* Partial or full prediction engine */
   GENAMIC = 1, GENEID = 1, 
   /* Only forward or reverse prediction engine */
@@ -88,10 +88,15 @@ long
   LOW=0,
   /* User defined upper limit */
   HI=0;
-    
+
+/* Optional Predicted Gene Prefix */
+  char  GenePrefix[MAXSTRING]="";
+  
+
 /* Increase/decrease exon weight value (exon score) */
 float EW = NOVALUE;
 float U12EW = 0; 
+float EvidenceEW = 0; 
 float U12_SPLICE_SCORE_THRESH = -1000;
 float U12_EXON_SCORE_THRESH = -1000;
 
@@ -155,7 +160,9 @@ int main (int argc, char *argv[])
   /* geneid prediction parameters: data structures */
   gparam* gp = NULL;
   gparam** isochores;
-  
+ 
+
+    
   /* Input Filenames */
   char  SequenceFile[FILENAMELENGTH],
     ExonsFile[FILENAMELENGTH],
@@ -194,7 +201,7 @@ int main (int argc, char *argv[])
   m = (account*)InitAcc();  
   
   /* 0.c. Read setup options */
-  readargv(argc,argv,ParamFile,SequenceFile,ExonsFile,HSPFile);
+  readargv(argc,argv,ParamFile,SequenceFile,ExonsFile,HSPFile,GenePrefix);
   printRes("\n\n\t\t\t** Running geneid 1.3 2003 geneid@imim.es **\n\n");
 
   /* 0.d. Prediction of DNA sequence length to request memory */
@@ -461,7 +468,7 @@ int main (int argc, char *argv[])
 
 	      /* B.4. Printing current fragment predictions (sites and exons) */
 	      Output(allSites, allSites_r, allExons, allExons_r, 
-		     exons, nExons, Locus, l1, l2, lowerlimit, Sequence, gp, dAA); 
+		     exons, nExons, Locus, l1, l2, lowerlimit, Sequence, gp, dAA, GenePrefix); 
 
 	      /* recompute stats about splice sites and exons */
 	      updateTotals(m,allSites,allSites_r,allExons,allExons_r);
@@ -469,6 +476,7 @@ int main (int argc, char *argv[])
 	      /* B.5. Calling to genamic for assembling the best gene */ 
 	      if (GENAMIC && nExons)
 		{
+
 		  genamic(exons, nExons, genes, gp);
 				  
 		  if (upperlimit - lowerlimit + 1 > LENGTHSi)/*  if (LengthSequence > LENGTHSi) */
@@ -503,7 +511,7 @@ int main (int argc, char *argv[])
 			 (EVD && evidence != NULL)? 
 			 m->totalExons + evidence->nvExons : 
 			 m->totalExons, 
-			 Locus, Sequence, gp, dAA);
+			 Locus, Sequence, gp, dAA, GenePrefix);
 
 	      /* Reset best genes data structures for next input sequence */
 	      printMess("Cleaning gene structures and dumpster");
@@ -565,7 +573,7 @@ int main (int argc, char *argv[])
       
       /* B.3. Printing gene predictions */
       OutputGene(genes, external->evidence[0]->nvExons, 
-		 Locus, Sequence, isochores[0], dAA);
+		 Locus, Sequence, isochores[0], dAA, GenePrefix);
     } /* end only gene assembling from exons file */
   
 

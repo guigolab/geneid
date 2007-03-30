@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: SortExons.c,v 1.13 2007-01-11 17:53:00 talioto Exp $  */
+/*  $Id: SortExons.c,v 1.14 2007-03-30 15:09:29 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -84,6 +84,7 @@ void InsertBeginExon(exonGFF* Exons, long lowerlimit)
   Exons[0].lValue = 0;
   Exons[0].rValue = 0; 
   Exons[0].selected = 0;
+  Exons[0].nConstraints = 0;
 
   /* 2. Reverse Strand */
   /* Create the exon structure */
@@ -126,6 +127,8 @@ void InsertBeginExon(exonGFF* Exons, long lowerlimit)
   Exons[1].lValue = 0;
   Exons[1].rValue = 0; 
   Exons[1].selected = 0;
+  Exons[1].nConstraints = 0;
+
 }
 
 /* Artificial terminal gene feature: force complete gene prediction */
@@ -176,6 +179,8 @@ void InsertEndExon(exonGFF* Exons, long n, long L)
   Exons[n].lValue = 0;
   Exons[n].rValue = 0; 
   Exons[n].selected = 0;
+  Exons[n].nConstraints = 0;
+
 
   /* 1. Reverse Strand */
   /* Create the exon structure */
@@ -219,6 +224,8 @@ void InsertEndExon(exonGFF* Exons, long n, long L)
   Exons[n+1].lValue = 0;
   Exons[n+1].rValue = 0; 
   Exons[n+1].selected = 0;
+  Exons[n+1].nConstraints = 0;
+
 }
 
 /* Struct for a node (list): pointer to exon and to next node */
@@ -261,14 +268,15 @@ void UpdateList(struct exonitem** p, exonGFF* InputExon)
 void SortExons(packExons* allExons,
                packExons* allExons_r, 
                packExternalInformation* external,
-			   packEvidence* pv,
-			   exonGFF* Exons,         
+	       packEvidence* pv,
+	       exonGFF* Exons,         
                long l1, long l2,long lowerlimit,
-			   long upperlimit)
+	       long upperlimit)
 { 
   struct exonitem **ExonList, *q;
   long i;
   long acceptor;
+  /* long donor; */
   long n;
   int offset;
   long l;
@@ -415,9 +423,10 @@ void SortExons(packExons* allExons,
 	(pv->vExons + i)->Acceptor->class = U2;
 	(pv->vExons + i)->Donor->class = U2;
 		acceptor=(pv->vExons + i)->Acceptor->Position - left;
+		/* donor=(pv->vExons + i)->Donor->Position - left; */
 		offset = (pv->vExons + i)->offset1;
 		room = ((acceptor + offset)<0)? 0 : (acceptor + offset);
-
+		
 		/* Requirement 1: range of values */
 		if (acceptor < 0)
 		  {
@@ -486,6 +495,8 @@ void SortExons(packExons* allExons,
 		  Exons[n].lValue = q->Exon->lValue;
 		  Exons[n].rValue = q->Exon->rValue; 
 		  Exons[n].selected = 0;
+		  Exons[n].nConstraints = 0;
+
 
 		  n++;
 	  

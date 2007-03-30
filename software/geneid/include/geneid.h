@@ -28,7 +28,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/     
 
-/* $Id: geneid.h,v 1.30 2007-01-23 14:48:14 talioto Exp $ */
+/* $Id: geneid.h,v 1.31 2007-03-30 15:09:29 talioto Exp $ */
 
 /* Required libraries */
 #include <stdlib.h>
@@ -88,11 +88,11 @@ A. DEFINITIONS
 #define BASEVALUEEXONS_LARGE 300000
 
 /* Max number of annotations per locus      */
-#define MAXEVIDENCES 50000       
+#define MAXEVIDENCES 500000       
 #define MAXSITESEVIDENCES 3*MAXEVIDENCES
 
 /* Max number of HSP per locus/frame/strand */
-#define MAXHSP 25000             
+#define MAXHSP 2500000             
 
 /* Max number of locus in multi-fasta files */
 #define MAXNSEQUENCES 10         
@@ -143,7 +143,7 @@ A. DEFINITIONS
 #define OPT_U12BP_DIST 13
 #define OPT_U2BP_DIST 25
 
-#define U12BP_PENALTY_SCALING_FACTOR 7 /* used to be 15 */
+#define U12BP_PENALTY_SCALING_FACTOR 6 /* used to be 15 */
 #define U2BP_PENALTY_SCALING_FACTOR 0 /* used to be 15 */
 
 /* Recursive splice site thresholds */
@@ -286,15 +286,17 @@ A. DEFINITIONS
 #define sU12_EXON_WEIGHT "U12_Exon_weight"
 
 /* Exons                                    */
-#define FIRST    0               
-#define INTERNAL 1
-#define TERMINAL 2
-#define SINGLE   3
-#define ORF      4
-#define ZEROLENGTH      5
+#define FIRST      0               
+#define INTERNAL   1
+#define TERMINAL   2
+#define SINGLE     3
+#define ORF        4
+#define ZEROLENGTH 5
+#define INTRON     6
 
 #define sFIRST    "First"              
 #define sINTERNAL "Internal"
+#define sINTRON   "Intron"
 #define sZEROLENGTH "RSS"
 #define sTERMINAL "Terminal"
 #define sSINGLE   "Single"
@@ -415,6 +417,7 @@ typedef struct s_exonGFF
   char Group[MAXSTRING];
   int offset1;
   int offset2;
+  int nConstraints;
   short lValue;
   short rValue;
   short evidence;
@@ -448,6 +451,8 @@ typedef struct s_packGenes
   exonGFF* **d;
   long* km;
   long* je;
+  long pmc;
+  int nmc;
 } packGenes;
 
 typedef struct s_packEvidence
@@ -622,6 +627,9 @@ typedef struct s_gparam
 /*************************************************************************
 C. IMPORTED HEADERS
 *************************************************************************/
+void PrintExonGFF(exonGFF *e, char* Name, char* Source);
+
+void PrintGeneGFF(exonGFF *e, char* Name, char* Source);
 
 void printError(char *s);
 
@@ -709,7 +717,7 @@ packExternalInformation* RequestMemoryExternalInformation();
 
 void readargv (int argc,char *argv[],
 	       char *ParamFile, char* SequenceFile,
-	       char *ExonsFile, char* HSPFile);
+	       char *ExonsFile, char* HSPFile, char* GenePrefix);
 
 int readparam (char *name, gparam** isochores);
 
@@ -750,7 +758,7 @@ void SwitchCounters(packExternalInformation* external);
 void Output(packSites* allSites, packSites* allSites_r,
             packExons* allExons, packExons* allExons_r,
             exonGFF* exons, long nExons, char* Locus, 
-	    long l1, long l2, long lowerlimit, char* Sequence, gparam* gp, dict* dAA);
+	    long l1, long l2, long lowerlimit, char* Sequence, gparam* gp, dict* dAA, char* GenePrefix);
 
 void updateTotals(account *m,
                   packSites* allSites,
@@ -770,7 +778,7 @@ void cleanGenes(packGenes* pg, int nclass, packDump* dumpster);
 void cleanDumpHash(dumpHash *h);
 
 void OutputGene(packGenes* pg, long nExons, char* Locus,
-                char* Sequence, gparam* gp, dict* dAA);
+                char* Sequence, gparam* gp, dict* dAA, char* GenePrefix);
 
 void OutputStats(char* Locus);
 void OutputTime();
@@ -805,7 +813,7 @@ void PrintSites (site *s, long ns,int type,
                  profile *p);
 
 void PrintExons (exonGFF *e, long ne, int type, char Name[],
-                 long l1, long l2, char* Sequence,  dict* dAA); 
+                 long l1, long l2, char* Sequence,  dict* dAA, char* GenePrefix); 
 
 void resetDict(dict* d);
 
@@ -839,22 +847,22 @@ void PrintSite(site *s, int type, char Name[], int Strand,
 
 void PrintGExon(exonGFF *e, char Name[], char* s, dict* dAA, 
 		long ngen, int AA1, int AA2, int nAA,
-		int numInt);
+		int numInt, char* GenePrefix);
 			   
 void PrintGIntron(exonGFF *d, exonGFF *a, char Name[],long ngen,
-		int numInt);
+		  int numInt, char* GenePrefix);
 
 void PrintGGene(exonGFF *s, exonGFF *e, char Name[],
-		long ngen, float score);
+		long ngen, float score, char* GenePrefix);
 
 void PrintGmRNA(exonGFF *s, exonGFF *e, char Name[],
-		long ngen, float score);
+		long ngen, float score, char* GenePrefix);
 
 
 void PrintXMLExon(exonGFF *e, char Name[], 
 		  long ngen, long nExon, 
 		  int type1, int type2, 
-		  int nExons);
+		  int nExons, char* GenePrefix);
 
 void TranslateGene(exonGFF* e,
                    char* s,
@@ -875,7 +883,7 @@ void setAADict(dict *d, char s[], char aA);
 char getAADict(dict *d, char s[]);
 
 void CookingGenes(exonGFF *e, char Name[], char* s,
-                  gparam* gp, dict* dAA);
+                  gparam* gp, dict* dAA, char* GenePrefix);
 
 float MeasureSequence(long l1,long l2,char* s);
 
