@@ -53,11 +53,11 @@ my $gamma,
 my $non_colinear;
 
 my %options;
-getopts('f:o:e:s:v:w:d:t:a:l:u:m:n:i:g:r:', \%options);
+getopts('f:o:z:s:v:w:d:t:a:l:u:m:n:i:g:r:', \%options);
 
 defined $options{f} and $seqfile = $options{f};
 defined $options{o} and $html_output_file = $options{o};
-defined $options{o} and $input_type = $options{e};
+defined $options{z} and $input_type = $options{z};
 defined $options{s} and $species = $options{s};
 defined $options{v} and $upstream_length = $options{v};
 defined $options{w} and $downstream_length = $options{w};

@@ -18,7 +18,7 @@ use vars qw /$gmaster_home/;
 $gmaster_home = $ENV{HOME};
 # $gmaster_home = "/home/ug/gmaster";
 
-my $_path_to_script = $gmaster_home . "/projects/moby/scripts/workflows_implementations";
+my $_path_to_script = $gmaster_home . "/projects/moby/devel/scripts/workflows_implementations";
 
 my $APACHE_ROOT = $ENV{'APACHE_ROOT'};
 # $APACHE_ROOT = "/usr/local/Install/apache2";
@@ -52,11 +52,11 @@ my $gamma,
 my $non_colinear;
 
 my %options;
-getopts('f:o:e:s:v:w:d:t:a:l:u:m:n:i:s:p:g:r:', \%options);
+getopts('f:o:z:s:v:w:d:t:a:l:u:e:p:g:r:', \%options);
 
 defined $options{f} and $seqfile = $options{f};
 defined $options{o} and $html_output_file = $options{o};
-defined $options{o} and $input_type = $options{e};
+defined $options{z} and $input_type = $options{z};
 defined $options{s} and $species = $options{s};
 defined $options{v} and $upstream_length = $options{v};
 defined $options{w} and $downstream_length = $options{w};
@@ -65,7 +65,7 @@ defined $options{t} and $threshold = $options{t};
 defined $options{a} and $alpha = $options{a};
 defined $options{l} and $lambda = $options{l};
 defined $options{u} and $mu = $options{u};
-defined $options{s} and $distance = $options{s};
+defined $options{e} and $distance = $options{e};
 defined $options{p} and $resource_threshold = $options{p};
 defined $options{g} and $gamma = $options{g};
 defined $options{r} and $non_colinear = $options{r};
@@ -173,13 +173,13 @@ $gene_clustering_output_dirname =~ s/$APACHE_ROOT\/htdocs\/webservices\/workflow
 
 # Make the arguments line
 
-my $args = "-x 2 -c $_path_to_script\/workflow.config -d $motif_database -t $threshold -a $alpha -l $lambda -u $mu -s $distance -p $resource_threshold -g $gamma -r $non_colinear -f $seqfile -o $gene_clustering_output_dir";
+my $args = "-x 2 -c $_path_to_script\/workflow.config -d $motif_database -t $threshold -a $alpha -l $lambda -u $mu -e $distance -p $resource_threshold -g $gamma -r $non_colinear -f $seqfile -o $gene_clustering_output_dir";
 
 if ($input_type eq "LIST") {
     $args .= " -s $species -v $upstream_length -w $downstream_length";
 }
 
-if ($_debug) {
+if (1 || $_debug) {
     print STDERR "executing the following command: $_path_to_script\/$script_name $args\n";
 }
 
