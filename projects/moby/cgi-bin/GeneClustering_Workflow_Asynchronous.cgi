@@ -251,29 +251,25 @@ my $alpha            = $cgi->param ('alpha');
 my $lambda           = $cgi->param ('lambda');
 my $mu               = $cgi->param ('mu');
 
-my $nj_method        = $cgi->param ('method') || "nearest";
+# SOTA
+my $distance 	     = $cgi->param('distance');
+my $resource_threshold = $cgi->param('resource_threshold');
 
-my $iteration_number = $cgi->param ('iterations');
-my $cluster_number   = $cgi->param ('clusters');
+if ($_debug) {
+  print STDERR "distance, $distance\n";
+  print STDERR "resource_threshold, $resource_threshold\n";
+}
 
 my $gamma            = $cgi->param ('gamma');
 my $non_colinear     = $cgi->param ('noncol');
 
 # Parameters Validation
 
-if (!defined $cluster_number || ! ($cluster_number =~ /\d+/)) {
-    print STDERR "number of clusters not defined or is not numerical, $cluster_number!\n";
+if (!defined $resource_threshold || ! ($resource_threshold =~ /\d+/)) {
+    print STDERR "The SOTA resource threshold parameter is not defined or is not numerical, $resource_threshold!\n";
     print "Content-type: text/html\n\n";
-    print_error("<b>ERROR> Error parsing the parameters!");
+    print_error("<b>ERROR> Error parsing the SOTA parameters!");
     exit 1;
-}
-
-if (! ($iteration_number =~ /\d+/)) {
-    print STDERR "number of k-means iterations is not numerical, $iteration_number!\n";
-}
-
-if ($_debug) {
-    print STDERR "NJ method, $nj_method\n";
 }
 
 if ($_debug) {
@@ -292,7 +288,7 @@ if ($_debug) {
 
 # Make the arguments line
 
-my $args = "-e $input_type -o $outfile -d $matrix -t $threshold -a $alpha -l $lambda -u $mu -m $nj_method -n $cluster_number -i $iteration_number -g $gamma -r $non_colinear -f $seqfile";
+my $args = "-z $input_type -o $outfile -d $matrix -t $threshold -a $alpha -l $lambda -u $mu -e $distance -p $resource_threshold -g $gamma -r $non_colinear -f $seqfile";
 
 if ($input_type eq "LIST") {
     $args .= " -s $species -v $upstream_length -w $downstream_length";
