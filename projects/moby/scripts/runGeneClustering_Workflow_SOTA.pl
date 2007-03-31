@@ -179,7 +179,7 @@ if ($input_type eq "LIST") {
     $args .= " -s $species -v $upstream_length -w $downstream_length";
 }
 
-if (1 || $_debug) {
+if ($_debug) {
     print STDERR "executing the following command: $_path_to_script\/$script_name $args\n";
 }
 
