@@ -66,7 +66,7 @@ return <<"END_HELP";
 Description: Execute a gene clustering workflow, based on patterns found in the upstream regions of a given set of genes. This workflow takes a set of gene upstream sequences in FASTA format and return in STDOUT a clustering tree picture in PNG format.
 Usage:
 
-    GenesClustering_FASTA.pl [-h] -x {Moby Central} -f {sequence FASTA file} -t {MatScan threshold} -d {MatScan database} -a {meta-alignment alpha penalty} -l {meta-alignment lambda penalty} -u {meta-alignment mu penalty} -g {multiple meta-alignment gamma penalty} -r {non-collinearity penalty} -m {Hierarchical clustering method} -s {sota distance function} -p {sota resource threshold} -o {Output directory}
+    GenesClustering_FASTA.pl [-h] -x {Moby Central} -f {sequence FASTA file} -t {MatScan threshold} -d {MatScan database} -a {meta-alignment alpha penalty} -l {meta-alignment lambda penalty} -u {meta-alignment mu penalty} -g {multiple meta-alignment gamma penalty} -r {non-collinearity penalty} -m {Hierarchical clustering method} -e {sota distance function} -p {sota resource threshold} -o {Output directory}
 	-h help
 	-x MOBY Central: Inab, BioMoby, Mobydev (optional - Default is BioMoby registry)
 		<1> or Inab
@@ -81,13 +81,13 @@ Usage:
 	-g Multiple meta-alignment gamma penalty (Default is -10)
 	-r Multiple meta-alignment non-collinearity penalty (Default is 100)
         -m HierarchicalCluster method, e.g nearest neighbour joining or furthest neighbour joining [nearest, furthest] (Default is nearest)
-        -s sota distance function ['euclidean', 'square', 'correlation', 'offset', 'spearman', 'jackknife'] (Default is 'euclidean')
+        -e sota distance function ['euclidean', 'square', 'correlation', 'offset', 'spearman', 'jackknife'] (Default is 'euclidean')
         -p sota resource threshold percentage (Default is 35)
         -o Output directory name, if not specified, the output is turned off, the script will just return a tree clustering picture in STDOUT.
 	-c workflow configuration file (default is \$HOME/.workflow.config)
 
 Examples using some combinations:
-	perl GenesClustering_FASTA.pl -x 2 -f /home/ug/arnau/data/ENSRNOG00000007726.orthoMode.withRat.1000.fa -c \$HOME/.workflow.config -t 0.80 -d jaspar -a 0.5 -l 0.1 -u 0.1 -g -10 -r 100 -m nearest -s euclidean -p 20 -o outpuat
+	perl GenesClustering_FASTA.pl -x 2 -f /home/ug/arnau/data/ENSRNOG00000007726.orthoMode.withRat.1000.fa -c \$HOME/.workflow.config -t 0.80 -d jaspar -a 0.5 -l 0.1 -u 0.1 -g -10 -r 100 -m nearest -e euclidean -p 20 -o outpuat
 
 END_HELP
 
@@ -96,13 +96,13 @@ END_HELP
 BEGIN {
 	
     # Determines the options with values from program
-    use vars qw/$opt_h $opt_x $opt_f $opt_c $opt_t $opt_d $opt_a $opt_l $opt_u $opt_m $opt_g $opt_r $opt_s $opt_p $opt_o $opt_z $output_dir $gmaster_home/;
+    use vars qw/$opt_h $opt_x $opt_f $opt_c $opt_t $opt_d $opt_a $opt_l $opt_u $opt_m $opt_g $opt_r $opt_e $opt_p $opt_o $opt_z $output_dir $gmaster_home/;
     
     # $gmaster_home = $ENV{'HOME'};
     $gmaster_home = "/home/ug/gmaster";
     
     # these are switches taking an argument (a value)
-    my $switches = 'x:zhf:c:t:d:a:l:u:m:g:r:s:p:o:';
+    my $switches = 'x:zhf:c:t:d:a:l:u:m:g:r:e:p:o:';
     
     # Get the switches
     getopts($switches);
@@ -215,7 +215,7 @@ my $mu_xml     = "<Value>$mu</Value>";
 
 # SOTA parameters
 
-my $distance = $opt_s || "euclidean";
+my $distance = $opt_e || "euclidean";
 my $distance_xml = "<Value>$distance</Value>";
 my $resource_threshold = $opt_p || 35;
 my $resource_threshold_xml = "<Value>$resource_threshold</Value>";
