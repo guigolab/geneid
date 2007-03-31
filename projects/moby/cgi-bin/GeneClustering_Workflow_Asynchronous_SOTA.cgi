@@ -288,7 +288,7 @@ if ($_debug) {
 
 # Make the arguments line
 
-my $args = "-e $input_type -o $outfile -d $matrix -t $threshold -a $alpha -l $lambda -u $mu -s $distance -p $resource_threshold -g $gamma -r $non_colinear -f $seqfile";
+my $args = "-z $input_type -o $outfile -d $matrix -t $threshold -a $alpha -l $lambda -u $mu -e $distance -p $resource_threshold -g $gamma -r $non_colinear -f $seqfile";
 
 if ($input_type eq "LIST") {
     $args .= " -s $species -v $upstream_length -w $downstream_length";
