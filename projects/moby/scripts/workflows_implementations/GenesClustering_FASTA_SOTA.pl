@@ -82,12 +82,12 @@ Usage:
 	-r Multiple meta-alignment non-collinearity penalty (Default is 100)
         -m HierarchicalCluster method, e.g nearest neighbour joining or furthest neighbour joining [nearest, furthest] (Default is nearest)
         -s sota distance function ['euclidean', 'square', 'correlation', 'offset', 'spearman', 'jackknife'] (Default is 'euclidean')
-        -p sota resource threshold percentage (Default is 10)
+        -p sota resource threshold percentage (Default is 35)
         -o Output directory name, if not specified, the output is turned off, the script will just return a tree clustering picture in STDOUT.
 	-c workflow configuration file (default is \$HOME/.workflow.config)
 
 Examples using some combinations:
-	perl GenesClustering_FASTA.pl -x 2 -f /home/ug/arnau/data/ENSRNOG00000007726.orthoMode.withRat.1000.fa -c \$HOME/.workflow.config -t 0.80 -d jaspar -a 0.5 -l 0.1 -u 0.1 -g -10 -r 100 -m nearest -s euclidean -p 20 -o output
+	perl GenesClustering_FASTA.pl -x 2 -f /home/ug/arnau/data/ENSRNOG00000007726.orthoMode.withRat.1000.fa -c \$HOME/.workflow.config -t 0.80 -d jaspar -a 0.5 -l 0.1 -u 0.1 -g -10 -r 100 -m nearest -s euclidean -p 20 -o outpuat
 
 END_HELP
 
