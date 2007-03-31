@@ -18,7 +18,7 @@ use vars qw /$gmaster_home/;
 $gmaster_home = $ENV{HOME};
 # $gmaster_home = "/home/ug/gmaster";
 
-my $_path_to_script = $gmaster_home . "/projects/moby/devel/scripts/workflows_implementations";
+my $_path_to_script = $gmaster_home . "/projects/moby/scripts/workflows_implementations";
 
 my $APACHE_ROOT = $ENV{'APACHE_ROOT'};
 # $APACHE_ROOT = "/usr/local/Install/apache2";
