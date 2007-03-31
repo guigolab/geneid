@@ -1,0 +1,204 @@
+  
+     <table border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tr>
+          <td class="section" border="0" cellpadding="0" cellspacing="0" width="80%" align="left">
+            <font size="5" class="K">Mapping configuration</font>
+          </td>
+          <td class="section" border="0" cellpadding="0" cellspacing="0" width="20%" align="right">
+            <a href="#TOP"><img class="pnt" src="/webservices/images/top.gif" height="15" width="15" border="0"></a>
+          </td>
+        </tr>  
+      </table>
+      <br>
+
+      <table border="0">
+        <tr>
+          <td>
+            <font face="helvetica" size="2" color="green">Please select the collection of weight matrices to perform the mapping from nucleotides into TF binding sites<br>
+            <a href="http://genome.imim.es/datasets/mmeta2006/index.html#mapping">(please click here for further information about the mapping functions)</a></font>
+          </td>
+        </tr>
+      </table>
+
+      <table border="0" width="600" cellpadding="10" cellspacing="10">
+        <tr>
+          <td>
+            <a href="http://genome.imim.es/software/meta/help.html#mapOpt"><font face="helvetica" size="2" color="green">Transcription Factor Binding Sites (TFBSs) collections:</font></a><br>
+          </td>
+          <td>
+            <a href="http://genome.imim.es/software/meta/help.html#mapOpt"><font face="helvetica" size="2" color="green">Mapping threshold quality:</font></a><br>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <input type="radio" name="matrix" value="transfac" checked> <font face="helvetica" size="2"><a href="http://www.gene-regulation.com/pub/databases.html" target="_blank">Transfac</a> v6.4: 610 matrices</font><br>
+	    
+            <input type="radio" name="matrix" value="jaspar"> <font face="helvetica" size="2"><a href="http://jaspar.cgb.ki.se/cgi-bin/jaspar_db.pl" target="_blank">Jaspar</a>: 123 matrices</font>
+          </td>
+          <td>
+            <input type="text" name="threshold" value="0.92">
+          </td>
+        </tr>
+      </table><br>
+      <br>
+      <table border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tr>
+          <td class="section" border="0" cellpadding="0" cellspacing="0" width="80%" align="left">
+            <font size="5" class="K"><a href="http://genome.imim.es/software/meta/index.html" target="_blank">TF-MAP pairwise alignments</a> configuration</font>
+          </td>
+          <td class="section" border="0" cellpadding="0" cellspacing="0" width="20%" align="right">
+            <a href="#TOP"><img class="pnt" src="/webservices/images/top.gif" height="15" width="15" border="0"></a>
+          </td>
+        </tr>
+      </table><br>
+      <font face="helvetica" size="2" color="green">Please select the parameters to perform the TF-map pairwise alignments<br>
+      <a href="http://genome.imim.es/datasets/meta2005/index.html#algo">(please click here for further information about the pairwise meta-alignment parameters)</a></font><br>
+
+      <table border="0" width="500" cellpadding="10" cellspacing="10">
+        <tr>
+          <td>
+            <a href="http://genome.imim.es/software/meta/help.html#mapOpt"><font face="helvetica" size="2" color="green">&alpha; value:</font></a><br>
+          </td>
+          <td>
+            <a href="http://genome.imim.es/software/meta/help.html#mapOpt"><font face="helvetica" size="2" color="green">&lambda; value:</font></a><br>
+          </td>
+          <td>
+            <a href="http://genome.imim.es/software/meta/help.html#mapOpt"><font face="helvetica" size="2" color="green">&mu; value:</font></a><br>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <input type="text" name="alpha" value="0.5">
+          </td>
+          <td>
+            <input type="text" name="lambda" value="0.1">
+          </td>
+          <td>
+            <input type="text" name="mu" value="0.1">
+          </td>
+        </tr>
+      </table><br>
+      <br>
+      <table border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tr>
+          <td class="section" border="0" cellpadding="0" cellspacing="0" width="80%" align="left">
+            <font size="5" class="K"><a href="http://bioinfo.cnio.es/~jherrero/downloads/sotarray/doc/" target="_blank">SOTA clustering</a> configuration</font>
+
+          </td>
+          <td class="section" border="0" cellpadding="0" cellspacing="0" width="20%" align="right">
+            <a href="gene_clustering.html#TOP" onmouseover="window.status='TOP:INDEX';"><img class="pnt" src="/g_icons/top.gif" height="15" width="15" border="0"></a>
+
+          </td>
+        </tr>
+      </table>
+      <table border="0" width="500" cellpadding="10" cellspacing="10">
+        <tr>
+          <td>
+            <font face="helvetica" size="2" color="green"><a href="http://gepas.bioinfo.cipf.es/cgi-bin/docs/sotarrayhelp#distance">Distance function</a>:</font><br>
+          </td>
+
+          <td>
+            <font face="helvetica" size="2" color="green"><a
+          href="http://gepas.bioinfo.cipf.es/cgi-bin/docs/sotarrayhelp#end">Resource threshold</a>:</font><br>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <select name="distance" size=1>
+              <option selected value="euclidean">Euclidean
+              <option value="square">Square
+              <option value="correlation">correlation
+              <option value="offset">Offset
+              <option value="spearman">Spearman
+              <option value="jackknife">Jackknife
+            </select>
+
+          </td>
+          <td>
+            <input type="text" name="resource_threshold" value="35">
+          </td>
+        </tr>
+      </table><br>
+      <br>
+      <table border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tr>
+          <td class="section" border="0" cellpadding="0" cellspacing="0" width="80%" align="left">
+            <font size="5" class="K"><a href="http://genome.imim.es/software/mmeta/index.html" target="_blank">TF-MAP multiple alignments</a> configuration</font>
+          </td>
+          <td class="section" border="0" cellpadding="0" cellspacing="0" width="20%" align="right">
+            <a href="#TOP"><img class="pnt" src="/webservices/images/top.gif" height="15" width="15" border="0"></a>
+          </td>
+        </tr>
+      </table><br>
+      <font face="helvetica" size="2" color="green">Please select the parameters to perform the TF-map multiple alignments<br>
+      <a href="http://genome.imim.es/datasets/mmeta2006/index.html#algo">(please click here for further information about the multiple meta-alignment parameters)</a></font><br>
+
+      <table border="0" width="500" cellpadding="10" cellspacing="10">
+        <tr>
+          <td>
+            <a href="http://genome.imim.es/software/mmeta/help.html#mapOpt"><font face="helvetica" size="2" color="green">&alpha; value:</font></a><br>
+          </td>
+          <td>
+            <a href="http://genome.imim.es/software/mmeta/help.html#mapOpt"><font face="helvetica" size="2" color="green">&lambda; value:</font></a><br>
+          </td>
+          <td>
+            <a href="http://genome.imim.es/software/mmeta/help.html#mapOpt"><font face="helvetica" size="2" color="green">&mu; value:</font></a><br>
+          </td>
+          <td>
+            <a href="http://genome.imim.es/software/mmeta/help.html#mapOpt"><font face="helvetica" size="2" color="green">&gamma; value:</font></a><br>
+          </td>
+          <td>
+            <a href="http://genome.imim.es/software/mmeta/help.html#mapOpt"><font face="helvetica" size="2" color="green">c value:</font></a><br>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <input type="text" name="alpha" value="0.5">
+          </td>
+          <td>
+            <input type="text" name="lambda" value="0.1">
+          </td>
+          <td>
+            <input type="text" name="mu" value="0.1">
+          </td>
+          <td>
+            <input type="text" name="gamma" value="-10">
+          </td>
+          <td>
+            <input type="text" name="noncol" value="100">
+          </td>
+        </tr>
+
+      </table><br>
+      <br>
+    </form><!-- ############### TRAILER AREA ############### -->
+    <table class="trailer" border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr class="default">
+        <td id="traila" align="left">
+          &nbsp; <a href="http://genome.imim.es/main/disclaimer.html" onmouseover="window.status='Data Release Policy and Software License';">Disclaimer</a>
+        </td>
+
+        <td id="trailb" align="center">
+          <script type="text/javascript" languaje="javascript">
+      <!--
+              LastUpdateSplit()
+      // -->
+</script>
+        </td>
+        <td id="trailc" align="rigth">
+          <a href="MAILTO:gmaster@imim.es" onmouseover="window.status='Contact with our webmaster';">webmaster</a>&nbsp;
+        </td>
+      </tr>
+    </table><script type="text/javascript" languaje="javascript">
+  <!--
+   reportErrors();
+   // -->
+
+</script><!-- ############### EOF ############### -->
+
+	  </td></tr>
+        </tbody>
+      </table>
+
+  </body>
+</html>
