@@ -157,8 +157,8 @@ BEGIN {
 	exit 0;
     }
 
-    $_config_file_path = "/home/ug/gmaster/projects/promoter_extraction/config.pl";
-    # $_config_file_path = "/home/ug/arnau/cvs/GRIB/users/arnau/projects/promoter_extraction/config.pl";
+    # $_config_file_path = "/home/ug/gmaster/projects/promoter_extraction/config.pl";
+    $_config_file_path = "/home/ug/arnau/cvs/GRIB/users/arnau/projects/promoter_extraction/config.pl";
     
     if (-f "$_config_file_path") {
         require "$_config_file_path";
