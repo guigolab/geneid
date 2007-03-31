@@ -217,8 +217,8 @@ my $mu_xml     = "<Value>$mu</Value>";
 
 my $distance = $opt_s || "euclidean";
 my $distance_xml = "<Value>$distance</Value>";
-my $resource_threshold_percentage = $opt_p || 10;
-my $resource_threshold_percentage_xml = "<Value>$resource_threshold_percentage</Value>";
+my $resource_threshold = $opt_p || 35;
+my $resource_threshold_xml = "<Value>$resource_threshold</Value>";
 
 # Multiple Meta-alignment parameters
 
@@ -826,7 +826,7 @@ $articleName   = $parameters{$serviceName}->{articleName} || "";
 $Service = getService ($C, $serviceName, $authURI);
 
 $moby_response = $Service->execute (XMLinputlist => [
-						     ["$articleName", "$input_xml\n", "distance", $distance_xml, 'resource_threshold_percentage', $resource_threshold_percentage_xml]
+						     ["$articleName", "$input_xml\n", "distance", $distance_xml, 'resource_threshold', $resource_threshold_xml]
 						     ]);
 
 if ($_debug) {
