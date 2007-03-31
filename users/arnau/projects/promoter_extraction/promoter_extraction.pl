@@ -152,7 +152,7 @@ BEGIN {
     getopts($switches, \%opts);
     
     # If the user does not write nothing, skip to help
-    if (defined($opts{h}) || !defined($opts{f}) || !defined($opts{s}) || !defined($opts{r})){
+    if (defined($opts{h}) || !defined($opts{f}) || !defined($opts{s})){
 	print STDERR help;
 	exit 0;
     }
@@ -180,6 +180,8 @@ $report_features   = 0;
 $intergenic_only   = 0;
 $orthologous_mode  = 0;
 
+$release = $latest_release;
+
 defined $opts{f} and $geneIds_file      = $opts{f};
 defined $opts{s} and $species           = $opts{s};
 defined $opts{r} and $release           = $opts{r};
@@ -188,6 +190,8 @@ defined $opts{d} and $downstream_length = $opts{d};
 defined $opts{g} and $report_features++;
 defined $opts{i} and $intergenic_only++;
 defined $opts{o} and $orthologous_mode++;
+
+print STDERR "Using Ensembl release $release\n";
 
 #
 # Get the database name associated to the species and release information
