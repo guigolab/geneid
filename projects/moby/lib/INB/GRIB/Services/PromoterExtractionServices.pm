@@ -1,4 +1,4 @@
-# $Id: PromoterExtractionServices.pm,v 1.16 2006-08-03 09:53:22 gmaster Exp $
+# $Id: PromoterExtractionServices.pm,v 1.17 2007-03-31 19:34:47 gmaster Exp $
 #
 #
 # This file is an instance of a template written 
@@ -156,9 +156,6 @@ sub _do_query_PromoterExtraction {
     my $queryInput_DOM   = shift @_;
     my $orthologous_mode = shift @_;
     
-    # The latest that is working !
-    my $dbrelease = 38;
-    
     my $MOBY_RESPONSE   = ""; # set empty response
     my $moby_exceptions = [];
     my $output_object_type  = "CommentedDNASequence";
@@ -187,7 +184,6 @@ sub _do_query_PromoterExtraction {
     # Add the parsed parameters in a hash table
     
     $parameters{organism}          = $organism;
-    $parameters{dbrelease}         = $dbrelease;
     $parameters{upstream_length}   = $upstream_length;
     $parameters{downstream_length} = $downstream_length;
     $parameters{intergenic_only}   = $intergenic_only;

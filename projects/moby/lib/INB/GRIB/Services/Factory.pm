@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.115 2007-03-27 18:53:50 gmaster Exp $
+# $Id: Factory.pm,v 1.116 2007-03-31 19:34:47 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -937,7 +937,9 @@ sub PromoterExtraction_call {
 	$_promExtraction_args .= " -s homo_sapiens";
     }
     
-    $_promExtraction_args .= " -r $dbrelease";
+    if (defined $dbrelease) {
+      $_promExtraction_args .= " -r $dbrelease";
+    }
     
     # Make a temporary file for the input list of genes
     
@@ -3877,7 +3879,7 @@ sub GFF2JPEG_call {
       print STDERR "convert -rotate 90 $ps_file $jpeg_file\n";
     }
     
-    # I expect convert tool to be in the PATH !
+    # I expect convert tool to already be in the PATH !
     my $convert_result = qx/convert -rotate 90 $ps_file $jpeg_file/;
     
     if ($debug) {
