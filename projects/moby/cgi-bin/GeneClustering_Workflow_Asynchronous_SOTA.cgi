@@ -27,7 +27,7 @@ my $t1 = Benchmark->new ();
 
 my $_debug = 0;
 
-my $_path_to_script = $gmaster_home . "/projects/moby/devel/scripts";
+my $_path_to_script = $gmaster_home . "/projects/moby/prod/scripts";
 my $_script_name = "runGeneClustering_Workflow.pl";
 
 my $APACHE_ROOT = $ENV{'APACHE_ROOT'};
