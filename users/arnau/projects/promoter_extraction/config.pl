@@ -17,8 +17,8 @@
 
 $_libraries_path = $ENV{HOME} . "/projects/promoter_extraction/lib/";
 
-use lib $ENV{HOME} . "/projects/promoter_extraction/lib/ensembl-38/modules";
-use lib $ENV{HOME} . "/projects/promoter_extraction/lib/ensembl-compara-38/modules";
+use lib $ENV{HOME} . "/projects/promoter_extraction/lib/ensembl-43/modules";
+use lib $ENV{HOME} . "/projects/promoter_extraction/lib/ensembl-compara-43/modules";
 
 # Latest Ensembl release
 
@@ -28,7 +28,7 @@ use lib $ENV{HOME} . "/projects/promoter_extraction/lib/ensembl-compara-38/modul
 #
 #########################################################
 
-$latest_release = "38";
+$latest_release = "43";
 
 # Ensembl database connection parameters
 # Two sets of parameters to allow connecting to a different server depending on which release the user is asking !!!
