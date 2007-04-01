@@ -1446,7 +1446,7 @@ sub saveResults {
   my $i = 0;
   while ($i < $size) {
     my $element = $elements->[$i];
-    my $id = $element->getAttribute ("id");
+    my $id = $element->getAttribute ("id") || $element->getAttribute ("moby:id");
     
     # if more than one simple object, create an identifier index
     if ((! defined $id) || $id eq "") {
