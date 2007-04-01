@@ -1,4 +1,4 @@
-# $Id: ConversionServices.pm,v 1.3 2006-06-16 13:51:52 gmaster Exp $
+# $Id: ConversionServices.pm,v 1.4 2007-04-01 18:58:17 gmaster Exp $
 #
 # This file is an instance of a template written 
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -307,7 +307,11 @@ sub _do_query_fromGenericSequencestoFASTA {
 		# Get the namespace
 		
 		my @namespaces = INB::GRIB::Utils::CommonUtilsSubs->getNamespace ($DOM);
-		if (@namespaces > 1) {
+		
+		if (!@namespaces) {
+		  $namespace = "";
+		}
+		elsif (@namespaces > 1) {
 		    my $note = "Collection contains sequence objects belonging to more than one namespace. Returning a FASTA object with an empty namespace\n";
 		    print STDERR "$note\n";
 		    my $code = "201";
@@ -588,6 +592,8 @@ sub _do_query_fromFASTAtoMobySequence {
     # Parse the FASTA sequences
     
     if ($_debug) {
+        print STDERR "namespace, $namespace\n";
+        print STDERR "moby_output_object_type, $moby_output_object_type\n";
 	print STDERR "fasta sequences,\n$fasta_seqs.\n";
     }
     
@@ -882,6 +888,7 @@ sub fromGenericSequenceToFASTA {
 	if ($_debug) {
 	    my $query_str = $queryInput->toString();
 	    print STDERR "query text: $query_str\n";
+	    
 	}
 	
 	my ($query_response, $moby_exceptions_tmp) = _do_query_fromGenericSequencestoFASTA ($queryInput, "simple");
