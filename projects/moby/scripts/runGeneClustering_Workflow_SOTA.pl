@@ -236,11 +236,26 @@ if ($_debug) {
     print STDERR "zip result status, $result\n";
 }
 
+# Now the SOTA gene tree in Newick format
+
+if (-f "$gene_clustering_output_dir/sota_gene_tree.newick.txt") {
+
+  my $gene_tree = qx/cat $gene_clustering_output_dir\/sota_gene_tree.newick.txt/;
+
+  print $out_fh "<br><br><h3>SOTA gene tree (<a href=\"http://evolution.genetics.washington.edu/phylip/newick_doc.html\" target=\"_blank\">Newick format</a>)</h3>\n";
+  print $out_fh "<pre>$gene_tree</pre><br>\n";
+}
+else {
+  print STDERR "no SOTA gene tree in Newick format!?\n";
+}
+
 if ($_debug) {
     print STDERR "process the cluster results\n";
 }
 
 # Now, get the cluster results
+
+print $out_fh "<h3>SOTA clusters analysis</h3>\n";
 
 print $out_fh "<ul>\n";
 
