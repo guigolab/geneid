@@ -1,5 +1,5 @@
-<moby:FASTA_NA_multi namespace='ENSEMBL' id='ENSG00000197785'>
-<String namespace='' id='' articleName='content'>
+<moby:FASTA_NA_multi moby:namespace='ENSEMBL' moby:id='ENSG00000197785'>
+<String moby:namespace='' moby:id='' moby:articleName='content'>
 <![CDATA[
 >ENSG00000197785
 GAGCCACTGCACCTGGCCTACGATGATAACTTATAGCAAACTTTACTTTTGCTGAAAACC
