@@ -854,6 +854,9 @@ if (hasFailed ($moby_response)) {
 # Get the simples (collection of List_Text)
 
 $input_xml_aref = parseResults ($moby_response, "List_Text");
+if (defined $output_dir) {
+  saveResults ($moby_response, "Newick_Text", "sota_gene_tree", $output_dir);
+}
 
 if ($_verbose) {
   print STDERR "Fourth step done!\n\n";
@@ -1527,7 +1530,7 @@ sub getFileNameSuffix {
   if (lc ($object_type) eq "gff") {
     return "gff";
   }
-  elsif (lc ($object_type) eq "text-formatted" || lc ($object_type) eq "text_formatted" || lc ($object_type) eq "microarraydata_text" || lc ($object_type) eq "newick_text") {
+  elsif (lc ($object_type) eq "text-formatted" || lc ($object_type) eq "text_formatted" || lc ($object_type) eq "microarraydata_text") {
     return "txt";
   }
   elsif (lc ($object_type) eq "b64_encoded_png") {
@@ -1539,7 +1542,10 @@ sub getFileNameSuffix {
   elsif (lc ($object_type) eq "list_text" || lc ($object_type) eq "list-text") {
       return "lst";
   }
-  
+  elsif (lc ($object_type) eq "newick_text") {
+    return "newick.txt";
+  }
+       
   if ($_debug) {
       print STDERR "Suffix for object_type, $object_type unknown, return txt!\n"; 
   }
