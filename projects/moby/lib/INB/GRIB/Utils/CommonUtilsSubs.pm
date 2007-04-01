@@ -974,10 +974,17 @@ sub getNamespace {
     foreach my $node (@object_nodes) {
 	# should be already this type !!
 	if ($node->nodeType() == ELEMENT_NODE) {
-	    my $namespace = $node->getAttributeNode ("namespace")->getValue();
-	    if (! is_in (\@namespaces, $namespace)) {
-		push (@namespaces, $namespace);
+	    my $attributeNode = $node->getAttributeNode ("namespace") || $node->getAttributeNode ("moby:namespace");
+	    if (!defined $attributeNode) {
+	      print STDERR "Error parsing the namespace from node, " . $node->toString() . "\n";
+	      return undef;
 	    }
+	    else {
+	      my $namespace = $attributeNode->getValue();
+	      if (! is_in (\@namespaces, $namespace)) {
+		push (@namespaces, $namespace);
+              }
+            }
 	}
     }
     
