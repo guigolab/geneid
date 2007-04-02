@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: genamic.c,v 1.13 2007-03-30 15:09:30 talioto Exp $  */
+/*  $Id: genamic.c,v 1.14 2007-04-02 15:50:37 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -119,13 +119,14 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
       (E+i)->GeneScore = (E+i)->Score;
       current_exon_is_u12 = 0;
       if (!strcmp((E+i)->Type,"Intron")){
-	printMess("Intron");
+	
 	(E+i)->Donor->class = U2;
 	(E+i)->Acceptor->class = U2;
 	(E+i)->offset1 = -1; 
 	(E+i)->offset2 = -1;
 	/* (E+i)->Remainder = (3-((E+i)->Frame))%3; */
 	if (DEBUG){
+	  printMess("Intron");
 	  printMess("-----");
 	  PrintExonGFF((E+i),"NA","CurrentIntron");
 	  sprintf(mess,"frame %i   remainder %i spliceclass %i",(E+i)->Frame,(E+i)->Remainder,(E+i)->Acceptor->class);
@@ -133,12 +134,13 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 	}
 	
       }else{
-	printMess("Exon");
+	
 	if (DEBUG){
-	  printMess("-----");
-	  PrintExonGFF((E+i),"NA","CurrentExon");
-	  sprintf(mess,"frame %i   remainder %i",(E+i)->Frame,(E+i)->Remainder);
-	  printMess(mess);
+/* 	  printMess("Exon"); */
+/* 	  printMess("-----"); */
+/* 	  PrintExonGFF((E+i),"NA","CurrentExon"); */
+/* 	  sprintf(mess,"frame %i   remainder %i",(E+i)->Frame,(E+i)->Remainder); */
+/* 	  printMess(mess); */
 	}
       }
       spliceclass = (E+i)->Acceptor->class;
@@ -176,7 +178,9 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 			     + 
 			     pg->Ga[etype][frame][spliceclass]->offset2) 
 			    < 
-			    ((E+i)->Acceptor->Position + (E+i)->offset1) - MaxDist) 
+			    ((E+i)->Acceptor->Position + (E+i)->offset1)
+			    + ((E+i)->evidence - pg->Ga[etype][frame][spliceclass]->evidence)
+			    - MaxDist) 
 			  {
 			    /* loop backward searching another best gene matching MAX distance */
 			    if (DEBUG){printMess("looping backward");}
@@ -187,6 +191,7 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 				     + pg->d[etype][j2]->offset2)
 				    >= 
 				    ((E+i)->Acceptor->Position + (E+i)->offset1)
+				    + ((E+i)->evidence - pg->d[etype][j2]->evidence)
 				    - MaxDist))
 			      {
 				remainder = pg->d[etype][j2]->Remainder;
@@ -209,7 +214,10 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 			      ((pg->d[etype][j]->Donor->Position 
 				+ pg->d[etype][j]->offset2)
 			       <= 
-			       ((E+i)->Acceptor->Position + (E+i)->offset1) - MinDist))
+			       ((E+i)->Acceptor->Position + (E+i)->offset1) 
+			       + ((E+i)->evidence - pg->d[etype][j]->evidence)
+			       - MinDist)
+			      )
 			  {
 			    remainder = pg->d[etype][j]->Remainder;
 			    dclass = pg->d[etype][j]->Donor->class;
@@ -217,7 +225,10 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 				 ((pg->d[etype][j]->Donor->Position 
 				   + pg->d[etype][j]->offset2)
 				  < 
-				  ((E+i)->Acceptor->Position + (E+i)->offset1) - MaxDist)))
+				  ((E+i)->Acceptor->Position + (E+i)->offset1)
+				  + ((E+i)->evidence - pg->d[etype][j]->evidence) 
+				  - MaxDist))
+				)
 			      {
 				/* Skip this exon because max distance not ok */
 				if (DEBUG){
@@ -280,6 +291,7 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 			  
 			  if (!strcmp((E+i)->Type,"Intron")){
 			    if (DEBUG){printMess("intron");}
+			    
 			    (E+i)->GeneScore = pg->Ga[etype][frame][spliceclass]->GeneScore + (E+i)->Score;
 			    (E+i)->PreviousExon = pg->Ga[etype][frame][spliceclass];
 /* 			    (E+i)->Frame = pg->Ga[etype][frame][spliceclass]->Frame; */
@@ -292,7 +304,7 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 				pg->nmc = CountNumConstraints((E+i),0);
 			      }
 			    }
-			    printMess("here");
+			    
 			    if (DEBUG){sprintf(mess, "Intron Genescore = %4.3f Optimal score = %4.3f",(E+i)->GeneScore,pg->GOptim->GeneScore);
 			      printMess(mess);
 			    }

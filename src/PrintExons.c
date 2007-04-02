@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: PrintExons.c,v 1.16 2007-03-30 15:09:29 talioto Exp $  */
+/*  $Id: PrintExons.c,v 1.17 2007-04-02 15:50:37 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -178,25 +178,27 @@ void PrintGExon(exonGFF *e,
       /* GFF3 format 5_prime_partial=true ???*/
       if (e->five_prime_partial) { strcpy(attribute,";5_prime_partial=true");}
       if (e->three_prime_partial) { strcpy(attribute,";3_prime_partial=true");}
-      printf ("%s\t%s\t%s\t%ld\t%ld\t%1.2f\t%c\t%hd\tID=exon_%s%s_%ld.%i;Parent=mRNA_%s%s_%ld;type=%s\n",
-	      /* correct stop codon position, Terminal- & Terminal+ */ 
-	      Name,
-	      (e->evidence)? EVIDENCE : VERSION,     
-	      "exon",
-	      (e->evidence)? e->Acceptor->Position : e->Acceptor->Position + e->offset1,
-	      (e->evidence)? e->Donor->Position : e->Donor->Position + e->offset2,
-	      (e->Score==MAXSCORE)? 0.0:e->Score,
-	      e->Strand,
-	      e->Frame,
-	      GenePrefix,
-	      Name,
-	      ngen,
-	      nExon,
-	      GenePrefix,
-	      Name,
-	      ngen,
-	      e->Type);
-      printf ("%s\t%s\t%s\t%ld\t%ld\t%1.2f\t%c\t%hd\tID=cds_%s%s_%ld;Parent=mRNA_%s%s_%ld;Target=%s_predicted_protein_%s%s_%ld %d %d%s\n",
+
+      /* It's really not necessary to print out exons unless we can predict UTR exons (leave this commented for now) */
+/*       printf ("%s\t%s\t%s\t%ld\t%ld\t%1.2f\t%c\t%hd\tID=exon_%s%s_%ld.%i;Parent=mRNA_%s%s_%ld;type=%s\n", */
+/* 	      /\* correct stop codon position, Terminal- & Terminal+ *\/  */
+/* 	      Name, */
+/* 	      (e->evidence)? EVIDENCE : VERSION,      */
+/* 	      "exon", */
+/* 	      (e->evidence)? e->Acceptor->Position : e->Acceptor->Position + e->offset1, */
+/* 	      (e->evidence)? e->Donor->Position : e->Donor->Position + e->offset2, */
+/* 	      (e->Score==MAXSCORE)? 0.0:e->Score, */
+/* 	      e->Strand, */
+/* 	      e->Frame, */
+/* 	      GenePrefix, */
+/* 	      Name, */
+/* 	      ngen, */
+/* 	      nExon, */
+/* 	      GenePrefix, */
+/* 	      Name, */
+/* 	      ngen, */
+/* 	      e->Type); */
+      printf ("%s\t%s\t%s\t%ld\t%ld\t%1.2f\t%c\t%hd\tID=cds_%s%s_%ld.%i;Parent=mRNA_%s%s_%ld;Target=%s_predicted_protein_%s%s_%ld %d %d%s\n",
 	      /* correct stop codon position, Terminal- & Terminal+ */ 
 	      Name,
 	      (e->evidence)? EVIDENCE : VERSION,     
@@ -209,6 +211,7 @@ void PrintGExon(exonGFF *e,
 	      GenePrefix,
 	      Name,
 	      ngen,
+	      nExon,
 	      GenePrefix,
 	      Name,
 	      ngen,
