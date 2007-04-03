@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: Translate.c,v 1.8 2006-12-11 09:50:48 talioto Exp $  */
+/*  $Id: Translate.c,v 1.9 2007-04-03 12:39:53 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -110,6 +110,7 @@ void TranslateGene(exonGFF* e,
 	  /* Traversing the list of exons */
 	  for(i=0, totalAA=0, currFrame=0; i<nExons; i++)
 		{
+		  if (strcmp(e->Type,sINTRON)){
 		  /* 0. Acquire the real positions of the exon in the sequence */
 		  p1 = (e->evidence)?
 			e->Acceptor->Position + e->offset1 : 
@@ -208,7 +209,7 @@ void TranslateGene(exonGFF* e,
         
 		  totalAA = totalAA + currAA;
 		  tAA[i][1] = totalAA;
-	  
+		  }
 		  /* 5. Pointer jumping to the next exon */
 		  e = e->PreviousExon;
 		} /* endfor */
@@ -234,6 +235,7 @@ void TranslateGene(exonGFF* e,
       /* Concat uncomplete codon at the beginning of the protein */
       sprintf(sAux,"%s%s",rmdProt,prot);
       strcpy(prot,sAux);
+		
     }
 
   /* B. Translating a reverse sense exon: First > Internal >.. Terminal */
@@ -243,6 +245,7 @@ void TranslateGene(exonGFF* e,
 	  /* Traversing the list of exons */
 	  for(i=0, totalAA=0, currRmd=0; i<nExons; i++)
 		{
+		  if (strcmp(e->Type,sINTRON)){
 		  p1 = (e->evidence)? 
 			e->Acceptor->Position + e->offset1: 
 			e->Acceptor->Position + e->offset1 - COFFSET;
@@ -340,8 +343,10 @@ void TranslateGene(exonGFF* e,
 		  tAA[i][1] = totalAA;
 	  
 		  /* Next exon */
-		  e = e->PreviousExon;
 		  free(rs); 
+		  }
+		  e = e->PreviousExon;
+		  
 		}
 	  /* Frame of the last exon in the gene */
 	  sprintf(sAux,"%s%s",rmdProt,prot);
@@ -369,6 +374,7 @@ void TranslateGene(exonGFF* e,
 	  for(j = 0; j < currRmd; j++)
 		prot[lAux+j] = rmdProt[j];
 	  prot[lAux+j] = '\0'; 
+		
 	} /* end of reverse translation */
 
   *nAA = totalAA;
@@ -424,6 +430,7 @@ void GetcDNA(exonGFF* e,
 
       for(i=0, *nNN = 0; i<nExons; i++)
 		{
+		  if (strcmp(e->Type,sINTRON)){
 		  p1 = e->Acceptor->Position + e->offset1 - COFFSET;
 		  p2 = e->Donor->Position + e->offset2 - COFFSET;
         
@@ -443,7 +450,9 @@ void GetcDNA(exonGFF* e,
 		  strcat(cDNA,rs);
    
 		  *nNN += p2-p1+1;
+		  }
 		  e = e->PreviousExon;
+		  
 		} 
       /* Set free reverse sequence */
       free(rs);
