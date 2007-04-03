@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: genamic.c,v 1.14 2007-04-02 15:50:37 talioto Exp $  */
+/*  $Id: genamic.c,v 1.15 2007-04-03 12:39:53 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -122,8 +122,8 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 	
 	(E+i)->Donor->class = U2;
 	(E+i)->Acceptor->class = U2;
-	(E+i)->offset1 = -1; 
-	(E+i)->offset2 = -1;
+/* 	(E+i)->offset1 = -1;  */
+/* 	(E+i)->offset2 = -1; */
 	/* (E+i)->Remainder = (3-((E+i)->Frame))%3; */
 	if (DEBUG){
 	  printMess("Intron");
