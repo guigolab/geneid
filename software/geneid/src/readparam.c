@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: readparam.c,v 1.13 2007-01-23 14:48:14 talioto Exp $  */
+/*  $Id: readparam.c,v 1.14 2007-04-04 10:25:06 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -291,18 +291,30 @@ void ReadProfile(FILE* RootFile, profile* p, char* signal, int H)
   char line[MAXLINE];
   char mess[MAXSTRING];
   int numProfileParams = 0;
+  p->afactor = 0;
+  p->bfactor = 1;
+  p->acc_context = ACCEPTOR_CONTEXT;
+  p->dist = MIN_U12BPACC_DIST;
+  p->opt_dist = OPT_U12BP_DIST;
+  p->penalty_factor = (float) U12BP_PENALTY_SCALING_FACTOR;
+
   /* Definition parameters: Length, offset, cutoff and order (Markov chain) */
   if (H==1)
 	readHeader(RootFile,line);
 
   readLine(RootFile,line);
-  numProfileParams = sscanf(line,"%d %d %f %d %f %f", 
-			  &(p->dimension),
-			  &(p->offset), 
-			  &(p->cutoff),
-			  &(p->order),
-			  &(p->afactor),
-			  &(p->bfactor));
+  numProfileParams = sscanf(line,"%d %d %f %d %f %f %d %d %d %f", 
+			    &(p->dimension),
+			    &(p->offset), 
+			    &(p->cutoff),
+			    &(p->order),
+			    &(p->afactor),
+			    &(p->bfactor),
+			    &(p->acc_context),
+			    &(p->dist),
+			    &(p->opt_dist),
+			    &(p->penalty_factor)
+			    );
   if (numProfileParams<4)
 	{
 	  sprintf(mess,"Wrong format: Definition parameters in %s profile",signal);
@@ -313,7 +325,17 @@ void ReadProfile(FILE* RootFile, profile* p, char* signal, int H)
 	  p->afactor = 0;
 	  p->bfactor = 1;
 	}
- 
+   if (numProfileParams<6)
+	{
+	  p->afactor = 0;
+	  p->bfactor = 1;
+	}
+   if (numProfileParams<6)
+	{
+	  p->afactor = 0;
+	  p->bfactor = 1;
+	}
+
   /* Memory to allocate the data with these fixed dimensions */
   RequestMemoryProfile(p);
   
@@ -336,6 +358,7 @@ void ReadProfileSpliceSites(FILE* RootFile, gparam* gp)
   int u12atacAcc=0;
   int u12gtagDon=0;
   int u12atacDon=0;
+
 
   /* A. Optional profiles: U12GTAG, U12ATAC Donor, acceptor and branch points 
   and U2 branch points and Poly Pyrimidine Tract */

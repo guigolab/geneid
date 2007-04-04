@@ -28,7 +28,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/     
 
-/* $Id: geneid.h,v 1.31 2007-03-30 15:09:29 talioto Exp $ */
+/* $Id: geneid.h,v 1.32 2007-04-04 10:25:06 talioto Exp $ */
 
 /* Required libraries */
 #include <stdlib.h>
@@ -367,6 +367,10 @@ typedef struct s_profile
   int    order;
   float  afactor;
   float  bfactor;
+  int    acc_context;
+  int    dist;
+  int    opt_dist;
+  float    penalty_factor;
 
   long dimensionTrans;
   float*  transitionValues[PROFILEDIM];

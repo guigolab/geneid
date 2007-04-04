@@ -52,9 +52,9 @@ float ComputeU12BranchProfile(char* s,
   long i,j;
   maxScore = -INF;
   /*      char mess[MAXSTRING];  */
-  i = MAX(p->order,positionAcc - ACCEPTOR_CONTEXT);
-  end = MIN(positionAcc - MIN_U12BPACC_DIST + p->dimension - p->offset,limitRight);
-  Opt = MAX(0,positionAcc - OPT_U12BP_DIST);
+  i = MAX(p->order,positionAcc - p->acc_context);
+  end = MIN(positionAcc - p->dist + p->dimension - p->offset,limitRight);
+  Opt = MAX(0,positionAcc - p->opt_dist);
   for (;
        i + p->dimension <= end;
        i++)
@@ -73,8 +73,8 @@ float ComputeU12BranchProfile(char* s,
 	    score = score + p->transitionValues[j][index];
 	}
 	   
-      score = score - U12BP_PENALTY_SCALING_FACTOR * (((float)(abs(i + p->offset -Opt))/((float)(ACCEPTOR_CONTEXT - p->offset - OPT_U12BP_DIST)))*((float)(abs(i + p->offset
-																			       -Opt))/((float)(ACCEPTOR_CONTEXT - p->offset - OPT_U12BP_DIST)))); 
+      score = score - p->penalty_factor * (((float)(abs(i + p->offset -Opt))/((float)(p->acc_context - p->offset - p->opt_dist)))*((float)(abs(i + p->offset
+																			       -Opt))/((float)(p->acc_context - p->offset - p->opt_dist)))); 
       if (score >= maxScore){
 	maxScore = score;
 	splicesite->PositionBP = i + p->offset - positionAcc;
@@ -99,7 +99,7 @@ float ComputePPTProfile(char* s,
   maxScore = -INF;
 
   i = MAX(p->order,positionAcc + splicesite->PositionBP + 1);
-  i = MAX(i,positionAcc - PPT_ACC_MAXDIST - p->dimension);
+  i = MAX(i,positionAcc - p->dist - p->dimension);
   end = MIN(positionAcc,limitRight);
   for (;
        i + p->dimension <= end;
