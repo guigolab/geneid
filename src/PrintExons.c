@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: PrintExons.c,v 1.17 2007-04-02 15:50:37 talioto Exp $  */
+/*  $Id: PrintExons.c,v 1.18 2007-04-04 12:40:12 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -360,8 +360,10 @@ void PrintGIntron(exonGFF *d,
 		  char Name[],
 		  long ngen,
 		  int numInt,
-		  char* GenePrefix)
+		  char* GenePrefix,
+		  int evidence)
 {
+  float score = 0.0;
   char intronType[MAXTYPE]; 
   strcpy(intronType,"U2");
   char intronSubtype[MAXTYPE]; 
@@ -370,8 +372,11 @@ void PrintGIntron(exonGFF *d,
   /* short phase = MIN(0, 3 - a->Frame); */
   long start = (a->evidence)? d->Donor->Position + 1: d->Donor->Position + 1 + d->offset2;
   long end = (a->evidence)? a->Acceptor->Position - 1: a->Acceptor->Position -1 + a->offset1;
-  float score = (d->Donor->Score + a->Acceptor->Score)/2;
-	
+  if (evidence){
+    score = a->Score;
+  }else{
+    score = (d->Donor->Score + a->Acceptor->Score)/2;
+  }
   if (!(strcmp(d->Donor->subtype,sU12gtag))||!(strcmp(d->Donor->subtype,sU12atac))){
     strcpy(intronType,"U12");
   }
@@ -392,7 +397,7 @@ void PrintGIntron(exonGFF *d,
 	    (a->evidence)? EVIDENCE : VERSION,     
 	    start,
 	    end,
-	    score,
+	    (score==MAXSCORE)? 0.0:score,
 	    a->Strand,
 	    phase,
 	    GenePrefix,
@@ -415,7 +420,7 @@ void PrintGIntron(exonGFF *d,
 	      intronType,
 	      start,
 	      end,
-	      score,
+	      (score==MAXSCORE)? 0.0:score,
 	      a->Strand,
 	      phase,
 	      GenePrefix,

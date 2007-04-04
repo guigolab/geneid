@@ -28,7 +28,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/     
 
-/* $Id: geneid.h,v 1.32 2007-04-04 10:25:06 talioto Exp $ */
+/* $Id: geneid.h,v 1.33 2007-04-04 12:40:12 talioto Exp $ */
 
 /* Required libraries */
 #include <stdlib.h>
@@ -854,7 +854,7 @@ void PrintGExon(exonGFF *e, char Name[], char* s, dict* dAA,
 		int numInt, char* GenePrefix);
 			   
 void PrintGIntron(exonGFF *d, exonGFF *a, char Name[],long ngen,
-		  int numInt, char* GenePrefix);
+		  int numInt, char* GenePrefix, int evidence);
 
 void PrintGGene(exonGFF *s, exonGFF *e, char Name[],
 		long ngen, float score, char* GenePrefix);
