@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: CookingGenes.c,v 1.24 2007-04-03 12:39:53 talioto Exp $  */
+/*  $Id: CookingGenes.c,v 1.25 2007-04-04 12:40:12 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -41,6 +41,7 @@ extern int PRINTINT;
 typedef struct s_gene
 {
   long nexons;
+  long nintrons;
   float score;
   exonGFF *start;
   exonGFF *end;
@@ -283,17 +284,19 @@ long CookingInfo(exonGFF* eorig,
 			  if (e->Strand == '-')
 				{
 				  if(!strcmp(e->Type,sINTRON)){
-				    if (e->Score==MAXSCORE)
-				      *artScore = *artScore + MAXSCORE;
-				    e = (e-> PreviousExon);
+				    /* if (e->Score==MAXSCORE) */
+/* 				      *artScore = *artScore + MAXSCORE; */
+				    /* e = (e-> PreviousExon); */
+				    info[igen].nintrons++;
+				    
 				  }
 				  
 				  info[igen].start = e;
 				  info[igen].end = e;
-/* 				  if (strcmp(e->Type,sINTRON)){ */
-/* 				    info[igen].nexons++; */
-/* 				  } */
-				  info[igen].nexons++;
+				  if (strcmp(e->Type,sINTRON)){
+				    info[igen].nexons++;
+				  }
+				  /* info[igen].nexons++; */
 				  /* Evidences (annotations) not added if infinitum score */
 				  if (e->Score==MAXSCORE)
 					*artScore = *artScore + MAXSCORE;
@@ -313,14 +316,29 @@ long CookingInfo(exonGFF* eorig,
 				  while( !stop && !stop1 )
 					{  
 					  if(!strcmp(e->Type,sINTRON)){
-					    if (e->Score==MAXSCORE)
-					      *artScore = *artScore + MAXSCORE;
-					    e = (e-> PreviousExon);
+					    /* if (e->Score==MAXSCORE) */
+					    /* 				      *artScore = *artScore + MAXSCORE; */
+					    /* e = (e-> PreviousExon); */
+					    info[igen].nintrons++;
+				    
 					  }
-/* 					  if (strcmp(e->Type,sINTRON)){ */
-/* 					    info[igen].nexons++; */
+				  
+					  info[igen].start = e;
+					  info[igen].end = e;
+					  if (strcmp(e->Type,sINTRON)){
+					    info[igen].nexons++;
+					  }
+					 
+				  
+/* 					  if(!strcmp(e->Type,sINTRON)){ */
+/* 					    if (e->Score==MAXSCORE) */
+/* 					      *artScore = *artScore + MAXSCORE; */
+/* 					    e = (e-> PreviousExon); */
 /* 					  } */
-					  info[igen].nexons++;
+/* /\* 					  if (strcmp(e->Type,sINTRON)){ *\/ */
+/* /\* 					    info[igen].nexons++; *\/ */
+/* /\* 					  } *\/ */
+/* 					  info[igen].nexons++; */
 					  /* Evidences (annotations) not summed if infinite score */
 					  if (e->Score==MAXSCORE)
 						*artScore = *artScore + MAXSCORE;
@@ -344,15 +362,16 @@ long CookingInfo(exonGFF* eorig,
 				  {
 				    
 				    if(!strcmp(e->PreviousExon->Type,sINTRON)){
-				      *artScore = *artScore + e->PreviousExon->Score;
-				      e->PreviousExon = (e->PreviousExon->PreviousExon);
+				      /* *artScore = *artScore + e->PreviousExon->Score; */
+/* 				      e->PreviousExon = (e->PreviousExon->PreviousExon); */
+				      info[igen].nintrons++;
 				    }
 					info[igen].start = e;
 					info[igen].end = e;
-/* 					if (strcmp(e->Type,sINTRON)){ */
-/* 					  info[igen].nexons++; */
-/* 					} */
-					info[igen].nexons++;
+					if (strcmp(e->Type,sINTRON)){
+					  info[igen].nexons++;
+					}
+					/* info[igen].nexons++; */
 					if (e->Score==MAXSCORE)
 					  *artScore = *artScore + MAXSCORE;
 					else
@@ -371,13 +390,14 @@ long CookingInfo(exonGFF* eorig,
 					  { 
 					    
 					    if(!strcmp(e->PreviousExon->Type,sINTRON)){
-					      *artScore = *artScore + e->PreviousExon->Score;
-					      e->PreviousExon = (e->PreviousExon->PreviousExon);
+/* 					      *artScore = *artScore + e->PreviousExon->Score; */
+/* 					      e->PreviousExon = (e->PreviousExon->PreviousExon); */
+					      info[igen].nintrons++;
 					    }
-/* 					    if (strcmp(e->Type,sINTRON)){ */
-/* 					      info[igen].nexons++; */
-/* 					    } */
-					    info[igen].nexons++;
+					    if (strcmp(e->Type,sINTRON)){
+					      info[igen].nexons++;
+					    }
+					    /* info[igen].nexons++; */
 					    /* Evidences (annotations) not added if infinitum score */
 					    if (e->Score==MAXSCORE)
 					      *artScore = *artScore + MAXSCORE;
@@ -426,14 +446,16 @@ void PrintGene(exonGFF* start,
   int type2;
   int strand;
   int nint = 1;
-  int nex = 1;
+
+/*   int nex = 1; */
 
   /* a. Recursive case */
   if (start != end)
     {
       if (start->Strand == '+'){
-	if (strcmp(start->Type,sINTRON)){nint = nExons - nPrintExon;nPrintExon++;}
-	nex = nint + 1;
+	nint = nExons - nPrintExon;
+	if (strcmp(start->Type,sINTRON)){nPrintExon++;}
+/* 	nex = nint + 1; */
       }else{
 	if (strcmp(start->Type,sINTRON)){nint = nPrintExon + 1;nPrintExon++;}
       }
@@ -460,16 +482,21 @@ void PrintGene(exonGFF* start,
 	      PrintSite(start->Donor,type2,Name,strand,s,p2);
 	    }
 	  else {
-	    if (PRINTINT) { PrintGIntron(eaux,start,Name,igen,nint,GenePrefix); }
+	    if (PRINTINT && strcmp(eaux->Type,sINTRON)) { PrintGIntron(eaux,start,Name,igen,nint,GenePrefix,0); }
 	    PrintGExon(start,Name,s,dAA,igen,tAA[nExon][0],tAA[nExon][1],nAA,nint,GenePrefix);
 	  }
+      }else{
+	if (PRINTINT){
+	  PrintGIntron(eaux,start,Name,igen,nint,GenePrefix,1);	  
+	}
       }
     }
   else
     {
       if (start->Strand == '+'){
-	if (strcmp(start->Type,sINTRON)){nint = nExons - nPrintExon;nPrintExon++;}
-	nex = nint + 1;
+	nint = nExons - nPrintExon;
+	if (strcmp(start->Type,sINTRON)){nPrintExon++;}
+/* 	nex = nint + 1; */
       }else{
 	if (strcmp(start->Type,sINTRON)){nint = nPrintExon + 1;nPrintExon++;}
       }
@@ -562,7 +589,7 @@ void CookingGenes(exonGFF* e,
 	  
       /* Translate gene into protein */
       
-	    TranslateGene(info[igen].start,s,dAA,info[igen].nexons,tAA,prot,&nAA);
+      TranslateGene(info[igen].start,s,dAA,(info[igen].nexons + info[igen].nintrons),tAA,prot,&nAA);
 	  
       /* Get genomic DNA for exons if required */
       if (cDNA)
@@ -664,7 +691,7 @@ void CookingGenes(exonGFF* e,
 		  for(igen=ngen-1; igen>=0; igen--)
 			{
 			  /* Translate gene into protein */
-				TranslateGene(info[igen].start,s,dAA,info[igen].nexons,tAA,prot,&nAA);
+				TranslateGene(info[igen].start,s,dAA,(info[igen].nexons + info[igen].nintrons),tAA,prot,&nAA);
 			  /* Protein in FASTA format (except promoters) */
 				if (strcmp(info[igen].start->Type,sPROMOTER))
 				  printProt(Name,ngen-igen,prot,nAA,PROT,GenePrefix);
