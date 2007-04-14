@@ -1,0 +1,10 @@
+<MicroArrayData_Text namespace="" id="">
+  <String namespace="" id="" articleName="content"><![CDATA[#	Gasdermin_Rat	Gasdermin_Human	Leptin_Rat	Leptin_Human	Gasdermin_Mouse	Leptin_Mouse
+Gasdermin_Rat		2.77	-2.60	-0.44	21.44	5.76
+Gasdermin_Human	2.77		-0.87	12.60	1.95	-2.90
+Leptin_Rat	-2.60	-0.87		23.55	0.22	37.53
+Leptin_Human	-0.44	12.60	23.55		-0.09	21.17
+Gasdermin_Mouse	21.44	1.95	0.22	-0.09		5.53
+Leptin_Mouse	5.76	-2.90	37.53	21.17	5.53	
+]]></String>
+</MicroArrayData_Text>
