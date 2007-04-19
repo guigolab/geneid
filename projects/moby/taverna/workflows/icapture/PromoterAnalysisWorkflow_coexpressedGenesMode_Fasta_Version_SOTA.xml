@@ -12,11 +12,11 @@ See, http://genome.imim.es/webservices/workflows.html page for more details.</s:
   <s:processor name="articleName" boring="true">
     <s:stringconstant>sequences</s:stringconstant>
   </s:processor>
-  <s:processor name="parse_moby_score_matrix">
+  <s:processor name="parse_moby_matscan_gff">
     <s:local>org.embl.ebi.escience.scuflworkers.biomoby.ExtractMobyData</s:local>
   </s:processor>
-  <s:processor name="parse_moby_gene_clusters">
-    <s:local>org.biomoby.client.taverna.plugin.ExtractMobyData</s:local>
+  <s:processor name="parse_moby_score_matrix">
+    <s:local>org.embl.ebi.escience.scuflworkers.biomoby.ExtractMobyData</s:local>
   </s:processor>
   <s:processor name="parse_moby_meta">
     <s:local>org.embl.ebi.escience.scuflworkers.biomoby.ExtractMobyData</s:local>
@@ -27,36 +27,25 @@ See, http://genome.imim.es/webservices/workflows.html page for more details.</s:
   <s:processor name="parse_moby_gene_tree">
     <s:local>org.biomoby.client.taverna.plugin.ExtractMobyData</s:local>
   </s:processor>
-  <s:processor name="parse_moby_matscan_gff">
-    <s:local>org.embl.ebi.escience.scuflworkers.biomoby.ExtractMobyData</s:local>
-  </s:processor>
   <s:processor name="StringArticleName" boring="true">
     <s:stringconstant>content</s:stringconstant>
   </s:processor>
-  <s:processor name="fromMetaAlignmentsToTextScoreMatrix">
-    <s:description>Parses a collection of meta-alignment outputs to produce a text-formatted sequence similarity score matrix</s:description>
-    <s:biomobywsdl>
-      <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
-      <s:serviceName>fromMetaAlignmentsToTextScoreMatrix</s:serviceName>
-      <s:authorityName>genome.imim.es</s:authorityName>
-    </s:biomobywsdl>
-  </s:processor>
-  <s:processor name="runMultiPairwiseMetaAlignment">
-    <s:description>runMultiPairwiseMetaAlignment runs Meta-alignment software on a multiple running mode, receiving a collection of maps, making pairs of them and, foreach pair, it produces alignments of sequences of TF binding sites. It returns the predictions in 'Meta-alignment' format. You can use runMatScanGFF to produce the input GFF files</s:description>
-    <s:biomobywsdl>
-      <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
-      <s:serviceName>runMultiPairwiseMetaAlignment</s:serviceName>
-      <s:authorityName>genome.imim.es</s:authorityName>
-      <s:Parameter s:name="lamba penalty">0.1</s:Parameter>
-      <s:Parameter s:name="alpha penalty">0.5</s:Parameter>
-      <s:Parameter s:name="mu penalty">0.1</s:Parameter>
-    </s:biomobywsdl>
+  <s:processor name="parse_moby_gene_clusters">
+    <s:local>org.biomoby.client.taverna.plugin.ExtractMobyData</s:local>
   </s:processor>
   <s:processor name="fromFASTAToDNASequenceCollection">
     <s:description>Converts a FASTA_NA_multi object into a collection of DNASequence moby objects</s:description>
     <s:biomobywsdl>
       <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
       <s:serviceName>fromFASTAToDNASequenceCollection</s:serviceName>
+      <s:authorityName>genome.imim.es</s:authorityName>
+    </s:biomobywsdl>
+  </s:processor>
+  <s:processor name="fromMetaAlignmentsToTextScoreMatrix">
+    <s:description>Parses a collection of meta-alignment outputs to produce a text-formatted sequence similarity score matrix</s:description>
+    <s:biomobywsdl>
+      <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
+      <s:serviceName>fromMetaAlignmentsToTextScoreMatrix</s:serviceName>
       <s:authorityName>genome.imim.es</s:authorityName>
     </s:biomobywsdl>
   </s:processor>
@@ -79,8 +68,8 @@ See, http://genome.imim.es/webservices/workflows.html page for more details.</s:
       <s:authorityName>genome.imim.es</s:authorityName>
       <s:Parameter s:name="matrix mode">log-likelihood</s:Parameter>
       <s:Parameter s:name="strand">Both</s:Parameter>
-      <s:Parameter s:name="threshold">0.92</s:Parameter>
-      <s:Parameter s:name="motif database">Transfac</s:Parameter>
+      <s:Parameter s:name="threshold">0.85</s:Parameter>
+      <s:Parameter s:name="motif database">Jaspar</s:Parameter>
     </s:biomobywsdl>
   </s:processor>
   <s:processor name="runSOTAClustering">
@@ -108,6 +97,17 @@ See, http://genome.imim.es/webservices/workflows.html page for more details.</s:
       <s:serviceName>FASTA_NA_multi</s:serviceName>
       <s:authorityName />
     </s:biomobyobject>
+  </s:processor>
+  <s:processor name="runMultiPairwiseMetaAlignment">
+    <s:description>runMultiPairwiseMetaAlignment runs Meta-alignment software on a multiple running mode, receiving a collection of maps, making pairs of them and, foreach pair, it produces alignments of sequences of TF binding sites. It returns the predictions in 'Meta-alignment' format. You can use runMatScanGFF to produce the input GFF files</s:description>
+    <s:biomobywsdl>
+      <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
+      <s:serviceName>runMultiPairwiseMetaAlignment</s:serviceName>
+      <s:authorityName>genome.imim.es</s:authorityName>
+      <s:Parameter s:name="lamba penalty">0.1</s:Parameter>
+      <s:Parameter s:name="alpha penalty">0.5</s:Parameter>
+      <s:Parameter s:name="mu penalty">0.1</s:Parameter>
+    </s:biomobywsdl>
   </s:processor>
   <s:link source="String:mobyData" sink="FASTA_NA_multi:String(content)" />
   <s:link source="identifier" sink="FASTA_NA_multi:id" />
