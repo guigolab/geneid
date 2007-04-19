@@ -588,9 +588,14 @@ foreach my $geneId (@geneIds) {
 	    my $strand      = $upstream_slice_region->strand;
 	    my $assembly    = $upstream_slice_region->coord_system->version;
 	    
+	    my $geneId_display = $gene_stable_id;
+	    if ($geneId !~ /^ENS/) {
+	      $geneId_display = $geneId . "_" . $gene_stable_id;
+	    }
+	    
 	    my $description = "$geneId:$assembly:$chromosome:$slice_start:$slice_end:$strand:$tss_information";
 	    my $seqobj = Bio::PrimarySeq->new (
-					       -id    => $gene_stable_id,
+					       -id    => $geneId_display,
 					       -desc  => $description,
 					       -seq   => $upstream_sequence,
 					       );
