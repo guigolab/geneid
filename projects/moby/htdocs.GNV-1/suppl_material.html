@@ -78,9 +78,37 @@
   	        <td>&nbsp;</td>
                 <td width="700" colspan="2" class="textogris">
 		
-		  The co-expressed genes analysis pipeline was assessed on a set of genes that was extracted from
-		  <a href="http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?db=pubmed&cmd=Retrieve&list_uids=12368243" target="_blank">Thompson <em>et al.</em></a>,
-		  which reports the <br>identification of a new module of co-expressed genes.
+		  The co-expressed genes promoter analysis pipeline was assessed on a set of genes that was extracted from
+		  <a href="http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?db=pubmed&cmd=Retrieve&list_uids=12368243" target="_blank">Thompson <em>et
+		  al.</em></a> (2002).<br>
+		  This study reports the identification of a group of co-expressed Human genes, the PDEF module, that they found
+		  mainly expressed in tissue extracted from breast and ovarian cancers.
+		  <br><br>
+		  The PDEF module:
+		  <ul>
+		  	<li>PDEF
+		  	<li>H2AFO
+		  	<li>PSMD7
+		  	<li>NUCKS
+		  	<li>FLJ10111
+		  	<li>SQSTM1
+		  </ul>
+		  They also report another set of genes expressed during pregnancy:
+		  <ul>
+		  	<li>ENSG00000183668 (PSG9)
+		  	<li>PSG3
+		  	<li>PSG6
+		  	<li>PAPPA
+		  	<li>CSH1
+		  	<li>CYP19
+		  	<li>ADAM12
+		  	<li>PSG5
+		  	<li>TFPI2
+		  	<li>PSG2
+		  </ul>
+		  For the purpose of our analysis, we have mixed together
+		  the genes of both modules.
+		  
 		  <br><br>
 		  If you would like to repeat our analysis, you can use
 		  either our <a href="http://genome.imim.es/cgi-bin/moby/GeneClustering_DataSubmission.cgi" target="_blank">Web submission page</a> 	
@@ -90,8 +118,8 @@
 		  <ul>
 		    <li>Input for the Data submission Web page:
 		      <ul>
-		        <li><a href="suppl_materials/Thompson_geneSet.lst" target="_blank">The list of human genes</a>
-		        <li><a href="suppl_materials/Thompson_geneSet_upstream_seqs.fa" target="_blank">The 500 bp upstream sequences in FASTA format</a>
+		        <li><a href="suppl_material/Thompson_geneSet.lst" target="_blank">The list of human genes</a>
+		        <li><a href="suppl_material/Thompson_geneSet_upstream_seqs.fa" target="_blank">The 500 bp upstream sequences in FASTA format</a>
 		        <br>&nbsp;
 		      </ul>
 		    <li>Input for the Taverna Workflow:
@@ -102,6 +130,7 @@
 		      </ul>
 		    <li>The parameter settings are the following:
 		      <ul>
+		        <li>promoter sequence extraction from Ensembl: species=homo_sapiens; upstream_length=500; downstream_length=0
 		    	<li>MatScan: database=jaspar; threshold=0.85
 		    	<li>TF-alignment: &alpha=0.5; &lambda=0.1; &mu=0.1
 		    	<li>SOTA: distance=euclidean; resource_threshold=35
@@ -110,9 +139,12 @@
 		      <br>&nbsp;
 		    <li>Results
 		      <ul>
-		      	<li>The <a href="http://genome.imim.es/cgi-bin/moby/retrieveWorkflowResults.cgi?jobid=uEmATZ" target="_blank">results reporting page</a>
-		      	<li>A complete <a href="http://genome.imim.es/webservices/workflows/results/GENE_CLUSTERING_OUTPUT.XhKlVs.zip" target="_blank">archive</a> with the output of every steps.
-		      	<li>The <a href="suppl_materials/Thompson_500bp_jaspar_0.86.SOTA_35.png" target="_blank">SOTA tree</a> generated with
+		      	<li>The <a
+		      href="http://genome.imim.es/cgi-bin/moby/retrieveWorkflowResults.cgi?jobid=o4p9e3" target="_blank">results reporting page</a>
+		      	<li>A complete <a
+		      href="http://genome.imim.es/webservices/workflows/results/GENE_CLUSTERING_OUTPUT.5UdBN8.zip" target="_blank">archive</a> with the output of every steps.
+		      	<li>The <a
+		      href="suppl_material/Thompson_500bp_list_jaspar_0.85.SOTA_35.png" target="_blank">SOTA tree</a> generated with
 		      	<a href="http://www.gepas.org" target="_blank">GEPAS</a> Tree visualization tool.
 		      	<br>&nbsp;
 		      </ul>
