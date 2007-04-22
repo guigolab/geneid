@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.116 2007-03-31 19:34:47 gmaster Exp $
+# $Id: Factory.pm,v 1.117 2007-04-22 22:23:25 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -3889,6 +3889,9 @@ sub GFF2JPEG_call {
     # if not empty file
     if (! -z $jpeg_file) {
       $image = qx/cat $jpeg_file/;
+    }
+    else {
+      print STDERR "WARNING - GFF2JPEG output file is empty!\n";
     }
     
     if (!$debug) {
