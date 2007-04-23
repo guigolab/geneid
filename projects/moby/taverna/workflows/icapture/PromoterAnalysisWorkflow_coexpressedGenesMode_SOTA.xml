@@ -9,22 +9,19 @@ Output:
   * foreach cluster, a TF alignment map that defines a consensus transcriptional regulatory pattern.
 
 See, http://genome.imim.es/webservices/workflows.html page for more details.</s:workflowdescription>
-  <s:processor name="parse_moby_multi_meta_gff">
+  <s:processor name="parse_moby_meta_gff">
     <s:local>org.biomoby.client.taverna.plugin.ExtractMobyData</s:local>
   </s:processor>
-  <s:processor name="parse_moby_matscan_gff">
-    <s:local>org.embl.ebi.escience.scuflworkers.biomoby.ExtractMobyData</s:local>
+  <s:processor name="StringArticleName" boring="true">
+    <s:stringconstant>content</s:stringconstant>
   </s:processor>
-  <s:processor name="parse_moby_multiple_meta">
-    <s:local>org.biomoby.client.taverna.plugin.ExtractMobyData</s:local>
+  <s:processor name="identifier" boring="true">
+    <s:stringconstant />
   </s:processor>
   <s:processor name="decode_image_gff2jpeg">
     <s:local>org.embl.ebi.escience.scuflworkers.java.DecodeBase64</s:local>
   </s:processor>
-  <s:processor name="parse_moby_image_gff2jpeg">
-    <s:local>org.biomoby.client.taverna.plugin.ExtractMobyData</s:local>
-  </s:processor>
-  <s:processor name="parse_moby_meta_gff">
+  <s:processor name="parse_moby_multiple_meta">
     <s:local>org.biomoby.client.taverna.plugin.ExtractMobyData</s:local>
   </s:processor>
   <s:processor name="parse_moby_score_matrix">
@@ -36,17 +33,30 @@ See, http://genome.imim.es/webservices/workflows.html page for more details.</s:
   <s:processor name="parse_moby_gene_clusters">
     <s:local>org.biomoby.client.taverna.plugin.ExtractMobyData</s:local>
   </s:processor>
-  <s:processor name="StringArticleName" boring="true">
-    <s:stringconstant>content</s:stringconstant>
-  </s:processor>
-  <s:processor name="identifier" boring="true">
-    <s:stringconstant />
-  </s:processor>
   <s:processor name="parse_moby_meta">
     <s:local>org.embl.ebi.escience.scuflworkers.biomoby.ExtractMobyData</s:local>
   </s:processor>
+  <s:processor name="parse_moby_multi_meta_gff">
+    <s:local>org.biomoby.client.taverna.plugin.ExtractMobyData</s:local>
+  </s:processor>
   <s:processor name="parse_moby_upstream_sequences">
     <s:local>org.biomoby.client.taverna.plugin.ExtractMobyData</s:local>
+  </s:processor>
+  <s:processor name="Beanshell_scripting_host">
+    <s:beanshell>
+      <s:scriptvalue>ArrayList list = new ArrayList();
+list.add(strings);</s:scriptvalue>
+      <s:beanshellinputlist>
+        <s:beanshellinput s:syntactictype="'text/xml'">strings</s:beanshellinput>
+      </s:beanshellinputlist>
+      <s:beanshelloutputlist>
+        <s:beanshelloutput s:syntactictype="'text/xml'">list</s:beanshelloutput>
+      </s:beanshelloutputlist>
+      <s:dependencies s:classloader="iteration" />
+    </s:beanshell>
+  </s:processor>
+  <s:processor name="parse_moby_matscan_gff">
+    <s:local>org.embl.ebi.escience.scuflworkers.biomoby.ExtractMobyData</s:local>
   </s:processor>
   <s:processor name="runMultiPairwiseMetaAlignmentGFF">
     <s:description>Runs Meta-alignment software on a multiple running mode, receiving a collection of maps, making pairs of them and, foreach pair, producing, in GFF format, alignments of sequences of TF binding sites</s:description>
@@ -72,6 +82,36 @@ See, http://genome.imim.es/webservices/workflows.html page for more details.</s:
       <s:Parameter s:name="gap penalty">-10</s:Parameter>
     </s:biomobywsdl>
   </s:processor>
+  <s:processor name="runSOTAClustering">
+    <s:description>Runs SOTA algorithm to partition the gene space into subclusters. The input is a gene score matrix represented as a MicroArrayData_Text object.</s:description>
+    <s:biomobywsdl>
+      <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
+      <s:serviceName>runSOTAClustering</s:serviceName>
+      <s:authorityName>genome.imim.es</s:authorityName>
+      <s:Parameter s:name="resource_threshold">35</s:Parameter>
+      <s:Parameter s:name="distance">euclidean</s:Parameter>
+    </s:biomobywsdl>
+  </s:processor>
+  <s:processor name="String">
+    <s:description>a string</s:description>
+    <s:biomobyobject>
+      <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
+      <s:serviceName>String</s:serviceName>
+      <s:authorityName />
+    </s:biomobyobject>
+  </s:processor>
+  <s:processor name="getUpstreamSeqFromEnsembl1">
+    <s:description>Sequence retrieval tool from Ensembl database. It returns the upstream sequence of a given set of Ensembl gene identifiers. These identifiers could be external ones, such as Refseq Ids or Affymetrix ids.</s:description>
+    <s:biomobywsdl>
+      <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
+      <s:serviceName>getUpstreamSeqFromEnsembl</s:serviceName>
+      <s:authorityName>genome.imim.es</s:authorityName>
+      <s:Parameter s:name="upstream length">500</s:Parameter>
+      <s:Parameter s:name="intergenic only">False</s:Parameter>
+      <s:Parameter s:name="downstream length" />
+      <s:Parameter s:name="organism">Homo sapiens</s:Parameter>
+    </s:biomobywsdl>
+  </s:processor>
   <s:processor name="getUpstreamSeqFromEnsembl">
     <s:description>Sequence retrieval tool from Ensembl database. It returns the upstream sequence of a given set of Ensembl gene identifiers. These identifiers could be external ones, such as Refseq Ids or Affymetrix ids.
  In case you select the orthologous mode, it will returns the upstream sequence of all orthologous genes of a given input gene (only one input gene identifier in that case)</s:description>
@@ -85,14 +125,12 @@ See, http://genome.imim.es/webservices/workflows.html page for more details.</s:
       <s:Parameter s:name="organism">Homo sapiens</s:Parameter>
     </s:biomobywsdl>
   </s:processor>
-  <s:processor name="runSOTAClustering">
-    <s:description>Runs SOTA algorithm to partition the gene space into subclusters. The input is a gene score matrix represented as a MicroArrayData_Text object.</s:description>
+  <s:processor name="fromGenericSequenceCollectionToFASTA">
+    <s:description>Converts a collection of generic sequences into FASTA sequences</s:description>
     <s:biomobywsdl>
       <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
-      <s:serviceName>runSOTAClustering</s:serviceName>
+      <s:serviceName>fromGenericSequenceCollectionToFASTA</s:serviceName>
       <s:authorityName>genome.imim.es</s:authorityName>
-      <s:Parameter s:name="resource_threshold">35</s:Parameter>
-      <s:Parameter s:name="distance">euclidean</s:Parameter>
     </s:biomobywsdl>
   </s:processor>
   <s:processor name="runMatScanGFFCollection">
@@ -107,36 +145,14 @@ See, http://genome.imim.es/webservices/workflows.html page for more details.</s:
       <s:Parameter s:name="motif database">Jaspar</s:Parameter>
     </s:biomobywsdl>
   </s:processor>
-  <s:processor name="fromGenericSequenceCollectionToFASTA">
-    <s:description>Converts a collection of generic sequences into FASTA sequences</s:description>
+  <s:processor name="runGFF2JPEG">
+    <s:description>Runs gff2ps software to vizualize a set of GFF annotations maps. It returns an encoded image in JPEG format.</s:description>
     <s:biomobywsdl>
       <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
-      <s:serviceName>fromGenericSequenceCollectionToFASTA</s:serviceName>
+      <s:serviceName>runGFF2JPEG</s:serviceName>
       <s:authorityName>genome.imim.es</s:authorityName>
     </s:biomobywsdl>
-  </s:processor>
-  <s:processor name="getUpstreamSeqFromEnsembl1">
-    <s:description>Sequence retrieval tool from Ensembl database. It returns the upstream sequence of a given set of Ensembl gene identifiers. These identifiers could be external ones, such as Refseq Ids or Affymetrix ids.</s:description>
-    <s:biomobywsdl>
-      <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
-      <s:serviceName>getUpstreamSeqFromEnsembl</s:serviceName>
-      <s:authorityName>genome.imim.es</s:authorityName>
-      <s:Parameter s:name="upstream length">500</s:Parameter>
-      <s:Parameter s:name="intergenic only">False</s:Parameter>
-      <s:Parameter s:name="downstream length" />
-      <s:Parameter s:name="organism">Homo sapiens</s:Parameter>
-    </s:biomobywsdl>
-  </s:processor>
-  <s:processor name="runMultiPairwiseMetaAlignment">
-    <s:description>runMultiPairwiseMetaAlignment runs Meta-alignment software on a multiple running mode, receiving a collection of maps, making pairs of them and, foreach pair, it produces alignments of sequences of TF binding sites. It returns the predictions in 'Meta-alignment' format. You can use runMatScanGFF to produce the input GFF files</s:description>
-    <s:biomobywsdl>
-      <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
-      <s:serviceName>runMultiPairwiseMetaAlignment</s:serviceName>
-      <s:authorityName>genome.imim.es</s:authorityName>
-      <s:Parameter s:name="lamba penalty">0.1</s:Parameter>
-      <s:Parameter s:name="alpha penalty">0.5</s:Parameter>
-      <s:Parameter s:name="mu penalty">0.1</s:Parameter>
-    </s:biomobywsdl>
+    <s:mergemode input="GFF(Collection - 'maps')" mode="merge" />
   </s:processor>
   <s:processor name="runMatScanGFFCollection1">
     <s:description>Analyzes a collection of DNA sequences for putative transcription factor binding sites from Transfac or Jaspar and reports them in GFF format</s:description>
@@ -150,30 +166,33 @@ See, http://genome.imim.es/webservices/workflows.html page for more details.</s:
       <s:Parameter s:name="motif database">Jaspar</s:Parameter>
     </s:biomobywsdl>
   </s:processor>
-  <s:processor name="fromMetaAlignmentsToTextScoreMatrix">
-    <s:description>Parses a collection of meta-alignment outputs to produce a text-formatted sequence similarity score matrix</s:description>
-    <s:biomobywsdl>
-      <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
-      <s:serviceName>fromMetaAlignmentsToTextScoreMatrix</s:serviceName>
-      <s:authorityName>genome.imim.es</s:authorityName>
-    </s:biomobywsdl>
-  </s:processor>
-  <s:processor name="String">
-    <s:description>a string</s:description>
+  <s:processor name="List_Of_GeneIdentifiers">
+    <s:description>Fractional solvation report</s:description>
     <s:biomobyobject>
       <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
-      <s:serviceName>String</s:serviceName>
+      <s:serviceName>List_Text</s:serviceName>
       <s:authorityName />
     </s:biomobyobject>
   </s:processor>
-  <s:processor name="runGFF2JPEG">
-    <s:description>Runs gff2ps software to vizualize a set of GFF annotations maps. It returns an encoded image in JPEG format.</s:description>
+  <s:processor name="Parse_Moby_Data_b64_encoded_jpeg">
+    <s:description>Processor to parse the datatype b64_encoded_jpeg</s:description>
+    <s:biomobyparser>
+      <s:endpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:endpoint>
+      <s:datatype>b64_encoded_jpeg</s:datatype>
+      <s:articleName>image</s:articleName>
+      <s:description>Processor to parse the datatype b64_encoded_jpeg</s:description>
+    </s:biomobyparser>
+  </s:processor>
+  <s:processor name="runMultiPairwiseMetaAlignment">
+    <s:description>runMultiPairwiseMetaAlignment runs Meta-alignment software on a multiple running mode, receiving a collection of maps, making pairs of them and, foreach pair, it produces alignments of sequences of TF binding sites. It returns the predictions in 'Meta-alignment' format. You can use runMatScanGFF to produce the input GFF files</s:description>
     <s:biomobywsdl>
       <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
-      <s:serviceName>runGFF2JPEG</s:serviceName>
+      <s:serviceName>runMultiPairwiseMetaAlignment</s:serviceName>
       <s:authorityName>genome.imim.es</s:authorityName>
+      <s:Parameter s:name="lamba penalty">0.1</s:Parameter>
+      <s:Parameter s:name="alpha penalty">0.5</s:Parameter>
+      <s:Parameter s:name="mu penalty">0.1</s:Parameter>
     </s:biomobywsdl>
-    <s:mergemode input="GFF(Collection - 'maps')" mode="merge" />
   </s:processor>
   <s:processor name="runMultiMetaAlignment">
     <s:description>Runs Multiple-Meta-Alignment software to perform multiple non-collinear transcription factor map alignments of promoter regions.</s:description>
@@ -188,16 +207,31 @@ See, http://genome.imim.es/webservices/workflows.html page for more details.</s:
       <s:Parameter s:name="mu penalty">0.1</s:Parameter>
     </s:biomobywsdl>
   </s:processor>
-  <s:processor name="List_Of_GeneIdentifiers">
-    <s:description>Fractional solvation report</s:description>
-    <s:biomobyobject>
+  <s:processor name="fromMetaAlignmentsToTextScoreMatrix">
+    <s:description>Parses a collection of meta-alignment outputs to produce a text-formatted sequence similarity score matrix</s:description>
+    <s:biomobywsdl>
       <s:mobyEndpoint>http://mobycentral.icapture.ubc.ca/cgi-bin/MOBY05/mobycentral.pl</s:mobyEndpoint>
-      <s:serviceName>List_Text</s:serviceName>
-      <s:authorityName />
-    </s:biomobyobject>
+      <s:serviceName>fromMetaAlignmentsToTextScoreMatrix</s:serviceName>
+      <s:authorityName>genome.imim.es</s:authorityName>
+    </s:biomobywsdl>
   </s:processor>
+  <s:link source="Beanshell_scripting_host:list" sink="runGFF2JPEG:GFF(Collection - 'maps')" />
+  <s:link source="Parse_Moby_Data_b64_encoded_jpeg:image_'content'" sink="decode_image_gff2jpeg:base64" />
   <s:link source="String:mobyData" sink="List_Of_GeneIdentifiers:String(content)" />
   <s:link source="StringArticleName:value" sink="String:article name" />
+  <s:link source="runGFF2JPEG:b64_encoded_jpeg(image)" sink="Parse_Moby_Data_b64_encoded_jpeg:mobyData('b64_encoded_jpeg')" />
+  <s:link source="runMatScanGFFCollection1:GFF(Collection - 'matscan_predictions')" sink="runMultiMetaAlignmentGFF:GFF(Collection - 'maps')" />
+  <s:link source="runMatScanGFFCollection:GFF(Collection - 'matscan_predictions' As Simples)" sink="parse_moby_matscan_gff:mobydata" />
+  <s:link source="runMatScanGFFCollection:GFF(Collection - 'matscan_predictions')" sink="runMultiPairwiseMetaAlignment:GFF(Collection - 'maps')" />
+  <s:link source="runMultiMetaAlignment:Meta_Alignment_Text(multi_meta_predictions)" sink="parse_moby_multiple_meta:mobydata" />
+  <s:link source="runMultiMetaAlignmentGFF:GFF(multi_meta_predictions)" sink="parse_moby_multi_meta_gff:mobydata" />
+  <s:link source="runMultiPairwiseMetaAlignment:Meta_Alignment_Text(Collection - 'meta_predictions' As Simples)" sink="parse_moby_meta:mobydata" />
+  <s:link source="runMultiPairwiseMetaAlignment:Meta_Alignment_Text(Collection - 'meta_predictions')" sink="fromMetaAlignmentsToTextScoreMatrix:Meta_Alignment_Text(Collection - 'similarity_results')" />
+  <s:link source="runMultiPairwiseMetaAlignmentGFF:GFF(Collection - 'meta_predictions' As Simples)" sink="parse_moby_meta_gff:mobydata" />
+  <s:link source="runSOTAClustering:List_Text(Collection - 'gene_clusters' As Simples)" sink="getUpstreamSeqFromEnsembl1:List_Text(genes)" />
+  <s:link source="runSOTAClustering:List_Text(Collection - 'gene_clusters' As Simples)" sink="parse_moby_gene_clusters:mobydata" />
+  <s:link source="runSOTAClustering:Newick_Text(gene_tree)" sink="parse_moby_gene_tree:mobydata" />
+  <s:link source="decode_image_gff2jpeg:bytes" sink="TFBSs_cluster_image" />
   <s:link source="fromGenericSequenceCollectionToFASTA:FASTA(sequences)" sink="parse_moby_upstream_sequences:mobydata" />
   <s:link source="fromMetaAlignmentsToTextScoreMatrix:MicroArrayData_Text(microarraydata)" sink="parse_moby_score_matrix:mobydata" />
   <s:link source="fromMetaAlignmentsToTextScoreMatrix:MicroArrayData_Text(microarraydata)" sink="runSOTAClustering:MicroArrayData_Text(gene_score_matrix)" />
@@ -209,11 +243,6 @@ See, http://genome.imim.es/webservices/workflows.html page for more details.</s:
   <s:link source="identifier:value" sink="String:id" />
   <s:link source="namespace" sink="List_Of_GeneIdentifiers:namespace" />
   <s:link source="List_Of_GeneIdentifiers:mobyData" sink="getUpstreamSeqFromEnsembl:List_Text(genes)" />
-  <s:link source="parse_moby_image_gff2jpeg:value" sink="decode_image_gff2jpeg:base64" />
-  <s:link source="runGFF2JPEG:b64_encoded_jpeg(image)" sink="parse_moby_image_gff2jpeg:mobydata" />
-  <s:link source="runMatScanGFFCollection1:GFF(Collection - 'matscan_predictions')" sink="runMultiMetaAlignment:GFF(Collection - 'maps')" />
-  <s:link source="runMatScanGFFCollection:GFF(Collection - 'matscan_predictions')" sink="runMultiPairwiseMetaAlignmentGFF:GFF(Collection - 'maps')" />
-  <s:link source="decode_image_gff2jpeg:bytes" sink="TFBSs_cluster_image" />
   <s:link source="parse_moby_gene_clusters:value" sink="gene_clusters" />
   <s:link source="parse_moby_gene_tree:value" sink="gene_tree" />
   <s:link source="parse_moby_matscan_gff:value" sink="matscan_gff" />
@@ -223,18 +252,9 @@ See, http://genome.imim.es/webservices/workflows.html page for more details.</s:
   <s:link source="parse_moby_multiple_meta:value" sink="MultiMeta_alignment" />
   <s:link source="parse_moby_score_matrix:value" sink="score_matrix" />
   <s:link source="parse_moby_upstream_sequences:value" sink="upstream_sequences_fasta" />
-  <s:link source="runMatScanGFFCollection1:GFF(Collection - 'matscan_predictions')" sink="runMultiMetaAlignmentGFF:GFF(Collection - 'maps')" />
-  <s:link source="runMatScanGFFCollection:GFF(Collection - 'matscan_predictions' As Simples)" sink="parse_moby_matscan_gff:mobydata" />
-  <s:link source="runMatScanGFFCollection:GFF(Collection - 'matscan_predictions')" sink="runMultiPairwiseMetaAlignment:GFF(Collection - 'maps')" />
-  <s:link source="runMultiMetaAlignment:Meta_Alignment_Text(multi_meta_predictions)" sink="parse_moby_multiple_meta:mobydata" />
-  <s:link source="runMultiMetaAlignmentGFF:GFF(multi_meta_predictions)" sink="parse_moby_multi_meta_gff:mobydata" />
-  <s:link source="runMultiMetaAlignmentGFF:GFF(multi_meta_predictions)" sink="runGFF2JPEG:GFF(Collection - 'maps')" />
-  <s:link source="runMultiPairwiseMetaAlignment:Meta_Alignment_Text(Collection - 'meta_predictions' As Simples)" sink="parse_moby_meta:mobydata" />
-  <s:link source="runMultiPairwiseMetaAlignment:Meta_Alignment_Text(Collection - 'meta_predictions')" sink="fromMetaAlignmentsToTextScoreMatrix:Meta_Alignment_Text(Collection - 'similarity_results')" />
-  <s:link source="runMultiPairwiseMetaAlignmentGFF:GFF(Collection - 'meta_predictions' As Simples)" sink="parse_moby_meta_gff:mobydata" />
-  <s:link source="runSOTAClustering:List_Text(Collection - 'gene_clusters' As Simples)" sink="getUpstreamSeqFromEnsembl1:List_Text(genes)" />
-  <s:link source="runSOTAClustering:List_Text(Collection - 'gene_clusters' As Simples)" sink="parse_moby_gene_clusters:mobydata" />
-  <s:link source="runSOTAClustering:Newick_Text(gene_tree)" sink="parse_moby_gene_tree:mobydata" />
+  <s:link source="runMatScanGFFCollection1:GFF(Collection - 'matscan_predictions')" sink="runMultiMetaAlignment:GFF(Collection - 'maps')" />
+  <s:link source="runMatScanGFFCollection:GFF(Collection - 'matscan_predictions')" sink="runMultiPairwiseMetaAlignmentGFF:GFF(Collection - 'maps')" />
+  <s:link source="runMultiMetaAlignmentGFF:GFF(multi_meta_predictions)" sink="Beanshell_scripting_host:strings" />
   <s:source name="namespace" />
   <s:source name="list_of_geneIdentifiers_input" />
   <s:sink name="matscan_gff" />
