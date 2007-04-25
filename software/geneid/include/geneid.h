@@ -28,7 +28,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/     
 
-/* $Id: geneid.h,v 1.33 2007-04-04 12:40:12 talioto Exp $ */
+/* $Id: geneid.h,v 1.34 2007-04-25 09:08:52 talioto Exp $ */
 
 /* Required libraries */
 #include <stdlib.h>
@@ -103,7 +103,7 @@ A. DEFINITIONS
 /* Maximum number of exons in a gene        */
 #define MAXEXONGENE 1000         
 
-/* Maximum lenght of a protein              */
+/* Maximum length of a protein              */
 #define MAXAA 50000              
 
 /* Maximum length of (cDNA) in genes        */

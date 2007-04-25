@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: CookingGenes.c,v 1.25 2007-04-04 12:40:12 talioto Exp $  */
+/*  $Id: CookingGenes.c,v 1.26 2007-04-25 09:08:52 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -240,6 +240,7 @@ long CookingInfo(exonGFF* eorig,
   for(igen=0; igen < MAXGENE; igen++)
     {
       info[igen].nexons = 0;
+      info[igen].nintrons = 0;
       info[igen].score = 0.0;
     }
   
@@ -284,9 +285,6 @@ long CookingInfo(exonGFF* eorig,
 			  if (e->Strand == '-')
 				{
 				  if(!strcmp(e->Type,sINTRON)){
-				    /* if (e->Score==MAXSCORE) */
-/* 				      *artScore = *artScore + MAXSCORE; */
-				    /* e = (e-> PreviousExon); */
 				    info[igen].nintrons++;
 				    
 				  }
@@ -296,7 +294,7 @@ long CookingInfo(exonGFF* eorig,
 				  if (strcmp(e->Type,sINTRON)){
 				    info[igen].nexons++;
 				  }
-				  /* info[igen].nexons++; */
+
 				  /* Evidences (annotations) not added if infinitum score */
 				  if (e->Score==MAXSCORE)
 					*artScore = *artScore + MAXSCORE;
@@ -316,29 +314,15 @@ long CookingInfo(exonGFF* eorig,
 				  while( !stop && !stop1 )
 					{  
 					  if(!strcmp(e->Type,sINTRON)){
-					    /* if (e->Score==MAXSCORE) */
-					    /* 				      *artScore = *artScore + MAXSCORE; */
-					    /* e = (e-> PreviousExon); */
+
 					    info[igen].nintrons++;
 				    
 					  }
-				  
-					  info[igen].start = e;
-					  info[igen].end = e;
+
 					  if (strcmp(e->Type,sINTRON)){
 					    info[igen].nexons++;
 					  }
-					 
-				  
-/* 					  if(!strcmp(e->Type,sINTRON)){ */
-/* 					    if (e->Score==MAXSCORE) */
-/* 					      *artScore = *artScore + MAXSCORE; */
-/* 					    e = (e-> PreviousExon); */
-/* 					  } */
-/* /\* 					  if (strcmp(e->Type,sINTRON)){ *\/ */
-/* /\* 					    info[igen].nexons++; *\/ */
-/* /\* 					  } *\/ */
-/* 					  info[igen].nexons++; */
+
 					  /* Evidences (annotations) not summed if infinite score */
 					  if (e->Score==MAXSCORE)
 						*artScore = *artScore + MAXSCORE;
@@ -362,8 +346,6 @@ long CookingInfo(exonGFF* eorig,
 				  {
 				    
 				    if(!strcmp(e->PreviousExon->Type,sINTRON)){
-				      /* *artScore = *artScore + e->PreviousExon->Score; */
-/* 				      e->PreviousExon = (e->PreviousExon->PreviousExon); */
 				      info[igen].nintrons++;
 				    }
 					info[igen].start = e;
@@ -371,7 +353,6 @@ long CookingInfo(exonGFF* eorig,
 					if (strcmp(e->Type,sINTRON)){
 					  info[igen].nexons++;
 					}
-					/* info[igen].nexons++; */
 					if (e->Score==MAXSCORE)
 					  *artScore = *artScore + MAXSCORE;
 					else
@@ -390,14 +371,11 @@ long CookingInfo(exonGFF* eorig,
 					  { 
 					    
 					    if(!strcmp(e->PreviousExon->Type,sINTRON)){
-/* 					      *artScore = *artScore + e->PreviousExon->Score; */
-/* 					      e->PreviousExon = (e->PreviousExon->PreviousExon); */
 					      info[igen].nintrons++;
 					    }
 					    if (strcmp(e->Type,sINTRON)){
 					      info[igen].nexons++;
 					    }
-					    /* info[igen].nexons++; */
 					    /* Evidences (annotations) not added if infinitum score */
 					    if (e->Score==MAXSCORE)
 					      *artScore = *artScore + MAXSCORE;
@@ -545,7 +523,7 @@ void CookingGenes(exonGFF* e,
   int** tAA;
   double artificialScore;
   long i;
-  
+
   tmpDNA = NULL;
 
   /* Get info about each gene */
