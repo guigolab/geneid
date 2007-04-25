@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: Translate.c,v 1.9 2007-04-03 12:39:53 talioto Exp $  */
+/*  $Id: Translate.c,v 1.10 2007-04-25 09:08:52 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -110,7 +110,7 @@ void TranslateGene(exonGFF* e,
 	  /* Traversing the list of exons */
 	  for(i=0, totalAA=0, currFrame=0; i<nExons; i++)
 		{
-		  if (strcmp(e->Type,sINTRON)){
+		  /* if (strcmp(e->Type,sINTRON)){ */
 		  /* 0. Acquire the real positions of the exon in the sequence */
 		  p1 = (e->evidence)?
 			e->Acceptor->Position + e->offset1 : 
@@ -209,7 +209,7 @@ void TranslateGene(exonGFF* e,
         
 		  totalAA = totalAA + currAA;
 		  tAA[i][1] = totalAA;
-		  }
+		  /* } */
 		  /* 5. Pointer jumping to the next exon */
 		  e = e->PreviousExon;
 		} /* endfor */
@@ -245,7 +245,7 @@ void TranslateGene(exonGFF* e,
 	  /* Traversing the list of exons */
 	  for(i=0, totalAA=0, currRmd=0; i<nExons; i++)
 		{
-		  if (strcmp(e->Type,sINTRON)){
+		  /* if (strcmp(e->Type,sINTRON)){ */
 		  p1 = (e->evidence)? 
 			e->Acceptor->Position + e->offset1: 
 			e->Acceptor->Position + e->offset1 - COFFSET;
@@ -343,9 +343,10 @@ void TranslateGene(exonGFF* e,
 		  tAA[i][1] = totalAA;
 	  
 		  /* Next exon */
-		  free(rs); 
-		  }
+		   
+		  /* } */
 		  e = e->PreviousExon;
+		  free(rs);
 		  
 		}
 	  /* Frame of the last exon in the gene */
@@ -403,7 +404,8 @@ void GetcDNA(exonGFF* e,
     {
       for(i=0, *nNN = 0; i<nExons; i++)
 		{
-		  p1 = e->Acceptor->Position + e->offset1 - COFFSET;
+		  if (strcmp(e->Type,sINTRON)){
+		    p1 = e->Acceptor->Position + e->offset1 - COFFSET;
 		  p2 = e->Donor->Position + e->offset2 - COFFSET;
         
 		  /* Get the cDNA for this exon */
@@ -419,6 +421,7 @@ void GetcDNA(exonGFF* e,
 		  strcpy(cDNA,tmpDNA);
         
 		  *nNN += p2-p1+1;
+		  }
 		  e = e->PreviousExon;
 		}
     }
