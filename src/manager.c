@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/* $Id: manager.c,v 1.11 2007-01-11 17:53:01 talioto Exp $ */
+/* $Id: manager.c,v 1.12 2007-04-25 17:20:01 talioto Exp $ */
 
 #include "geneid.h"
 
@@ -36,6 +36,7 @@ extern int U2GCAG;
 extern int U2GTA;
 extern int U2GTG;
 extern int U2GTY;
+extern int RSS;
 extern long NUMSITES,NUMEXONS;
 
 /* Management of splice sites prediction and exon construction/scoring */
@@ -228,12 +229,13 @@ void  manager(char *Sequence,
 
   sprintf(mess,"---------\t\t%8ld", allSites->nSites);
   printRes(mess);
-
-  /* Predicted sites must be sorted by position */
-  printMess ("Sorting sites ...");
-  SortSites(allSites->DonorSites,allSites->nDonorSites,donorsites,l1b,l2b);
-  SortSites(allSites->AcceptorSites,allSites->nAcceptorSites,acceptorsites,l1a,l2a);
-
+  
+  if ( U12GTAG || U12ATAC || U2GCAG || U2GTA || U2GTG || U2GTY ){
+    /* Predicted sites must be sorted by position */
+    printMess ("Sorting sites ...");
+    SortSites(allSites->DonorSites,allSites->nDonorSites,donorsites,l1b,l2b);
+    SortSites(allSites->AcceptorSites,allSites->nAcceptorSites,acceptorsites,l1a,l2a);
+  }
   /* 2. Building exons with splice sites predicted before */ 
   printMess ("Computing exons ...");   
   
@@ -256,15 +258,16 @@ void  manager(char *Sequence,
   sprintf(mess,"Internal Exons \t\t%8ld", allExons->nInternalExons);
   printRes(mess); 
 
-  allExons->nZeroLengthExons =
-	BuildZeroLengthExons(allSites->AcceptorSites,allSites->nAcceptorSites,
-					   allSites->DonorSites,allSites->nDonorSites,
-					   allSites->StopCodons,allSites->nStopCodons,
-					   gp->MaxDonors,sZEROLENGTH,Sequence,
-					   allExons->ZeroLengthExons,NUMEXONS);
-  sprintf(mess,"Zero-Length Exons \t\t%8ld", allExons->nZeroLengthExons);
-  printRes(mess); 
-    
+  if (RSS){
+    allExons->nZeroLengthExons =
+      BuildZeroLengthExons(allSites->AcceptorSites,allSites->nAcceptorSites,
+			   allSites->DonorSites,allSites->nDonorSites,
+			   allSites->StopCodons,allSites->nStopCodons,
+			   gp->MaxDonors,sZEROLENGTH,Sequence,
+			   allExons->ZeroLengthExons,NUMEXONS);
+    sprintf(mess,"Zero-Length Exons \t%8ld", allExons->nZeroLengthExons);
+    printRes(mess); 
+  }
   allExons->nTerminalExons =
     BuildTerminalExons(allSites->AcceptorSites,allSites->nAcceptorSites,
 					   allSites->StopCodons,allSites->nStopCodons,

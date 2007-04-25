@@ -25,13 +25,13 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: SortExons.c,v 1.14 2007-03-30 15:09:29 talioto Exp $  */
+/*  $Id: SortExons.c,v 1.15 2007-04-25 17:20:01 talioto Exp $  */
 
 #include "geneid.h"
 
 /* Maximum allowed number of generic exons (multiplied by FSORT) */
 extern long NUMEXONS;
-
+extern int RSS;
 extern int EVD;
 extern int FWD,RVS;
 extern int scanORF;
@@ -84,7 +84,6 @@ void InsertBeginExon(exonGFF* Exons, long lowerlimit)
   Exons[0].lValue = 0;
   Exons[0].rValue = 0; 
   Exons[0].selected = 0;
-  Exons[0].nConstraints = 0;
 
   /* 2. Reverse Strand */
   /* Create the exon structure */
@@ -127,7 +126,6 @@ void InsertBeginExon(exonGFF* Exons, long lowerlimit)
   Exons[1].lValue = 0;
   Exons[1].rValue = 0; 
   Exons[1].selected = 0;
-  Exons[1].nConstraints = 0;
 
 }
 
@@ -179,8 +177,6 @@ void InsertEndExon(exonGFF* Exons, long n, long L)
   Exons[n].lValue = 0;
   Exons[n].rValue = 0; 
   Exons[n].selected = 0;
-  Exons[n].nConstraints = 0;
-
 
   /* 1. Reverse Strand */
   /* Create the exon structure */
@@ -224,7 +220,6 @@ void InsertEndExon(exonGFF* Exons, long n, long L)
   Exons[n+1].lValue = 0;
   Exons[n+1].rValue = 0; 
   Exons[n+1].selected = 0;
-  Exons[n+1].nConstraints = 0;
 
 }
 
@@ -322,16 +317,16 @@ void SortExons(packExons* allExons,
       offset = (allExons->InternalExons+i)->offset1;
       UpdateList(&(ExonList[acceptor + offset]), allExons->InternalExons+i); 
     }
-
-  for (i=0;i<allExons->nZeroLengthExons;i++) 
-    {
-      acceptor=(allExons->ZeroLengthExons+i)->Acceptor->Position - left;
-      (allExons->ZeroLengthExons+i)->Strand = '+';
-      CorrectExon(allExons->ZeroLengthExons+i);
-      offset = (allExons->ZeroLengthExons+i)->offset1;
-      UpdateList(&(ExonList[acceptor + offset]), allExons->ZeroLengthExons+i); 
-    }
-
+  if (RSS){
+    for (i=0;i<allExons->nZeroLengthExons;i++) 
+      {
+	acceptor=(allExons->ZeroLengthExons+i)->Acceptor->Position - left;
+	(allExons->ZeroLengthExons+i)->Strand = '+';
+	CorrectExon(allExons->ZeroLengthExons+i);
+	offset = (allExons->ZeroLengthExons+i)->offset1;
+	UpdateList(&(ExonList[acceptor + offset]), allExons->ZeroLengthExons+i); 
+      }
+  }
   for (i=0;i<allExons->nTerminalExons;i++) 
     {
       acceptor=(allExons->TerminalExons+i)->Acceptor->Position - left;
@@ -379,14 +374,16 @@ void SortExons(packExons* allExons,
       UpdateList(&(ExonList[acceptor + offset]), allExons_r->InternalExons+i); 
     }
 
-  for (i=0;i<allExons_r->nZeroLengthExons;i++) 
-    {
-      acceptor=(allExons_r->ZeroLengthExons+i)->Acceptor->Position - left;
-      (allExons_r->ZeroLengthExons+i)->Strand = '-';
-      CorrectExon(allExons_r->ZeroLengthExons+i);
-      offset = (allExons_r->ZeroLengthExons+i)->offset1;
-      UpdateList(&(ExonList[acceptor + offset]), allExons_r->ZeroLengthExons+i); 
-    }
+  if (RSS){
+    for (i=0;i<allExons_r->nZeroLengthExons;i++) 
+      {
+	acceptor=(allExons_r->ZeroLengthExons+i)->Acceptor->Position - left;
+	(allExons_r->ZeroLengthExons+i)->Strand = '-';
+	CorrectExon(allExons_r->ZeroLengthExons+i);
+	offset = (allExons_r->ZeroLengthExons+i)->offset1;
+	UpdateList(&(ExonList[acceptor + offset]), allExons_r->ZeroLengthExons+i); 
+      }
+  }
 
   for (i=0;i<allExons_r->nTerminalExons;i++) 
     {   
@@ -495,8 +492,6 @@ void SortExons(packExons* allExons,
 		  Exons[n].lValue = q->Exon->lValue;
 		  Exons[n].rValue = q->Exon->rValue; 
 		  Exons[n].selected = 0;
-		  Exons[n].nConstraints = 0;
-
 
 		  n++;
 	  

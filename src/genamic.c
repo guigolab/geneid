@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: genamic.c,v 1.16 2007-04-25 09:08:52 talioto Exp $  */
+/*  $Id: genamic.c,v 1.17 2007-04-25 17:20:01 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -34,27 +34,6 @@ extern int GENEID;
 extern int RSS;
 extern float U12_SPLICE_SCORE_THRESH;
 extern float U12_EXON_SCORE_THRESH;
-
-int numRSS(exonGFF* E, int nRSS)
-{
-  int total = nRSS;
-  if ((E->Donor->Position == E->Acceptor->Position - 1)){
-    total = numRSS(E->PreviousExon,++nRSS);
-  }
-  return total;
-}
-
-int CountNumConstraints(exonGFF* E, int nC)
-{
-  int total = nC;
-  if (E->Strand == '*'){
-    return nC;
-  }else{
-    total = CountNumConstraints(E->PreviousExon,nC);
-  }
-  if (E->Score == MAXSCORE){total++;}
-  return total;
-}
 
 void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 {
@@ -68,7 +47,6 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
   char mess[MAXSTRING];
   int current_exon_is_u12 = 0;
   int thresholdmet = 1;
- /*  int DEBUG = 0; */
 
   /* 0. Starting process ... */
   printMess("-- Running gene assembling (genamic) --");
@@ -214,7 +192,7 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 		    j++;
 		  }
 		pg->je[etype] = j;
-		/* 		      } */
+
 		/* Assembling the exon with the best compatible gene before it */
 		/* Verify group rules if there are evidence exons (annotations) */
 		if (current_exon_is_u12){
@@ -249,12 +227,6 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 		      (E+i)->PreviousExon = pg->Ga[etype][frame][spliceclass];
 		      (E+i)->lValue = pg->Ga[etype][frame][spliceclass]->lValue;
 		      (E+i)->rValue = pg->Ga[etype][frame][spliceclass]->rValue;
-		      if (!((E+i)->Score == MAXSCORE)&&(pg->Ga[etype][frame][spliceclass]->Score == MAXSCORE)){
-			pg->pmc = (E+i)->Acceptor->Position;
-			if ( CountNumConstraints((E+i),0) > pg->nmc){
-			  pg->nmc = CountNumConstraints((E+i),0);
-			}
-		      }
 		    }else
 		      {if (RSS && ((E+i)->Donor->Position == (E+i)->Acceptor->Position -1)){
 			  (E+i)->GeneScore = pg->Ga[etype][frame][spliceclass]->GeneScore + (E+i)->Score;
@@ -289,12 +261,6 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 			       {
 				 (E+i)->GeneScore = pg->Ga[etype][frame][spliceclass]->GeneScore + (E+i)->Score;
 				 (E+i)->PreviousExon = pg->Ga[etype][frame][spliceclass];
-				 if (!((E+i)->Score == MAXSCORE)&&(pg->Ga[etype][frame][spliceclass]->Score == MAXSCORE)){
-				   pg->pmc = (E+i)->Acceptor->Position;
-				   if ( CountNumConstraints((E+i),0) > pg->nmc){
-				     pg->nmc = CountNumConstraints((E+i),0);
-				   }
-				 }
 			       }
 			   }
 		       }
