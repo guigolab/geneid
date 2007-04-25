@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: RequestMemory.c,v 1.15 2007-03-30 15:09:29 talioto Exp $  */
+/*  $Id: RequestMemory.c,v 1.16 2007-04-25 17:20:01 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -543,7 +543,6 @@ packGenes* RequestMemoryGenes()
 
   /* Mark this exon as Ghost Exon */
   pg->Ghost->Strand = '*';
-  pg->Ghost->nConstraints = 0;
   pg->Ghost->Remainder = 0;
   pg->Ghost->Frame = 0;
   pg->Ghost->GeneScore = 0.0;
@@ -561,8 +560,6 @@ packGenes* RequestMemoryGenes()
   pg->Ghost->offset2 = 0;
   pg->GOptim = pg->Ghost;
   
-  pg->pmc = 0;
-  pg->nmc = 0;
   /* 2. Allocating memory space for Ga */
   /* Ga is the array of best predicted genes (in every gene class) */ 
   if ((pg->Ga = (exonGFF* ***)calloc(MAXENTRY, sizeof(exonGFF* **))) == NULL)

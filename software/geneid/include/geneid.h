@@ -28,7 +28,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/     
 
-/* $Id: geneid.h,v 1.34 2007-04-25 09:08:52 talioto Exp $ */
+/* $Id: geneid.h,v 1.35 2007-04-25 17:20:01 talioto Exp $ */
 
 /* Required libraries */
 #include <stdlib.h>
@@ -45,7 +45,7 @@ A. DEFINITIONS
 *************************************************************************/
 
 /* Length of every processed fragment       */ 
-#define LENGTHSi 100000          
+#define LENGTHSi 220000          
 
 /* Overlap between 2 fragments              */
 #define OVERLAP 10000            
@@ -92,7 +92,7 @@ A. DEFINITIONS
 #define MAXSITESEVIDENCES 3*MAXEVIDENCES
 
 /* Max number of HSP per locus/frame/strand */
-#define MAXHSP 2500000             
+#define MAXHSP 100000             
 
 /* Max number of locus in multi-fasta files */
 #define MAXNSEQUENCES 10         
@@ -421,7 +421,6 @@ typedef struct s_exonGFF
   char Group[MAXSTRING];
   int offset1;
   int offset2;
-  int nConstraints;
   short lValue;
   short rValue;
   short evidence;
@@ -455,8 +454,6 @@ typedef struct s_packGenes
   exonGFF* **d;
   long* km;
   long* je;
-  long pmc;
-  int nmc;
 } packGenes;
 
 typedef struct s_packEvidence
