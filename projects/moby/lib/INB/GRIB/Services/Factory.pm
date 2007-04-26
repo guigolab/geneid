@@ -1,4 +1,4 @@
-# $Id: Factory.pm,v 1.117 2007-04-22 22:23:25 gmaster Exp $
+# $Id: Factory.pm,v 1.118 2007-04-26 09:26:05 gmaster Exp $
 #
 # INBPerl module for INB::GRIB::geneid::Factory
 #
@@ -425,9 +425,6 @@ sub GeneID_call {
     
     $geneid_output = qx/$_geneid_dir\/$_geneid_bin $_geneid_args $seqfile/;
     
-    # Comment this line if you want to keep the file...
-    unlink $seqfile;
-    
     if ((! defined $geneid_output) || (length $geneid_output < 1)) {
 	my $note = "Internal System Error. Geneid has failed!\n";
 	print STDERR "$note\n";
@@ -441,6 +438,9 @@ sub GeneID_call {
 	push (@$moby_exceptions, $moby_exception);
 	return (undef, undef, $moby_exceptions);
     }
+
+    # Comment this line if you want to keep the file...
+    unlink $seqfile;
 
     # Just for speed sake, we check the format but would work also with data in GFF2 format
     # runGeneIDGFF doesn't specify the peptides output so run this code just when it is runGeneIDGFF3 service
