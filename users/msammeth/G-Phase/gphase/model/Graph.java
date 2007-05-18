@@ -17,6 +17,7 @@ import gphase.ext.ClustalWrapper;
 import gphase.graph.SpliceGraph;
 
 import java.io.BufferedReader;
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileReader;
 import java.io.RandomAccessFile;
@@ -27,6 +28,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.StringTokenizer;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -120,6 +122,10 @@ public class Graph implements Serializable {
 		
 	}
 	
+	/**
+	 * only splits genes, after transcript removal
+	 * cannot unite them
+	 */
 	public void recluster() {
 		Iterator iter= speciesHash.values().iterator();
 		while (iter.hasNext()) {
@@ -251,7 +257,7 @@ public class Graph implements Serializable {
 			// get Graph
 		EnsemblDBAdaptor adaptor= new EnsemblDBAdaptor();
 		Graph g= adaptor.getGraphAllHomologs();
-		g.getSpeciesByName("mus_musculus").setBuildVersion(34);
+		g.getSpeciesByName("mus_musculus").setAnnotationVersion(34);
 		GraphHandler.writeOut(g, GraphHandler.getGraphAbsPath());
 		
 			// read in sequence
@@ -612,14 +618,7 @@ public class Graph implements Serializable {
 			}
 				
 		
-			start--;
-			if (chromosome.equals("MT"))	// correct Ensembl to GRIB jargon
-				chromosome= "M";
-			if (chromosome.startsWith("0"))
-				chromosome= chromosome.substring(1, chromosome.length());
-			if ((!chromosome.startsWith("scaffold"))&& (!chromosome.startsWith("reftig"))
-					&& (!chromosome.startsWith("contig"))&& (!chromosome.startsWith("Contig"))) 
-				chromosome= "chr"+ chromosome;
+			start--;	// this is ok
 			
 			byte[] seq= new byte[end- start];
 			String s= null;
@@ -627,8 +626,22 @@ public class Graph implements Serializable {
 			try {
 //				System.out.println(getSequenceDirectory(speRealName)+ File.separator+ "chr"+ chromosome+ Constants.CHROMOSOME_EXT);
 //				System.out.println(start+"-"+end);
-				String fName= getSequenceDirectory(spe)+File.separator+ chromosome+ Constants.CHROMOSOME_EXT;
-				RandomAccessFile raf= new RandomAccessFile(new File(fName),"r");
+				
+					
+				String dirPath= getSequenceDirectory(spe); 
+				String fName= dirPath+File.separator+ chromosome+ Constants.CHROMOSOME_EXT;
+				if (!new File(fName).exists()) {	// try to find file case insensitive
+					String[] list= new File(dirPath).list();
+					String chrFile= chromosome+ Constants.CHROMOSOME_EXT;
+					for (int i = 0; list!= null&& i < list.length; i++) 
+						if (list[i].equalsIgnoreCase(chrFile)) {
+							chrFile= list[i];
+							break;
+						}
+					fName= dirPath+ File.separator+ chrFile;
+				}
+				File f= new File(fName);
+				RandomAccessFile raf= new RandomAccessFile(f,"r");
 				
 				String read= raf.readLine();
 				while (!read.startsWith(">"))
@@ -640,19 +653,39 @@ public class Graph implements Serializable {
 				int line= read.length();
 				
 				p= offset+1+start+ (start/line);
+				if (p< 0) {
+					//System.err.println("Neg seek: "+forwardStrand+", "+start+", "+end);
+					p= 0;
+				}
 				raf.seek(p);	// fpointer is different from reading point!
 				int pos= 0;
 				int nextN= (line- (start%line));				// read (end of) first line
-				while (pos+ nextN< seq.length) {		// full lines
+				while (pos+ nextN< seq.length&& p+pos+nextN< f.length()) {		// full lines
 					raf.readFully(seq,pos,nextN);
 					raf.skipBytes(1);
 					pos+= nextN;
 					nextN= line;
 				}
-				raf.readFully(seq,pos,seq.length- pos);	// read start of last line
+				int a= seq.length- pos;
+				int b= (int) (f.length()- p- pos- 1);
+				int rest= Math.min(a, b);	// catch EOF (when reading range larger than file)
+				if (a < 0)
+					rest= b;
+				else if (b< 0)
+					rest= a;
+				if (a< 0&& b< 0)
+					rest= 0;
+				try {
+					raf.readFully(seq,pos,rest);	// read start of last line
+				} catch (Exception e) {	//EOFException, IndexOutOfBoundsException
+					System.err.println("Problems reading "+chromosome+": "+(p+pos)+", "+rest+"> "+f.length()+" into "+seq.length);
+					return s;
+				}
 				raf.close();
 				
 				s= new String(seq);
+				if (seq.length- pos> rest)
+					s= s.substring(0, s.length()- ((seq.length- pos)- rest));
 				if (!forwardStrand) 
 					s= gphase.tools.Arrays.reverseComplement(s);
 			} catch (Exception e) {
@@ -682,35 +715,47 @@ public class Graph implements Serializable {
 				+ seqDirName);
 		String[] list= speciesGenome.list();
 		if (list== null)
-			System.err.println("\nSequence Directory not found: "+ speciesGenome.getAbsolutePath()+"\nplease provide build version: "+spe.getBuildVersion());
+			System.err.println("\nSequence Directory not found: "+ speciesGenome.getAbsolutePath()+"\nplease provide build version: "+spe.getAnnotationVersion());
 		
-		String oneLetterPFX= ""+ bin1.charAt(0)+ bin2.charAt(0);
-		String threeLetterPFX= ""+ bin1.substring(0,3)+ bin2.substring(0,3);
-		String oneThreeLetterPFX= ""+ bin1.charAt(0)+ bin2.substring(0,3);
-		Vector combiVec= new Vector();
-		int x= spe.getBuildVersion();
-		for (int i = 0; i< Species.ASSEMBLY_PFX.length; i++) 
-			combiVec.add(Species.ASSEMBLY_PFX[i].toUpperCase()+x);
-		combiVec.add(oneLetterPFX.toUpperCase()+x);
-		combiVec.add(threeLetterPFX.toUpperCase()+x);
-		combiVec.add(oneThreeLetterPFX.toUpperCase()+x);
+//		String oneLetterPFX= ""+ bin1.charAt(0)+ bin2.charAt(0);
+//		String threeLetterPFX= ""+ bin1.substring(0,3)+ bin2.substring(0,3);
+//		String oneThreeLetterPFX= ""+ bin1.charAt(0)+ bin2.substring(0,3);
+//		Vector combiVec= new Vector();
+//		String x= spe.getAnnotationVersion();
+//		for (int i = 0; i< Species.ASSEMBLY_PFX.length; i++) 
+//			combiVec.add(Species.ASSEMBLY_PFX[i].toUpperCase()+x);
+//		combiVec.add(oneLetterPFX.toUpperCase()+x);
+//		combiVec.add(threeLetterPFX.toUpperCase()+x);
+//		combiVec.add(oneThreeLetterPFX.toUpperCase()+x);
 		int i;
+		String subdirName= null;
 		for (i = 0; i < list.length; i++) {
-			int j;
-			for (j = 0; j < combiVec.size(); j++) {
-				String s= (String) combiVec.elementAt(j);
-				int p= list[i].toUpperCase().indexOf(s);
-				if (p>= 0&& (p+ s.length()== list[i].length()|| list[i].charAt(p+s.length())== '_'))	// dateID
+//			int j;
+//			for (j = 0; j < combiVec.size(); j++) {
+//				String s= (String) combiVec.elementAt(j);
+//				int p= list[i].toUpperCase().indexOf(s);
+//				if (p>= 0&& (p+ s.length()== list[i].length()|| list[i].charAt(p+s.length())== '_'))	// dateID
+//					break;
+//			}
+//			if (j< combiVec.size())
+//				break;
+			StringTokenizer st= new StringTokenizer(list[i], "_.");
+			while (st.hasMoreTokens()) {
+				if (st.nextToken().toUpperCase().contains(spe.getGenomeVersion().toUpperCase())) {
+					subdirName= list[i];
 					break;
+				}
 			}
-			if (j< combiVec.size())
+			if (subdirName!= null)
 				break;
 		}
-		if (i> list.length- 1) {
-			System.err.print("Build not found: "+ bin+" ( ");
-			for (int j = 0; j < combiVec.size(); j++) 
-				System.out.print(combiVec.elementAt(j));
-			System.out.println(")");
+//		if (i> list.length- 1) {
+		if (subdirName== null) {
+			System.err.println("Not found genomeVer "+spe.getGenomeVersion()+".");
+//			System.err.print("Build not found: "+ bin+" ( ");
+//			for (int j = 0; j < combiVec.size(); j++) 
+//				System.out.print(combiVec.elementAt(j));
+//			System.out.println(")");
 		}		
 		
 		return speciesGenome.getAbsolutePath()+ File.separator
@@ -1458,6 +1503,20 @@ public class Graph implements Serializable {
 		}
 	}
 	
+	public void filterScaffold() {
+		System.out.println("filtering graph");
+		Iterator iter= speciesHash.values().iterator();
+		while (iter.hasNext()) {
+			Species spec= (Species) iter.next();
+			Gene[] ge= spec.getGenes();
+			for (int i = 0; i < ge.length; i++) {
+				if (ge[i].getChromosome().toLowerCase().contains("scaffold"))
+					spec.remove(ge[i], true);
+			}
+		}
+		// no reclustering necessary, removing complete chromosomes
+	}
+	
 	public void filterUnInformative() {
 		System.out.print("filtering graph for uninformative transcripts..");
 		System.out.flush();
@@ -1523,6 +1582,42 @@ public class Graph implements Serializable {
 			}
 		}
 		recluster();
+	}
+	
+	public void filterCodingClustersOnly() {
+		System.out.println("filter for coding clusters");
+		Iterator iter= speciesHash.values().iterator();
+		while (iter.hasNext()) {
+			Species spec= (Species) iter.next();
+			Gene[] ge= spec.getGenes();
+			for (int i = 0; i < ge.length; i++) {
+				Transcript[] trans= ge[i].getTranscripts();
+				int j;
+				for (j = 0; j < trans.length; j++) 
+					if (trans[j].isCoding())
+						break;
+				if (j== trans.length)	// remove gene if there are no coding transcripts
+					spec.remove(ge[i], true);
+			}
+		}
+	}
+	
+	public void filterNonCodingClustersOnly() {
+		System.out.println("filter for non-coding clusters");
+		Iterator iter= speciesHash.values().iterator();
+		while (iter.hasNext()) {
+			Species spec= (Species) iter.next();
+			Gene[] ge= spec.getGenes();
+			for (int i = 0; i < ge.length; i++) {
+				Transcript[] trans= ge[i].getTranscripts();
+				int j;
+				for (j = 0; j < trans.length; j++) 
+					if (trans[j].isCoding())
+						break;
+				if (j< trans.length)	// remove gene if there are no coding transcripts
+					spec.remove(ge[i], true);
+			}
+		}
 	}
 	
 	/**

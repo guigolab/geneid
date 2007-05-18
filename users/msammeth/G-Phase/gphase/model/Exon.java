@@ -7,13 +7,17 @@
 package gphase.model;
 
 import gphase.io.gtf.GTFObject;
+import gphase.model.ASMultiVariation.SpliceChainComparator;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Vector;
+
+import prefuse.util.UpdateListener;
 
 /**
  * See <code>http://www.genomicglossaries.com/content/gene_def.asp</code>:
@@ -44,11 +48,17 @@ public class Exon extends DirectedRegion {
 	SpliceSite donor= null;
 	SpliceSite acceptor= null;
 	int frame= -1;
-	int startCDS= 0;
-	int endCDS= 0;
+	int cds5Prime= 0;
+	int cds3Prime= 0;
 	
+	public boolean isCodingCompletely() {
+		if (get5PrimeCDS()!= 0&& get3PrimeCDS()!= 0)
+			return true;
+		return false;
+	}
+
 	public boolean isCoding() {
-		if (startCDS!= 0&& endCDS!= 0)
+		if (get5PrimeCDS()!= 0|| get3PrimeCDS()!= 0)
 			return true;
 		return false;
 	}
@@ -66,15 +76,43 @@ public class Exon extends DirectedRegion {
 	}
 	
 	public int get5PrimeCDS() {
-		if (getGene().getStrand()< 0)
-			return endCDS;
-		return startCDS;
+		if (cds5Prime == 0) {
+			for (int i = 0; i < transcripts.length; i++) {
+				if (!transcripts[i].isCoding())
+					continue;
+				Translation trans= transcripts[i].getTranslations()[0];
+				if (this.overlaps(trans)) {
+					int p5= Math.max(this.get5PrimeEdge(), trans.get5PrimeEdge());
+					if (cds5Prime== 0)
+						cds5Prime= p5;
+					else
+						cds5Prime= Math.min(p5, cds5Prime);
+				} 
+			}
+			
+		}
+
+		return cds5Prime;
 	}
 	
 	public int get3PrimeCDS() {
-		if (getGene().getStrand()< 0)
-			return startCDS;
-		return endCDS;
+		if (cds3Prime == 0) {
+			for (int i = 0; i < transcripts.length; i++) {
+				if (!transcripts[i].isCoding())
+					continue;
+				Translation trans= transcripts[i].getTranslations()[0];
+				if (this.overlaps(trans)) {
+					int p3= Math.min(this.get3PrimeEdge(), trans.get3PrimeEdge());
+					if (cds3Prime== 0)
+						cds3Prime= p3;
+					else
+						cds3Prime= Math.max(p3, cds5Prime);
+				} 
+			}
+			
+		}
+
+		return cds3Prime;
 	}
 	
 	public boolean isCoding5Prime() {
@@ -83,6 +121,87 @@ public class Exon extends DirectedRegion {
 			return true;
 		return false;
 	}
+	
+	public boolean isConstitutive(int codingCode) {
+		getGene().getASVariations(codingCode);
+		if (getDonor()!= null&& (!getDonor().isConstitutive()))			
+			return false;
+		if (getAcceptor()!= null&& (!getAcceptor().isConstitutive()))			
+			return false;
+		return true;
+		
+//		for (int i = 0; i < getTranscripts().length; i++) {
+//			Exon[] ex= getTranscripts()[i].getExons();
+//			int j;
+//			for (j = 0; j < ex.length; j++) {
+//				if (this.equals(ex[j]))  	// o ident?!
+//					break;
+//			}
+//			if (j== ex.length)
+//				return false;
+//		}
+//		return true;	 
+	}
+	
+	public boolean hasVariation(String varCode, int codingCode) {
+		if (getDonor()== null|| getAcceptor()== null)
+			return false;
+		ASVariation[] vars= getGene().getASVariations(codingCode);
+		for (int i = 0; vars!= null&& i < vars.length; i++) {
+			if (!vars[i].toString().equals(varCode))
+				continue;
+			Comparator compi= new SpliceSite.PositionComparator();
+			SpliceSite[] sc1= vars[i].getSpliceChain1();
+			if (sc1!= null) {
+				int p1= Arrays.binarySearch(sc1, getAcceptor(), compi);
+				int p2= Arrays.binarySearch(sc1, getDonor(), compi);
+				if (p1>= 0&& p2>= 0&& p2==p1+1)
+					return true;
+			}
+			SpliceSite[] sc2= vars[i].getSpliceChain2();
+			if (sc2!= null) {
+				int p1= Arrays.binarySearch(sc2, getAcceptor(), compi);
+				int p2= Arrays.binarySearch(sc2, getDonor(), compi);
+				if (p1>= 0&& p2>= 0&& p2==p1+1)
+					return true;
+			}
+		}
+		return false;
+	}
+	
+	public boolean isCodingSomewhere5Prime() {
+		for (int i = 0; i < getTranscripts().length; i++) {
+			if (!getTranscripts()[i].isCoding())
+				continue;
+			Translation tln= getTranscripts()[i].getTranslations()[0];
+			if (tln.get5PrimeEdge()<= get5PrimeEdge()&& tln.get3PrimeEdge()>= get5PrimeEdge())
+				return true;
+		}
+		return false;	 
+	}
+	
+	public boolean overlapsCDS() {
+		for (int i = 0; i < getTranscripts().length; i++) {
+			if (!getTranscripts()[i].isCoding())
+				continue;
+			Translation tln= getTranscripts()[i].getTranslations()[0];
+			if (tln.overlaps(this))
+				return true;
+		}
+		return false;	 
+	}
+	
+	public boolean isCodingSomewhere3Prime() {
+		for (int i = 0; i < getTranscripts().length; i++) {
+			if (!getTranscripts()[i].isCoding())
+				continue;
+			Translation tln= getTranscripts()[i].getTranslations()[0];
+			if (tln.get5PrimeEdge()<= get3PrimeEdge()&& tln.get3PrimeEdge()>= get3PrimeEdge())
+				return true;
+		}
+		return false;	 
+	}
+	
 	
 	public boolean isCoding3Prime() {
 		int x= get3PrimeCDS();
@@ -93,7 +212,7 @@ public class Exon extends DirectedRegion {
 	
 	public boolean setFrame(int newFrame) {
 		
-		if (frame>= 0&& frame!= newFrame) {
+		if (frame!= 0&& frame!= newFrame) {
 			System.out.println("Exon "+this+" already used in another frame "+frame+"!");
 			return false;
 		}
@@ -297,6 +416,9 @@ public class Exon extends DirectedRegion {
 					
 		setStart(start);
 		setEnd(end);
+		for (int i = 0; i < getTranscripts().length; i++) 
+			getTranscripts()[i].updateBoundaries(this);
+		
 		
 			// decompose ID
 		this.exonID= stableExonID;
@@ -324,7 +446,15 @@ public class Exon extends DirectedRegion {
 	}
 
 	public int getStrand() {
-		return transcripts[0].getGene().getStrand();
+		if (strand!= 0)
+			return strand;
+		if (getTranscripts()!= null&& transcripts[0]!= null) {
+			if (transcripts[0].getStrand()!= 0)
+				return transcripts[0].getStrand();
+			if (transcripts[0].getGene()!= null)
+				return transcripts[0].getGene().getStrand();
+		}
+		return 0;
 	}
 	
 	/**
@@ -343,11 +473,23 @@ public class Exon extends DirectedRegion {
 	}
 
 	public String getChromosome() {
+		if (getGene()== null) {
+			if (chromosome!= null)
+				return chromosome.toUpperCase();
+			return chromosome;
+		}
 		return getGene().getChromosome();
 	}
 	
 	public Species getSpecies() {
-		return getGene().getSpecies();
+		if (species!= null) {
+			return species;
+		} else if (transcripts!= null&& transcripts[0].getSpecies()!= null) {
+			return transcripts[0].getSpecies();
+		} else if (getGene()!= null&& getGene().getSpecies()!= null)
+			return getGene().getSpecies();
+		
+		return null;
 	}
 
 	static final long serialVersionUID = 8914674126313232057L;
@@ -381,37 +523,73 @@ public class Exon extends DirectedRegion {
 		return getGene().getSite(getEnd());
 	}
 
+	public AbstractSite getStartSite() {
+		return getGene().getSite(getStart());
+	}
+	
+	public int get3PrimeFrame() {
+		int fr= getFrame();
+		int len= get3PrimeCDS()- get5PrimeCDS()+ 1;
+		if (fr>= len- 1)	 
+			fr-= (len- 1);
+		else 
+			fr= (fr+ ((len- 1)% 3))% 3;		// simpler?, inverse op of %??
+		
+		return fr;		
+	}
+	
+	
 	public int getFrame() {
+		if (frame== -1) {
+			
+			for (int i = 0; i < transcripts.length; i++) {
+				if ((!transcripts[i].isCoding())|| (!transcripts[i].getTranslations()[0].contains(get5PrimeCDS())))
+					continue;
+				int pos= transcripts[i].getTranslations()[0].getTranslatedPosition(get5PrimeCDS());
+				int f= pos% 3;
+				if (frame== -1)
+					frame= f;
+				else
+					assert(frame== f);
+			}
+			
+		}
 		return frame;
 	}
 
 	public int getEndCDS() {
-		return endCDS;
+		if (isForward())
+			return get3PrimeCDS();
+		return get5PrimeCDS();
 	}
 
 	public void setEndCDS(int endCDS) {
 		if (getGene().getStrand()< 0)
-			endCDS= -Math.abs(endCDS);
-		this.endCDS = endCDS;
+			this.cds5Prime= -Math.abs(endCDS);
+		else
+			this.cds3Prime = endCDS;
 	}
 
 	public int getStartCDS() {
-		return startCDS;
+		if (isForward())
+			return get5PrimeCDS();	// here not getter method, avoid init for buildup
+		return get3PrimeCDS();
 	}
 
 	public void setStartCDS(int startCDS) {
 		if (getGene().getStrand()< 0)
-			startCDS= -Math.abs(startCDS);
-		this.startCDS = startCDS;
+			cds3Prime= -Math.abs(startCDS);
+		else
+			cds5Prime = startCDS;
 	}
 	
 	public void extendStartCDS(int nuStartCDS) {
-		if ((this.startCDS== 0)|| (Math.abs(nuStartCDS)< Math.abs(this.startCDS)))
+		if ((this.getStartCDS()== 0)|| (Math.abs(nuStartCDS)< Math.abs(this.getStartCDS())))
 			setStartCDS(nuStartCDS);
 	}
 
 	public void extendEndCDS(int nuEndCDS) {
-		if ((this.endCDS== 0)|| (Math.abs(nuEndCDS)> Math.abs(this.endCDS))) 
+		if ((this.getEndCDS()== 0)|| (Math.abs(nuEndCDS)> Math.abs(this.getEndCDS()))) 
 			setEndCDS(nuEndCDS);
 	}
 

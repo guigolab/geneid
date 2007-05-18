@@ -7,46 +7,73 @@ import java.util.HashMap;
 
 public class Distribution {
 
-	double[] surface= null;	// sorted
-	double[][] histogram= null;
+	double[] arrayD= null;	// sorted
+	int[] arrayI= null;	// sorted
+	HashMap histogram= null;
 	       
 	public Distribution(double[] surface) {
-		this.surface= surface;
-		setSurface(this.surface);
+		Arrays.sort(surface);
+		this.arrayD= surface;
 	}
 	
 	public Distribution(int[] surface) {
-		this.surface= new double[surface.length];
-		for (int i = 0; i < surface.length; i++) 
-			this.surface[i]= (double) surface[i];
-		setSurface(this.surface);
-	}
-	
-	public void setSurface(double[] surface) {
 		Arrays.sort(surface);
-		this.surface= surface;
+		this.arrayI= surface;
 	}
 	
-	public double[][] getHistogram() {
+	public double getMin() {
+		if (arrayD!= null) {
+			double min= Double.MAX_VALUE;
+			for (int i = 0; i < arrayD.length; i++) 
+				if (arrayD[i]< min)
+					min= arrayD[i];
+			return min;
+		} else {
+			int min= Integer.MAX_VALUE;
+			for (int i = 0; i < arrayI.length; i++) 
+				if (arrayI[i]< min)
+					min= arrayI[i];
+			return min;
+		}
+	}
+	
+	public double getMax() {
+		if (arrayD!= null) {
+			double max= Double.MIN_VALUE;
+			for (int i = 0; i < arrayD.length; i++) 
+				if (arrayD[i]> max)
+					max= arrayD[i];
+			return max;
+		} else {
+			int max= Integer.MIN_VALUE;
+			for (int i = 0; i < arrayI.length; i++) 
+				if (arrayI[i]> max)
+					max= arrayI[i];
+			return max;
+		}
+	}
+	
+	public HashMap getHistogram() {
 		if (histogram == null) {
-			HashMap distrTable= new HashMap();
-			for (int i = 0; i < surface.length; i++) {
-				Double key= new Double(surface[i]);
-				Integer val= (Integer) distrTable.get(key);
+			histogram= new HashMap();
+			for (int i = 0; arrayD!= null&& i < arrayD.length; i++) {
+				Double key= new Double(arrayD[i]);
+				Integer val= (Integer) histogram.get(key);
 				if (val== null) 
 					val= new Integer(1);
 				else
 					val= new Integer(val.intValue()+ 1);
-				distrTable.put(key, val);
+				histogram.put(key, val);
 			}
 			
-			Object[] keys= distrTable.keySet().toArray();
-			Arrays.sort(keys);
-			histogram= new double[keys.length][];
-			for (int i = 0; i < keys.length; i++) {
-				histogram[i]= new double[2];
-				histogram[i][0]= ((Double) keys[i]).doubleValue();
-				histogram[i][1]= (double) ((Integer) distrTable.get(keys[i])).intValue();
+			for (int i = 0; arrayI!= null&& i < arrayI.length; i++) {
+				Integer key= new Integer(arrayI[i]);
+				Integer val= (Integer) histogram.get(key);
+				if (val== null) 
+					val= new Integer(1);
+				else
+					val= new Integer(val.intValue()+ 1);
+				histogram.put(key, val);
 			}
 		}
 
@@ -54,37 +81,117 @@ public class Distribution {
 	}
 	
 	public double getMean() {
-		if (surface.length== 0)
-			return 0d;
-		double sum= 0d;
-		for (int i = 0; i < surface.length; i++) 
-			sum+= surface[i];
-		return (sum/ surface.length);
+		
+		if (arrayD!= null) {
+			if (arrayD.length== 0)
+				return 0d;
+			double sum= 0d;
+			for (int i = 0; i < arrayD.length; i++) 
+				sum+= arrayD[i];
+			return (sum/ arrayD.length);
+		} else if (arrayI!= null) {
+			if (arrayI.length== 0)
+				return 0d;
+			double sum= 0d;
+			for (int i = 0; i < arrayI.length; i++) 
+				sum+= arrayI[i];
+			return (sum/ arrayI.length);
+		}
+		
+		return 0d;
+	}
+	
+	public double getTotal() {
+		if (arrayD!= null) {
+			double sum= 0;
+			for (int i = 0; i < arrayD.length; i++) 
+				sum+= arrayD[i];
+			return sum;
+		} else if (arrayI!= null) {
+			int sum= 0;
+			for (int i = 0; i < arrayI.length; i++) 
+				sum+= arrayI[i];
+			return sum;
+		}
+		
+		return 0d;
+	}
+	
+	double getMedian(int i) {
+		if (arrayD!= null) {
+			if (arrayD.length== 0)
+				return 0d;
+			int medPos= arrayD.length/ i;
+			if (arrayD.length% i== 0&& (medPos+1)< arrayD.length)
+				return ((arrayD[medPos]+ arrayD[medPos+ 1])/ i);
+			else
+				return arrayD[medPos];
+		} else if (arrayI!= null) {
+			if (arrayI.length== 0)
+				return 0d;
+			int medPos= arrayI.length/ i;
+			if (arrayI.length% i== 0&& (medPos+1)< arrayI.length)
+				return ((arrayI[medPos]+ arrayI[medPos+ 1])/ i);
+			else
+				return arrayI[medPos];
+		}
+		return 0d;
 	}
 	
 	public double getMedian() {
-		if (surface.length== 0)
-			return 0d;
-		int medPos= surface.length/ 2;
-		if (surface.length% 2== 0&& (medPos+1)< surface.length)
-			return ((surface[medPos]+ surface[medPos+ 1])/ 2);
-		else
-			return surface[medPos];
+		return getMedian(2);
+	}
+	public double get1stQuart() {
+		return getMedian(4);
+	}
+
+	public double getSum() {		
+		if (arrayD!= null) {
+			double sum= 0d;
+			for (int i = 0; i < arrayD.length; i++) 
+				sum+= arrayD[i];
+			return sum;
+		} else if (arrayI!= null) {
+			int sum= 0;
+			for (int i = 0; i < arrayI.length; i++) 
+				sum+= arrayI[i];
+			return sum;
+		}
+		return 0d;
 	}
 	
 	public double getStandardDeviation() {
-		if (surface.length== 0)
-			return 0d;
-		double med= getMedian();		
-		double sum= 0d;
-		for (int i = 0; i < surface.length; i++) {
-			double val= surface[i]- med;
-			val*= val;
-			sum+= val;
+		if (arrayD!= null) {
+			if (arrayD.length== 0)
+				return 0d;
+			double med= getMedian();		
+			double sum= 0d;
+			for (int i = 0; i < arrayD.length; i++) {
+				double val= arrayD[i]- med;
+				val*= val;
+				sum+= val;
+			}
+			
+			sum/= (arrayD.length- 1);
+			return Math.sqrt(sum);
+			
+			
+		} else if (arrayI!= null) {
+			if (arrayI.length== 0)
+				return 0d;
+			double med= getMedian();		
+			double sum= 0d;
+			for (int i = 0; i < arrayI.length; i++) {
+				double val= arrayI[i]- med;
+				val*= val;
+				sum+= val;
+			}
+			
+			sum/= (arrayI.length- 1);
+			return Math.sqrt(sum);
 		}
 		
-		sum/= (surface.length- 1);
-		return Math.sqrt(sum);
+		return 0d;
 	}
 	
 	/**

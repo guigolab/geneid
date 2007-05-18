@@ -10,6 +10,7 @@ import gphase.tools.ENCODE;
 
 import java.io.PrintStream;
 import java.io.Serializable;
+import java.text.Collator;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -27,8 +28,9 @@ public class ASVariation implements Serializable {
 
 	public static final String ID_PURE_AD= "(1^ // 2^)";
 	public static final String ID_PURE_AA= "(1= // 2=)";
+	public static final String ID_MUTEX= "1-2^ , 3-4^";
+	public static final String ID_SKIPPED= "1-2^ , 0";
 	
-	static final long serialVersionUID = 2433674838499118768L;
 	
 	public static final int TYPE_ALL= 0;
 	public static final int TYPE_CDS= 1;
@@ -123,6 +125,7 @@ public class ASVariation implements Serializable {
 		
 		DirectedRegion reg= new DirectedRegion(min, max, trans1.getStrand());
 		reg.setChromosome(trans1.getChromosome());
+		reg.setSpecies(trans1.getSpecies());
 		return reg;
 	}
 	
@@ -1375,6 +1378,10 @@ public class ASVariation implements Serializable {
 			System.err.println("SpliceChain "+schain+ " does not match ASVariation!");
 		return spliceChain1;
 	}
+	public ASVariation() {
+		; //:)
+	}
+	
 	public ASVariation(Transcript newTID1, Transcript newTID2, SpliceSite[] newSChain1, SpliceSite[] newSChain2) {		
 		trans1= newTID1;
 		trans2= newTID2;		
@@ -1384,6 +1391,19 @@ public class ASVariation implements Serializable {
 		spliceChain2= newSChain2;
 		markAS(spliceChain1);
 		markAS(spliceChain2);
+		
+		// swap
+		if (spliceChain2!= null&& spliceChain2.length> 0) {
+			if (spliceChain1== null|| spliceChain1.length== 0|| 
+					(spliceChain2[0].getPos()< spliceChain1[0].getPos())) {
+				Transcript h= trans1;
+				trans1= trans2;
+				trans2= h;
+				SpliceSite[] scH= spliceChain1;
+				spliceChain1= spliceChain2;
+				spliceChain2= scH;
+			}
+		}
 	}
 	
 	void markAS(SpliceSite[] schain) {
@@ -2073,7 +2093,19 @@ public class ASVariation implements Serializable {
 		return false;		
 	}
 	
+	public boolean has_onlyGTAG_Intron() {
+		return !has_nonGTAG_Intron();
+	}
+	
 	public boolean isAlignmentArtefact() {
+		return false;
+	}
+	
+	public boolean isBorderEvent() {
+		if (spliceChain1!= null&& spliceChain1.length> 0&& spliceChain1[0]== trans1.getSpliceChain()[0])
+			return true;
+		if (spliceChain2!= null&& spliceChain2.length> 0&& spliceChain2[0]== trans2.getSpliceChain()[0])
+			return true;
 		return false;
 	}
 	
@@ -2520,6 +2552,29 @@ public class ASVariation implements Serializable {
 		return false;
 	}
 	
+	/**
+	 * two events are identical, if they have the same splice chains (inverse also)
+	 * and the same transcript IDs.
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		ASVariation var= (ASVariation) obj;
+		SpliceSite[] sc1= var.getSpliceChain1();
+		SpliceSite[] sc2= var.getSpliceChain2();
+		String tID1= var.getTranscript1().getTranscriptID();
+		String tID2= var.getTranscript2().getTranscriptID();
+		if ((gphase.tools.Arrays.compare(sc1, spliceChain1)&&
+				gphase.tools.Arrays.compare(sc2, spliceChain2)&&
+				trans1.getTranscriptID().equals(tID1)&&
+				trans2.getTranscriptID().equals(tID2))||
+				(gphase.tools.Arrays.compare(sc1, spliceChain2)&&	// inverse
+						gphase.tools.Arrays.compare(sc2, spliceChain1)&&
+						trans1.getTranscriptID().equals(tID2)&&
+						trans2.getTranscriptID().equals(tID1)))
+			return true;
+		return false;
+ 	}
+	
 	public void outputDetail(PrintStream stream) {
 		
 		String s= null;
@@ -2543,12 +2598,79 @@ public class ASVariation implements Serializable {
 	}
 	
 	/**
+		 * One line schematical representation of the splicing variation.
+		 */
+		public String toString() {
+			String c1= "";
+			String c2= "";
+			
+			int ltt= 1;
+			int p1= 0, p2= 0;
+			while ((spliceChain1!= null&& p1< spliceChain1.length)||
+					(spliceChain2!= null&& p2< spliceChain2.length)) {
+				if (spliceChain1!= null&& p1< spliceChain1.length)
+					if (spliceChain2!= null&& p2< spliceChain2.length)
+						if (spliceChain1[p1].getPos()< spliceChain2[p2].getPos())
+							c1+= spliceChain1[p1++].isDonor()?Integer.toString(ltt)+ "^":Integer.toString(ltt)+ "-";
+						else
+							c2+= spliceChain2[p2++].isDonor()?Integer.toString(ltt)+ "^":Integer.toString(ltt)+ "-";
+					else
+						c1+= spliceChain1[p1++].isDonor()?Integer.toString(ltt)+ "^":Integer.toString(ltt)+ "-";
+				else
+					c2+= spliceChain2[p2++].isDonor()?Integer.toString(ltt)+ "^":Integer.toString(ltt)+ "-";
+					
+				ltt++;
+			}
+	
+	//		if (c2.length()< c1.length()) {	// print shortest first
+	//			String h= c1;
+	//			c1= c2;
+	//			c2= h;
+	//		} else if (c1.length()== c2.length()) {	// sort according to first number
+	//			int x= 0;
+	//			while (Character.isDigit(c1.charAt(x++)));
+	//			int n1= Integer.parseInt(c1.substring(0, x-1));
+	//			x= 0;
+	//			while (Character.isDigit(c2.charAt(x++)));
+	//			int n2= Integer.parseInt(c2.substring(0, x-1));
+	//			if (n2< n1)  {
+	//				String h= c1;
+	//				c1= c2;
+	//				c2= h;
+	//			}
+	//		}
+			if (c1.equals("")|| c2.equals("")) {
+				if (c1.equals("")) {
+					c1= "0";
+					String h= c1;
+					c1= c2;
+					c2= h;
+				} else
+					c2= "0";
+			} else {
+				int x= 0;
+				while (Character.isDigit(c1.charAt(x++)));
+				int n1= Integer.parseInt(c1.substring(0, x-1));
+				x= 0;
+				while (Character.isDigit(c2.charAt(x++)));
+				int n2= Integer.parseInt(c2.substring(0, x-1));
+				if (n2< n1)  {
+					String h= c1;
+					c1= c2;
+					c2= h;
+				}
+			}
+			return c1+ " , "+ c2;
+		}
+
+	/**
 	 * One line schematical representation of the splicing variation.
 	 */
-	public String toString() {
+	public String toStringASTA() {
 		String c1= "";
 		String c2= "";
 		
+			// build r-order strings
 		int ltt= 1;
 		int p1= 0, p2= 0;
 		while ((spliceChain1!= null&& p1< spliceChain1.length)||
@@ -2567,29 +2689,23 @@ public class ASVariation implements Serializable {
 			ltt++;
 		}
 
-//		if (c2.length()< c1.length()) {	// print shortest first
-//			String h= c1;
-//			c1= c2;
-//			c2= h;
-//		} else if (c1.length()== c2.length()) {	// sort according to first number
-//			int x= 0;
-//			while (Character.isDigit(c1.charAt(x++)));
-//			int n1= Integer.parseInt(c1.substring(0, x-1));
-//			x= 0;
-//			while (Character.isDigit(c2.charAt(x++)));
-//			int n2= Integer.parseInt(c2.substring(0, x-1));
-//			if (n2< n1)  {
-//				String h= c1;
-//				c1= c2;
-//				c2= h;
-//			}
-//		}
+			// swap rules
+		Transcript t1= trans1;
+		Transcript t2= trans2;
+		SpliceSite[] sc1= spliceChain1;
+		SpliceSite[] sc2= spliceChain2;
 		if (c1.equals("")|| c2.equals("")) {
 			if (c1.equals("")) {
 				c1= "0";
 				String h= c1;
 				c1= c2;
 				c2= h;
+				Transcript th= t1;
+				t1= t2;
+				t2= th;
+				SpliceSite[] sch= sc1;
+				sc1= sc2;
+				sc2= sch;
 			} else
 				c2= "0";
 		} else {
@@ -2603,9 +2719,40 @@ public class ASVariation implements Serializable {
 				String h= c1;
 				c1= c2;
 				c2= h;
+				Transcript th= t1;
+				t1= t2;
+				t2= th;
+				SpliceSite[] sch= sc1;
+				sc1= sc2;
+				sc2= sch;
 			}
 		}
-		return c1+ " , "+ c2;
+
+			// build final string
+		String evCode= c1+ " , "+ c2;
+		StringBuffer result= new StringBuffer(evCode+ "\t"+ trans1.getChromosome());
+		result.append("\t"+ t1.getTranscriptID()+ "\t");
+		if (sc1!= null&& sc1.length> 0) {
+			if (sc1[0].getPos()>= 0)
+				for (int i = 0; i < sc1.length; i++) 
+					result.append(sc1[i].getPos()+",");
+			else
+				for (int i = sc1.length- 1; i >= 0; --i) 
+					result.append(Math.abs(sc1[i].getPos())+",");
+			result.deleteCharAt(result.length()- 1);
+		}
+		result.append("\t"+ t2.getTranscriptID()+ "\t");
+		if (sc2!= null&& sc2.length> 0) {
+			if (sc2[0].getPos()>= 0)
+				for (int i = 0; i < sc2.length; i++) 
+					result.append(sc2[i].getPos()+",");
+			else
+				for (int i = sc2.length- 1; i >= 0; --i) 
+					result.append(Math.abs(sc2[i].getPos())+",");
+			result.deleteCharAt(result.length()- 1);
+		}
+		
+		return result.toString();
 	}
 	
 	/**
@@ -2859,11 +3006,11 @@ public class ASVariation implements Serializable {
 	}
 	
 	public DirectedRegion[] getVariableRegion1() {
-		return getVariableRegion("B");
+		return getVariableRegion("C");
 	}
 	
 	public DirectedRegion[] getVariableRegion2() {
-		return getVariableRegion("C");
+		return getVariableRegion("B");
 	}
 	
 	public DirectedRegion[] getVariableRegion(String id) {
@@ -2902,7 +3049,15 @@ public class ASVariation implements Serializable {
 				DirectedRegion reg= new DirectedRegion(min, max, getGene().getStrand());
 				reg.setChromosome(getGene().getChromosome());
 				regV.add(reg);
-			}
+
+				// correct for border ss contained or not
+				if (bit.charAt(i)== 'B' || bit.charAt(i)== 'C') {
+					if (i!= 0&& bit.charAt(i-1)!= 'A')
+						reg.set5PrimeEdge(reg.get5PrimeEdge()+ 1);
+					if (i< bit.length()- 1&& bit.charAt(i+1)!= 'A')
+						reg.set3PrimeEdge(reg.get3PrimeEdge()- 1);
+				}
+}
 		}
 		return (DirectedRegion[]) gphase.tools.Arrays.toField(regV);
 	}
@@ -2974,28 +3129,127 @@ public class ASVariation implements Serializable {
 		return result;
 	}
 	
+	
+	public String[] getVariableCodons() {
+		Vector codons= new Vector();
+		
+		DirectedRegion[] vregs= getVariableRegion1();
+		if (vregs!= null&& vregs.length> 0) {
+			String seq= "";
+			Translation tln= trans1.getTranslations()[0];
+			DirectedRegion leader= new DirectedRegion(
+					tln.getGenomicPosition(tln.getTranslatedPosition(vregs[0].get5PrimeEdge())- 2),
+					tln.getGenomicPosition(tln.getTranslatedPosition(vregs[0].get5PrimeEdge())- 1),
+					trans1.getStrand()
+					);
+			leader.setChromosome(trans1.getChromosome());
+			leader.setSpecies(trans1.getSpecies());
+			seq+= Graph.readSequence(leader);
+			for (int i = 0; i < vregs.length; i++) {
+				DirectedRegion reg= new DirectedRegion(vregs[i].get5PrimeEdge(), vregs[i].get3PrimeEdge(), trans1.getStrand());
+				reg.setChromosome(trans1.getChromosome());
+				reg.setSpecies(trans1.getSpecies());
+				seq+= Graph.readSequence(reg);
+			}
+			DirectedRegion trailer= new DirectedRegion(
+					tln.getGenomicPosition(tln.getTranslatedPosition(vregs[vregs.length- 1].get3PrimeEdge())+ 1),
+					tln.getGenomicPosition(tln.getTranslatedPosition(vregs[vregs.length- 1].get3PrimeEdge())+ 2),
+					trans1.getStrand()
+					);
+			trailer.setChromosome(trans1.getChromosome());
+			trailer.setSpecies(trans1.getSpecies());
+			seq+= Graph.readSequence(trailer);
+			
+			int frame= trans1.getTranslations()[0].getFrameAtPosition(leader.get5PrimeEdge());
+			codons= (Vector) gphase.tools.Arrays.addAll(codons, Translation.extractCodons(seq, frame));
+		}
+		vregs= getVariableRegion2();
+		if (vregs!= null&& vregs.length> 0) {
+			String seq= "";
+			Translation tln= trans2.getTranslations()[0];
+			DirectedRegion leader= new DirectedRegion(	// lets hope there is no exon with 1 nt
+					tln.getGenomicPosition(tln.getTranslatedPosition(vregs[0].get5PrimeEdge())- 2),
+					tln.getGenomicPosition(tln.getTranslatedPosition(vregs[0].get5PrimeEdge())- 1),
+					trans2.getStrand()
+					);
+			leader.setChromosome(trans2.getChromosome());
+			leader.setSpecies(trans2.getSpecies());
+			seq+= Graph.readSequence(leader);
+			for (int i = 0; i < vregs.length; i++) { 
+				DirectedRegion reg= new DirectedRegion(vregs[i].getStart(), vregs[i].getEnd(), trans2.getStrand());
+				reg.setChromosome(trans2.getChromosome());
+				reg.setSpecies(trans2.getSpecies());
+				seq+= Graph.readSequence(reg);
+			}
+			DirectedRegion trailer= new DirectedRegion(
+					tln.getGenomicPosition(tln.getTranslatedPosition(vregs[vregs.length- 1].get3PrimeEdge())+ 1),
+					tln.getGenomicPosition(tln.getTranslatedPosition(vregs[vregs.length- 1].get3PrimeEdge())+ 2),
+					trans2.getStrand()
+					);
+			trailer.setChromosome(trans2.getChromosome());
+			trailer.setSpecies(trans2.getSpecies());
+			seq+= Graph.readSequence(trailer);
+			
+			int frame= trans2.getTranslations()[0].getFrameAtPosition(leader.get5PrimeEdge());
+			codons= (Vector) gphase.tools.Arrays.addAll(codons, Translation.extractCodons(seq, frame));
+		}
+		
+		return (String[]) gphase.tools.Arrays.toField(codons);
+	}
+	
+	public String toStringElza() {
+		String result= null;
+		if (trans1.getTranscriptID().compareTo(trans2.getTranscriptID())< 0)
+			result= trans1.getTranscriptID()+"\t"+trans2.getTranscriptID()+"\t";
+		else 
+			result= trans2.getTranscriptID()+"\t"+trans1.getTranscriptID()+"\t";
+		
+		SpliceSite[] su= getSpliceUniverse();
+		if (trans1.isForward())
+			for (int i = 0; i < su.length; i++) 
+				result+= su[i].getPos()+" ";
+		else
+			for (int i = su.length- 1; i >= 0; --i) 
+				result+= Math.abs(su[i].getPos())+" ";
+		result+= "\t"+this.toString();
+		return result;
+	}
+	
 	/**
 	 * Representation with absolute (chromosomal) coordinates for each splice site. 
 	 */
 	public String toStringCoordinates() {
-	
-		String result= getDegree()+ ":( ";
-		for (int j = 0; j < spliceChain1.length; j++) {
-			result+= spliceChain1[j].getPos();
-			if (spliceChain1[j].isDonor())
-				result+= "_";
+
+		SpliceSite[] sc1= spliceChain1;
+		SpliceSite[] sc2= spliceChain2;
+		Transcript t1= trans1;
+		Transcript t2= trans2;
+		if ((spliceChain2!= null&& spliceChain2.length> 0)&& 
+				(spliceChain1== null|| spliceChain1.length< 1|| spliceChain1[0].getPos()< spliceChain2[0].getPos())) {
+			SpliceSite[] h= sc1;
+			sc1= sc2;
+			sc2= h;
+			Transcript hh= t1;
+			t1= t2;
+			t2= hh;
+		}
+				
+		String result= getDegree()+ "\t"+ this.toString()+ "\t"+t1.toString()+" ";		
+		for (int j = 0; j < sc1.length; j++) {
+			result+= Math.abs(sc1[j].getPos());
+			if (sc1[j].isDonor())
+				result+= "^";
 			else
 				result+= "-";
 		}
-		result+= " / ";
-		for (int j = 0; j < spliceChain2.length; j++) {
-			result+= spliceChain2[j].getPos();
-			if (spliceChain2[j].isDonor())
-				result+= "_";
+		result+= " , "+t2.toString()+" ";
+		for (int j = 0; j < sc2.length; j++) {
+			result+= sc2[j].getPos();
+			if (sc2[j].isDonor())
+				result+= "^";
 			else
 				result+= "-";
 		}
-		result+= ")";
 		
 		return result;
 	}
@@ -3027,6 +3281,8 @@ public class ASVariation implements Serializable {
 	}
 	
 	public SpliceSite[] getSpliceUniverse() {
+		SpliceSite[] spliceChain1=(this.spliceChain1== null)?new SpliceSite[0]:this.spliceChain1;
+		SpliceSite[] spliceChain2=(this.spliceChain2== null)?new SpliceSite[0]:this.spliceChain2;
 		SpliceSite[] suniv= new SpliceSite[spliceChain1.length+ spliceChain2.length];
 		int s1= 0; int s2= 0;
 		for (int i = 0; i < suniv.length; i++) {
@@ -3053,6 +3309,25 @@ public class ASVariation implements Serializable {
 		}
 		suniv[suniv.length- 1]= flanks[1];
 		return suniv;
+	}
+	
+	/**
+	 * 
+	 * @return	int[shorter, longer splice chain]
+	 */
+	public int[] getBalance() {
+		int x= 0;
+		int y= 0;
+		if (spliceChain1!= null)
+			x= spliceChain1.length;
+		if (spliceChain2!= null)
+			y= spliceChain2.length;
+		if (x> y) {
+			int h= x;
+			x= y;
+			y= h;
+		}
+		return new int[] {x,y};
 	}
 	
 	public SpliceSite[] getSpliceChain1() {

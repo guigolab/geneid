@@ -4,6 +4,7 @@ import gphase.model.AbstractSite;
 import gphase.model.SpliceSite;
 import gphase.model.Transcript;
 import gphase.tools.Arrays;
+import gphase.tools.IntVector;
 
 import java.util.Vector;
 
@@ -13,6 +14,8 @@ public class SplicePath {
 	Vector nodeV= null;
 	Vector edgeV= null;
 	Transcript[] minFlowTrans= null;
+	SpliceNode src= null;
+	
 	
 	public SplicePath() {
 		nodeV= new Vector();
@@ -29,6 +32,17 @@ public class SplicePath {
 		}
 		
 		return len;
+	}
+	
+	public int[] getExonicLengthes() {
+		IntVector v= new IntVector();
+		for (int i = 0; i < edgeV.size(); i++) {
+			SpliceEdge e= (SpliceEdge) edgeV.elementAt(i);
+			if (e.isExonic())
+				v.add(e.getLength());
+		}
+		
+		return v.toIntArray();
 	}
 
 
@@ -74,6 +88,8 @@ public class SplicePath {
 		path.nodeV.add(newEdge.getHead());	// add node
 		path.edgeV.add(newEdge);
 		path.minFlowTrans= (Transcript[]) Arrays.toField(intersection);
+		if (path.src== null)
+			path.src= newEdge.getTail(); 
 		return path;
 	}
 	
@@ -135,6 +151,8 @@ public class SplicePath {
 		path.nodeV.add(newEdge.getHead());	// add node
 		path.edgeV.add(newEdge);
 		path.minFlowTrans= (Transcript[]) Arrays.toField(intersection);
+		if (path.src== null)
+			path.src= newEdge.getTail(); 
 		return path;
 	}
 	
@@ -158,5 +176,10 @@ public Transcript[] getTranscripts() {
 
 public void setTranscripts(Transcript[] nuTrans) {
 	minFlowTrans= nuTrans;
+}
+
+
+public SpliceNode getSrc() {
+	return src;
 }
 }

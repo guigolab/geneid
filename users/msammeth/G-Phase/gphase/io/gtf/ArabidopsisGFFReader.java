@@ -144,7 +144,7 @@ public class ArabidopsisGFFReader extends EncodeWrapper {
 				for (int k = 0; k < gtfs.length; k++) {		// exons 
 					GTFObject f= (GTFObject) gtfs[k];
 					if (f.isExon()) 
-						transcript.setBoundaries(new Exon(transcript, f.getExonID(), f.getStart(), f.getEnd()));
+						transcript.updateBoundaries(new Exon(transcript, f.getExonID(), f.getStart(), f.getEnd()));
 				}
 				t2Hash.put(tID, transcript);	// fill tHash with transcripts
 			} 

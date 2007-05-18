@@ -13,6 +13,7 @@ import gphase.model.Graph;
 import gphase.model.Species;
 import gphase.model.SpliceSite;
 import gphase.model.Transcript;
+import gphase.model.Translation;
 import gphase.tools.Arrays;
 
 import java.io.BufferedReader;
@@ -22,6 +23,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -29,23 +31,33 @@ import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.sql.Date;
+import java.text.Collator;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.StringTokenizer;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 public class EncodeWrapper extends GTFWrapper {
 	
 	protected InputStream inputStream= null;
+	String speName= null;
+	String genomeVer= null;
+	String buildVersion= null;
+	int linesRead= 0;
+	boolean silent= false;
 	
 	public Graph getGraph(boolean encode) {
-		try {
-			read();
-		} catch (Exception e) {
-			e.printStackTrace(); 
+		if (gtfObj== null) {
+			try {
+				read();
+			} catch (Exception e) {
+				e.printStackTrace(); 
+			}
 		}
 		return assemble(encode);		// <===== check ENCODE here !!!
 	}
@@ -289,7 +301,17 @@ public class EncodeWrapper extends GTFWrapper {
 	}
 	
 	public EncodeWrapper(String absFName) {
-		super(absFName);
+		super(absFName);		
+	}
+	
+	public EncodeWrapper(String absFName, String speName) {
+		this(absFName);
+		this.speName= speName;
+	}
+	
+	public EncodeWrapper(String absFName, String speName, String buildVersion) {
+		this(absFName, speName);
+		this.buildVersion= buildVersion;
 	}
 	
 	public EncodeWrapper(InputStream i) {
@@ -379,11 +401,52 @@ public class EncodeWrapper extends GTFWrapper {
 		}
 	}
 	
+	String getBuildVersion() {
+		if (buildVersion== null) {
+			String[] tokens= fName.split("_");
+			for (int i = 0; buildVersion== null&& i < tokens.length; i++) 
+				for (int j = 0; buildVersion== null&& j < Species.ASSEMBLY_PFX.length; j++) 
+					if (tokens[i].startsWith(Species.ASSEMBLY_PFX[j])) 
+						buildVersion= tokens[i];
+			if (buildVersion== null) {		
+				System.err.println("Coudn't guess build version.");
+				buildVersion= "Unknown";
+			}
+		}
+		return buildVersion;
+	}
+
+	String getSpeciesName() {
+		if (speName== null) {
+			String[] tokens= fName.split("_");
+			for (int i = 0; speName== null&& i < tokens.length; i++) {
+				for (int j = 0; speName== null&& j < Species.SP_NAMES_COMMON.length; j++) {
+					if (Species.SP_NAMES_COMMON[j].equalsIgnoreCase(tokens[i]))
+						speName= Species.SP_NAMES_COMMON[j];
+					else if (Species.getAbbrevNameForBinomial(Species.SP_NAMES_BINOMIAL[j]).equalsIgnoreCase(tokens[i]))
+						speName= Species.getAbbrevNameForPrefix(Species.SP_NAMES_BINOMIAL[j]);
+					else if (Species.SP_NAMES_BINOMIAL[j].equalsIgnoreCase(tokens[i]))
+						speName= Species.SP_NAMES_BINOMIAL[j];
+				}
+			}
+			if (speName== null) {
+				System.err.println("Coudn't guess species name");
+				speName= "Unknown";
+			}
+		}
+		return speName;
+	}
+	
 	Graph assemble(boolean encode) {
 		
-		Species spec= new Species("human");
-		spec.setBuildVersion(17);
-	
+		Species spec;
+		if (speName== null|| genomeVer== null) {
+			spec= new Species("human");
+			spec.setGenomeVersion("hg18");
+		} else { 
+			spec= new Species(speName);
+			spec.setGenomeVersion(genomeVer);
+		}
 			// cluster
 		HashMap hash= getGroups("transcript_id", getGtfObj());	// cluster for genes?
 		HashMap chrHash= getChromosomes(hash);
@@ -414,12 +477,14 @@ public class EncodeWrapper extends GTFWrapper {
 				France ff= (France) gtfs[0];
 				if (encode&& !ff.getSource().contains("VEGA"))
 					continue;
+				if (!ff.isExon()&& !ff.isCDS())
+					continue;
 				Transcript transcript= new Transcript(tID);
 				transcript.setStrand(ff.getStrand());
 				for (int k = 0; k < gtfs.length; k++) {		// exons 
 					France f= (France) gtfs[k];
 					if (f.isExon()) { 
-						transcript.setBoundaries(new Exon(transcript, f.getExonID(), f.getStart(), f.getEnd()));
+						transcript.updateBoundaries(new Exon(transcript, f.getExonID(), f.getStart(), f.getEnd()));
 						transcript.setHUGO(gtfs[k].getAttribute("gene_id"));
 					}
 				}
@@ -466,7 +531,7 @@ public class EncodeWrapper extends GTFWrapper {
 						// iterate again, all exons have to be there, order in input file not reliable
 					for (int m = 0; m < v.size(); m++) {
 						France f= (France) v.elementAt(m);
-						if (encode&& f.isCoding()) {		// in not-encode no exon ids..
+						if (encode&& f.isCoding()&& false) {		// in not-encode no exon ids..
 							Exon e= loci[j][k].getExon(f.getAttribute("exon_id"));	// 2nd iteration necessary, cds st b4 exon in file
 							e.extendStartCDS(f.getStart());
 							e.extendEndCDS(f.getEnd());
@@ -489,14 +554,16 @@ public class EncodeWrapper extends GTFWrapper {
 	}
 
 	/**
-	 * to create from the outside
+	 * doesnt take transcript_id order on the input gtfObs into account
+	 * problem f.i. with C.elegans -> same tID on different chromosomes
+	 * 
 	 * @param encode
 	 * @return
 	 */
 	public static Graph assemble(boolean encode, GTFObject[] gtfObs) {
 		
 		Species spec= new Species("human");
-		spec.setBuildVersion(17);
+		spec.setAnnotationVersion("17");
 
 			// cluster
 		HashMap hash= getGroups("transcript_id", gtfObs);	// cluster for genes?
@@ -533,7 +600,7 @@ public class EncodeWrapper extends GTFWrapper {
 				for (int k = 0; k < gtfs.length; k++) {		// exons 
 					France f= (France) gtfs[k];
 					if (f.isExon()) 
-						transcript.setBoundaries(new Exon(transcript, f.getExonID(), f.getStart(), f.getEnd()));
+						transcript.updateBoundaries(new Exon(transcript, f.getExonID(), f.getStart(), f.getEnd()));
 				}
 				t2Hash.put(tID, transcript);	// fill tHash with transcripts
 			}
@@ -624,7 +691,7 @@ public class EncodeWrapper extends GTFWrapper {
 	Graph assemble_stable(boolean encode) {
 		
 		Species spec= new Species("human");
-		spec.setBuildVersion(17);
+		spec.setAnnotationVersion("17");
 		
 			// cluster
 		HashMap gHash= getGroups("gene_id", getGtfObj());	// cluster for genes
@@ -749,30 +816,117 @@ public class EncodeWrapper extends GTFWrapper {
 		return tHash;
 	}
 
+		public String[] getGeneIDs(String[] protIDs) {
+			Vector v= new Vector();
+			Pattern[] patterns= new Pattern[protIDs.length];
+			for (int i = 0; i < protIDs.length; i++) 
+				patterns[i]= Pattern.compile(protIDs[i]);	// case sensitive .toUpperCase()
+			try {
+				BufferedReader buffy;
+				if (fPath!= null&& fName!= null)
+					buffy= new BufferedReader(new FileReader(fPath+ File.separator+ fName));
+				else 
+					buffy= new BufferedReader(new InputStreamReader(inputStream));
+				String line;
+				int lineCtr= 0;
+				Vector gtfVec= new Vector();
+				System.out.println("Scanning for geneIDs ");
+				long t0= System.currentTimeMillis();
+				while (buffy.ready()) {
+					lineCtr++;
+					if (lineCtr%1000== 0) {
+						System.out.print("*");
+						System.out.flush();
+					}
+					line= buffy.readLine();
+					int x= 0;
+					for (int i = 0; i < patterns.length; i++) {
+						//Matcher m= patterns[i].matcher(line);	// case sensitive .toUpperCase()
+						//if (m.find())
+						if (line.contains(protIDs[i]))
+							break;
+					}
+					if (x== protIDs.length)
+						continue;
+					
+					String[] tokens= line.split("\t");
+					for (int i = 8; i < tokens.length; i++) {
+						if (tokens[i].equals(GTFObject.GENE_ID_TAG)) {
+							String id= tokens[i+1];
+							if (id.startsWith("\"")|| id.startsWith("\'"))
+								id= id.substring(1, id.length()- 1);
+							v.add(id);
+							break;
+						}
+					}
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+			
+			System.out.println("\nPrimary list "+v.size());
+			Comparator compi= Collator.getInstance();
+			Vector vv= new Vector();
+			for (int i = 0; i < v.size(); i++) {
+				Arrays.addUnique(vv, v.elementAt(i), compi);
+			}
+			System.out.println("Found "+vv.size()+" gene ids for "+protIDs.length+" proteins.");
+			return (String[]) Arrays.toField(vv);
+		}
 	/* (non-Javadoc)
 		 * @see gphase.io.IOWrapper#read()
 		 */
-		public void read() throws Exception {
+		public void read(String[] ids) throws Exception {
 			
+			if (ids== null|| ids.length< 1)
+				return;
 			
 			BufferedReader buffy;
+			File file= new File(fPath+ File.separator+ fName);
 			if (fPath!= null&& fName!= null)
-				buffy= new BufferedReader(new FileReader(fPath+ File.separator+ fName));
+				buffy= new BufferedReader(new FileReader(file));
 			else 
 				buffy= new BufferedReader(new InputStreamReader(inputStream));
 			String line;
 			int lineCtr= 0;
 			Vector gtfVec= new Vector();
+			int lastPerc= 0;
+			long bytesRead= 0;
 			while (buffy.ready()) {
 				lineCtr++;
 				line= buffy.readLine();
+				bytesRead+= (line.length()+ 1);		// else
+				int perc= (int) ((bytesRead* 10d)/ file.length());
+				if (perc> lastPerc) {
+					System.out.print("*");
+					System.out.flush();
+					++lastPerc;
+				}
+				String[] cols= line.split("\t");
+				if (lineCtr== 1) {
+					if (cols.length< 9&& !cols[8].startsWith(GTFObject.GENE_ID_TAG))
+						System.err.println("gene_id not in col 8");
+				}
+				cols= cols[8].split(" ");
+				int x= 0;
+				for (x = 0; x < ids.length; x++) 
+					if (cols[1].substring(1).startsWith(ids[x])||
+							cols[1].startsWith(ids[x]))
+						break;
+				if (x== ids.length)
+					continue;
 				StringTokenizer toki= new StringTokenizer(line, " \t");	// must be tab, see specification
+				if (toki== null) {
+					System.err.println("Invalid GTF format: line "+ lineCtr+": "+line);
+					continue;
+				}
 				if (toki.countTokens()< 8)
 					System.err.println("line "+ lineCtr+ ": skipped (<8 token)!\n\t"+ line);
 				// <seqname> <source> <feature> <start> <end> <score> <strand> <frame> [attributes] [comments]
 				GTFObject newObj= createGTFObject();
 				try {				
-					newObj.seqname= toki.nextToken();
+					newObj.setSeqname(toki.nextToken());
 					newObj.source= toki.nextToken();
 					newObj.setFeature(toki.nextToken());
 					newObj.start= Integer.parseInt(toki.nextToken());
@@ -781,9 +935,9 @@ public class EncodeWrapper extends GTFWrapper {
 					newObj.setStrand(toki.nextToken());
 					newObj.setFrame(toki.nextToken());
 				} catch (Exception e) {
-					System.err.println("Invalid GTF format: line "+ lineCtr);
+					System.err.println("Invalid GTF format: line "+ lineCtr+" -- "+e.getMessage());
 					//e.printStackTrace();
-					//continue;
+					continue;
 				}
 				
 					// optional attributes
@@ -819,7 +973,107 @@ public class EncodeWrapper extends GTFWrapper {
 				gtfVec.add(newObj);
 				//System.out.println(gtfVec.size());
 			}
+			System.out.println();
 			
 			gtfObj= (GTFObject[]) Arrays.toField(gtfVec);
 		}
+
+		/* (non-Javadoc)
+			 * @see gphase.io.IOWrapper#read()
+			 */
+			public void read() throws Exception {
+				
+				
+				BufferedReader buffy;
+				if (fPath!= null&& fName!= null)
+					buffy= new BufferedReader(new FileReader(fPath+ File.separator+ fName));
+				else 
+					buffy= new BufferedReader(new InputStreamReader(inputStream));
+				String line;
+				int lineCtr= 0;
+				Vector gtfVec= new Vector();
+				while (buffy.ready()) {
+					lineCtr++;
+					line= buffy.readLine();
+					StringTokenizer toki= new StringTokenizer(line, " \t");	// must be tab, see specification
+					if (toki.countTokens()< 8)
+						System.err.println("line "+ lineCtr+ ": skipped (<8 token)!\n\t"+ line);
+					// <seqname> <source> <feature> <start> <end> <score> <strand> <frame> [attributes] [comments]
+					GTFObject newObj= createGTFObject();
+					try {				
+						newObj.seqname= toki.nextToken();
+						newObj.source= toki.nextToken();
+						newObj.setFeature(toki.nextToken());
+						newObj.start= Integer.parseInt(toki.nextToken());
+						newObj.end= Integer.parseInt(toki.nextToken());
+						newObj.setScore(toki.nextToken());
+						newObj.setStrand(toki.nextToken());
+						newObj.setFrame(toki.nextToken());
+					} catch (Exception e) {
+						if (!silent)
+							System.err.println("Invalid GTF format: line "+ lineCtr);
+						//e.printStackTrace();
+						continue;
+					}
+					
+						// optional attributes
+					int smc= line.indexOf(';');		// GTF2
+					if (smc>= 0) {
+						String ss= toki.nextToken();
+		//				toki= new StringTokenizer(line, " \t");	// must be tab, see specification
+		//				for (int i = 0; i < 8; i++) 
+		//					ss= toki.nextToken();
+		//				String h= line.substring(0, smc);			// last ';'
+		//				h= line.substring(0, h.lastIndexOf(' '));	// two ' ' tokens before
+		//				h= line.substring(0, h.lastIndexOf(' '));
+						String h= line.substring(line.indexOf(ss), line.length()).trim();	// skip that part
+						
+						toki= new StringTokenizer(h, ";");		// attributes
+						while (toki.hasMoreTokens()) {
+							h= toki.nextToken().trim();
+							int sep= h.indexOf(' ');
+							if (sep < 0) {						// comments
+								String s= h;
+								while (toki.hasMoreTokens())
+									s+= " "+ toki.nextToken();
+								newObj.setComments(s);
+							}
+							if (sep>= 0) {
+								String id= h.substring(0, sep);
+								String val= h.substring(sep+ 1, h.length());
+								newObj.addAttribute(id, val);
+							}
+						}
+					}
+						
+					gtfVec.add(newObj);
+					//System.out.println(gtfVec.size());
+				}
+				
+				gtfObj= (GTFObject[]) Arrays.toField(gtfVec);
+			}
+
+			public String getGenomeVer() {
+				return genomeVer;
+			}
+
+			public void setGenomeVer(String genomeVer) {
+				this.genomeVer = genomeVer;
+			}
+
+			public String getSpeName() {
+				return speName;
+			}
+
+			public void setSpeName(String speName) {
+				this.speName = speName;
+			}
+
+			public boolean isSilent() {
+				return silent;
+			}
+
+			public void setSilent(boolean silent) {
+				this.silent = silent;
+			}
 }

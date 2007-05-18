@@ -35,6 +35,17 @@ public class SpliceSite extends AbstractSite {
 												 // Barmak Modrek & Christopher J Lee
 	public static final int DELTA_RANGE= 20;
 	
+	public static final int NOBORU_DON5_EXTENT= 20;
+	public static final int NOBORU_DON3_EXTENT= 18;
+	public static final int NOBORU_ACC5_EXTENT= 21;
+	public static final int NOBORU_ACC3_EXTENT= 17;
+
+	public static final int SHAPIRO_DON5_FIRST= -3;
+	public static final int SHAPIRO_DON3_LAST= +6;
+	public static final int SHAPIRO_ACC5_FIRST= -13;
+	public static final int SHAPIRO_ACC3_LAST= +1;
+
+	
 	
 	HashMap hitparade= null;
 	HashMap homologs= null;	// maps genes to exon homologs
@@ -48,10 +59,12 @@ public class SpliceSite extends AbstractSite {
 			int res= super.compare(arg0, arg1);
 			if (res!= 0)
 				return res;
-			SpliceSite s0= (SpliceSite) arg0;
-			SpliceSite s1= (SpliceSite) arg1;
-			if (s0.isDonor()!= s1.isDonor())
-				return -1;
+			if (arg0 instanceof SpliceSite&& arg1 instanceof SpliceSite) {
+				SpliceSite s0= (SpliceSite) arg0;
+				SpliceSite s1= (SpliceSite) arg1;
+				if (s0.isDonor()!= s1.isDonor())
+					return -1;
+			}
 			return 0;
 		}
 	}
@@ -335,6 +348,73 @@ public class SpliceSite extends AbstractSite {
 		}
 		
 		return result;
+	}
+	
+	/**
+	 * from (-x to + y) number of exonic/intronic positions to
+	 * number of positions before and after ss
+	 * before and after ss
+	 * @param beforeSS
+	 * @param afterSS
+	 * @return
+	 */
+	public int[] convertToExonIntronPositions(int left, int right) {
+		int[] result= new int[2];
+		if (isDonor()) {
+			result[0]= Math.abs(left);
+			result[1]= right- 2;
+		} else {
+			result[0]= Math.abs(left)- 2;
+			result[1]= right;
+		}
+		return result;
+	}
+	
+	public DirectedRegion getShapiroRegion() {
+		
+		if (isDonor()) {
+			int[] extent= convertToExonIntronPositions(SHAPIRO_DON5_FIRST, SHAPIRO_DON3_LAST);
+			return getRegion(extent[0], extent[1]);
+		} else {
+			int[] extent= convertToExonIntronPositions(SHAPIRO_ACC5_FIRST, SHAPIRO_ACC3_LAST);
+			return getRegion(extent[0], extent[1]);
+		}
+			
+	}
+	
+	public DirectedRegion getRegion(int downstream, int upstream) {
+		int start= getPos();
+		int end= getPos();
+		
+		if (isDonor()) {
+			start-= downstream- 1;	// -2
+			end+= upstream+ 2;	// +4
+		} else {
+			start-= downstream+ 2;	// +1
+			end+= upstream- 1;	// 
+		}
+			
+		DirectedRegion reg= new DirectedRegion(start, end, getTranscripts()[0].getStrand());
+		reg.setChromosome(getTranscripts()[0].getChromosome());
+		reg.setSpecies(getTranscripts()[0].getSpecies());
+		return reg;
+	}
+
+	public DirectedRegion getNoboruRegion() {
+		int start= getPos();
+		int end= getPos();
+		if (isDonor()) {
+			start-= NOBORU_DON5_EXTENT- 1;	// -2
+			end+= NOBORU_DON3_EXTENT+ 2;	// +4
+		} else {
+			start-= NOBORU_ACC5_EXTENT+ 2;	// +1
+			end+= NOBORU_ACC3_EXTENT- 1;	// 
+		}
+			
+		DirectedRegion reg= new DirectedRegion(start, end, getTranscripts()[0].getStrand());
+		reg.setChromosome(getTranscripts()[0].getChromosome());
+		reg.setSpecies(getTranscripts()[0].getSpecies());
+		return reg;
 	}
 
 	public PWHit[] getHits(Gene g) {

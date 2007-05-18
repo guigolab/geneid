@@ -2,6 +2,7 @@ package gphase;
 
 import gphase.algo.ASAnalyzer;
 import gphase.io.gtf.EncodeWrapper;
+import gphase.io.gtf.GTFChrReader;
 import gphase.io.gtf.GTFObject;
 import gphase.io.gtf.GTFWrapper;
 import gphase.model.ASMultiVariation;
@@ -13,6 +14,7 @@ import gphase.model.EncodeRegion;
 import gphase.model.Exon;
 import gphase.model.Gene;
 import gphase.model.Graph;
+import gphase.model.Species;
 import gphase.model.SpliceSite;
 import gphase.model.Transcript;
 import gphase.model.Translation;
@@ -1601,6 +1603,30 @@ public class SpliceSiteConservationComparator {
 				
 			}
 
+	public static void plotCodonsEnsembl() {
+		for (int i = 0; i < Species.SP_NAMES_METAZOA.length; i++) {
+			System.out.println(Species.SP_NAMES_METAZOA[i]);
+			Species speStub= new Species(Species.SP_NAMES_METAZOA[i]);
+			try {
+				String iname= "annotation"+ File.separator+ "ensembl"+ File.separator+ 
+					Species.SP_NAMES_METAZOA[i]+"_42_filtDNA.gtf";
+				
+				
+				EncodeWrapper wrapper= new EncodeWrapper(iname);
+				Graph g= wrapper.getGraph(false);
+				
+					// dirty harry
+				g.getSpecies()[0].spNumber= speStub.spNumber;
+				g.getSpecies()[0].setAnnotationVersion("42");
+				
+				plotCodonsExtendTilStop()
+				
+			} catch (Exception e) {
+				;//
+			}
+
+	}
+	
 	/**
 	 * based on exons
 	 * @param g

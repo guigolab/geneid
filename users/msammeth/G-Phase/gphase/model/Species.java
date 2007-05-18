@@ -7,6 +7,7 @@
 package gphase.model;
 
 import gphase.Constants;
+import gphase.io.gtf.GTFChrReader;
 import gphase.tools.Arrays;
 
 
@@ -14,8 +15,11 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.io.PrintStream;
 import java.io.Serializable;
+import java.lang.reflect.Method;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -30,17 +34,75 @@ import java.util.regex.Pattern;
  */
 public class Species implements Serializable {
 	
+	String genomeVersion= null;
 	public static final String ENS_ID= "ENS";
 	public static final String ENS_IMCB_ID= "SIN";
 	public static final String GENOSCOPE_ID= "GS";
 	public static final String FLYBASE_ID= "C";
 	
 	public static final String[] ASSEMBLY_PFX= new String[] {
-		"ENSEMBL", "HG", "NCBI", "golden_path_", "WASHUC", "JGI", "Zv", "FUGU"
+		"ENSEMBL", "HG", "hg", "NCBI", "golden_path_", "gp", "WASHUC", "JGI", "Zv", "FUGU"
 	};
-	
 	// org=
+	public static final String[][][] SP_GENOME_VERSIONS= new String[][][] {
+		new String[][] {new String[] {"GP200405", "NCBI35", "HG17"}, new String[] {"GP200603","NCBI36", "HG18"}},
+		new String[][] {new String[] {"GP200603"}},
+		new String[][] {new String[] {"GP200603", "MM8", "NCBI36"}},
+		new String[][] {new String[] {"GP200411", "RGSC43"}},
+		new String[][] {new String[] {"GP200505", "CANFAM2"}},
+		new String[][] {new String[] {"GP200503", "BTAU2"}, new String[] {"BTAU31"}},
+		new String[][] {new String[] {}},	// opossum
+		
+		new String[][] {new String[] {"GP200605", "WASHUC2"}},
+		new String[][] {new String[] {"GP200508", "JGI41"}},
+		new String[][] {new String[] {"GP200603", "ZV6"}},
+		new String[][] {new String[] {}},	// fugu
+		new String[][] {new String[] {}},	// tetraodon
+		
+		new String[][] {new String[] {"BDGP43"}},
+		new String[][] {new String[] {}},	// mosquito
+		new String[][] {new String[] {"GP200501", "APIMEL2"}},
+		new String[][] {new String[] {"GP200607", "WS160"}},
+		
+		new String[][] {new String[] {}},	// yeast
+		new String[][] {new String[] {}},	// seasquirt
+		new String[][] {new String[] {}},	// seqsquirt2
+		new String[][] {new String[] {}},	// platypus
+		new String[][] {new String[] {}}	// cress
+		
+	};
+
+	public static final String[][][] SP_ANNOTATION_VERSIONS= new String[][][] {
+		new String[][] {new String[] {"GENCODE200510"}, new String[] {"ENSEMBL42", "ENSEMBL43"}},
+		new String[][] {new String[] {"PANTRO21", "ENSEMBL42", "ENSEMBL43"}},
+		new String[][] {new String[] {"ENSEMBL42", "ENSEMBL43"}},
+		new String[][] {new String[] {"ENSEMBL42", "ENSEMBL43"}},
+		new String[][] {new String[] {"ENSEMBL42", "ENSEMBL43"}},
+		new String[][] {new String[] {"ENSEMBL42"}, new String[] {"ENSEMBL43"}},	// cow
+		new String[][] {new String[] {}},	// opossum
+
+		new String[][] {new String[] {"ENSEMBL42", "ENSEMBL43"}},
+		new String[][] {new String[] {"ENSEMBL42", "ENSEMBL43"}},
+		new String[][] {new String[] {"ENSEMBL42", "ENSEMBL43"}},
+		new String[][] {new String[] {}},	// fugu
+		new String[][] {new String[] {}},	// tetraodon
+		
+		new String[][] {new String[] {"ENSEMBL42", "ENSEMBL43"}},
+		new String[][] {new String[] {}},	// mosquito
+		new String[][] {new String[] {"ENSEMBL42", "ENSEMBL43"}},
+		new String[][] {new String[] {"ENSEMBL42", "ENSEMBL43"}},
+		
+		new String[][] {new String[] {}},
+		new String[][] {new String[] {}},
+		new String[][] {new String[] {}},
+		new String[][] {new String[] {}},
+		new String[][] {new String[] {}}
+
+	};
 	public static final String[] SP_UCSC_CGI_STRINGS= new String[] {
+		//&clade=vertebrate&org=Mouse&db=mm8
+		// org=
+
 			"Homo_sapiens;db=hg17",	// &db=hg18 newest, but for gencode..
 			"Chimp",	// db=panTro
 			"Mouse",	// db=mm8
@@ -58,15 +120,47 @@ public class Species implements Serializable {
 			"D.+melanogaster",	// db=dm2
 			"A.+gambiae",	//&db=anoGam1
 			"A.+mellifera",  //&db=anoGam1	// not in ensembl
-			
 			"C.+elegans",	//&db=ce2
-			"S.+cerevisiae"	//&db=sacCer1
 			
+			"S.+cerevisiae",	//&db=sacCer1
+			"",
+			"",
+			"",
+			""
 			
+	};
+	
+	public static final String[][] SP_UCSC_GENOME_VERSIONS= new String[][] {
 		//&clade=vertebrate&org=Mouse&db=mm8
 		// org=
 
-	};
+		new String[] {"hg17", "hg18"},	// &db=hg18 newest, but for gencode..
+		new String[] {"panTro"},
+		new String[] {"mm8"},
+		new String[] {"rn4"},
+		new String[] {"canFam2"},
+		new String[] {"bosTau2"},
+		new String[] {"monDom4"},
+		
+		new String[] {"galGal3"},
+		new String[] {"xenTro2"},
+		new String[] {"danRer4"},	// zfish
+		new String[] {"fr1"},	// fugu
+		new String[] {"tetNig1"},	// tetraodon
+		
+		new String[] {"dm2"},	// droso
+		new String[] {"anoGam1"},	// mosquito
+		new String[] {"apiMel2"},  	// honeybee
+		new String[] {"ce2"},	// worm
+		
+		new String[] {"sacCer1"},	// yeast
+		new String[] {"ci2"},	// ciona
+		new String[] {""},
+		new String[] {""},
+		new String[] {""}
+		
+		
+};
 	
 	public static final String[] SP_NAMES_ENS_PFX= new String[] {
 			ENS_ID+			"", 
@@ -75,7 +169,7 @@ public class Species implements Serializable {
 			ENS_ID+			"RNO",
 			ENS_ID+			"CAF",
 			ENS_ID+			"BTA",
-			ENS_ID+			"MOD",
+			ENS_ID+			"MOD", 
 			
 			ENS_ID+			"GAL",
 			ENS_ID+			"XET",
@@ -87,8 +181,10 @@ public class Species implements Serializable {
 			ENS_ID+			"ANG",
 			ENS_ID+			"APM",
 			
-			"",		// W09B6.4, Y59E9AR.9, ZK994.1, ZK994.3, ZK994.4, ... (no rule)
-			""		// RDN58-1, snRNA, 15S-RNA, YAL016W, ... (no plan)
+			"WO",		// W09B6.4, Y59E9AR.9, ZK994.1, ZK994.3, ZK994.4, ... (no rule)
+			"RDN"		// RDN58-1, snRNA, 15S-RNA, YAL016W, ... (no plan)
+			
+			// species missing
 	};
 	
 	public static final boolean isValidEnsemblPrefix(String pfx) {
@@ -127,33 +223,61 @@ public class Species implements Serializable {
 			"arabidopsis_thaliana"
 	};
 	
+	public static final String[] SP_NAMES_COMMON = new String[] { 
+		"human", 
+		"chimp", 
+		"mouse", 
+		"rat", 
+		"dog", 
+		"cow", 
+		"opossum", 
+		
+		"chicken", "frog", "zebrafish", "fugu", "tetraodon", 
+		
+		"fruitfly", "mosquito", "honeybee", "worm", 
+		
+		"yeast", "seasquirt", "seqsquirt2", "platypus", "cress" };
+	public static final String[][] SPECIFIC_ANNOTATIONS = new String[][] { 
+		new String[] {"Known", "RefSeq", "EnsEmbl", "MGC"}, 
+		new String[] {"chimp"}, 
+		new String[] {"Known", "RefSeq", "EnsEmbl", "MGC"}, 
+		new String[] {"rat"}, 
+		new String[] {"dog"}, 
+		new String[] {"cow"}, 
+		new String[] {"opossum"}, 
+		new String[] {"chicken"}, 
+		new String[] {"frog"}, 
+		new String[] {"zebrafish"}, 
+		new String[] {"fugu"}, 
+		new String[] {"tetraodon"}, 
+		new String[] {"RefSeq", "FlyBase"}, 
+		new String[] {"mosquito"}, 
+		new String[] {"honeybee"}, 
+		new String[] {"RefSeq", "WormBase"}, 
+		new String[] {"yeast"}, 
+		new String[] {"seasquirt"}, 
+		new String[] {"seqsquirt2"}, 
+		new String[] {"platypus"}, 
+		new String[] {"cress"} 
+	};
+	public static final String[] SP_NAMES_ANDRE = new String[] { "human", "mouse", "rat", "dog", "cow", "chicken", "tetraodon"};
 	// public static final String[] SP_NAMES_ABBREV= new String[] {"hsapiens", "mmusculus", "rnorvegicus"};
-	public static final String[] SP_NAMES_COMMON= new String[] {
+	public static final String[] SP_NAMES_METAZOA= new String[] {
 			"human",	// mammals 
 			"chimp",
 			"mouse", 
 			"rat",
 			"dog",
 			"cow",
-			"opossum",
 
 			"chicken",	// other chordates
 			"frog",
 			"zebrafish",
-			"fugu",
-			"tetraodon",
 			
 			"fruitfly",
-			"mosquito",
-			"bee",		// not in ensembl
-			"worm",
-			"yeast",
-			
-			"seasquirt",
-			"seqsquirt2",
-			"platypus",
-			
-			"cress"
+			"honeybee",		// not in ensembl
+			"worm"
+
 	};
 
 	public static Species[] createByBinomialName(String[] binomialNames) {
@@ -214,6 +338,13 @@ public class Species implements Serializable {
 	public String getBinomialName() {
 		return SP_NAMES_BINOMIAL[spNumber];
 	}
+
+	public String getAbbreviatedName() {
+		String s= SP_NAMES_BINOMIAL[spNumber];
+		int p= s.indexOf("_");
+		s= Character.toUpperCase(s.charAt(0))+ "."+ s.substring(p+1, s.length());
+		return s;
+	}
 	
 	public String getCommonName() {
 		return SP_NAMES_COMMON[spNumber];
@@ -223,24 +354,97 @@ public class Species implements Serializable {
 		return SP_NAMES_BINOMIAL[spNumber].substring(0, SP_NAMES_BINOMIAL[spNumber].indexOf('_'));
 	}	
 	
-	static final String abbreviateBinomialName(String binName) {
+	public static final String getAbbrevNameForBinomial(String binName) {
 		return binName.charAt(0)+ binName.substring(binName.indexOf("_")+ 1);		
 	}
 	
 	public String getNameAbbrev() {
-		return abbreviateBinomialName(SP_NAMES_BINOMIAL[spNumber]);
+		return getAbbrevNameForBinomial(SP_NAMES_BINOMIAL[spNumber]);
 	}
 	
 	
-	int buildVersion= -1; 	// assuming a common build src (like NCBI, RGSC, ...)
+
 	HashMap geneHash= null;
 
+	public static final int getSpeNrForPrefix(String ensemblPFX) {
+		
+		ensemblPFX= ensemblPFX.toUpperCase();
+		
+		for (int i = SP_NAMES_ENS_PFX.length- 1; i >= 0 ; --i)	// iterate backw, human matches everything 
+			if (ensemblPFX.startsWith(SP_NAMES_ENS_PFX[i]))
+				return i;
+		
+		return -1;
+	}
+	
 	public static final String getCommonNameForPrefix(String ensemblPFX) {
 		
-		for (int i = 0; i < SP_NAMES_ENS_PFX.length; i++) 
-			if (SP_NAMES_ENS_PFX[i].equalsIgnoreCase(ensemblPFX))
-				return SP_NAMES_COMMON[i];
+		int speNr= getSpeNrForPrefix(ensemblPFX);
+		if (speNr>= 0)
+			return SP_NAMES_COMMON[speNr];
 		
+		return null;
+	}
+	
+	public static final String getGenomeVersionForAnnotation(String build) {
+		for (int i = 0; i < SP_ANNOTATION_VERSIONS.length; i++) 
+			for (int j = 0; j < SP_ANNOTATION_VERSIONS[i].length; j++) 
+				for (int k = 0; k < SP_ANNOTATION_VERSIONS[i][j].length; k++) 
+					if (SP_ANNOTATION_VERSIONS[i][j][k].equalsIgnoreCase(build))
+						return SP_GENOME_VERSIONS[i][j][0];
+		return null;
+	}
+	
+	public static final int getGenomeVerNbForAnnotation(String build) {
+		for (int i = 0; i < SP_ANNOTATION_VERSIONS.length; i++) 
+			for (int j = 0; j < SP_ANNOTATION_VERSIONS[i].length; j++) 
+				for (int k = 0; k < SP_ANNOTATION_VERSIONS[i][j].length; k++) 
+					if (SP_ANNOTATION_VERSIONS[i][j][k].equalsIgnoreCase(build))
+						return j;
+		return -1;
+	}
+	
+	public static final int getGenomeVerNb(String genomeVersion) {
+		for (int i = 0; i < SP_GENOME_VERSIONS.length; i++) 
+			for (int j = 0; j < SP_GENOME_VERSIONS[i].length; j++) 
+				for (int k = 0; k < SP_GENOME_VERSIONS[i][j].length; k++) 
+					if (SP_GENOME_VERSIONS[i][j][k].equalsIgnoreCase(genomeVersion))
+						return j;
+		return -1;
+	}
+
+	public static final int getSpeciesNumberForAnnotation(String build) {
+		for (int i = 0; i < SP_ANNOTATION_VERSIONS.length; i++) 
+			for (int j = 0; j < SP_ANNOTATION_VERSIONS[i].length; j++) 
+				for (int k = 0; k < SP_ANNOTATION_VERSIONS[i][j].length; k++) 
+					if (SP_ANNOTATION_VERSIONS[i][j][k].equalsIgnoreCase(build))
+						return i;
+		return -1;
+	}
+	
+	public static final int getSpeciesNumberForGenomeVersion(String genomeVer) {
+		for (int i = 0; i < SP_GENOME_VERSIONS.length; i++) 
+			for (int j = 0; j < SP_GENOME_VERSIONS[i].length; j++) 
+				for (int k = 0; k < SP_GENOME_VERSIONS[i][j].length; k++) 
+					if (SP_GENOME_VERSIONS[i][j][k].equalsIgnoreCase(genomeVer))
+						return i;
+		return -1;
+	}
+
+	public static final String getCommonNameForGenomeVersion(String build) {
+		for (int i = 0; i < SP_GENOME_VERSIONS.length; i++) 
+			for (int j = 0; j < SP_GENOME_VERSIONS[i].length; j++) 
+				for (int k = 0; k < SP_GENOME_VERSIONS[i][j].length; k++) 
+					if (SP_GENOME_VERSIONS[i][j][k].equalsIgnoreCase(build))
+						return SP_NAMES_COMMON[i];
+		return null;
+	}
+	
+	public static final String decodeEnsemblPfx(String ensemblID) {
+		Pattern patti= Pattern.compile("^(\\D{4,})\\d{11}.*");
+		Matcher m= patti.matcher(ensemblID);
+		if (m.matches())
+			return m.group(1);
 		return null;
 	}
 	
@@ -289,11 +493,11 @@ public class Species implements Serializable {
 		return null;
 	}	
 	
-	public static final String getAbbrevNameForBionomial(String ensemblPFX) {
+	public static final String getAbbrevNameForPrefix(String ensemblPFX) {
 		
 		for (int i = 0; i < SP_NAMES_ENS_PFX.length; i++) {
 			if (SP_NAMES_ENS_PFX[i].equalsIgnoreCase(ensemblPFX))
-				return abbreviateBinomialName(SP_NAMES_BINOMIAL[i]);
+				return getAbbrevNameForBinomial(SP_NAMES_BINOMIAL[i]);
 		}
 		
 		return null;
@@ -327,13 +531,22 @@ public class Species implements Serializable {
 		return getSpeciesNumberForBinomialName(getBinomialForSomeName(someName));
 	}
 	
+	public static int getAnnotationNumber(String someName, String annoName) {
+		String[] annotations= SPECIFIC_ANNOTATIONS[getSpeciesNumber(someName)];
+		for (int i = 0; i < annotations.length; i++) {
+			if (annotations[i].equals(annoName))
+				return i;
+		}
+		return -1;
+	}
+	
 	public static int getSpeciesNumberForBinomialName(String binName) {
 		int i;
 		for (i = 0; i < SP_NAMES_BINOMIAL.length; i++) 
-			if (SP_NAMES_BINOMIAL[i]== binName)
+			if (SP_NAMES_BINOMIAL[i].equals(binName))
 				break;
 		if (i>= SP_NAMES_BINOMIAL.length) {
-			System.err.println("Unknown name "+ binName);
+			//System.err.println("Unknown name "+ binName);
 			return -1;
 		}
 		
@@ -515,6 +728,14 @@ public class Species implements Serializable {
 		return Gene.toGeneArray(o);	
 	}
 	
+	public String getDefaultGenomeVersion() {
+		return Species.getDefaultGenomeVersion(getSpNumber());
+	}
+	
+	public static String getDefaultGenomeVersion(int speNb) {
+		return SP_GENOME_VERSIONS[speNb][0][0];
+	}
+	
 	
 	public Iterator getGeneIterator() {
 		return geneHash.values().iterator();
@@ -606,8 +827,8 @@ public class Species implements Serializable {
 	/**
 	 * @return Returns the buildVersion.
 	 */
-	public int getBuildVersion() {
-		return buildVersion;
+	public String getAnnotationVersion() {
+		return annotationVersion;
 	}
 	public Exon[] getExons() {
 
@@ -626,8 +847,8 @@ public class Species implements Serializable {
 	/**
 	 * @param buildVersion The buildVersion to set.
 	 */
-	public void setBuildVersion(int buildVersion) {
-		this.buildVersion = buildVersion;
+	public void setAnnotationVersion(String buildVersion) {
+		this.annotationVersion = buildVersion;
 	}
 
 	public String toString() {
@@ -812,6 +1033,10 @@ public class Species implements Serializable {
 	}
 
 	
+	/**
+	 * only splits genes, after transcript removal
+	 * cannot unite them
+	 */
 	public void recluster() {
 		Gene[] ge= getGenes();
 		for (int i = 0; i < ge.length; i++) {
@@ -961,5 +1186,74 @@ public class Species implements Serializable {
 		System.out.println(SP_NAMES_COMMON[getSpNumber()]+" removed "+ctrTrpt+" transcripts, by this "+ctrGene+" complete genes" +
 				" due to non-GT/AG introns.");
 		return chrHash;
+	}
+	String annotationVersion = null;
+
+	public String getGenomeVersion() {
+		return genomeVersion;
+	}
+
+	public void setGenomeVersion(String genomeVersion) {
+		this.genomeVersion = genomeVersion;
+	}
+
+	public static final String getAnnotation(String speName, String genomeVer, String annoName, String[] keywords) {
+		for (int i = 0; keywords!= null&& i < keywords.length; i++) 
+			keywords[i]= keywords[i].toUpperCase();
+		
+		speName= speName.toUpperCase();
+		annoName= annoName.toUpperCase();
+		String[] list= new File(Constants.SUBDIR_ANNOTATION).list();		
+		Vector v= new Vector();
+		for (int i = 0; i < list.length; i++) {
+			String s= list[i].toUpperCase();
+			if (s.contains(speName)&& s.contains(annoName)) {
+				if (genomeVer!= null) {
+					genomeVer= genomeVer.toUpperCase();
+					if (!s.contains(genomeVer))
+						continue;
+				}
+				if (keywords!= null) {
+					int x;
+					for (x = 0; x < keywords.length; x++) 
+						if (s.contains(keywords[x]))
+							break;
+					if (x< keywords.length)
+						v.add(new File(Constants.SUBDIR_ANNOTATION+ File.separator+ list[i]).getAbsolutePath());
+				} else if (!new gphase.tools.File(list[i]).getExtension().contains("_"))
+					v.add(new File(Constants.SUBDIR_ANNOTATION+ File.separator+ list[i]).getAbsolutePath());
+			}
+		}
+		
+		if (v.size()== 0) {
+			System.err.println("No annotation found for "+speName+", "+annoName);
+			return null;
+		}
+		if (v.size()== 1) 
+			return (String) v.elementAt(0);
+	
+		System.out.println("Ambiguous information, press <CR> for fetching newest relase (according to 200x date).");
+		try {
+			System.in.read();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		int max= -1;
+		int maxP= -1;
+		for (int i = 0; i < v.size(); i++) {
+			String s= (String) v.elementAt(i);
+			int p= s.indexOf("200");// 200x
+			if (p< 0) {
+				System.err.println("No date available for "+s);
+				continue;
+			}
+			int x= Integer.parseInt(s.substring(p+3, p+6));
+			if (x> max) {
+				max= x;
+				maxP= i;
+			}
+		}
+		
+		return (String) v.elementAt(maxP);
 	}
 }

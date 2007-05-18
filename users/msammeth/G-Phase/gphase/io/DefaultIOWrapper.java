@@ -57,6 +57,10 @@ public abstract class DefaultIOWrapper implements IOWrapper {
 		return fName;
 	}
 	
+	public void setFileName(String newFName) {
+		this.fName= newFName;
+	}
+	
 	public String getAbsFileName() {		
 		if (fPath!= null)
 			return getFilePath()+ File.separator+ getFileName();			

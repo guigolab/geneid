@@ -18,6 +18,7 @@ public class TSSite extends AbstractSite {
 	Transcript[] transcripts= null;
 	
 	public TSSite(Transcript newTrans, int newPos, boolean isTSS) {
+		super(newPos);
 		this.tsStart= isTSS;
 		this.pos= newPos;
 		addTranscript(newTrans);

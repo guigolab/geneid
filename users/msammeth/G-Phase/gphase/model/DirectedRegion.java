@@ -1,5 +1,6 @@
 package gphase.model;
 
+import gphase.io.gtf.GTFObject;
 import gphase.tools.Arrays;
 
 import java.util.Comparator;
@@ -245,6 +246,19 @@ public class DirectedRegion extends DefaultRegion {
 		return reg;
 	}
 	
+	@Override
+	public boolean equals(Object obj) {
+		
+		if (obj== null|| !(obj instanceof DirectedRegion))
+			return false;
+		
+		DirectedRegion otherReg= (DirectedRegion) obj;
+		if (otherReg.getStart()== getStart()&& otherReg.getEnd()== getEnd()
+				&& otherReg.getChromosome().equals(getChromosome()))
+			return true;
+		return false;
+	}
+	
 	public static class OrderComparator implements Comparator {
 		/**
 		 * sorts regions according to their order on pos/neg strand 
@@ -356,6 +370,13 @@ public class DirectedRegion extends DefaultRegion {
 		setEnd(source.getEnd());
 	}
 	
+	public DirectedRegion(GTFObject obj) {
+		setStrand(obj.getStrand());
+		setStart(obj.getStart());
+		setEnd(obj.getEnd());
+		setChromosome(obj.getChromosome());		
+	}
+	
 	public DirectedRegion() {
 	}
 	
@@ -435,10 +456,20 @@ public class DirectedRegion extends DefaultRegion {
 	
 	public int strand = 0;
 
-	public boolean overlaps(Region anotherRegion) {
-		
-		if (getChromosome()!= null&& anotherRegion.getChromosome()!= null
-			&& (!anotherRegion.getChromosome().equalsIgnoreCase(getChromosome())))
+	public boolean overlaps(DirectedRegion anotherRegion) {
+		if (anotherRegion== null)
+			return false;
+		if (getStrand()== 0|| anotherRegion.getStrand()== 0||
+				getChromosome()== null|| anotherRegion.getChromosome()== null||
+				getStart()== 0|| anotherRegion.getStart()== 0||
+				getEnd()== 0 || anotherRegion.getEnd()== 0) {
+			System.err.println("Not inited for overlap "+this+", "+anotherRegion);
+			return false;
+		}
+			
+
+		if (!(anotherRegion.getChromosome().equalsIgnoreCase(getChromosome()))||
+				getStrand()!= anotherRegion.getStrand())
 			return false;
 		
 		if ((Math.abs(getStart())>= Math.abs(anotherRegion.getStart())&& 

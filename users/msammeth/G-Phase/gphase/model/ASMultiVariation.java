@@ -88,6 +88,7 @@ public class ASMultiVariation implements Serializable {
 	public static final int FILTER_HIERARCHICALLY= 1;
 	public static final int FILTER_CODING_REDUNDANT= 2;
 	public static final int FILTER_STRUCTURALLY= 3;
+	public static final int FILTER_CONTAINED_IN_CDS= 4;
 	public static String[] FILTER_TO_STRING= {"none", "hierarchically", "coding_redundant", "structurally"};
 	
 	ASVariation[] asVariations= null;
@@ -184,7 +185,8 @@ public class ASMultiVariation implements Serializable {
 		return (ASVariation[]) Arrays.toField(v);
 	}
 	public static ASVariation[] removeRedundancy(ASVariation[] vars, Comparator compi) {
-		
+		if (vars== null)
+			return null;
 		Vector v= new Vector(vars.length);
 		for (int i = 0; i < vars.length; i++) 
 			v.add(vars[i]);

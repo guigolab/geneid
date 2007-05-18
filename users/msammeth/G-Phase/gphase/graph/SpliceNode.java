@@ -128,11 +128,11 @@ public class SpliceNode {
 	}
 	
 	public boolean isTSS() {
-		return (getInDegree()== 0);
+		return (getInDegree()== 0&& (site instanceof AbstractSite));
 	}
 	
 	public boolean isTES() {
-		return (getOutDegree()== 0);
+		return (getOutDegree()== 0&& (site instanceof AbstractSite));
 	}
 	
 	public void addOutEdge(SpliceEdge newOutEdge) {

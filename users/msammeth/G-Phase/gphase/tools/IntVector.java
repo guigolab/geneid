@@ -50,6 +50,10 @@ public class IntVector {
 		return vector[pos];
 	}
 	
+	public void set(int pos, int val) {
+		if (pos< vector.length)
+			vector[pos]= val;
+	}
 	public int[] toIntArray() {
 		int[] result= new int[length];
 		for (int i = 0; i < length; i++) 
@@ -71,5 +75,20 @@ public class IntVector {
 		
 		vector= newA;
 		length= newA.length;
+	}
+	
+	public int getValue(int pos) {
+		if (pos< length)
+			return vector[pos];
+		return 0;
+	}
+	
+	public void putValue(int pos, int val) {
+		if (pos>= length) {
+			int rounds= (pos+ 1)- size();
+			for (int i = 0; i < rounds; i++) 
+				add(0);
+		}
+		vector[pos]= val;
 	}
 }

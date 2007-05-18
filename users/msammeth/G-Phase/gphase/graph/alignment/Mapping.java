@@ -16,6 +16,9 @@ import java.util.Vector;
 
 public class Mapping {
 
+	boolean freeShift= false;
+	static String costID= "Len";
+	
 	public static class PriorityComparator implements Comparator {
 		public int compare(Object arg0, Object arg1) {
 			if (((Mapping) arg0).getCost()< ((Mapping) arg1).getCost())
@@ -26,12 +29,22 @@ public class Mapping {
 		}
 	}
 	
+	public static class PriorityExtensionComparator extends PriorityComparator {
+		public int compare(Object arg0, Object arg1) {
+			if (((Mapping) arg0).offIJ< ((Mapping) arg1).offIJ)
+				return -1;
+			if (((Mapping) arg0).offIJ> ((Mapping) arg1).offIJ)
+				return 1;
+			return super.compare(arg0, arg1);
+		}
+	}
+
 	double cost= 0;
 	HashMap mapTableI= new HashMap(), mapTableJ= new HashMap();
 	SpliceNode maxI= null, maxJ= null;
 	int maxRel= -1;
 	SpliceGraph g1, g2;
-	
+	int offI= 0, offJ= 0, offIJ= 0;
 	
 	public Mapping(SpliceGraph newG1, SpliceGraph newG2) {
 		this.g1= newG1;
@@ -52,7 +65,13 @@ public class Mapping {
 	}
 	
 	public double getCost(SpliceNode nI, SpliceNode nJ) {
-		return getCost_exonicLenPiece(nI, nJ);
+		if (costID.contains("LenExp"))
+			return getCost_exonicLenExp(nI, nJ);	
+		if (costID.contains("LenPiece"))
+			return getCost_exonicLenPiece(nI, nJ);	//getCost_exonicLenPiece(nI, nJ);
+		if (costID.contains("Len"))	// after lenpiece
+			return getCost_exonicLen(nI, nJ);	//getCost_exonicLen
+		return getCost_edge(nI, nJ);
 	}
 	
 	public void addMapping(SpliceNode nI, SpliceNode nJ) {
@@ -170,10 +189,12 @@ public class Mapping {
 		return (d1+ i2);
 	}
 	
-	double getCost_exonicLen(SpliceNode nI, SpliceNode nJ) {
+	strictfp double getCost_exonicLen(SpliceNode nI, SpliceNode nJ) {
 		
 		assert(!(nI== null&& nJ== null));
-		if ((nI== null&& nJ.getOutDegree()> 0)|| (nJ== null&& nI.getOutDegree()> 0)) {	// end node ??
+			//	allow freedom in the last node iff tss
+			// for tss handled by 2 sets of null pathes
+		if ((nI== null&& nJ.isTES())|| (nJ== null&& nI.isTES())) {	// end node ??
 			return 0d; 	// not aligned node, no penalty
 		}
 		
@@ -182,13 +203,13 @@ public class Mapping {
 		if (nI!= null) {
 			SpliceNode[] src= (SpliceNode[]) gphase.tools.Arrays.toField(mapTableI.keySet());
 			SpliceNode[] roots= g1.getRoots(); 
-			pathesI= fpath(roots, src, nI);
+			pathesI= fpath(roots, src, nI, g1);
 		}		
 		
 		if (nJ!= null) {
 			SpliceNode[] src= (SpliceNode[]) gphase.tools.Arrays.toField(mapTableJ.keySet());
 			SpliceNode[] roots= g2.getRoots(); 
-			pathesJ= fpath(roots, src, nJ);
+			pathesJ= fpath(roots, src, nJ, g2);
 		}
 		
 			// both no valid pathes (eg, src of both graphs)
@@ -196,10 +217,24 @@ public class Mapping {
 			return 0d;	// no penalty
 	
 			// only one with valid pathes
-		if (pathesI== null|| pathesI.length== 0) 
-			return (double) pathesJ.length;
-		if (pathesJ== null|| pathesJ.length== 0) 
-			return (double) pathesI.length;
+		if (pathesI== null|| pathesI.length== 0) {
+			if (!freeShift)
+				return (double) pathesJ.length;
+			int cnt= 0;
+			for (int i = 0; i < pathesJ.length; i++) 
+				if (pathesJ[i].getSrc().getInDegree()> 0)
+					++cnt;		// not good, alignment will go over the corner
+			return (double) cnt;
+		}
+		if (pathesJ== null|| pathesJ.length== 0) { 
+			if (!freeShift)
+				return (double) pathesI.length;
+			int cnt= 0;
+			for (int i = 0; i < pathesJ.length; i++) 
+				if (pathesI[i].getSrc().getInDegree()> 0)
+					++cnt;		// only non-border not aligned exonic areas
+			return (double) cnt;
+		}
 		
 			// two with valid pathes, match table
 		double[][] exLenDiff= new double[pathesI.length][pathesJ.length];
@@ -238,7 +273,60 @@ public class Mapping {
 		return sum;
 	}
 
-	double getCost_exonicLenPiece(SpliceNode nI, SpliceNode nJ) {
+	strictfp double getCost_exonicLenExp(SpliceNode nI, SpliceNode nJ) {
+		
+		if (nI.isTSS()|| nJ.isTSS())
+			return 0d; 
+		
+			// get new pathes (since last aligned node or root)
+		SplicePath[] pathesI= null, pathesJ= null;
+		if (nI!= null) {
+			SpliceNode[] src= (SpliceNode[]) gphase.tools.Arrays.toField(mapTableI.keySet());
+			SpliceNode[] roots= g1.getRoots(); 
+			pathesI= fpath(roots, src, nI, g1);
+		}		
+		
+		if (nJ!= null) {
+			SpliceNode[] src= (SpliceNode[]) gphase.tools.Arrays.toField(mapTableJ.keySet());
+			SpliceNode[] roots= g2.getRoots(); 
+			pathesJ= fpath(roots, src, nJ, g2);
+		}
+		
+			// at least one with NO valid pathes (eg, src of both graphs)
+		if ((pathesI== null|| pathesI.length== 0)|| (pathesJ== null|| pathesJ.length== 0))
+			return 1d;	// not alignable
+	
+			// two with valid pathes, match table
+		double[][] exLenDiff= new double[pathesI.length][pathesJ.length];
+		for (int i = 0; i < pathesI.length; i++) {
+			for (int j = 0; j < pathesJ.length; j++) {
+				int vw= Math.abs(pathesI[i].getExonicLength());
+				int tu= Math.abs(pathesJ[j].getExonicLength());
+				if (vw> 0&& tu> 0)
+					exLenDiff[i][j]= 1d-Math.min(((double) tu/ vw), ((double) vw/ tu));
+				else if (vw== 0&& tu== 0)
+					exLenDiff[i][j]= 0d;
+				else {
+					assert (vw== 0^ tu== 0);
+					exLenDiff[i][j]= 1d;
+				}
+			}
+		}
+		
+			// add up minima
+		double sum= 0d;
+		for (int i = 0; i < exLenDiff.length; i++) {
+			double min= 2d;
+			for (int j = 0; j < exLenDiff[i].length; j++) 
+				if (exLenDiff[i][j]< min)
+					min= exLenDiff[i][j];
+			sum+= min;
+		}
+		
+		return sum;
+	}
+
+	strictfp double getCost_exonicLenPiece(SpliceNode nI, SpliceNode nJ) {
 		
 		assert(!(nI== null&& nJ== null));
 		if ((nI== null&& nJ.getOutDegree()> 0)|| (nJ== null&& nI.getOutDegree()> 0)) {	// end node ??
@@ -561,6 +649,22 @@ public class Mapping {
 		return mapTableJ;
 	}
 
+	public SpliceNode[] getNextAlignPair(SpliceNode[] listI, SpliceNode[] listJ, int idxI, int idxJ) {
+		
+		while(true) {
+			if (offI< offIJ&& idxI+offI+1< listI.length&& idxJ+offIJ< listJ.length)
+				return new SpliceNode[] {listI[idxI+(offI++)], listJ[idxJ+offIJ]};
+			if (offJ< offIJ&& idxJ+offJ+1< listJ.length&& idxI+offIJ< listI.length)
+				return new SpliceNode[] {listI[idxI+offIJ], listJ[idxJ+(offJ++)]};
+			++offIJ;
+			offI= 1; offJ= 1;
+			if (idxI+ offIJ< listI.length&& idxJ+ offIJ< listJ.length)
+				return new SpliceNode[] {listI[idxI+offIJ], listJ[idxJ+offIJ]};
+			if (idxI+ offIJ> listI.length&& idxJ+ offIJ> listJ.length)
+				return null;
+		}
+	}
+	
 	public SpliceNode getMaxI() {
 		return maxI;
 	}
@@ -569,6 +673,47 @@ public class Mapping {
 		return maxJ;
 	}
 	
+	public String toStringInverse() {
+		Object[] o= mapTableJ.keySet().toArray();
+		SpliceNode[] nodes= new SpliceNode[o.length];
+		for (int i = 0; i < nodes.length; i++) 
+			nodes[i]= (SpliceNode) o[i];
+		Arrays.sort(nodes, new SpliceNode.PositionComparator());
+		
+		String result= "";
+		for (int i = 0; i < nodes.length; i++) 
+			result+= "["+ nodes[i].getSite().getPos()+ ","+ 
+				((SpliceNode) mapTableJ.get(nodes[i])).getSite().getPos()+ "], ";
+		
+		if (result.length()> 2)
+			result= result.substring(0, result.length()- 2);
+		result+= ": "+ getCost();
+		
+		return result;
+	}
+
+	public String toStringInverse(SpliceNode[] listI, SpliceNode[] listJ) {
+		Object[] o= mapTableJ.keySet().toArray();
+		SpliceNode[] nodes= new SpliceNode[o.length];
+		for (int i = 0; i < nodes.length; i++) 
+			nodes[i]= (SpliceNode) o[i];
+		Comparator compi= new SpliceNode.PositionComparator();
+		Arrays.sort(nodes, compi);
+		
+		String result= "";
+		for (int i = 0; i < nodes.length; i++) {
+			int p1= Arrays.binarySearch(listJ, nodes[i], compi);
+			int p2= Arrays.binarySearch(listI, mapTableJ.get(nodes[i]), compi);
+			result+= "["+ p1+ ","+ p2 + "], ";
+		}
+		
+		if (result.length()> 2)
+			result= result.substring(0, result.length()- 2);
+		result+= ": "+ getCost();
+		
+		return result;
+	}
+
 	public String toString() {
 		Object[] o= mapTableI.keySet().toArray();
 		SpliceNode[] nodes= new SpliceNode[o.length];
@@ -588,7 +733,68 @@ public class Mapping {
 		return result;
 	}
 
+	public String toString(SpliceNode[] listI, SpliceNode[] listJ) {
+		Object[] o= mapTableI.keySet().toArray();
+		SpliceNode[] nodes= new SpliceNode[o.length];
+		for (int i = 0; i < nodes.length; i++) 
+			nodes[i]= (SpliceNode) o[i];
+		Comparator compi= new SpliceNode.PositionComparator();
+		Arrays.sort(nodes, compi);
+		
+		String result= "";
+		for (int i = 0; i < nodes.length; i++) { 
+			int p1= Arrays.binarySearch(listI, nodes[i], compi);
+			int p2= Arrays.binarySearch(listJ, mapTableI.get(nodes[i]), compi);
+			result+= "["+ p1+ ","+ p2+ "], ";
+		}
+		
+		if (result.length()> 2)
+			result= result.substring(0, result.length()- 2);
+		result+= ": "+ getCost();
+		
+		return result;
+	}
+
+	//gene id spec1       \t      geneid spec2      \t        chrpos spec1     \t      chrpos spec2
+	public String toStringAndre() {
+		Object[] o= mapTableI.keySet().toArray();
+		SpliceNode[] nodes= new SpliceNode[o.length];
+		for (int i = 0; i < nodes.length; i++) 
+			nodes[i]= (SpliceNode) o[i];
+		Arrays.sort(nodes, new SpliceNode.PositionComparator());
+		
+		String result1= "";
+		String result2= "";
+		for (int i = 0; i < nodes.length; i++) {
+			result1+= Math.abs(nodes[i].getSite().getPos())+ " "; 
+			result2+= Math.abs(((SpliceNode) mapTableI.get(nodes[i])).getSite().getPos())+ " ";
+		}
+		if (result1.length()> 0)
+			result1= result1.substring(0, result1.length()-1);
+		if (result2.length()> 0)
+			result2= result2.substring(0, result2.length()-1);
+		
+		return (result1+ "\t"+ result2);
+	}
+
+
 	public int getMaxRel() {
 		return maxRel;
+	}
+
+	public boolean isFreeShift() {
+		return freeShift;
+	}
+
+	public void setFreeShift(boolean freeShift) {
+		this.freeShift = freeShift;
+	}
+
+	public static String getCostID() {
+		return costID;
+	}
+
+	public static void setCostID(String newCostID) {
+		costID = newCostID;
 	}
 }

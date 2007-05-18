@@ -69,7 +69,7 @@ public class ATDWrapper extends EncodeWrapper {
 	Graph assemble() {
 		
 		Species spec= new Species("human");
-		spec.setBuildVersion(17);
+		spec.setAnnotationVersion(17);
 		
 			// genes
 		GTFObject[] gtfs= getGtfObj();

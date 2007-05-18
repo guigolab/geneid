@@ -243,7 +243,7 @@ public class StopCodons {
 					continue;
 				Exon[] exons= trpts[j].getExons();
 				for (int k = 0; k < exons.length; k++) {	// not 1st exon
-					if (exons[k].isCoding())
+					if (exons[k].isCodingCompletely())
 						break;
 					if (k> 0&& exons[k].getLength()> longestExon)
 						longestExon= exons[k].getLength();

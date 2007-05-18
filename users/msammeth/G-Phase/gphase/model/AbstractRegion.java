@@ -8,6 +8,7 @@ package gphase.model;
 
 import java.io.Serializable;
 import java.util.Comparator;
+import java.util.HashMap;
 
 /**
  * 
@@ -17,6 +18,7 @@ import java.util.Comparator;
 public abstract class AbstractRegion implements Region {
 
 	String id= null;
+	HashMap attributes= null;
 	
 	static final long serialVersionUID=  5443375142823871946L;
 	public abstract Species getSpecies();
@@ -32,47 +34,77 @@ public abstract class AbstractRegion implements Region {
 		return false;
 	}
 	
+	public void addAttribute(Object id, Object val) {
+		if (attributes== null)
+			attributes= new HashMap();
+		attributes.put(id, val);
+	}
+	
+	public Object getAttribute(Object id) {
+		if (attributes== null)
+			return null;
+		return attributes.get(id);
+	}
+	
 	public abstract String getChromosome();
 
 	/* assumption: exons share same strand
 	 * 
 	 * @author micha
 	 */
-	public static class PositionComparator implements Comparator {
+	public static class StartComparator implements Comparator {
 		
 		public int compare(Object o1, Object o2) {
 
-			int end1= ((Region) o1).getEnd();
 			int start2= ((Region) o2).getStart();
-			int end2= ((Region) o2).getEnd();
 			int start1= ((Region) o1).getStart();
-			if (start1== start2&& end1== end2)	// no object identity
+			if (start1== start2)
 				return 0;
-			
-				// non-overlapping, one before the other
-			// cancelled, not working for neg. strand (clustering, sort array asc with start, end pos)
-//			if (end1< start2)
-//				return -1;		// one stops before the other
-//			if (end2< start1)
-//				return 1;
-			
-				// overlapping: none stops before the other
 			if (start1< start2)
 				return -1;
-			if (start2< start1)
-				return 1;
-			
-				// overlapping and same start position
-			if (start1< end2)
-				return -1;
-			if (end2< start1)
-				return 1;
-			
-			System.err.println("assertion in abstractregion.positioncomparator failed");
-			return 0;	// identical positions --> never reached
-			
+			return 1;
 		}
 	}
+
+	/* assumption: exons share same strand
+		 * 
+		 * @author micha
+		 */
+		public static class PositionComparator implements Comparator {
+			
+			public int compare(Object o1, Object o2) {
+	
+				int end1= ((Region) o1).getEnd();
+				int start2= ((Region) o2).getStart();
+				int end2= ((Region) o2).getEnd();
+				int start1= ((Region) o1).getStart();
+				if (start1== start2&& end1== end2)	// no object identity
+					return 0;
+				
+					// non-overlapping, one before the other
+				// cancelled, not working for neg. strand (clustering, sort array asc with start, end pos)
+	//			if (end1< start2)
+	//				return -1;		// one stops before the other
+	//			if (end2< start1)
+	//				return 1;
+				
+					// overlapping: none stops before the other
+				if (start1< start2)
+					return -1;
+				if (start2< start1)
+					return 1;
+				
+					// overlapping and same start position
+				if (start1< end2)
+					return -1;
+				if (end2< start1)
+					return 1;
+				
+				//System.err.println("assertion in abstractregion.positioncomparator failed");
+				return 0;	// identical positions --> never reached
+				
+			}
+		}
 
 	public boolean overlaps(Region anotherRegion) {
 		
@@ -144,6 +176,10 @@ public abstract class AbstractRegion implements Region {
 	
 	protected Object clone() throws CloneNotSupportedException {
 		return super.clone();
+	}
+
+	public HashMap getAttributes() {
+		return attributes;
 	}
 	
 }

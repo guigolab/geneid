@@ -3,6 +3,7 @@ package gphase.model;
 import gphase.Constants;
 import gphase.algo.AlignmentGenerator;
 import gphase.graph.Tuple;
+import gphase.tools.Array;
 
 import java.awt.List;
 import java.io.File;
@@ -40,6 +41,10 @@ public class Gene extends DirectedRegion {
 	ASMultiVariation[] asComplexes= null;
 	AbstractSite[] sites= null;
 	TU[] tu= null;
+	Exon[] exons= null;
+	DirectedRegion[] introns= null;
+	ASVariation[] vars= null;
+	int varCC= -1;
 	
 	public boolean isProteinCoding() {
 		for (int i = 0; transcripts!= null&& i < transcripts.length; i++) 
@@ -63,6 +68,86 @@ public class Gene extends DirectedRegion {
 		if (min== Integer.MAX_VALUE)
 			return 0;
 		return min;
+	}
+	
+	/**
+	 * Returns Map(non-red event x Vector[](alt tIDs))
+	 * @return
+	 */
+	public HashMap getVariantGroups() {
+		ASVariation[] varsNorm= getASVariations(ASMultiVariation.FILTER_NONE);
+		ASVariationGroup[] vars= null;
+		if (varsNorm!= null) {
+			vars= new ASVariationGroup[varsNorm.length];
+			for (int i = 0; i < vars.length; i++) 
+				vars[i]= new ASVariationGroup(varsNorm[i]);
+		}
+		HashMap groupsHash= new HashMap();
+		Comparator compi= new ASVariation.StructureComparator();
+		for (int j = 0; vars!= null&& j < vars.length; j++) {
+			Vector[] v= (Vector[]) groupsHash.remove(vars[j]);
+			if (v== null) {
+				v= new Vector[2];
+				v[0]= new Vector();
+				v[1]= new Vector();
+			}
+			v[0]= (Vector) gphase.tools.Arrays.addUnique(v[0], vars[j].getTranscript1().getTranscriptID());
+			v[1]= (Vector) gphase.tools.Arrays.addUnique(v[1], vars[j].getTranscript2().getTranscriptID());
+			groupsHash.put(vars[j], v);
+		}
+		
+		return groupsHash;
+	}
+	
+
+	/**
+	 * @return
+	 */
+	public VariantGroup_SpliceChain[] getVariantGroups_spliceChains() {
+		ASVariation[] vars= getASVariations(ASMultiVariation.FILTER_NONE);
+		HashMap variantMap= new HashMap(); // SC x Variant Group
+		for (int j = 0; vars!= null&& j < vars.length; j++) {
+			SpliceSite[] sc1= vars[j].getSpliceChain1();
+			SpliceSite[] sc2= vars[j].getSpliceChain2();
+			
+			if (sc1== null) {	// if empty, invert
+				sc1= new SpliceSite[sc2.length];
+				for (int i = sc2.length- 1; i >= 0; --i) 
+					sc1[i- sc2.length+ 1]= sc2[i];
+			}
+			Array sa1= new Array(sc1);
+			VariantGroup_SpliceChain var= (VariantGroup_SpliceChain) variantMap.get(sa1); 
+			if (var== null) {
+				var= new VariantGroup_SpliceChain(sc1);
+				var.addTranscriptID(vars[j].getTranscript1().getTranscriptID());
+				var.addASevent(vars[j]);
+				variantMap.put(sa1, var);
+			} else {
+				var.addTranscriptID(vars[j].getTranscript1().getTranscriptID());
+				var.addASevent(vars[j]);
+			}
+			
+			if (sc2== null) {	// if empty, invert
+				sc2= new SpliceSite[sc1.length];
+				for (int i = sc1.length- 1; i >= 0; --i) 
+					sc2[i- sc1.length+ 1]= sc1[i];
+			}
+			Array sa2= new Array(sc2);
+			var= (VariantGroup_SpliceChain) variantMap.get(sa2); 
+			if (var== null) {
+				var= new VariantGroup_SpliceChain(sc2);
+				var.addTranscriptID(vars[j].getTranscript2().getTranscriptID());
+				var.addASevent(vars[j]);
+				variantMap.put(sa2, var);
+			} else {
+				var.addTranscriptID(vars[j].getTranscript2().getTranscriptID());
+				var.addASevent(vars[j]);
+			}
+		}
+
+			// result
+		Object[] vals= variantMap.values().toArray();
+		return (VariantGroup_SpliceChain[]) gphase.tools.Arrays.toField(vals);
 	}
 	
 	public int getMinCDSEnd() {
@@ -683,13 +768,15 @@ public class Gene extends DirectedRegion {
 	
 	Transcript[] transcripts= null;
 
-	public Gene(Species spec, String stableGeneID) {
-
-		setSpecies(spec);
-		
-		geneID= stableGeneID;
+	public Gene(String newGeneID) {
+		geneID= newGeneID;
 		setID("gene");
-		setStrand(getStrand());
+		//setStrand(getStrand());	// hae?
+	}
+	
+	public Gene(Species spec, String newGeneID) {
+		this (newGeneID);
+		setSpecies(spec);
 	}
 	
 	/**
@@ -842,20 +929,50 @@ public class Gene extends DirectedRegion {
 		return assembly;
 	}
 
+	public DirectedRegion[] getIntrons() {
+		if (introns == null) {
+			Transcript[] trpts= getTranscripts();
+			Vector intronV= new Vector();
+			Comparator compi= new AbstractRegion.PositionComparator();
+			for (int i = 0; trpts!= null&& i < trpts.length; i++) {
+				Exon[] ex= trpts[i].getExons();
+				for (int j = 1; j < ex.length; j++) {
+					DirectedRegion intron= new DirectedRegion(
+							ex[j-1].get3PrimeEdge()+1, 
+							ex[j].get5PrimeEdge()- 1,
+							getStrand());
+					intron.setChromosome(getChromosome());
+					intronV= gphase.tools.Arrays.addUnique(intronV, intron, compi);
+				}
+			}
+			introns= (DirectedRegion[]) gphase.tools.Arrays.toField(intronV);
+		}
+
+		return introns;
+	}
 	/**
 	 * @return
 	 */
 	public Exon[] getExons() {
 
-		Vector v= new Vector();
-		for (int i = 0; i < transcripts.length; i++) 
-			v= (Vector) gphase.tools.Arrays.addUnique(v, transcripts[i].getExons());
-			
-		Exon[] exons= new Exon[v.size()];
-		for (int i = 0; i < v.size(); i++) 
-			exons[i]= (Exon) v.elementAt(i);
-		
+//		Vector v= new Vector();
+//		for (int i = 0; i < transcripts.length; i++) 
+//			v= (Vector) gphase.tools.Arrays.addUnique(v, transcripts[i].getExons());
+//			
+//		Exon[] exons= new Exon[v.size()];
+//		for (int i = 0; i < v.size(); i++) 
+//			exons[i]= (Exon) v.elementAt(i);
+//		
 		return exons;
+	}
+	
+	public void merge(Gene anotherGene) {
+		
+		spliceSites= (SpliceSite[]) gphase.tools.Arrays.addAll(spliceSites, anotherGene.getSpliceSites());
+		for (int i = 0; i < anotherGene.getTranscripts().length; i++) 
+			addTranscript(anotherGene.getTranscripts()[i]);
+		for (int i = 0; i < anotherGene.getTranscripts().length; i++)  
+			updateBoundaries(anotherGene.getTranscripts()[i]);
 	}
 	
 	public DirectedRegion[] getExonicRegions() {
@@ -1023,25 +1140,54 @@ public class Gene extends DirectedRegion {
 	}
 	
 	public ASVariation[] getASVariations(int codingCode) {
-		ASMultiVariation[] asm= getASMultiVariations();
-		if (asm== null)
-			return null;
-		Vector resVec= new Vector(asm.length);
-		for (int i = 0; i < asm.length; i++) {
-			ASVariation[] as= null;
-			if (codingCode== ASMultiVariation.FILTER_NONE)
-				as= asm[i].getASVariationsAll();
-			else if (codingCode== ASMultiVariation.FILTER_CODING_REDUNDANT)
-				as= asm[i].getASVariationsHierarchicallyFiltered();
-			else if (codingCode== ASMultiVariation.FILTER_HIERARCHICALLY)
-				as= asm[i].getASVariationsClusteredCoding();
-			else if (codingCode== ASMultiVariation.FILTER_STRUCTURALLY)
-				as= asm[i].getASVariationsStructurallyFiltered();
-			for (int j = 0; as!= null&& j < as.length; j++) 
-				resVec.add(as[j]);
+		if (vars== null|| (varCC!= codingCode)) {
+			ASMultiVariation[] asm= getASMultiVariations();
+			if (asm== null)
+				return null;
+			Vector resVec= new Vector(asm.length);
+			for (int i = 0; i < asm.length; i++) {
+				ASVariation[] as= null;
+				if (codingCode== ASMultiVariation.FILTER_NONE)
+					as= asm[i].getASVariationsAll();
+				else if (codingCode== ASMultiVariation.FILTER_CODING_REDUNDANT)
+					as= asm[i].getASVariationsHierarchicallyFiltered();
+				else if (codingCode== ASMultiVariation.FILTER_HIERARCHICALLY)
+					as= asm[i].getASVariationsClusteredCoding();
+				else if (codingCode== ASMultiVariation.FILTER_STRUCTURALLY)
+					as= asm[i].getASVariationsStructurallyFiltered();
+				else if (codingCode== ASMultiVariation.FILTER_CONTAINED_IN_CDS) {
+					as= asm[i].getASVariationsAll();
+					for (int j = 0; j < as.length; j++) {
+						if (as[j].is_contained_in_CDS())
+							resVec.add(as[j]);
+					}
+					continue;
+				}
+				for (int j = 0; as!= null&& j < as.length; j++) 
+					resVec.add(as[j]);
+			}
+			vars= (ASVariation[]) gphase.tools.Arrays.toField(resVec);
+			varCC= codingCode;
+		}			
+		return vars;
+	}
+	
+	/**
+	 * gets non-redundant set of coding exons
+	 * @param completelyCoding
+	 * @return
+	 */
+	public Exon[] getCodingExons(boolean completelyCoding) {
+		Exon[] ex= getExons();
+		Vector<Exon> resEx= new Vector<Exon>();
+		for (int i = 0; i < ex.length; i++) {
+			if (completelyCoding&& ex[i].isCodingSomewhere5Prime()&& 
+					ex[i].isCodingSomewhere3Prime())
+				resEx.add(ex[i]);
+			if ((!completelyCoding)&& ex[i].overlapsCDS())
+				resEx.add(ex[i]);
 		}
-			
-		return (ASVariation[]) gphase.tools.Arrays.toField(resVec);
+		return (Exon[]) gphase.tools.Arrays.toField(resEx);
 	}
 	
 	/**
@@ -1412,27 +1558,41 @@ public class Gene extends DirectedRegion {
 		geneID= i; 
 	}
 
+	public Exon addExon(Exon newExon) {
+		Comparator compi= new AbstractRegion.PositionComparator();
+		int x= -1;	// insertion point if empty
+		if (exons!= null) {
+			x= Arrays.binarySearch(exons, newExon, compi);
+			if (x>= 0) 
+				return exons[x];	// get other exon
+			else
+				exons= (Exon[]) gphase.tools.Arrays.insert(
+						exons, newExon, x);
+		} else
+			exons= new Exon[] {newExon};
+		
+		return newExon;
+
+	}
+	
 	/**
 	 * @param transcripts
 	 */
 	public boolean addTranscript(Transcript newTranscript) {
-		
-			// update boundaries
-		if (Math.abs(newTranscript.getStart())< Math.abs(getStart()))
-			setStart(newTranscript.getStart());
-		if (Math.abs(newTranscript.getEnd())> Math.abs(getEnd()))
-			setEnd(newTranscript.getEnd());
+
+			// search transcript
+		for (int i = 0; transcripts!= null&& i < transcripts.length; i++) 
+			if (transcripts[i].getStableID().equalsIgnoreCase(newTranscript.getStableID()))
+				return false;
+
+		updateBoundaries(newTranscript);
+		newTranscript.gene= this;
 		
 		if(transcripts== null) {
 			transcripts= new Transcript[] {newTranscript};
 			return true;
 		}
 		
-			// search transcript
-		for (int i = 0; i < transcripts.length; i++) 
-			if (transcripts[i].getStableID().equalsIgnoreCase(newTranscript.getStableID()))
-				return false;
-
 			// add transcript		
 		Transcript[] nTranscripts= new Transcript[transcripts.length+ 1];
 		for (int i= 0; i < transcripts.length; i++) 
@@ -1440,9 +1600,25 @@ public class Gene extends DirectedRegion {
 		nTranscripts[nTranscripts.length- 1]= newTranscript;
 		transcripts= nTranscripts;
 		
+		
+		for (int i = 0;newTranscript.getExons()!= null && 
+					i < newTranscript.getExons().length; i++) 
+			addExon(newTranscript.getExons()[i]);
 		sites= null;	// are to be re-inited
 		
 		return true;
+	}
+	
+	public void updateBoundaries(DirectedRegion reg) {
+		// update boundaries
+		if (strand== 0)
+			setStrand(reg.getStrand());
+		if (reg.getStart()!= 0&& (start== 0|| Math.abs(reg.getStart())< Math.abs(getStart())))
+			setStart(reg.getStart());
+		if (reg.getEnd()!= 0&& (end== 0|| Math.abs(reg.getEnd())> Math.abs(getEnd())))
+			setEnd(reg.getEnd());
+		if (chromosome== null)
+			setChromosome(reg.getChromosome());
 	}
 
 	/**
@@ -1611,7 +1787,6 @@ public class Gene extends DirectedRegion {
 	}
 
 	String chromosome = null;
-	Species species = null;
 	public static final String[] REGION_ID= 
 	{"REGION_COMPLETE_GENE", "REGION_REAL_5UTR", "REGION_REAL_CDS", "REGION_REAL_3UTR",
 		"REGION_MAX_5UTR", "REGION_MAX_CDS", "REGION_MAX_3UTR", "REGION_TRANSCRIPT_5UTR",
@@ -1635,24 +1810,23 @@ public class Gene extends DirectedRegion {
 	}
 
 	/**
-	 * @return
-	 */
-	public Species getSpecies() {
-		return species;
-	}
-
-	/**
 	 * @param string
 	 */
 	public void setChromosome(String string) {
-		chromosome= string;
-	}
-
-	/**
-	 * @param string
-	 */
-	public void setSpecies(Species newSpecies) {
-		species= newSpecies;
+		String stringU= string.toUpperCase();
+		if (stringU.startsWith("SCAFFOLD")|| stringU.startsWith("REFTIG")
+				|| stringU.startsWith("CONTIG")|| stringU.startsWith("CHR")
+				|| stringU.startsWith("GROUP"))
+			chromosome= string;
+		else {
+			if (stringU.equals("MT"))	// correct Ensembl to GRIB jargon
+				chromosome= "M";
+			else {						// add cher
+				if (string.startsWith("0"))
+					string= string.substring(1, string.length());
+				chromosome= "chr"+ string;
+			}
+		}
 	}
 
 	public SpliceSite[] getSpliceSites() {

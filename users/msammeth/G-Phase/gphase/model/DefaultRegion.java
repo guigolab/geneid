@@ -18,6 +18,7 @@ public class DefaultRegion extends AbstractRegion implements Region {
 	static long serialVersionUID= 6558964245030911377l;
 	String chromosome = null;
 	Species species = null;
+	double score= 0d;
 	
 	public boolean contains(SpliceSite ss) {
 		if (!ss.getGene().getChromosome().equals(chromosome))
@@ -73,7 +74,24 @@ public class DefaultRegion extends AbstractRegion implements Region {
 	}
 	
 	public String toString() {
-		String borders= super.toString();
-		return getSpecies().getCommonName()+ "-"+ getChromosome()+ ":"+ borders;
+		String str= super.toString();
+		if (getID()!= null)
+			str= getID()+ " "+ str;
+		if (getChromosome()!= null)
+			str= getChromosome()+ ":"+ str;
+		if (getSpecies()!= null)
+			str= getSpecies().getCommonName()+ "-"+ str;
+		if (!Double.toString(getScore()).equals(Double.toString(Double.NaN)))
+			str+= ": "+getScore();
+			
+		return str;
+	}
+
+	public double getScore() {
+		return score;
+	}
+
+	public void setScore(double score) {
+		this.score = score;
 	}
 }

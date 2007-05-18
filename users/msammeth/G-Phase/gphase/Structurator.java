@@ -1,3 +1,5 @@
+package gphase;
+
 
 
 import java.awt.Color;
@@ -15,6 +17,7 @@ import java.io.PipedOutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.util.Properties;
+import java.util.Vector;
 
 import javax.swing.JFrame;
 
@@ -25,6 +28,8 @@ import gphase.ext.DevNullReaderThread;
 import gphase.gui.CopyOfSpliceOSigner;
 import gphase.gui.pie.Pie;
 import gphase.io.gtf.EncodeWrapper;
+import gphase.io.gtf.GTFObject;
+import gphase.io.gtf.GTFWrapper;
 import gphase.model.ASMultiVariation;
 import gphase.model.ASVariation;
 import gphase.model.Graph;
@@ -34,7 +39,7 @@ import gphase.model.Transcript;
 import gphase.tools.Arrays;
 
 public class Structurator {
-	
+	final static String ANNOTATION_DIR= "annotation";
 	final static String UCSC_URL= "http://genome.ucsc.edu/cgi-bin/hgTracks?";
 	public static final String[] SP_UCSC_CGI_STRINGS= new String[] {
 		"knownGene=dense;encodeRegions=dense;encodeGencodeGeneOct05=pack;"
@@ -47,7 +52,7 @@ public class Structurator {
 		"multiz7way=hide;",	// Opossum
 		
 		"",	//Chicken
-		"",	//X.+tropicalis
+		"",	//X.+tropicalis 
 		"",	//Zebrafish
 		"blastHg17KG=hide;cpgIsland=hide;blatHg16=hide;",			//Fugu
 		"gaze=pack;netSelf=hide;",	//Tetraodon
@@ -93,8 +98,10 @@ public class Structurator {
 	final static Color IR_COL= new Color(246, 235, 22);
 	final static Color OTHERS_COL= new Color(192, 192, 192);
 	final static int UCSC_FLANK= 50;
-	static String speStr= Species.SP_UCSC_CGI_STRINGS[0];
-	
+	static String speStr= null;	//Species.SP_UCSC_CGI_STRINGS[0];
+	static String annStr= Species.SP_UCSC_CGI_STRINGS[0];
+	static boolean outputASTA= false;
+	static boolean outputGTF= false;
 	
 	static void include(PrintStream p, String fName) {
 		
@@ -160,8 +167,14 @@ public class Structurator {
 		int codingCode= ASVariation.TYPE_ALL;
 		String fName= null;
 		boolean html= false;
-		boolean nmd= true;
+		boolean nmd= false;
+		boolean filtGTAG= false;
 		for (int i = 0; i < args.length; i++) {
+
+				// let this first check else all double arg flags have to continue
+			if (!args[i].startsWith("-")|| args[i].contains(File.separator))
+				fName= args[i];
+
 			if (args[i].equalsIgnoreCase("-codingTranscripts"))
 				codingTranscripts= true;
 			if (args[i].equalsIgnoreCase("-noncodTranscripts"))
@@ -184,16 +197,28 @@ public class Structurator {
 			if (args[i].equalsIgnoreCase("-html")) {
 				html= true;
 			}
-
+			if (args[i].equalsIgnoreCase("-output")) {
+				if (i+1>= args.length) {
+					System.err.println("provide output format");
+					break;
+				}
+				String oFormat= args[i+1].toUpperCase();
+				if (args[i+1].equalsIgnoreCase("asta"))  
+					outputASTA= true;
+				else if (args[i+1].equalsIgnoreCase("gtf"))
+					outputGTF= true;
+				else
+					System.err.println("Unknown output format "+args[i+1]);
+				++i;
+			}
 			
+			if (args[i].equalsIgnoreCase("-filtGTAG"))
+				filtGTAG= true;
 			if (args[i].equalsIgnoreCase("-nonmd"))
 				nmd= false;
 			if (args[i].equalsIgnoreCase("-nmd"))
 				nmd= true;
 			
-			if (!args[i].startsWith("-")|| args[i].contains(File.separator))
-				fName= args[i];
-
 			if (args[i].equalsIgnoreCase("-species")) {
 				if (i+1>= args.length) {
 					System.err.println("provide species name");
@@ -215,6 +240,31 @@ public class Structurator {
 				}
 				
 			}
+			
+			if (args[i].equalsIgnoreCase("-annotation")) {
+				if (i+1>= args.length) {
+					System.err.println("provide annotation name");
+					break;
+				}
+				
+				
+			}
+
+			
+			if (args[i].equalsIgnoreCase("-genome")) {
+				if (i+1>= args.length) {
+					System.err.println("provide genome ID");
+					break;
+				}
+				
+				int p= args[i+1].indexOf("_");	// i would say mouse_mm8 ok?
+				if (p>= 0) {
+					speStr= args[i+1].substring(0, p);
+					annStr= args[i+1].substring(p+1, args[i+1].length());
+				} else 
+					annStr= args[i+1];	// not tested, check for mapping to UCSC string
+				++i;
+			}
 		}
 		
 		if (html) {
@@ -228,8 +278,10 @@ public class Structurator {
 				nil.start();
 				try {
 					PipedOutputStream pout= new PipedOutputStream(pin);
-					System.setOut(new PrintStream(pout));
-				} catch (IOException e) {
+					PrintStream p= new PrintStream(pout);
+					System.setOut(p);
+					System.setErr(p);	// kill stderr, sylvain stops otherwise
+				} catch (IOException e) {	
 					e.printStackTrace();
 				}
 			}
@@ -247,7 +299,20 @@ public class Structurator {
 		} else {
 			enc= new EncodeWrapper(fName);
 		}
-		Graph g= enc.getGraph(false);
+		//enc.setSilent(true);
+		
+		if (filtGTAG) {
+			enc.setSpeName(speStr);
+			enc.setGenomeVer(annStr);
+		}
+		boolean encode= false;
+//		if (fName.toUpperCase().contains("ENCODE"))
+//			encode= true;
+		Graph g= enc.getGraph(encode);
+		enc= null;
+		System.gc();
+		Thread.currentThread().yield();
+		
 		if (g== null) {
 			System.exit(-1);
 		}
@@ -258,14 +323,54 @@ public class Structurator {
 		if (nmd)
 			g.filterNMDTranscripts();
 		
-			// get vars
+			// get vars 
 		ASVariation[][] vars= g.getASVariations(filterCode);
+		if (filtGTAG) {
+			Vector v= new Vector();
+			int cntFiltEv= 0;
+			int cntAllEv= 0;
+			for (int i = 0; vars!= null&& i < vars.length; i++) { 
+				ASVariation[] filtClas= ASMultiVariation.filterNonGTAG(vars[i]);
+				if (filtClas== null)
+					cntFiltEv+= vars[i].length;
+				else
+					cntFiltEv+= vars[i].length- filtClas.length;
+				cntAllEv+= vars[i].length;
+				if (filtClas!= null&& filtClas.length> 0)
+					v.add(filtClas);
+			}
+			vars= (ASVariation[][]) Arrays.toField(v);
+			String percStr= Float.toString((cntFiltEv* 100f)/ cntAllEv);
+			percStr= percStr.substring(0, percStr.indexOf('.')+ 2);
+			System.out.println("filtered out "+cntFiltEv+" ("+percStr+"%) involving nonGT/AG introns.");
+		}
 		if (vars!= null&& vars.length!= 0) {
 			vars= filter(vars, codingCode);
 			vars= (ASVariation[][]) Arrays.sort2DFieldRev(vars);
 		}
+
+		int pos= fName.lastIndexOf(File.separator);
+		String baseDir= "";
+		if (pos>= 0)
+			baseDir= fName.substring(0, pos+ 1);
+		
+		if (outputASTA) {
+			PrintStream p;
+			try {
+				p= new PrintStream(baseDir+ "landscape.asta");
+				writeASTA(vars, p);
+				p.flush(); p.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		if (outputGTF) {
+			PrintStream p;
+			writeGTF(vars, baseDir);
+		}
+		
 		if (html)
-			writeHTML(vars, fName);
+			writeHTML(vars, baseDir);
 		else
 			ASAnalyzer.outputVariations(vars, false, false, System.out);
 		
@@ -273,13 +378,65 @@ public class Structurator {
 		System.out.println("time: "+ (t1-t0)+"[msec]");
 	}
 	
-	static void writeHTML(ASVariation[][] vars, String fName) {
+	public static void writeASTA(ASVariation[][] vars, PrintStream p) {		
+		for (int i = 0; vars!= null&& i < vars.length; i++) 
+			for (int j = 0; j < vars[i].length; j++) 
+				p.println(vars[i][j].toStringASTA());
+	}
+
+	public static void writeGTF(ASVariation[][] vars, String baseDir) {
+		Vector v= new Vector();
+		for (int i = 0; vars!= null&& i < vars.length; i++) 
+			for (int j = 0; j < vars[i].length; j++) {
+				GTFObject o= new GTFObject();
+				o.setSeqname(vars[i][j].getGene().getChromosome());
+				o.setSource("astalavista");
+				o.setFeature("as_event");
+				SpliceSite[] su= vars[i][j].getSpliceUniverse();
+				int start= Math.abs(su[0].getPos());
+				int end= Math.abs(su[su.length- 1].getPos());
+				if (start> end) {
+					int h= start;
+					start= end;
+					end= h;
+				}
+				o.setStart(start);
+				o.setEnd(end);
+				o.setScore(".");
+				o.setStrand(vars[i][j].getGene().getStrand());
+				// frame
+				o.addAttribute("as_code", vars[i][j].toString());
+				o.addAttribute("transcript1_id", vars[i][j].getTranscript1().toString());
+				String sc= "";
+				for (int k = 0; k < vars[i][j].getSpliceChain1().length; k++) 
+					sc+= Math.abs(vars[i][j].getSpliceChain1()[k].getPos())+",";
+				if (sc.length()> 0)
+					sc= sc.substring(0, sc.length()- 1);
+				o.addAttribute("splice_chain1", sc);
+				
+				o.addAttribute("transcript2_id", vars[i][j].getTranscript2().toString());
+				sc= "";
+				for (int k = 0; k < vars[i][j].getSpliceChain2().length; k++) 
+					sc+= Math.abs(vars[i][j].getSpliceChain2()[k].getPos())+",";
+				if (sc.length()> 0)
+					sc= sc.substring(0, sc.length()- 1);
+				o.addAttribute("splice_chain2", sc);
+				
+				v.add(o);
+			}
 		
-		int pos= fName.lastIndexOf(File.separator);
-		if (pos< 0)
-			fName= "";
-		else
-			fName= fName.substring(0, pos)+ File.separator;
+		GTFWrapper gtf= new GTFWrapper(baseDir+ File.separator+ "landscape.gtf");
+		gtf.setGtfObj((GTFObject[]) Arrays.toField(v));
+		gtf.setSortAttributes(new String[] {"as_code", "transcript1_id", "splice_chain1", "transcript2_id", "splice_chain2"});
+		try {
+			gtf.write();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
+	public static void writeHTML(ASVariation[][] vars, String fName) {
 		
 		PrintStream p;
 		try {
@@ -299,7 +456,7 @@ public class Structurator {
 				p.flush(); p.close();
 			}
 			
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			e.printStackTrace();
 		}
 	}
@@ -388,12 +545,20 @@ public class Structurator {
 	
 		include(p, HEADER_FILE);		
 
-		if (vars!= null)
-			headline(p, "AS Landscape", null);
-		else 
+		if (vars== null)
 			headline(p, "NO AS EVENTS FOUND", null);
-			
-		p.println("<DIV class=\"userspace\" align=\"center\"><CENTER><br><img src=\"distribution.png\"><br><br></CENTER></DIV>");
+		
+		else {
+			headline(p, "AS Landscape", null);
+			p.println("<DIV class=\"userspace\" align=\"center\"><CENTER><br><img src=\"distribution.png\"><br><br>");
+				
+			if (outputASTA)
+				p.println("<IMG src= \"http://genome.imim.es/astalavista/pics/dl_arrow.jpg\">"+
+						"<A HREF=\"landscape.asta\">Download output (ASTA format selected)</A><br><br></CENTER></DIV>");
+			if (outputGTF)
+				 p.println("<IMG src= \"http://genome.imim.es/astalavista/pics/dl_arrow.jpg\">"+
+						"<A HREF=\"landscape.gtf\">Download output (GTF format selected)</A><br><br></CENTER></DIV>");
+		}
 		int sum= 0;
 		for (int i = 0; vars!= null&& i < vars.length; i++) 
 			sum+= vars[i].length;
@@ -568,13 +733,16 @@ public class Structurator {
 		ps= spec.indexOf("_");	
 		if (ps>= 0)
 			spec= spec.substring(0, ps)+ " "+spec.substring(ps+1, spec.length());
-		p.println("<TR><TD bgcolor=\""+TABLE_HEADER_COLOR+"\" align=\"center\"><FONT face=\"Arial,Lucida Sans\" size=\"4\" color=\"#FFFFFF\"><b>Event<br>Nr</b></FONT></TD>" +
+		p.print("<TR><TD bgcolor=\""+TABLE_HEADER_COLOR+"\" align=\"center\"><FONT face=\"Arial,Lucida Sans\" size=\"4\" color=\"#FFFFFF\"><b>Event<br>Nr</b></FONT></TD>" +
 				"<TD bgcolor=\""+TABLE_HEADER_COLOR+"\" align=\"right\">&nbsp&nbsp</TD>"+
 				"<TD bgcolor=\""+TABLE_HEADER_COLOR+"\"><FONT face=\"Arial,Lucida Sans\" size=\"4\" color=\"#FFFFFF\"><b>Coordinates</b></FONT>" +
 						"<br><FONT face=\"Arial,Lucida Sans\" size=\"2\" color=\"#FFFFFF\"><b>Transcript ID</b> <i>Chromosome</i>: alt. Splice Sites</FONT></TD>" +
 				"<TD bgcolor=\""+TABLE_HEADER_COLOR+"\" align=\"right\">&nbsp&nbsp</TD>"+
 				"<TD bgcolor=\""+TABLE_HEADER_COLOR+"\" align=\"center\"><FONT face=\"Arial,Lucida Sans\" size=\"4\" color=\"#FFFFFF\"><b>Genome Browser</b></FONT>" +
-						"<br><FONT face=\"Arial,Lucida Sans\" size=\"2\" color=\"#FFFFFF\">"+spec+"</FONT></TD></TR>");
+						"<br><FONT face=\"Arial,Lucida Sans\" size=\"2\" color=\"#FFFFFF\">");
+		if (speStr!= null)
+			p.print(spec+"</FONT></TD></TR>");
+		p.println("</FONT></TD></TR>");
 		for (int i = 0; i < vars.length; i++) {
 			String colStr= "";
 			if (i%2 == 0)
@@ -612,14 +780,14 @@ public class Structurator {
 			String s= null;
 			if (vars[i].getSpliceChain2().length== 0|| 
 					(vars[i].getSpliceChain1().length> 0&& vars[i].getSpliceChain1()[0].getPos()< vars[i].getSpliceChain2()[0].getPos()))
-				s= vars[i].getTranscript1().getTranscriptID()+ "</b> <i>chr"
+				s= vars[i].getTranscript1().getTranscriptID()+ "</b> <i>"
 					+ vars[i].getGene().getChromosome()+ "</i>: "+ pos1Str+"<br><b>"
-					+ vars[i].getTranscript2().getTranscriptID()+ "</b> <i>chr"
+					+ vars[i].getTranscript2().getTranscriptID()+ "</b> <i>"
 					+ vars[i].getGene().getChromosome()+ "</i>: "+ pos2Str+"</FONT></TD>";
 			else
-				s= vars[i].getTranscript2().getTranscriptID()+ "</b> <i>chr"
+				s= vars[i].getTranscript2().getTranscriptID()+ "</b> <i>"
 					+ vars[i].getGene().getChromosome()+ "</i>: "+ pos2Str+"<br><b>"
-					+ vars[i].getTranscript1().getTranscriptID()+ "</b> <i>chr"
+					+ vars[i].getTranscript1().getTranscriptID()+ "</b> <i>"
 					+ vars[i].getGene().getChromosome()+ "</i>: "+ pos1Str+"</FONT></TD>";
 			
 			p.print("\t<TD valign=\"top\"<FONT face=\"Arial,Lucida Sans\" size=\"2\"><b>"+ s);
@@ -641,8 +809,10 @@ public class Structurator {
 				begin= -end;
 				end= h;
 			}
-			String ucscEventFlanks= UCSC_URL +
-			"org="+ speStr+ ";position=chr"
+			String ucscBase= UCSC_URL +"org="+ speStr+";";
+			if (annStr!= null)
+				ucscBase+= "db="+ annStr+ ";";
+			String ucscEventFlanks= ucscBase+ "position="
 			+ vars[i].getGene().getChromosome()+ ":"+(begin- UCSC_FLANK)+"-"+ (end+ UCSC_FLANK)+ ";"
 			+ UCSC_STANDARD_PAR+ "hgFind.matches="+vars[i].getTranscript1()+","+vars[i].getTranscript2()+",";
 			
@@ -653,14 +823,16 @@ public class Structurator {
 				begin= -end;
 				end= h;
 			}
-			String ucscEventVar= UCSC_URL +
-			"org="+ speStr+ ";position=chr"
+			String ucscEventVar= ucscBase+ "position="
 			+ vars[i].getGene().getChromosome()+ ":"+(begin- UCSC_FLANK)+"-"+ (end+ UCSC_FLANK)+ ";"
 			+ UCSC_STANDARD_PAR+ "hgFind.matches="+vars[i].getTranscript1()+","+vars[i].getTranscript2()+",";
 			
-			p.println("\t<TD valign=\"middle\" align=\"center\" width=\"120\">"
-					+ "<FONT face=\"Arial,Lucida Sans\" size=\"2\"><a href=\""+ ucscEventVar+"\">Show&nbsp;Alternative&nbsp;Parts>></a><br>" +
-						"<a href=\""+ ucscEventFlanks+"\">Show&nbsp;Complete&nbsp;Event>></a><br></FONT></TD>");
+			if (annStr!= null)
+				p.println("\t<TD valign=\"middle\" align=\"center\" width=\"120\">"
+						+ "<FONT face=\"Arial,Lucida Sans\" size=\"2\"><a href=\""+ ucscEventVar+"\">Show&nbsp;Alternative&nbsp;Parts>></a><br>" +
+							"<a href=\""+ ucscEventFlanks+"\">Show&nbsp;Complete&nbsp;Event>></a><br></FONT></TD>");
+			else
+				p.println("<TD valign=\"middle\" align=\"center\" width=\"120\"></TD>");	// empty
 			p.println("\t<TD></TD>"); 
 			
 			p.println("</TR>");

@@ -38,6 +38,7 @@ public class SpliceGraph {
 		}
 	}
 	
+	SpliceNode[] roots= null;
 	Transcript[] transcripts= null;
 	HashMap nodeList= null;	// SpliceNodes / Vector{SplicePathes..}
 	SpliceBubble[] bubbles= null;
@@ -48,6 +49,159 @@ public class SpliceGraph {
 	}
 	
 	public void init(boolean trimEnds) {
+				// add splice sites
+			for (int i = 0; i < transcripts.length; i++) {
+				SpliceSite[] sss= transcripts[i].getSpliceChain();
+				if (sss== null|| sss.length< 1)
+					continue;
+				SpliceNode node= new SpliceNode(sss[0]);
+				addNode(node);
+				for (int j = 1; j < sss.length; j++) {
+					node= new SpliceNode(sss[j]);
+					node= addNode(node);				
+					createEdge(getNode(sss[j-1]), node, new Transcript[] {transcripts[i]});
+				}
+			}
+			
+			if (!trimEnds)
+				return;
+			
+				// add border anchors
+			Vector tssV= new Vector();
+			//Vector nullEdges= new Vector();	// edges AS -> AS, for cross-linking
+			for (int i = 0; i < transcripts.length; i++) {
+
+				int end5= transcripts[i].get5PrimeEdge();
+				int end3= transcripts[i].get3PrimeEdge();
+
+				if (end3== 0|| end5== 0|| end3== end5) {
+					if (end3== 0^ end5== 0)
+						System.err.println("Assertion failed: only one valid trimming site, cannot be!");
+					continue;
+				}
+				
+					// create sites here, for having both transcripts
+				AbstractSite tss= new AbstractSite(end5);
+				tss.addTranscripts(new Transcript[] {transcripts[i]});
+				AbstractSite tes= new AbstractSite(end3);
+				tes.addTranscripts(new Transcript[] {transcripts[i]});
+				createEdge(transcripts[i], tss, tes);
+				
+				SpliceNode tmpTss= (SpliceNode) nodeList.get(tss);
+				int k;
+				for (k = 0; k < tssV.size(); k++) 
+					if (tmpTss== tssV.elementAt(k))
+						break;
+				if (k== tssV.size())
+					tssV.add(tmpTss);	// cannot check for forbidden connections at that point
+									// due to transitivity (3 or more transcripts)
+				
+				tmpTss= (SpliceNode) nodeList.get(tes);
+				for (k = 0; k < tssV.size(); k++) 
+					if (tmpTss== tssV.elementAt(k))
+						break;
+				if (k== tssV.size())
+					tssV.add(tmpTss);
+
+				
+						// trim transcript pair, find trim points
+				for (int j = i+1; j < transcripts.length; j++) {
+					
+					int[] t= trim(new Transcript[] {transcripts[i], transcripts[j]});
+					end5= t[0];
+					end3= t[1];
+	
+					if (end3== 0|| end5== 0|| end3== end5) {
+						if (end3== 0^ end5== 0)
+							System.err.println("Assertion failed: only one valid trimming site, cannot be!");
+						continue;
+					}
+					
+						// create sites here, for having both transcripts
+					tss= new AbstractSite(end5);
+					tss.addTranscripts(new Transcript[] {transcripts[i], transcripts[j]});
+					tes= new AbstractSite(end3);
+					tes.addTranscripts(new Transcript[] {transcripts[i], transcripts[j]});
+					createEdge(transcripts[i], tss, tes);
+					createEdge(transcripts[j], tss, tes);
+					// dont need, if a connection is supported by at least 2 pathes
+					// it will exist, otherwise not interesting for bubbles
+	//				SpliceEdge nEdge= createEdge(transcripts[i], tss, tes);	// crosslink anchors, for finding pathes
+	//				if (nEdge!= null) {
+	//					for (int k = 0; k < nullEdges.size(); k++) {
+	//						SpliceEdge e= (SpliceEdge) nullEdges.elementAt(k);
+	//						Transcript[][] nt= SpliceBubble.intersect(e.getTranscripts(), nEdge.getTranscripts());
+	//						if (nt!= null&& nt[2]!= null&& nt[2].length> 0) {
+	//							createEdge(e.tail, nEdge.head, nt[2]);
+	//							createEdge(nEdge.tail, e.head, nt[2]);
+	//						}
+	//					}
+	//					nullEdges.add(nEdge);
+	//				}
+	//				nEdge= createEdge(transcripts[j], tss, tes);
+	//				if (nEdge!= null) {	// crosslink anchors, for finding pathes
+	//					for (int k = 0; k < nullEdges.size(); k++) {
+	//						SpliceEdge e= (SpliceEdge) nullEdges.elementAt(k);
+	//						Transcript[][] nt= SpliceBubble.intersect(e.getTranscripts(), nEdge.getTranscripts());
+	//						if (nt!= null&& nt[2]!= null&& nt[2].length> 0) {
+	//							createEdge(e.tail, nEdge.head, nt[2]);
+	//							createEdge(nEdge.tail, e.head, nt[2]);
+	//						}
+	//					}
+	//					nullEdges.add(nEdge);
+	//				}
+					
+					tmpTss= (SpliceNode) nodeList.get(tss);
+					for (k = 0; k < tssV.size(); k++) 
+						if (tmpTss== tssV.elementAt(k))
+							break;
+					if (k== tssV.size())
+						tssV.add(tmpTss);	// cannot check for forbidden connections at that point
+										// due to transitivity (3 or more transcripts)
+					
+					tmpTss= (SpliceNode) nodeList.get(tes);
+					for (k = 0; k < tssV.size(); k++) 
+						if (tmpTss== tssV.elementAt(k))
+							break;
+					if (k== tssV.size())
+						tssV.add(tmpTss);
+	
+	//				if (end5!= 0) {	// overlap found
+	//					SpliceSite chk1= transcripts[i].getSpliceSite(end5);	// forbid anchor -> acceptor
+	//					SpliceSite chk2= transcripts[j].getSpliceSite(end5);	// no valid event
+	//					if ((chk1== null|| chk1.isDonor())&& (chk2== null|| chk2.isDonor())) {
+	//						AbstractSite tss= new AbstractSite(end5);
+	//						tss.addTranscripts(new Transcript[] {transcripts[i], transcripts[j]});
+	//						SpliceNode tssN= new SpliceNode(tss);
+	//						tssN= addNode(tssN);
+	//							// connect to schains
+	//						createEdge(transcripts[i], tss, compi, tssN, true);
+	//						createEdge(transcripts[j], tss, compi, tssN, true);
+	//					}
+	//				}
+	//
+	//				int end3= t[1];
+	//				if (end3!= 0) {
+	//					SpliceSite chk1= transcripts[i].getSpliceSite(end3);	// forbid donor -> anchor
+	//					SpliceSite chk2= transcripts[j].getSpliceSite(end3);
+	//					if ((chk1== null|| chk1.isAcceptor())&& (chk2== null|| chk2.isAcceptor())) {
+	//						AbstractSite tes= new AbstractSite(end3);
+	//						tes.addTranscripts(new Transcript[] {transcripts[i], transcripts[j]});
+	//						SpliceNode tesN= new SpliceNode(tes);
+	//						tesN= addNode(tesN);
+	//						createEdge(transcripts[i], tes, compi, tesN, false);
+	//						createEdge(transcripts[j], tes, compi, tesN, false);
+	//					}
+	//				}
+				}
+			}
+				// forbid AS -> acceptor, donor -> AS
+			//contractInvalidEdges(tssV);
+				// forbid 2 AS adjacent in same exon 
+			//eliminateRedundantTSS(tssV);
+		}
+
+	public void init_last(boolean trimEnds) {
 			// add splice sites
 		for (int i = 0; i < transcripts.length; i++) {
 			SpliceSite[] sss= transcripts[i].getSpliceChain();
@@ -69,6 +223,8 @@ public class SpliceGraph {
 		Vector tssV= new Vector();
 		//Vector nullEdges= new Vector();	// edges AS -> AS, for cross-linking
 		for (int i = 0; i < transcripts.length; i++) {
+			
+					// trim transcript pair
 			for (int j = i+1; j < transcripts.length; j++) {
 					// find trim points
 				int[] t= trim(new Transcript[] {transcripts[i], transcripts[j]});
@@ -559,13 +715,17 @@ public class SpliceGraph {
 	}
 	
 	public SpliceNode[] getRoots() {
-		SpliceNode[] nodes= getNodeList();
-		Vector v= new Vector();
-		for (int i = 0; i < nodes.length; i++) 
-			if (nodes[i].getInDegree()== 0)
-				v.add(nodes[i]);
-		
-		return (SpliceNode[]) gphase.tools.Arrays.toField(v);
+		if (roots == null) {
+			SpliceNode[] nodes= getNodeList();
+			Vector v= new Vector();
+			for (int i = 0; i < nodes.length; i++) 
+				if (nodes[i].getInDegree()== 0)
+					v.add(nodes[i]);
+			
+			roots= (SpliceNode[]) gphase.tools.Arrays.toField(v);
+		}
+
+		return roots;
 	}
 	
 	public SpliceNode[] getLeafs() {
@@ -1738,6 +1898,15 @@ public class SpliceGraph {
 			return null;
 		return (SplicePath[]) gphase.tools.Arrays.toField(v);
 	}
+
+	public SplicePath[] findPathes(SpliceNode pSrc, SpliceNode pSnk) {
+		Vector v= new Vector();
+		findPathesRec(pSrc, pSnk, null, v);
+		
+		if (v.size()== 0)
+			return null;
+		return (SplicePath[]) gphase.tools.Arrays.toField(v);
+	}
 	
 	void findPathesRec(SpliceNode node, SpliceEdge eSnk, SplicePath p, Vector v) {
 		
@@ -1756,6 +1925,28 @@ public class SpliceGraph {
 				return;
 			} else 
 				findPathesRec(edges[i].getHead(), eSnk, newP, v);
+		}
+	}
+
+	void findPathesRec(SpliceNode node, SpliceNode pSnk, SplicePath p, Vector v) {
+		
+		SpliceEdge[] edges= node.getOutEdges();
+		for (int i = 0; edges!= null&& i < edges.length; i++) {
+			SplicePath newP= null;
+			if (p== null) 
+				newP= new SplicePath(edges[i]);
+			else 
+				newP= p.exendPath(edges[i]);
+			if (newP== null)	// now flow, no path..
+				return;
+			if (edges[i].getHead()== pSnk) {
+				if (newP.getTranscripts().length> 0)
+					v.add(newP);
+				return;
+			} else if (edges[i].getHead().getSite().getPos()> pSnk.getSite().getPos())
+				return;	// not found
+			else 
+				findPathesRec(edges[i].getHead(), pSnk, newP, v);
 		}
 	}
 	

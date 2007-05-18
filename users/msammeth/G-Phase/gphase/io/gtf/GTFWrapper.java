@@ -19,7 +19,9 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.lang.reflect.Array;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -53,28 +55,60 @@ public class GTFWrapper extends DefaultIOWrapper {
 		super(absFName);
 	}
 	public GTFWrapper(File absPath, Species spec) {
-		super(absPath+ File.separator+ spec.getCommonName()+ "_"+ spec.getBuildVersion());
-		addGTFObject(spec.getGenes());
+		super(absPath.getAbsolutePath());
+		int p= absPath.getAbsolutePath().lastIndexOf("_");
+		String attrib= "";
+		if (p>= 0)
+			attrib= absPath.getAbsolutePath().substring(p);
+		fName= spec.getCommonName()+ "_"+ spec.getAnnotationVersion()+attrib+".gtf";
+		setGtfObj(getGTFObjects(spec.getGenes()));
+		setSortAttributes(new String[] {GTFObject.GENE_ID_TAG, GTFObject.TRANSCRIPT_ID_TAG, GTFObject.EXON_ID_TAG});
 	}
-	
-	public void addGTFObject(Gene[] genes) {
+
+	public static GTFObject[] getGTFObjects(Gene[] genes) {
 		Vector gtfsV= new Vector(genes.length);
 		for (int i = 0; i < genes.length; i++) {
-			gtfsV.add(GTFObject.createGTFObjects(genes[i])[0]);
-			Transcript[] trpts= genes[i].getTranscripts();
-			for (int j = 0; j < trpts.length; j++) {
-				gtfsV.add(GTFObject.createGTFObjects(trpts[j])[0]);
-				Exon[] exns= trpts[j].getExons();
-				for (int k = 0; k < exns.length; k++) {
-					GTFObject[] obj= GTFObject.createGTFObjects(exns[k]);
-					for (int m = 0; m < obj.length; m++) 
-						gtfsV.add(obj[m]);
-				}
-			}
+			//gtfsV.add(GTFObject.createGTFObjects(genes[i])[0]);	// dont write gene
+			GTFObject[] newObj= getGTFObjects(genes[i]);
+			for (int j = 0; j < newObj.length; j++) 
+				gtfsV.add(newObj[j]);
 		}
+		return (GTFObject[]) Arrays.toField(gtfsV);
+	}
+	
+	public static GTFObject[] getGTFObjects(Gene gene) {
+		return getGTFObjects(gene.getTranscripts());
+	}
+	
+	public static GTFObject[] getGTFObjects(Transcript[] trpts) {
+		Vector gtfsV= new Vector(trpts.length);
+		for (int j = 0; j < trpts.length; j++) {
+			//gtfsV.add(GTFObject.createGTFObjects(trpts[j])[0]);	// neither transcript
+			GTFObject[] obs= getGTFObjects(trpts[j]);
+			for (int i = 0; i < obs.length; i++) 
+				gtfsV.add(obs[i]);
+		}
+		return (GTFObject[]) Arrays.toField(gtfsV);
+	}
+	
 		
-		GTFObject[] objs= (GTFObject[]) Arrays.toField(gtfsV);
-		this.gtfObj= objs;
+	public static GTFObject[] getGTFObjects(Transcript trpt) {
+		return getGTFObjects(trpt.getExons(), trpt);
+	}
+	
+	public static GTFObject[] getGTFObjects(Exon[] exns, Transcript trpt) {
+		Vector gtfsV= new Vector(exns.length);
+		for (int k = 0; k < exns.length; k++) {
+			GTFObject[] obs= getGTFObjects(exns[k], trpt);
+			for (int i = 0; i < obs.length; i++) 
+				gtfsV.add(obs[i]);
+		}
+		return (GTFObject[]) Arrays.toField(gtfsV);
+	}
+	
+	public static GTFObject[] getGTFObjects(Exon exn, Transcript trpt) {
+		GTFObject[] obs= GTFObject.createGTFObjects(exn, trpt);
+		return obs;
 	}
 	
 	public GTFWrapper() {
@@ -97,29 +131,32 @@ public class GTFWrapper extends DefaultIOWrapper {
 	/**
 	 */
 	public void write() throws Exception {
-		writeGTF();
+		writeGTF(false);
 	}
 	
-	public void writeGTF() throws Exception {
+	public void write(boolean append) throws Exception {
+		writeGTF(append);
+	}
+	
+	public void writeGTF(boolean append) throws Exception {
 			String outName= getAbsFileName();
 	//		if (new File(outName).exists())
 	//			outName+= "_out";
-			BufferedWriter buffy= new BufferedWriter(new FileWriter(outName));
-			for (int i = 0; i < gtfObj.length; i++) {
+			BufferedWriter buffy= new BufferedWriter(new FileWriter(outName, append));
+			for (int i = 0; gtfObj!= null&& i < gtfObj.length; i++) {
 				// <seqname> <source> <feature> <start> <end> <score> <strand> <frame> [attributes] [comments]
 				String scoreStr= ".";
-				if (gtfObj[i].getScore()!= Float.NaN)
-					scoreStr= Float.toString(gtfObj[i].getScore());
-				buffy.write(
-						gtfObj[i].seqname+ "\t"+	//!! getter removes "chr"
-						gtfObj[i].getSource()+ "\t"+
-						gtfObj[i].getFeature()+ "\t"+
-						gtfObj[i].getStart()+ "\t"+
-						gtfObj[i].getEnd()+ "\t"+
-						scoreStr+ "\t"+
-						gtfObj[i].getStrand()+ "\t"+
-						gtfObj[i].getFrame()+ "\t"
-				);
+				String line= gtfObj[i].seqname+ "\t"+	//!! getter removes "chr"
+				gtfObj[i].getSource()+ "\t"+
+				gtfObj[i].getFeature()+ "\t"+
+				gtfObj[i].getStart()+ "\t"+
+				gtfObj[i].getEnd()+ "\t"+
+				gtfObj[i].getScoreString()+ "\t"+
+				gtfObj[i].getStrandSymbol()+ "\t"+
+				gtfObj[i].getFrameSymbol()+ "\t";
+
+ 				buffy.write(line);
+				
 				Collection c= gtfObj[i].getAttributes().keySet();
 				Iterator iter= c.iterator();
 				String[] keys= new String[c.size()];
@@ -215,11 +252,15 @@ public class GTFWrapper extends DefaultIOWrapper {
 				newObj.start= Integer.parseInt(toki.nextToken());
 				newObj.end= Integer.parseInt(toki.nextToken());
 				newObj.setScore(toki.nextToken());
-				newObj.setStrand(toki.nextToken());
+				try {
+					newObj.setStrand(toki.nextToken());
+				} catch (Exception e) {
+					System.err.println("*line "+ lineCtr+": "+ e);
+				}
 				newObj.setFrame(toki.nextToken());
 			} catch (Exception e) {
 				System.err.println("*line "+ lineCtr+": "+ e);
-				e.printStackTrace();
+				//e.printStackTrace();
 				//continue;
 			}
 			

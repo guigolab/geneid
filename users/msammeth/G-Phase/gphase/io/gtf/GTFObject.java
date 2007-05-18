@@ -27,6 +27,8 @@ import java.util.Vector;
  */
 public class GTFObject {
 
+	public static String ID_ATTRIBUTE_SEQUENCE= "seq";
+	
 	boolean gff= false;
 	
 	public String toString() {
@@ -39,7 +41,7 @@ public class GTFObject {
 			end+ "\t";
 		x+= (score== Float.NaN)?".":Float.toString(score);
 		x+= "\t";
-		x+= strand?"+":"-";
+		x+= (strand== 1)?"+":"-";
 		x+= "\t";
 		x+= (frame> 0)?Integer.toString(frame):".";
 		
@@ -60,7 +62,16 @@ public class GTFObject {
 	public final static String EXON_ID_TAG= "exon_id";
 	public final static String GENE_ALIAS_TAG= "gene_alias";
 	public final static String INTRON_ID_TAG= "intron_id";
-	public final static String INTRON_STATUS_TAG= "intron_status";
+	public static int parseStrand(String strandStr) {
+		
+		int strand= 0;
+		if (strandStr.equals("+")|| strandStr.equals("1"))
+			strand= 1;
+		else if (strandStr.equals("-")|| strandStr.equals("-1"))
+			strand= -1;
+		
+		return strand;
+	}
 	
 	public static GTFObject createGTFObject(AbstractSite site) {
 //		<seqname> <source> <feature> <start> <end> <score> <strand> <frame> [attributes] [comments] 
@@ -77,6 +88,8 @@ public class GTFObject {
 		return gtf;
 	}
 	
+	public final static String INTRON_STATUS_TAG = "intron_status";
+
 	public static GTFObject createGFFObject(DirectedRegion reg) {
 		GTFObject gtf= new GTFObject();
 		gtf.setGff(true);
@@ -133,55 +146,127 @@ public class GTFObject {
 	public static GTFObject[] createGTFObjects(DirectedRegion reg) {
 		GTFObject obj= new GTFObject();
 		obj.setSeqname(reg.getChromosome());
-		int start= Math.abs(reg.getStart());
-		int end= Math.abs(reg.getEnd());
-		if (start> end) {
-			int h= start;
-			start= end;
-			end= h;
-		}
-		obj.setStart(start);
-		obj.setEnd(end);
+		obj.setStart(reg.getStart());
+		obj.setEnd(reg.getEnd());
 		try {
 			obj.setStrand(reg.getStrand());
 			obj.setFeature(reg.getID());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
+	
 		Vector addObjV= new Vector();
 		if (reg instanceof Gene) {
 			obj.addAttribute(GENE_ID_TAG, ((Gene) reg).getGeneID());
 		} else if (reg instanceof Transcript) {
 			obj.addAttribute(GENE_ID_TAG, ((Transcript) reg).getGene().getGeneID());
 			obj.addAttribute(TRANSCRIPT_ID_TAG, ((Transcript) reg).getTranscriptID());
+			obj.setSource(((Transcript) reg).getSource());
 		} else if (reg instanceof Exon) {
 			Exon exon= ((Exon) reg);
-			obj.addAttribute(GENE_ID_TAG, exon.getGene().getGeneID());
-			obj.addAttribute(EXON_ID_TAG, exon.getExonID());
 			
-			GTFObject ex= (GTFObject) obj.clone();
-			ex.addAttribute(TRANSCRIPT_ID_TAG, exon.getTranscripts()[0].getTranscriptID());
-			addObjV.add(ex);
-			
-			GTFObject cds= (GTFObject) ex.clone();
-			cds.setFeature("CDS");
-			int st= Math.abs(exon.getStartCDS());
-			int nd= Math.abs(exon.getEndCDS());
-			if (st> nd) {
-				int h= st;
-				st= nd;
-				nd= h;
+			for (int i = 0; i < exon.getTranscripts().length; i++) {
+				GTFObject ex= (GTFObject) obj.clone();
+				ex.addAttribute(GENE_ID_TAG, exon.getGene().getGeneID());
+				ex.addAttribute(EXON_ID_TAG, exon.getExonID());
+				ex.setSource(exon.getTranscripts()[i].getSource());
+				
+				ex.addAttribute(TRANSCRIPT_ID_TAG, exon.getTranscripts()[i].getTranscriptID());
+				addObjV.add(ex);
+				
+				GTFObject cds= (GTFObject) ex.clone();
+				cds.setFeature("CDS");
+				cds.setStart(exon.getStartCDS());
+				cds.setEnd(exon.getEndCDS());
+				if (exon.getStartCDS()!= 0&& exon.getEndCDS()!= 0)
+					addObjV.add(cds);
 			}
-			cds.setStart(st);
-			cds.setEnd(nd);
-			addObjV.add(cds);
+	
 		} 
 		
 		if (addObjV.size()== 0)
 			return new GTFObject[] {obj};
 		else
 			return (GTFObject[]) Arrays.toField(addObjV);
+	}
+
+	public static GTFObject[] createGTFObjects(Exon exon, Transcript trpt) {
+		GTFObject obj= new GTFObject();
+		obj.setSeqname(exon.getChromosome());
+		obj.setStart(exon.getStart());
+		obj.setEnd(exon.getEnd());
+		try {
+			obj.setStrand(exon.getStrand());
+			obj.setFeature(exon.getID());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		Vector addObjV= new Vector();
+		GTFObject ex= (GTFObject) obj.clone();
+		ex.addAttribute(GENE_ID_TAG, exon.getGene().getGeneID());
+		ex.addAttribute(EXON_ID_TAG, exon.getExonID());
+		ex.setSource(trpt.getSource());
+		
+		ex.addAttribute(TRANSCRIPT_ID_TAG, trpt.getTranscriptID());
+		addObjV.add(ex);
+		
+		if (trpt.getTranslations()!= null) {
+			GTFObject cds= (GTFObject) ex.clone();
+			cds.setFeature("CDS");
+			cds.setStart(exon.getStartCDS());
+			cds.setEnd(exon.getEndCDS());
+			cds.setFrame(trpt.getTranslations()[0].getFrame(exon));
+			if (exon.getStartCDS()!= 0&& exon.getEndCDS()!= 0)
+				addObjV.add(cds);
+		}
+
+		return (GTFObject[]) Arrays.toField(addObjV);
+	}
+	
+	/**
+	 * all attributes set on pattern (ie, not <code>null</code> or 0) are compared against
+	 * objects in array. Objects that match all criteria are added to the solution. Attribute
+	 * is a minimum score threshold.
+	 * @param objs
+	 * @param pattern
+	 * @return
+	 */
+	public static GTFObject[] filterGTFObjects(GTFObject[] objs, GTFObject pattern) {
+		Vector v= new Vector();
+		for (int i = 0; i < objs.length; i++) {
+			if (pattern.getSeqname()!= null&& !pattern.getSeqname().equals(objs[i].getSeqname()))
+				continue;
+			if (pattern.getSource()!= null&& !pattern.getSource().equals(objs[i].getSource()))
+				continue;
+			if (pattern.getFeature()!= null&& !pattern.getFeature().equals(objs[i].getFeature()))
+				continue;
+			if (pattern.getStrand()!= 0&& pattern.getStrand()!= objs[i].getStrand())
+				continue;
+			if (pattern.getStart()!= 0&& pattern.getStart()!= objs[i].getStart())
+				continue;
+			if (pattern.getEnd()!= 0&& pattern.getEnd()!= objs[i].getEnd())
+				continue;
+			if (pattern.getStrand()!= 0&& pattern.getStrand()!= objs[i].getStrand())
+				continue;
+			if (pattern.getScore()!= 0&& pattern.getScore()< objs[i].getScore())
+				continue;
+			
+			HashMap map= pattern.getAttributes();
+			Object[] keys= map.keySet().toArray();
+			HashMap map2= objs[i].getAttributes();
+			int j;
+			for (j = 0; keys!= null&& j < keys.length; j++) {
+				if (map2== null|| !map.get(keys[j]).equals(map2.get(keys[j])))
+					break;
+			}
+			if (keys!= null&& j< keys.length)
+				continue;
+			
+			v.add(objs[i]);
+		}
+		
+		return (GTFObject[]) Arrays.toField(v);
 	}
 	
 	public static GTFObject createGFFObject(SpliceSite site, String source) {
@@ -243,7 +328,7 @@ public class GTFObject {
 //	0 indicates that the first whole codon of the reading frame is located at 5'-most base. 1 means that there is one extra base before the first codon and 2 means that there are two extra bases before the first codon. Note that the frame is not the length of the CDS mod 3.
 //	Here are the details excised from the GFF spec. Important: Note comment on reverse strand.
 //	'0' indicates that the specified region is in frame, i.e. that its first base corresponds to the first base of a codon. '1' indicates that there is one extra base, i.e. that the second base of the region corresponds to the first base of a codon, and '2' means that the third base of the region is the first base of a codon. If the strand is '-', then the first base of the region is value of <end>, because the corresponding coding region will run from <end> to <start> on the reverse strand.
-	boolean strand= false;
+	int strand= 0;
 	int frame= -1;
 	
 	
@@ -269,6 +354,9 @@ public class GTFObject {
 	}
 	public void addAttribute(String name, String value) {
 		
+		if (value== null) 
+			return;
+		
 		value= value.trim();
 		if (value.startsWith("\"")) 
 			value= value.substring(1, value.length()- 1);	// remove quota
@@ -278,7 +366,8 @@ public class GTFObject {
 	
 	public Object clone() {
 		GTFObject obj= new GTFObject();
-		obj.attributes= (HashMap) attributes.clone(); 
+		if (attributes!= null)
+			obj.attributes= (HashMap) attributes.clone(); 
 		obj.comments= comments;
 		obj.end= end;
 		obj.feature= feature;
@@ -327,6 +416,13 @@ public class GTFObject {
 			return null;
 		
 		return (String) attributes.get(id);
+	}
+	public String removeAttribute(String id) {
+		
+		if (attributes== null)
+			return null;
+		
+		return (String) attributes.remove(id);
 	}
 	public String getExonID() {
 		
@@ -386,7 +482,12 @@ public class GTFObject {
 	 * @param end The end to set.
 	 */
 	public void setEnd(int end) {
-		this.end = end;
+		this.end= Math.abs(end);
+		if (start>= 0&& start> this.end) {
+			int h= start;
+			start= this.end;
+			this.end= h;
+		}
 	}
 /**
  * @return Returns the feature.
@@ -399,7 +500,7 @@ public String getFeature() {
  */
 public void setFeature(String feature) {
 	
-	if (!isGff()) {
+	if (false) {	//!isGff()) {
 		//Exception e;
 		int i;
 		for (i = 0; i < GTFObject.FEATURE_VALID.length; i++) { 
@@ -421,6 +522,12 @@ public void setFeature(String feature) {
 	public float getScore() {
 		return score;
 	}
+	
+	public String getScoreString() {
+		if (Float.toString(score).equals(Float.toString(Float.NaN)))
+			return ".";
+		return Float.toString(score);
+	}
 	/**
 	 * @param score The score to set.
 	 */
@@ -436,8 +543,10 @@ public void setFeature(String feature) {
  */
 public String getSeqname() {
 	String s= seqname;
-	if (s.startsWith("chr"))	// not in mart output
-		s= seqname.substring(3);	// "chr..."
+	// now always with chr, write own method if you dont want it
+	// (better for scaffolds, contigs..
+//	if (s.startsWith("chr"))	// not in mart output
+//		s= seqname.substring(3);	// "chr..."
 
 	return s;
 }
@@ -448,7 +557,8 @@ public void setSeqname(String seqname) {
 	
 	if (seqname.length()<= 3)
 		seqname= "chr"+ seqname;
-	
+//	if (seqname.indexOf('_')>= 0) 	// human known genes
+//		seqname= seqname.split("_")[0];
 	this.seqname = seqname;
 }
 	/**
@@ -476,11 +586,24 @@ public void setSeqname(String seqname) {
 		else
 			return -1;
 	}
+	
+	public char getStrandSymbol() {
+		if (strand== 1)
+			return '+';
+		if (strand== -1)
+			return '-';
+		return '.';
+	}
 	/**
 	 * @param start The start to set.
 	 */
 	public void setStart(int start) {
-		this.start = start;
+		this.start= Math.abs(start);
+		if (end>= 0&& this.start> end) {
+			int h= this.start;
+			this.start= end;
+			end= h;
+		}
 	}
 	/**
 	 * @return Returns the frame.
@@ -488,12 +611,20 @@ public void setSeqname(String seqname) {
 	public int getFrame() {
 		return frame;
 	}
+	
+	
+	public char getFrameSymbol() {
+		if (frame== -1)
+			return '.';
+		return Integer.toString(frame).charAt(0);
+	}
 	/**
 	 * @param frame The frame to set.
 	 */
-	public void setFrame(int frame) throws Exception {
+	public void setFrame(int frame) {
 		if (frame< 0 || frame> 2)
-			throw new Exception("no valid frame-shift "+frame);
+			return;
+			//throw new Exception("no valid frame-shift "+frame);
 		this.frame = frame;
 	}
 	
@@ -507,33 +638,27 @@ public void setSeqname(String seqname) {
  * @return Returns the leadingStrand.
  */
 public boolean isStrand() {
-	return strand;
+	return (strand== 1);
 }
 /**
  * @param strand The leadingStrand to set.
  */
 public void setStrand(String leadingLagging) throws Exception{
 	if (leadingLagging.trim().equals("+")|| leadingLagging.trim().equals("1")) {
-		strand= true;
+		strand= 1;
 		return;
 	} else if (leadingLagging.trim().equals("-")|| leadingLagging.trim().equals("-1")) {
-		strand= false;
+		strand= -1;
 		return;
 	}
 	Exception e= new Exception("no valid mark for orientation! "+leadingLagging);
 	throw(e);
 }
-public void setStrand(int strandInt) throws Exception {
-	if (strandInt== 1) {
-		strand= true;
-		return;
-	} else if (strandInt== -1) {
-		strand= false;
-		return;
-	}
-	if (!isGff()) {
-		Exception e= new Exception("no valid mark for orientation! "+strandInt);
-		throw(e);
+public void setStrand(int strandInt) {
+	if (strandInt== 1|| strandInt== -1)
+		this.strand= strandInt;
+	else if (!isGff()) {
+		System.err.println("no valid mark for orientation! "+strandInt);
 	}
 }
 	/**

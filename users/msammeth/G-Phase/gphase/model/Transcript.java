@@ -30,6 +30,13 @@ import com.sun.org.apache.xerces.internal.impl.xs.opti.DefaultDocument;
  */
 public class Transcript extends DirectedRegion {
 
+	public static final String ID_TAG= "id_tag";
+	public static final String[] POLY_A_SITES= new String[] {
+		"AATAAA","ATTAAA", 	// canonical 
+		"AGTAAA", "TATAAA", "CATAAA", "GATAAA", "AATATA", "AATACA", "AATAGA", "AATGAA", "ACTAAA", // Beaudoing et al. 2000  
+		"AACAAA", "TTTAAA"	// F. Lopez and D. Gautheret, unpubl.
+	};
+	
 	public static class SpliceChainComparator implements Comparator {
 		public int compare(Object o1, Object o2) {
 			SpliceSite[] sc1= ((Transcript) o1).getSpliceChain();
@@ -55,6 +62,8 @@ public class Transcript extends DirectedRegion {
 	TU[] tu= null;
 	byte nmd= 0;
 	Translation predORF= null;
+	String source= null; 
+	
 	String HUGO= null;
 	
 	public static int REGION_5UTR= 1;
@@ -632,6 +641,71 @@ public class Transcript extends DirectedRegion {
 	public boolean isNonCoding() {
 		return (translations== null|| translations.length== 0);
 	}
+	/**
+	 * see  Lopez1 et al., RNA 2006
+	 */
+	public boolean isInternallyPrimed() {
+		final int FLANK_REGION= 50;
+		int end3= getExons()[getExons().length- 1].get3PrimeEdge();
+		DirectedRegion flankReg= new DirectedRegion(
+			end3,end3+ FLANK_REGION,getStrand());	// 50 nt downstream
+		flankReg.setChromosome(getChromosome());
+		flankReg.setSpecies(getSpecies());
+		
+		return isArichRegion(flankReg);
+	}
+	
+	public static boolean isArichRegion(DirectedRegion reg) {
+		final int WIN_SIZE= 10;
+		String seq= Graph.readSequence(reg);
+		seq= seq.toUpperCase();
+		int cntA= 0;
+		boolean aRich= false;
+		for (int i = 0; i < reg.getLength()- WIN_SIZE+ 1; i++) {
+			if (i== 0) {
+				for (int j = i; j < i+ WIN_SIZE; j++) 
+					if (seq.charAt(j)== 'A')
+						++cntA;
+			} else {
+				if (seq.charAt(i-1)== 'A')
+					--cntA;
+				if (seq.charAt(i+ WIN_SIZE- 1)== 'A')
+					++cntA;
+			}
+			if (cntA> 8) {
+				break;
+			}
+		}
+		
+		return aRich;
+	}
+
+	/**
+	 * see  Lopez1 et al., RNA 2006
+	 * check complete3PSandro()
+	 * @return
+	 */
+	public boolean is3Pcomplete() {
+		
+		final int windowSize= 30;	// window to look for pA
+		
+			// get seq for winSize
+		int nb= getExons().length- 1;		
+		String seq= "";
+		while (seq.length()< windowSize&& nb> 0) {
+			seq= Graph.readSequence(getExons()[nb])+ seq;
+			--nb;
+		}
+		
+		seq= seq.toUpperCase();
+		int x;
+		for (x = 0; x < POLY_A_SITES.length; x++) 
+			if (seq.contains(POLY_A_SITES[x]))
+				break;
+		if (x< POLY_A_SITES.length)
+			return true;
+		return false;
+	}
 	
 	public boolean hasNonGTAGIntron() {
 		DirectedRegion[] regs= getIntrons();
@@ -738,7 +812,7 @@ public class Transcript extends DirectedRegion {
 	}
 	
 	public boolean isForward() {
-		if (gene!= null)
+		if (gene!= null)	// strand== 0&& 
 			return gene.isForward();
 		return super.isForward();
 	}
@@ -844,10 +918,17 @@ public class Transcript extends DirectedRegion {
 	}
 
 	public String getChromosome() {
+		if (getGene()== null) {
+			if (chromosome!= null)
+				return chromosome.toUpperCase();
+			return chromosome;
+		}
 		return getGene().getChromosome();
 	}
 	
 	public Species getSpecies() {
+		if (getGene()== null)
+			return species;
 		return getGene().getSpecies();
 	}
 	
@@ -1009,77 +1090,46 @@ public class Transcript extends DirectedRegion {
 			 */
 			public boolean addExon(Exon newExon) {
 		
-					// new exon array
-				if (exons== null) 
+//			 	// in gene...
+				if (getGene()!= null) 
+					newExon= getGene().addExon(newExon);
+				else
+					System.err.println("Exon added without gene available.");
+				
+				Comparator compi= new AbstractRegion.PositionComparator();
+				if (exons== null) {
 					exons= new Exon[] {newExon};
-				else {
-					
-						// search for identical exon (HERE necessary)
-					int p= Arrays.binarySearch(
-							exons,
-							newExon,
-							new AbstractRegion.PositionComparator()	// has to be directed, end< start for two ident. regions	
-						);
-			
-					if (p>= 0) 
-						return false;	// already contained, not added
-					
-						// new Exon: search for overlapping exons 
-						// and accordingly construct SuperExon
-		//			Exon[] exs= getGene().getExons();		// in ALL transcripts
-		//			for (int i = 0; i < exons.length; i++) {
-		//				if ((exs[i].getStart()>= newExon.getStart()&& exs[i].getStart()< newExon.getEnd())||
-		//						newExon.getStart()>= exs[i].getStart()&& newExon.getStart()< exs[i].getEnd()) { // intersecting
-		//					if (exs[i].getSuperExon()!= null)
-		//						if (newExon.getSuperExon()!= null)
-		//							newExon.getSuperExon().merge(exs[i].getSuperExon()); 	// merge two super-exs
-		//						else
-		//							exs[i].getSuperExon().add(newExon);	// add to super-exon of the other
-		//					else {
-		//						SuperExon superEx= newExon.getSuperExon();
-		//						if (superEx== null) {
-		//							superEx= new SuperExon();
-		//							superEx.add(newExon);
-		//						}
-		//						superEx.add(exs[i]);
-		//					}
-		//				}
-		//			}
-					
-						// add exon
-					exons= (Exon[]) gphase.tools.Arrays.insert(this.exons, newExon, p);
+					updateBoundaries(newExon);
+					return true;
 				}
-		
-					// init splice sites 
-				int p= Arrays.binarySearch(
-						this.exons,
-						newExon,
-						new AbstractRegion.PositionComparator()		// here also abstractregion possible	
-				);
 				
-				if (p== 0) {
-					//int tss= isForward()?newExon.getStart():newExon.getEnd();
-					if (isForward())
-						setStart(newExon.getStart());
-					else
-						setEnd(newExon.getEnd());
-					if (exons.length>1) {	// ex-first exon now has an acceptor
-						Exon ex= this.exons[1];
-						int posAcceptor= isForward()?ex.getStart():ex.getEnd();
-						SpliceSite acceptor= new SpliceSite(getGene(), posAcceptor, false, ex);
-						SpliceSite ss= getGene().checkSpliceSite(acceptor);
-						if (ss== null) 
-							getGene().addSpliceSite(acceptor);
-						else {
-							acceptor= ss;
-							ss.addExon(ex);
-						}
-						ex.setAcceptor(acceptor);
+				// search for identical exon (HERE necessary)
+				int p= Arrays.binarySearch(exons, newExon, compi);
+				if (p>= 0) 
+					return false;	// already contained, not added
+				exons= (Exon[]) gphase.tools.Arrays.insert(this.exons, newExon, p);
+				newExon.addTranscript(this);
+				// SuperExons?! search for overlapping exons 
+					
+					// init splice sites
+				p= -(p+1);	// insertion point
+				
+				if (p== 0&& exons.length> 1&& exons[1].getAcceptor()== null) {	// ex-first exon now has an acceptor
+					Exon ex= this.exons[1];
+					int posAcceptor= ex.get5PrimeEdge();
+					SpliceSite acceptor= new SpliceSite(getGene(), posAcceptor, false, ex);
+					SpliceSite ss= getGene().checkSpliceSite(acceptor);
+					if (ss== null) 
+						getGene().addSpliceSite(acceptor);
+					else {
+						acceptor= ss;
+						ss.addExon(ex);
 					}
+					ex.setAcceptor(acceptor);
 				}
 				
-				if (p> 0) {										// has acceptor
-					int posAcceptor= isForward()?newExon.getStart():newExon.getEnd();
+				if (p> 0&& newExon.getAcceptor()== null) {	// has acceptor
+					int posAcceptor= newExon.get5PrimeEdge();
 					SpliceSite acceptor= new SpliceSite(getGene(), posAcceptor, false, newExon);
 					SpliceSite ss= getGene().checkSpliceSite(acceptor);
 					if (ss== null) 
@@ -1091,8 +1141,8 @@ public class Transcript extends DirectedRegion {
 					exons[p].setAcceptor(acceptor);
 				}
 				
-				if (p< this.exons.length- 1) {					// has donor
-					int posDonor= isForward()?newExon.getEnd():newExon.getStart();
+				if (p< this.exons.length- 1&& newExon.getDonor()== null) {					// has donor
+					int posDonor= newExon.get3PrimeEdge();
 					SpliceSite donor= new SpliceSite(getGene(), posDonor, true, newExon);
 					SpliceSite ss= getGene().checkSpliceSite(donor);
 					if (ss== null) 
@@ -1104,32 +1154,22 @@ public class Transcript extends DirectedRegion {
 					exons[p].setDonor(donor);
 				}
 		
-				if (p== this.exons.length- 1) {
-					//int tes= isForward()?newExon.getEnd():newExon.getStart();
-					if (isForward())
-						setEnd(newExon.getEnd());
-					else
-						setStart(newExon.getStart());
-					if (exons.length>1) {	// ex-last exon now has an donor
-						Exon ex= this.exons[exons.length- 2];
-						int posDonor= isForward()?ex.getEnd():ex.getStart();
-						SpliceSite donor= new SpliceSite(getGene(), posDonor, true, ex);
-						SpliceSite ss= getGene().checkSpliceSite(donor);
-						if (ss== null) 
-							getGene().addSpliceSite(donor);
-						else {
-							donor= ss;
-							ss.addExon(ex);
-						}
-						ex.setDonor(donor);
+				if (p== exons.length- 1&& exons.length> 1&& 
+					exons[exons.length- 2].getDonor()== null) {	// ex-last exon now has an donor
+					Exon ex= exons[exons.length- 2];
+					int posDonor= ex.get3PrimeEdge();
+					SpliceSite donor= new SpliceSite(getGene(), posDonor, true, ex);
+					SpliceSite ss= getGene().checkSpliceSite(donor);
+					if (ss== null) 
+						getGene().addSpliceSite(donor);
+					else {
+						donor= ss;
+						ss.addExon(ex);
 					}
+					ex.setDonor(donor);
 				}
 				
-				int sstart= start;
-				int send= end;
-				setBoundaries(newExon);
-				if (start!= sstart|| send!= end)
-					System.currentTimeMillis();
+				updateBoundaries(newExon);
 				return true;
 			}
 
@@ -1141,12 +1181,15 @@ public class Transcript extends DirectedRegion {
 		 * @param newExon
 		 * @return the exon already contained or <code>newExon</code> case of the exon was added successfully
 		 */
-		public void setBoundaries(Exon newExon) {
+		public void updateBoundaries(Exon newExon) {
 	
-			if (Math.abs(newExon.getStart())< Math.abs(getStart()))
+			if (newExon.getStart()!= 0&&(getStart()== 0|| Math.abs(newExon.getStart())< Math.abs(getStart())))
 				setStart(newExon.getStart());
-			if (Math.abs(newExon.getEnd())> Math.abs(getEnd()))
+			if (newExon.getEnd()!= 0&& (getEnd()== 0|| Math.abs(newExon.getEnd())> Math.abs(getEnd())))
 				setEnd(newExon.getEnd());
+			if (getGene()!= null) {
+				getGene().updateBoundaries(newExon);
+			}
 //			if (newExon.getStart()< getStart())
 //				setStart(newExon.getStart());
 //			if (newExon.getEnd()> getEnd())
@@ -1505,7 +1548,7 @@ public class Transcript extends DirectedRegion {
 		Vector v= new Vector(exons.length);
 		DirectedRegion reg;
 		for (int i = 0; i < exons.length; i++) {
-			if (!exons[i].isCoding())
+			if (!exons[i].isCodingCompletely())
 				continue;
 			reg= new DirectedRegion(exons[i].get5PrimeCDS(), exons[i].get3PrimeCDS(), exons[i].getStrand());
 			reg.setChromosome(getChromosome());
@@ -1544,6 +1587,12 @@ public class Transcript extends DirectedRegion {
 	}
 	public void setHUGO(String hugo) {
 		HUGO = hugo;
+	}
+	public String getSource() {
+		return source;
+	}
+	public void setSource(String source) {
+		this.source = source;
 	}
 
 

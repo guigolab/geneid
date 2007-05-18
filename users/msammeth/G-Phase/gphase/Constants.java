@@ -9,6 +9,7 @@ package gphase;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Vector;
 
 import qalign.OSChecker;
 
@@ -19,6 +20,7 @@ import qalign.OSChecker;
  */
 public class Constants {
 
+	public static final char separator= '_';
 	public static final String getDateString() {
 		return "["+ new Date(System.currentTimeMillis()).toString()+ "]";
 	}
@@ -30,20 +32,29 @@ public class Constants {
 		if (OSChecker.isSunOS())
 			DATA_DIR= "/vol/cluster-data/micha/gphase";
 		else if (OSChecker.isLinux())
-			DATA_DIR= "/home/msammeth";
+			DATA_DIR= "/home/msammeth";	// ludwig: "/home/users/micha";	
 		else if (OSChecker.isWindows())
-			DATA_DIR= "D:";
+			DATA_DIR= "H:";		// D:
 	}
 	public final static String SEQUENCES_SUBDIR= "genomes";	// genomes 
 	public final static boolean CHROMOSOME_USE_MASKED= false;
 	public final static String CHROMOSOME_DIR= (CHROMOSOME_USE_MASKED?"chromFa_msk":"chromFa");	// masked or non-masked
 	public final static String CHROMOSOME_EXT= (CHROMOSOME_USE_MASKED?".fa.msk":".fa");	// masked or non-masked
 	public final static String ALIGNMENT_SUBDIR= "ali";
+	public static String SUBDIR_ANNOTATION= null;
+	static {
+		if (OSChecker.isLinux())
+			SUBDIR_ANNOTATION= null;
+		else if (OSChecker.isWindows())
+			SUBDIR_ANNOTATION= "H:"+File.separator+"annotations";
+	}
+	public final static String SUBDIR_ANNOTATION_UCSC= SUBDIR_ANNOTATION+File.separator+"UCSC";
 
 	public static final String[] TYPES = new String[] { "protein_coding", "pseudogene", "rRNA", "rRNA_pseudogene", "tRNA", "tRNA_pseudogene", "ncRNA", "ncRNA_pseudogene", "scRNA", "scRNA_pseudogene", "snRNA", "snRNA_pseudogene", "snoRNA", "snoRNA_pseudogene", "miRNA", "miRNA_pseudogene", "Mt_rRNA", "Mt_rRNA_pseudogene", "Mt_tRNA", "Mt_tRNA_pseudogene", "misc_RNA", "misc_RNA_pseudogene" };
 
 	public static final String[] CONFIDENCES = new String[] { "KNOWN", "NOVEL", "PUTATIVE", "PREDICTED" };	
-	public final static String CLUSTAL_SUBDIR= "clustal";	
+	public final static String CLUSTAL_SUBDIR= "clustal";
+	public final static String MAPTABLES_SUBDIR= "maptables";
 	public final static String DIALIGN_SUBDIR= "dialign";	
 	public final static String MLAGAN_SUBDIR= "mlagan";	
 	public final static String MLAGAN_SUBSUBDIR= "lagan12";	
@@ -106,4 +117,95 @@ public class Constants {
 
 		return i; 
 	}	
+	
+	public static final String getLatestUCSCAnnotation(String speName, String annoName, String[] keywords) {
+		for (int i = 0; keywords!= null&& i < keywords.length; i++) 
+			keywords[i]= keywords[i].toUpperCase();
+		
+		speName= speName.toUpperCase();
+		annoName= annoName.toUpperCase();
+		String[] list= new File(SUBDIR_ANNOTATION_UCSC).list();		
+		Vector v= new Vector();
+		for (int i = 0; i < list.length; i++) {
+			String s= list[i].toUpperCase();
+			if (s.contains(speName)&& s.contains(annoName)) {
+				int x;
+				for (x = 0; keywords!= null&& x < keywords.length; x++) 
+					if (s.contains(keywords[x]))
+						break;
+				if (keywords== null|| x< keywords.length)
+					v.add(new File(SUBDIR_ANNOTATION_UCSC+ File.separator+ list[i]).getAbsolutePath());
+			}
+		}
+		
+		if (v.size()== 0) {
+			System.err.println("UCSC annotation not found for "+speName+", "+annoName);
+			return null;
+		}
+		if (v.size()== 1) 
+			return (String) v.elementAt(0);
+
+		int max= -1;
+		int maxP= -1;
+		for (int i = 0; i < v.size(); i++) {
+			String s= (String) v.elementAt(i);
+			int p= s.indexOf("200");// 200x
+			if (p< 0) {
+				System.err.println("No date available for "+s);
+				continue;
+			}
+			int x= Integer.parseInt(s.substring(p+3, p+6));
+			if (x> max) {
+				max= x;
+				maxP= i;
+			}
+		}
+		
+		return (String) v.elementAt(maxP);
+	}
+	public static final String getUCSCAnnotation(String speName, String annoName, String genVer) {
+		speName= speName.toUpperCase();
+		annoName= annoName.toUpperCase();
+		genVer= genVer.toUpperCase();
+		String[] list= new File(SUBDIR_ANNOTATION_UCSC).list();
+		Vector v= new Vector();
+		for (int i = 0; i < list.length; i++) {
+			String s= list[i].toUpperCase();
+			if (s.contains(speName)&& s.contains(annoName)&& s.contains(genVer)&& s.endsWith(".GTF"))
+				v.add(new File(SUBDIR_ANNOTATION_UCSC+ File.separator+ list[i]).getAbsolutePath());
+		}
+		
+		if (v.size()== 0) {
+			System.err.println("UCSC annotation not found for "+speName+", "+annoName);
+			return null;
+		}
+		if (v.size()== 1) 
+			return (String) v.elementAt(0);
+	
+		int max= -1;
+		int maxP= -1;
+		for (int i = 0; i < v.size(); i++) {
+			String s= (String) v.elementAt(i);
+			int p= s.indexOf("200");// 200x
+			if (p< 0)
+				System.err.println("No date available for "+s);
+			int x= Integer.parseInt(s.substring(p+3, p+6));
+			if (x> max) {
+				max= x;
+				maxP= i;
+			}
+		}
+		
+		return (String) v.elementAt(maxP);
+	}
+	public static String getAnnotationFile(String speName, String annoName) {
+		String annoUp= annoName.toUpperCase();
+		
+		if (annoUp.contains("REFSEQ")|| annoUp.contains("UCSC")|| annoUp.contains("KNOWN")
+				|| annoUp.contains("FLYBASE")|| annoUp.contains("WORMBASE"))			
+		return getLatestUCSCAnnotation(speName, annoName, null);
+		
+			// ensembl here
+		return null;
+	}
 }

@@ -41,6 +41,24 @@ public class Arrays {
 		return v;
 	}
 	
+	/**
+	 * two arrays are equal, if all of their elements are equal
+	 * @param a1
+	 * @param a2
+	 * @return
+	 */
+	public static boolean compare(Object[] a1, Object[] a2) {
+		if (a1== null&& a2== null)
+			return true;
+		if ((a1== null^ a2== null)|| (a1.length!= a2.length))
+			return false;
+		for (int i = 0; i < a1.length; i++) 
+			for (int j = 0; j < a2.length; j++) 
+				if (!a1[i].equals(a2[j]))
+					return false;
+		return true;
+	}
+	
     static int binSearch(Vector v, Object key, Comparator compi) {
     	return binSearch(v, key, compi, 0, v.size());
     }
@@ -79,8 +97,8 @@ public class Arrays {
 	}
 	
 	public static String complement(String in){
-		String normal= "ACGTN-acgtnMmKk";	// M spotted in refseq intron annotation of human
-		String reverse= "TGCAN-tgcanKkMm";
+		String normal= "ACGTN-acgtnMmKkXx";	// M spotted in refseq intron annotation of human
+		String reverse= "TGCAN-tgcanKkMmXx";
 		StringBuffer buffy= new StringBuffer(in.length());
 		for (int i = 0; i < in.length(); i++) {
 			int p= normal.indexOf(in.charAt(i));
@@ -256,6 +274,15 @@ public class Arrays {
 		return add(a, o);
 	}
 	
+	public static Vector addUnique(Vector v, Object o) {
+		for (int i = 0; v!= null&& i < v.size(); i++) {
+			if (v.elementAt(i).equals(o))
+				return v;
+		}
+		v.add(o);
+		return v;
+	}
+	
 	public static Object[] extendField(Object[] a, Object o) {
 		if (a== null) {
 			Object[] newA= (Object[]) Array.newInstance(o.getClass(), 1);
@@ -264,6 +291,16 @@ public class Arrays {
 		}
 		
 		return insert(a, o, a.length);	
+	}
+	public static Object[] extendField(Object[] a, Object o, Comparator compi) {
+		if (a== null) {
+			Object[] newA= (Object[]) Array.newInstance(o.getClass(), 1);
+			newA[0]= o;
+			return newA;
+		}
+		
+		int p= java.util.Arrays.binarySearch(a, o, compi);
+		return insert(a, o, p);	
 	}
 	
 	/**
@@ -279,7 +316,7 @@ public class Arrays {
 	 */
 	public static Object[] insert(Object[] a, Object o, int p) {
 		
-		if (a== null&& p== 0) {
+		if (a== null) {
 			Object[] newA= (Object[]) Array.newInstance(o.getClass(), 1);
 			newA[0]= o;
 			return newA;
@@ -299,15 +336,38 @@ public class Arrays {
 	}
 	
 	public static Object[] remove(Object[] a, Object o) {
-		if (a== null)
+		if (a== null|| a.length< 1|| o.getClass().isAssignableFrom(a[0].getClass()))
 			return null;
 		
-		Vector v= new Vector();
-		for (int i = 0; i < a.length; i++) 
-			if (a[i]!= o)
-				v.add(a[i]);
+		Object[] b= (Object[]) Array.newInstance(o.getClass(), a.length- 1);
+		int i;
+		for (i = 0; i < a.length; i++) {
+			if (a[i]== o)
+				break;
+			b[i]= a[i];
+		}
+		for (; i < b.length; i++) 
+			b[i]= a[i+1];
 		
-		return (Object[]) toField(v);
+		return b;
+	}
+	
+	public static Object[] remove(Object[] a, int p) {
+		
+		if (p< 0|| a== null|| a.length< (p+1))
+			return null;
+		
+		Object[] b= (Object[]) Array.newInstance(a[0].getClass(), a.length- 1);
+		int i;
+		for (i = 0; i < b.length; i++) {
+			if (i== p)
+				break;
+			b[i]= a[i];
+		}
+		for (; i < b.length; i++) 
+			b[i]= a[i+1];
+		
+		return b;
 	}
 	
 	public static void swap(Object[] o) {
@@ -395,9 +455,9 @@ public class Arrays {
 		}
 		Object[] result= null;
 		if (r!= null) {
-			result= (Object[]) Array.newInstance(type, );
-			for (int i = 0; i < o.length; i++) 
-			result[i]= toPrimitiveField(o.length);
+//			result= (Object[]) Array.newInstance(type, );
+			//for (int i = 0; i < o.length; i++) 
+//			result[i]= toPrimitiveField(o.length);
 		}
 		
 		return result;
@@ -427,6 +487,8 @@ public class Arrays {
 		return resVec;
 	}
 	public static Object[] filter(Object[] hits, Method target) {
+		if (hits== null)
+			return null;
 		Vector v= new Vector(hits.length);
 		for (int j = 0; j < hits.length; j++) {
 			Object o= null;

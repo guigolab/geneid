@@ -60,8 +60,6 @@ import org.ensembl.util.PropertiesUtil;
 
 import prefuse.util.UpdateListener;
 
-import com.sun.org.apache.bcel.internal.generic.GETSTATIC;
-
 import qalign.tools.FASTAWrapper;
 import qalign.tools.SequenceWrapper;
 
@@ -116,22 +114,27 @@ public class EnsemblDBAdaptor {
 
 	public static void serializeGraphs() {
 		
+		String[] addFlags= new String[] {"_download", "_filtDNA"};
 		EnsemblDBAdaptor adaptor= new EnsemblDBAdaptor();
-		String[] spec= Species.SP_NAMES_COMMON;
-		spec= new String[] {"yeast"};
+		String[] spec= new String[] {"yeast"};
+		//spec= Species.SP_NAMES_COMMON;
 		Graph g;
-		for (int i = 0; i < spec.length; i++) 
-			try {
-				System.out.println(spec[i]);
-				System.out.println(Constants.getDateString()+ " loading Graph");
-				Species sp= new Species(spec[i]);
-				g= GraphHandler.readIn(GraphHandler.getGraphAbsPath(sp)+"_download");
-				GTFWrapper wrapper= new GTFWrapper(new File(GraphHandler.getGraphAbsPath()+"_download.gtf"), sp);
-				System.out.println(Constants.getDateString()+ " writing GTF");
-				wrapper.write();
-			} catch (Exception e) {
-				e.printStackTrace();
+		for (int i = 0; i < spec.length; i++) {
+			System.out.println(spec[i]);
+			System.out.println(Constants.getDateString()+ " loading Graph");
+			Species sp= new Species(spec[i]);
+			for (int j = 0; j < addFlags.length; j++) {
+				try {
+					g= GraphHandler.readIn(GraphHandler.getGraphAbsPath(sp)+addFlags[j]);
+					sp= g.getSpecies()[0];
+					GTFWrapper wrapper= new GTFWrapper(new File(GraphHandler.getGraphAbsPath()+addFlags[j]), sp);
+					System.out.println(Constants.getDateString()+ " writing GTF");
+					wrapper.write();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
+		}
 	}
 
 	public static void filter() {
@@ -165,7 +168,7 @@ public class EnsemblDBAdaptor {
 //				continue;
 			try {
 				g= GraphHandler.readIn(GraphHandler.getGraphAbsPath(new Species(spec[i]))+"_download");
-				g.getSpecies()[0].setBuildVersion(42);
+				g.getSpecies()[0].setAnnotationVersion(42);
 				GraphHandler.writeOut(g, GraphHandler.getGraphAbsPath(new Species(spec[i]))+"_download");
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -765,7 +768,7 @@ public class EnsemblDBAdaptor {
 					con.getCatalog().indexOf("_core")+ 6,
 					con.getCatalog().lastIndexOf('_')));
 			checkVersion(x);	// e.g. "homo_sapiens_core_31_35d" = Ensembl ver 31, based on NCBI genome 35
-			genes[0].getSpecies().setBuildVersion(x);
+			genes[0].getSpecies().setAnnotationVersion(x);
 					
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -862,7 +865,7 @@ public class EnsemblDBAdaptor {
 					con.getCatalog().length()); // e.g. "homo_sapiens_core_31_35d"
 			if (Character.isLetter(s.charAt(s.length()- 1)))
 				s= s.substring(0, s.length()- 1); // quit last letter if present (e.g., the "d")
-			genes[0].getSpecies().setBuildVersion(
+			genes[0].getSpecies().setAnnotationVersion(
 				Integer.parseInt(s));
 					
 		} catch (SQLException e) {
@@ -944,7 +947,7 @@ public class EnsemblDBAdaptor {
 					con.getCatalog().length()); // e.g. "homo_sapiens_core_31_35d"
 			if (Character.isLetter(s.charAt(s.length()- 1)))
 				s= s.substring(0, s.length()- 1); // quit last letter if present (e.g., the "d")
-			graph.getSpeciesByName(species).setBuildVersion(
+			graph.getSpeciesByName(species).setAnnotationVersion(
 				Integer.parseInt(s));
 					
 		} catch (SQLException e) {
@@ -2359,10 +2362,10 @@ public class EnsemblDBAdaptor {
 			//testFilter(new Species("Tetraodon"));
 			//updateFilterAllGraphsNonsense();
 			//correctTranslations();
-			//serializeGraphs();
+			serializeGraphs();
 			//filterNonGTAG();
 			//correctBuildVersion();
-			filter();
+			//filter();
 			//correctExonCDS();
 			//serializeGraphs();
 			if (1== 1)

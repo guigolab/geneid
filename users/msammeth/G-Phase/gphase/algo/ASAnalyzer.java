@@ -31,10 +31,6 @@ import javax.swing.JFrame;
 import javax.swing.JWindow;
 import javax.swing.plaf.multi.MultiViewportUI;
 
-import com.p6spy.engine.logging.appender.StdoutLogger;
-import com.sun.org.apache.xalan.internal.xsltc.compiler.util.FilterGenerator;
-import com.sun.org.apache.xml.internal.utils.StringToStringTable;
-
 import gphase.CodeBookMark;
 import gphase.Toolbox;
 import gphase.db.EnsemblDBAdaptor;
@@ -67,8 +63,11 @@ import gphase.regex.ChessMaster;
 import gphase.regex.RegExp;
 import gphase.tools.Arrays;
 import gphase.tools.Distribution;
+import gphase.tools.DoubleVector;
 import gphase.tools.ENCODE;
 import gphase.tools.IntVector;
+import gphase.tools.KMP;
+import gphase.tools.Sequence;
 import gphase.tools.Time;
 
 /**
@@ -105,7 +104,7 @@ public class ASAnalyzer {
 				java.util.Arrays.sort(e, compi);
 				for (int k = 0; k < e.length; k++) {
 					String[] att= new String[] {t[j].getTranscriptID(), e[k].getExonID(), Gene.REGION_ID[Gene.REGION_TRANSCRIPT_5UTR]};
-					if (e[k].isCoding()) {
+					if (e[k].isCodingCompletely()) {
 						if (!e[k].isCoding5Prime()) {
 							int p1= Math.abs(e[k].get5PrimeEdge());
 							int p2= Math.abs(e[k].get5PrimeCDS()- 1);
@@ -180,7 +179,7 @@ public class ASAnalyzer {
 					reg.setID("intron");
 					regV.add(reg);
 					attMap.put(reg, att);
-					if (e[k].isCoding())
+					if (e[k].isCodingCompletely())
 						break;
 				}
 			}
@@ -224,7 +223,7 @@ public class ASAnalyzer {
 				boolean start= false;
 				for (int k = 0; k < e.length; k++) {
 					if (!start) {
-						if (e[k].isCoding()) 
+						if (e[k].isCodingCompletely()) 
 							start= true;
 						continue;
 					}
@@ -1144,6 +1143,100 @@ public class ASAnalyzer {
 			p.println("===> 0: "+scnt0+"\t1: "+scnt1+"\t2: "+scnt2+"\t("+stot+"): "+((double) scnt0/ stot));
 		}
 
+	public static void test03c_statisticIntronsWithGCcontent(Graph g, PrintStream p) {
+		Gene[] ge= g.getGenes();
+		Vector v= new Vector();	// collect unique introns
+		IntVector inSizesV= new IntVector(v.size());
+		DoubleVector gcFracsV= new DoubleVector(v.size());
+		IntVector vStart= new IntVector();	// distance from 5' end of gene	
+		IntVector vEnd= new IntVector();	// distance from 3' end
+		IntVector vPTrans= new IntVector();	// # per transcript
+		IntVector vPGene= new IntVector();	// # per gene
+		Comparator compi= new DirectedRegion.PositionComparator();
+		int cntNonGTAG= 0;
+		int ssum= 0;
+		for (int i = 0; i < ge.length; i++) {
+			Transcript[] trpts= ge[i].getTranscripts();
+			int sum= 0;
+			for (int j = 0; j < trpts.length; j++) {
+				DirectedRegion[] regs= trpts[j].getIntrons(); 
+				int cnt= 0;
+				for (int k = 0; regs!= null&& k < regs.length; k++) {
+					if (regs[k].getLength()< 4)
+						continue;
+					String seq= null;
+					try {
+						seq= Graph.readSequence(regs[k]);
+					} catch (Exception ex) {
+						ex.printStackTrace();
+						continue;
+					}
+					String gt= seq.substring(0, 2).toUpperCase();
+					String ag= seq.substring(seq.length()- 2, seq.length());
+					if ((!gt.equals("GT"))|| (!ag.equals("AG"))) {
+						++cntNonGTAG;
+						continue;	// skip non-GTAG
+					}
+					
+					++cnt;
+					int oldSize= v.size();
+					v= Arrays.addUnique(v, regs[k], compi);
+					if (v.size()> oldSize) {
+						int x= Sequence.countGC(seq);
+						int len= regs[k].getLength();
+						inSizesV.add(new Integer(len));
+						gcFracsV.add(new Double((100d* x)/ len)); 
+						vStart.add(regs[k].get5PrimeEdge()- ge[i].get5PrimeEdge());
+						vEnd.add(ge[i].get3PrimeEdge()- regs[k].get3PrimeEdge());
+					}
+					
+				}
+				sum+= cnt;
+				vPTrans.add(cnt);
+			}
+			vPGene.add(sum);
+			ssum+= sum;
+		}
+		System.out.println("Removed "+cntNonGTAG+"/"+ssum+" non-GTAG introns.");
+		p.println("Removed "+cntNonGTAG+"/"+ssum+" non-GTAG introns.");
+		System.out.println("[Intrs]\tmean\tmedian\tstd dev");
+		p.println("[Intrs]\tmean\tmedian\tstd dev");
+		
+			// sizes
+		Distribution dist= new Distribution(inSizesV.toIntArray());
+		String[] statStr= dist.toStatString();
+		System.out.println("len\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		p.println("len\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		
+		dist= new Distribution(gcFracsV.toDoubleArray());
+		statStr= dist.toStatString();
+		System.out.println("gc%\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		p.println("gc%\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		
+		dist= new Distribution(vStart.toIntArray());
+		statStr= dist.toStatString();
+		System.out.println("start\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		p.println("start\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		
+		dist= new Distribution(vEnd.toIntArray());
+		statStr= dist.toStatString();
+		System.out.println("end\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		p.println("end\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		
+		dist= new Distribution(vPTrans.toIntArray());
+		statStr= dist.toStatString();
+		System.out.println("pTrpt\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		p.println("pTrpt\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		
+		dist= new Distribution(vPGene.toIntArray());
+		statStr= dist.toStatString();
+		System.out.println("pGene\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		p.println("pGene\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		
+		System.out.println();
+		p.println();
+	}
+
 	public static void test03c_statisticIntrons(Graph g, PrintStream p) {
 		Gene[] ge= g.getGenes();
 		Vector v= new Vector();
@@ -1253,6 +1346,221 @@ public class ASAnalyzer {
 		String[] statStr= dist.toStatString();
 		System.out.println("len\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
 		p.println("len\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		
+		dist= new Distribution(vStart.toIntArray());
+		statStr= dist.toStatString();
+		System.out.println("start\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		p.println("start\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		
+		dist= new Distribution(vEnd.toIntArray());
+		statStr= dist.toStatString();
+		System.out.println("end\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		p.println("end\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		
+		dist= new Distribution(vPTrans.toIntArray());
+		statStr= dist.toStatString();
+		System.out.println("pTrpt\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		p.println("pTrpt\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		
+		dist= new Distribution(vPGene.toIntArray());
+		statStr= dist.toStatString();
+		System.out.println("pGene\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		p.println("pGene\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		
+		System.out.println();
+		p.println();
+	}
+
+	public static String[] getMotifs(String fName) {
+		Vector v= null;
+		try {
+			BufferedReader buffy= new BufferedReader(new FileReader(fName));
+			v= new Vector();
+			while (buffy.ready()) {
+				String line= buffy.readLine().trim();
+				v.add(line);
+			}
+			buffy.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		//System.out.println("read "+ v.size()+ " motifs from "+fName);
+		return ((String[]) Arrays.toField(v));
+	}
+	
+	public static void test03c_statisticExonsWithRegulatorSequences(Graph g, PrintStream p) {
+		Gene[] ge= g.getGenes();
+		Vector v= new Vector();
+		IntVector inSizesV= new IntVector();
+		IntVector eseDensity80V= new IntVector();
+		IntVector eseDensity40V= new IntVector();
+		IntVector eseDensity15V= new IntVector();
+		IntVector essDensityV= new IntVector();
+		IntVector vStart= new IntVector();
+		IntVector vEnd= new IntVector();
+		IntVector vPTrans= new IntVector();
+		IntVector vPGene= new IntVector();
+		Comparator compi= new DirectedRegion.PositionComparator();
+		String[] ese= getMotifs(INPUT_ESE_HAGEN_PENTAMERS);
+		String[] ess= getMotifs(INPUT_ESS_HAGEN_PENTAMERS);
+		final int FLANKSIZE_STADLER= 80;
+		final int FLANKSIZE_EDU= 40;
+		final int FLANKSIZE_GIL= 15;
+		int cntNonGTAG= 0;
+		int ssum= 0;
+		for (int i = 0; i < ge.length; i++) {
+			Transcript[] trpts= ge[i].getTranscripts();
+			int sum= 0;
+			for (int j = 0; j < trpts.length; j++) {
+				DirectedRegion[] regs= trpts[j].getExons();
+				int ccnt= 0;
+				for (int k = 0; regs!= null&& k < regs.length; k++) {
+					DirectedRegion reg= regs[k];
+					int start= Math.abs(reg.getStart());
+					int end= Math.abs(reg.getEnd());
+					int s= 0, e= 0;
+					if (k> 0) {
+						reg.setStart(start- 2);
+						s= 2;
+					}
+					if (k< regs.length- 1) { 
+						reg.setEnd(end+ 2);
+						e= 2;
+					}
+					String seq= null;
+					try {
+						seq= Graph.readSequence(reg);
+					} catch (Exception ex) {
+						ex.printStackTrace();
+						continue;
+					}
+					if (k> 0&& (!seq.substring(0, 2).toUpperCase().equals("AG"))) {
+						++cntNonGTAG;
+						continue;
+					}
+					if (k< regs.length- 1&& (!seq.substring(seq.length()- 2, seq.length()).toUpperCase().equals("GT"))) {
+						++cntNonGTAG;
+						continue;
+					}
+					
+					
+					seq= seq.substring(s, seq.length()- e);
+					++ccnt;
+					int oldSize= v.size();
+					v= Arrays.addUnique(v, regs[k], compi);
+					if (v.size()> oldSize) {
+						int len= reg.getLength();
+						inSizesV.add(len);
+						vStart.add(regs[k].get5PrimeEdge()- ge[i].get5PrimeEdge());
+						vEnd.add(ge[i].get3PrimeEdge()- regs[k].get3PrimeEdge());
+						
+						int cnt= 0;
+						for (int x = 0; x < ess.length; ++x) {	// unbeschr f. ESS
+							KMP kmp= new KMP(seq, ess[x], false);
+							cnt+= kmp.countMatches();
+						}
+						essDensityV.add(cnt);
+						
+							// ESS stadler
+						cnt= 0;
+						if (len<= (2* FLANKSIZE_STADLER)) {	// flank f. ESE
+							for (int x = 0; x < ese.length; ++x) {
+								KMP kmp= new KMP(seq, ese[x], false);
+								cnt+= kmp.countMatches();
+							}
+							eseDensity80V.add(cnt); 
+						
+						} else {	// search the 2 flanks
+							String seq0= seq.substring(0, FLANKSIZE_STADLER);
+							seq= seq.substring(seq.length()- FLANKSIZE_STADLER, seq.length());
+							for (int x = 0; x < ese.length; x++) {
+								KMP kmp= new KMP(seq0, ese[x], false);
+								cnt+= kmp.countMatches();
+								kmp= new KMP(seq, ese[x], false);
+								cnt+= kmp.countMatches();
+							}
+							eseDensity80V.add(cnt); 
+						}
+						// ESS edu
+						cnt= 0;
+						if (len<= (2* FLANKSIZE_EDU)) {	// flank f. ESE
+							for (int x = 0; x < ese.length; ++x) {
+								KMP kmp= new KMP(seq, ese[x], false);
+								cnt+= kmp.countMatches();
+							}
+							eseDensity40V.add(cnt); 
+						
+						} else {	// search the 2 flanks
+							String seq0= seq.substring(0, FLANKSIZE_EDU);
+							seq= seq.substring(seq.length()- FLANKSIZE_EDU, seq.length());
+							for (int x = 0; x < ese.length; x++) {
+								KMP kmp= new KMP(seq0, ese[x], false);
+								cnt+= kmp.countMatches();
+								kmp= new KMP(seq, ese[x], false);
+								cnt+= kmp.countMatches();
+							}
+							eseDensity40V.add(cnt); 
+						}
+						// ESS gil
+						cnt= 0;
+						if (len<= (2* FLANKSIZE_GIL)) {	// flank f. ESE
+							for (int x = 0; x < ese.length; ++x) {
+								KMP kmp= new KMP(seq, ese[x], false);
+								cnt+= kmp.countMatches();
+							}
+							eseDensity15V.add(cnt); 
+						
+						} else {	// search the 2 flanks
+							String seq0= seq.substring(0, FLANKSIZE_GIL);
+							seq= seq.substring(seq.length()- FLANKSIZE_GIL, seq.length());
+							for (int x = 0; x < ese.length; x++) {
+								KMP kmp= new KMP(seq0, ese[x], false);
+								cnt+= kmp.countMatches();
+								kmp= new KMP(seq, ese[x], false);
+								cnt+= kmp.countMatches();
+							}
+							eseDensity15V.add(cnt); 
+						}
+					}
+					
+				}
+				sum+= ccnt;
+				vPTrans.add(ccnt);
+			}
+			vPGene.add(sum);
+			ssum+= sum;
+		}
+		System.out.println("Removed "+cntNonGTAG+"/"+ssum+" non-GTAG exons.");
+		p.println("Removed "+cntNonGTAG+"/"+ssum+" non-GTAG exons.");
+		System.out.println("[Exons]\tmean\tmedian\tstd dev");
+		p.println("[Exons]\tmean\tmedian\tstd dev");
+		
+			// size and sequence
+		Distribution dist= new Distribution(inSizesV.toIntArray());
+		String[] statStr= dist.toStatString();
+		System.out.println("len\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		p.println("len\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		
+		dist= new Distribution(eseDensity80V.toIntArray());
+		statStr= dist.toStatString();
+		System.out.println("eseD80\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		p.println("eseD80\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		
+		dist= new Distribution(eseDensity40V.toIntArray());
+		statStr= dist.toStatString();
+		System.out.println("eseD40\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		p.println("eseD40\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		
+		dist= new Distribution(eseDensity15V.toIntArray());
+		statStr= dist.toStatString();
+		System.out.println("eseD15\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		p.println("eseD15\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		
+		dist= new Distribution(essDensityV.toIntArray());
+		statStr= dist.toStatString();
+		System.out.println("essDens\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
+		p.println("essDens\t"+statStr[0]+"\t"+statStr[1]+"\t"+statStr[2]);
 		
 		dist= new Distribution(vStart.toIntArray());
 		statStr= dist.toStatString();
@@ -2081,6 +2389,10 @@ public class ASAnalyzer {
 		}
 	}
 
+	public final static String INPUT_ESS_HAGEN_PENTAMERS= "encode/stadlerESS.pentamers.4.directed.occurrences";
+	public final static String INPUT_ESE_HAGEN_PENTAMERS= "encode/stadlerESE.pentamers.4.directed.occurrences";
+	public final static String INPUT_ESS_STADLER= "encode/stadlerTrustedESS";
+	public final static String INPUT_ESE_STADLER= "encode/stadlerTrustedESE"; 
 	public final static String INPUT_ENCODE= "encode/44regions_genes_CHR_coord.gtf";
 	public final static String INPUT_ENCODE_RACES= "encode/gencode_races.gtf";
 	public final static String INPUT_ENSEMBL_CODING_FROM_UCSC= "encode/EnsemblGenes_fromUCSC.gtf";
@@ -2089,7 +2401,7 @@ public class ASAnalyzer {
 	public final static String INPUT_REFSEQ_CODING_FROM_UCSC= "encode/RefSeqGenes_fromUCSC.gtf";
 	public final static String INPUT_ENSEMBL_FROM_ENSEMBL= "encode/EnsemblGenes_all_fromENSEMBL.gtf";
 	public final static String INPUT_HAVANA= "encode/Sequences_mapped_HAVANA_136.gtf";
-	public final static String INPUT_ASD= "encode/ASD_27.35a.1.CLASSES_filtChr.gff";
+	public final static String INPUT_ASD= "encode"+File.separator+"ASD_27.35a.1.CLASSES_filtChr.gff";
 	public final static String[] INPUT_GO_LEVEL1= new String[] {
 		   "0008150",	// biological_process [137651]  
            "0005575", 	// cellular_component [115920]  
@@ -2170,7 +2482,7 @@ public class ASAnalyzer {
 			myWrapper= new EncodeWrapper(new File(fName).getAbsolutePath()); // testGTF.gtf
 		
 		try {
-			myWrapper.read();
+			myWrapper.read(); 
 		} catch (Exception e) {
 			e.printStackTrace(); 
 		}
@@ -2433,6 +2745,190 @@ public class ASAnalyzer {
 				}
 				
 				public static void test04_determineVariations(Graph g, String iname, String sfx, boolean filtNonGTAG) {
+							ASVariation[][] classes= g.getASVariations(ASMultiVariation.FILTER_NONE);
+							classes= (ASVariation[][]) Arrays.sort2DFieldRev(classes);
+							if (classes== null)
+								return;
+							ASVariation[][] filtClasses= new ASVariation[classes.length][];
+							Comparator compx= new ASVariation.HierarchyMergeFlags();
+							for (int i = 0; i < filtClasses.length; i++) 
+								filtClasses[i]= ASMultiVariation.removeRedundancyHierachically(classes[i], compx);
+							classes= filtClasses;
+							if (filtNonGTAG) {
+								Vector v= new Vector();
+								int cntFiltEv= 0;
+								int cntAllEv= 0;
+								for (int i = 0; i < classes.length; i++) { 
+									ASVariation[] filtClas= ASMultiVariation.filterNonGTAG(classes[i]);
+									if (filtClas== null)
+										cntFiltEv+= classes[i].length;
+									else
+										cntFiltEv+= classes[i].length- filtClas.length;
+									cntAllEv+= classes[i].length;
+									if (filtClas!= null&& filtClas.length> 0)
+										v.add(filtClas);
+								}
+								classes= (ASVariation[][]) Arrays.toField(v);
+								filtClasses= classes;
+								String percStr= Float.toString((cntFiltEv* 100f)/ cntAllEv);
+								percStr= percStr.substring(0, percStr.indexOf('.')+ 2);
+								System.out.println("filtered out "+cntFiltEv+" ("+percStr+"%) involving nonGT/AG introns.");
+							}
+							
+							PrintStream p= null;
+							try {
+								Method m = classes[0][0].getClass().getMethod("is_all", null);	// warum eigentlich?
+								try {
+									String fName= Toolbox.checkFileExists(iname+"."+m.getName()+sfx);
+									p= new PrintStream(fName);
+									//p= System.out;
+								} catch (Exception e) {
+									e.printStackTrace();
+								}
+								Comparator compi= new ASVariation.StructureComparator();
+								for (int i = 0; filtClasses!= null&& i < filtClasses.length; i++) 
+									filtClasses[i]= ASMultiVariation.removeRedundancy(classes[i], compi);
+								filtClasses= (ASVariation[][]) Arrays.filter(filtClasses, m);
+								p.println(m.getName());
+								outputVariations(filtClasses, false, true, p);
+								p.flush(); p.close();
+								
+		//						m = classes[0][0].getClass().getMethod("isUTRnotLastIntron", null);
+		//						filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
+		//						for (int i = 0; filtClasses!= null&& i < filtClasses.length; i++) 
+		//							filtClasses[i]= ASMultiVariation.removeRedundancy(filtClasses[i], compi);
+		//						p.println(m.getName());
+		//						outputVariations(filtClasses, true, false, p);
+		
+								
+								
+								// "isProteinCoding_1cover"
+								m = classes[0][0].getClass().getMethod("is_affecting_CDS", null);
+								try {p= new PrintStream(iname+"."+m.getName()+sfx);
+								} catch (Exception e) {e.printStackTrace();}
+								p.println(m.getName());
+								filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
+								for (int i = 0; filtClasses!= null&& i < filtClasses.length; i++) 
+									filtClasses[i]= ASMultiVariation.removeRedundancy(filtClasses[i], compi);
+								outputVariations(filtClasses, true, false, p);
+								p.flush(); p.close();
+						
+								m = classes[0][0].getClass().getMethod("is_contained_in_CDS", null);
+								try {p= new PrintStream(iname+"."+m.getName()+sfx);
+								} catch (Exception e) {e.printStackTrace();}
+								filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
+								for (int i = 0; filtClasses!= null&& i < filtClasses.length; i++) 
+									filtClasses[i]= ASMultiVariation.removeRedundancy(filtClasses[i], compi);
+								p.println(m.getName());
+								outputVariations(filtClasses, true, false, p);
+								p.flush(); p.close();
+						
+								// "isNotProteinCoding_1cover"
+								m = classes[0][0].getClass().getMethod("is_affecting_5UTR", null);
+								try {p= new PrintStream(iname+"."+m.getName()+sfx);
+								} catch (Exception e) {e.printStackTrace();}
+								filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
+				//				System.out.println(m.getName());
+				//				for (int i = 0; i < filtClasses.length; i++) {
+				//					if (filtClasses[i]!= null&& filtClasses[i][0].toString().equals("(1^ // 2^)"))
+				//						for (int j = 0; j < filtClasses[i].length; j++) {
+				//							System.out.println(filtClasses[i][j].getTranscript1()+","+filtClasses[i][j].getTranscript2());
+				//						}
+				//				}
+								for (int i = 0; filtClasses!= null&& i < filtClasses.length; i++) 
+									filtClasses[i]= ASMultiVariation.removeRedundancy(filtClasses[i], compi);
+								p.println(m.getName());
+								outputVariations(filtClasses, true, false, p);
+								p.flush(); p.close();
+						
+								m = classes[0][0].getClass().getMethod("is_contained_in_5UTR", null);
+								try {p= new PrintStream(iname+"."+m.getName()+sfx);
+								} catch (Exception e) {e.printStackTrace();}
+								filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
+								for (int i = 0; filtClasses!= null&& i < filtClasses.length; i++) 
+									filtClasses[i]= ASMultiVariation.removeRedundancy(filtClasses[i], compi);
+								p.println(m.getName());
+								outputVariations(filtClasses, true, false, p);
+								p.flush(); p.close();
+						
+								m = classes[0][0].getClass().getMethod("is_affecting_3UTR", null);
+								try {p= new PrintStream(iname+"."+m.getName()+sfx);
+								} catch (Exception e) {e.printStackTrace();}
+								filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
+								for (int i = 0; filtClasses!= null&& i < filtClasses.length; i++) 
+									filtClasses[i]= ASMultiVariation.removeRedundancy(filtClasses[i], compi);
+								p.println(m.getName());
+								outputVariations(filtClasses, true, false, p);
+								p.flush(); p.close();
+								
+								m = classes[0][0].getClass().getMethod("is_contained_in_3UTR", null);
+								try {p= new PrintStream(iname+"."+m.getName()+sfx);
+								} catch (Exception e) {e.printStackTrace();}
+								filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
+								for (int i = 0; filtClasses!= null&& i < filtClasses.length; i++) 
+									filtClasses[i]= ASMultiVariation.removeRedundancy(filtClasses[i], compi);
+								p.println(m.getName());
+								outputVariations(filtClasses, true, false, p);
+								p.flush(); p.close();
+						
+								m = classes[0][0].getClass().getMethod("is_twilight_5UTR_CDS", null);
+								try {p= new PrintStream(iname+"."+m.getName()+sfx);
+								} catch (Exception e) {e.printStackTrace();}
+								filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
+								for (int i = 0; filtClasses!= null&& i < filtClasses.length; i++) 
+									filtClasses[i]= ASMultiVariation.removeRedundancy(filtClasses[i], compi);
+								p.println(m.getName());
+								outputVariations(filtClasses, true, false, p);
+								p.flush(); p.close();
+								
+								m = classes[0][0].getClass().getMethod("is_twilight_CDS_3UTR", null);
+								try {p= new PrintStream(iname+"."+m.getName()+sfx);
+								} catch (Exception e) {e.printStackTrace();}
+								filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
+								for (int i = 0; filtClasses!= null&& i < filtClasses.length; i++) 
+									filtClasses[i]= ASMultiVariation.removeRedundancy(filtClasses[i], compi);
+								p.println(m.getName());
+								outputVariations(filtClasses, true, false, p);
+								p.flush(); p.close();
+								
+								m = classes[0][0].getClass().getMethod("is_twilight_5UTR_3UTR", null);
+								try {p= new PrintStream(iname+"."+m.getName()+sfx);
+								} catch (Exception e) {e.printStackTrace();}
+								filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
+								for (int i = 0; filtClasses!= null&& i < filtClasses.length; i++) 
+									filtClasses[i]= ASMultiVariation.removeRedundancy(filtClasses[i], compi);
+								p.println(m.getName());
+								outputVariations(filtClasses, true, false, p);
+								p.flush(); p.close();
+								
+								m = classes[0][0].getClass().getMethod("is_twilight_5UTR_CDS_3UTR", null);
+								try {p= new PrintStream(iname+"."+m.getName()+sfx);
+								} catch (Exception e) {e.printStackTrace();}
+								filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
+								for (int i = 0; filtClasses!= null&& i < filtClasses.length; i++) 
+									filtClasses[i]= ASMultiVariation.removeRedundancy(filtClasses[i], compi);
+								p.println(m.getName());
+								outputVariations(filtClasses, true, false, p);
+								p.flush(); p.close();
+								
+								m = classes[0][0].getClass().getMethod("is_non_classifiable", null);
+								try {p= new PrintStream(iname+"."+m.getName()+sfx);
+								} catch (Exception e) {e.printStackTrace();}
+								filtClasses= (ASVariation[][]) Arrays.filter(classes, m);
+				//				for (int i = 0; filtClasses!= null&& i < filtClasses.length; i++) 
+				//					filtClasses[i]= ASMultiVariation.removeRedundancy(filtClasses[i], compi);
+								p.println(m.getName());
+								outputVariations(filtClasses, true, false, p);
+								p.flush(); p.close();
+								
+							} catch (Exception e) {
+								e.printStackTrace();
+							} 
+						}
+
+				public static void test04_determineVariations(Graph g, String iname, String sfx, boolean filtNonGTAG, boolean filtShort) {
+					
+					final int SHORT= 8;
 					ASVariation[][] classes= g.getASVariations(ASMultiVariation.FILTER_NONE);
 					classes= (ASVariation[][]) Arrays.sort2DFieldRev(classes);
 					if (classes== null)
@@ -2442,6 +2938,34 @@ public class ASAnalyzer {
 					for (int i = 0; i < filtClasses.length; i++) 
 						filtClasses[i]= ASMultiVariation.removeRedundancyHierachically(classes[i], compx);
 					classes= filtClasses;
+					if (filtShort) {
+						int cnt= 0;
+						Vector vv= new Vector();
+						Comparator compi= new AbstractSite.PositionComparator();
+						for (int i = 0; i < classes.length; i++) {
+							if (classes[i][0].toString().contains(", 0"))
+								continue;	// ensure 2 splice chains
+							Vector v= new Vector(classes[i].length);
+							for (int j = 0; j < classes[i].length; j++) {
+								SpliceSite[] sc1= classes[i][j].getSpliceChain1();
+								SpliceSite[] sc2= classes[i][j].getSpliceChain2();
+								int k;
+								for (k = 0; k < sc1.length; k++) {
+									int p= java.util.Arrays.binarySearch(sc2, sc1[k], compi);
+									if (p< 0)
+										p= -(p+1);
+									if ((p> 0&& Math.abs(sc1[k].getPos()- sc2[p-1].getPos())< SHORT
+											&& sc1[k].isDonor()== sc2[p-1].isDonor())||
+										(p< sc2.length&& Math.abs(sc1[k].getPos()- sc2[p].getPos())< SHORT
+													&& sc1[k].isDonor()== sc2[p].isDonor()))
+										break;
+								}
+								if (k== sc1.length)
+									v.add(classes[i][j]);
+							}
+							classes[i]= (ASVariation[]) Arrays.toField(v);
+						}
+					}
 					if (filtNonGTAG) {
 						Vector v= new Vector();
 						int cntFiltEv= 0;
@@ -3601,13 +4125,47 @@ public class ASAnalyzer {
 				continue;
 			}
 			p.println(classes[i].length+ " "+ ((float) classes[i].length/ totNum)+ " "+classes[i][0]);
-
+	
 			if (classes[i].length< threshold) {
 				++cnt1;
 				cnt2+= classes[i].length;
 			}
 		}
 		p.println("\n\n");
+		
+	}
+
+	/**
+	 * @param classes
+	 * @param sortConsistently
+	 * @param writeFile
+	 * @param p
+	 * @return
+	 */
+	public static void outputVariationCoordinates(ASVariation[][] classes, PrintStream p) {
+		
+		if (classes== null|| p== null)
+			return;
+				
+		p.println("transcript1 ID\ttranscript2 ID\tconflicting >:( sites");
+		for (int i = 0; i < classes.length; i++) {
+			if (classes[i]== null) 
+				continue;
+			for (int j = 0; classes[i]!= null&& j < classes[i].length; j++) {
+				p.print(classes[i][j].getTranscript1()+"\t"+classes[i][j].getTranscript2()+"\t");
+				SpliceSite[] ss= classes[i][j].getSpliceUniverse();
+				int[] pos= new int[ss.length];
+				for (int k = 0; k < pos.length; k++) 
+					pos[k]= Math.abs(ss[k].getPos());
+				java.util.Arrays.sort(pos);
+				for (int k = 0; k < pos.length; k++) { 
+					p.print(pos);
+					if (k< pos.length- 1)
+						p.print(",");
+				}
+				p.println();
+			}
+		}
 		
 	}
 

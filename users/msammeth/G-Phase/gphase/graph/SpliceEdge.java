@@ -54,7 +54,7 @@ public class SpliceEdge {
 		}
 		
 			// two abstract sites
-		return true;
+		return true;	// worx for tss->tes  
 	}
 	
 	public void addTranscripts(Transcript[] newTranscripts) {

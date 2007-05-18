@@ -23,14 +23,145 @@ import java.util.Vector;
 public class Translation extends DirectedRegion {
 
 	static final long serialVersionUID= 8996021902187779155L;
+	public static final int UNKNOWN_ID= 0;
+	public static final int REFSEQ_ID= 1;
+	public static final int ENSEMBL_ID= 2;
+	public static final int SWISSPROT_ID= 3;
+	public static String ORDER_AA= "ILVFMCAGPTSYWQNHEDKR";
+	public static String AA_STERIC= "FWHYP";
+	public static String AA_POLAR= "DECNQTYSGHKR";	// hydrophob are the others
+	public static String AA_POS_CHARGE= "HKR";
+	public static String AA_NEG_CHARGE= "DE";
+		
+	public static String[][] CODONS_AA= new String[][] {
+		new String[] {"ATT", "ATC", "ATA"},
+		new String[] {"CTT", "CTC", "CTA", "CTG", "TTA", "TTG"},
+		new String[] {"GTT", "GTC", "GTA", "GTG"},
+		new String[] {"TTT", "TTC"},
+		new String[] {"ATG"},
+		new String[] {"TGT", "TGC"},
+		new String[] {"GCT", "GCC", "GCA", "GCG"},
+		new String[] {"GGT", "GGC", "GGA", "GGG"},
+		new String[] {"CCT", "CCC", "CCA", "CCG"},
+		new String[] {"ACT", "ACC", "ACA", "ACG"},
+		new String[] {"TCT", "TCC", "TCA", "TCG", "AGT", "AGC"},
+		new String[] {"TAT", "TAC"},
+		new String[] {"TGG"},
+		new String[] {"CAA", "CAG"},
+		new String[] {"AAT", "AAC"},
+		new String[] {"CAT", "CAC"},
+		new String[] {"GAA", "GAG"},
+		new String[] {"GAT", "GAC"},
+		new String[] {"AAA", "AAG"},
+		new String[] {"CGT", "CGC", "CGA", "CGG", "AGA", "AGG"}
+	};
+	public static HashMap codonHash= null;
+	
+	
+	public static boolean isAAposCharge(char aa) {
+		if (AA_POS_CHARGE.indexOf(aa)>= 0)
+			return true;
+		return false;
+	}
+	public static boolean isAAnegCharge(char aa) {
+		if (AA_NEG_CHARGE.indexOf(aa)>= 0)
+			return true;
+		return false;
+	}
+	public static boolean isAAnoCharge(char aa) {
+		if (AA_POS_CHARGE.indexOf(aa)< 0&& AA_NEG_CHARGE.indexOf(aa)< 0)
+			return true;
+		return false;
+	}
+	public static boolean isAApolar(char aa) {
+		if (AA_POLAR.indexOf(aa)>= 0)
+			return true;
+		return false;
+	}
+	public static boolean isAAunpolar(char aa) {
+		return !isAApolar(aa);
+	}
+	public static boolean isAAsteric(char aa) {
+		if (AA_STERIC.indexOf(aa)>= 0)
+			return true;
+		return false;
+	}
+	
+	public static boolean isStop(char aa) {
+		if (aa== '.')
+			return true;
+		return false;
+	}
+
+	public static char getTranslatedAA(String codon) {
+		HashMap map= getCodonHash();
+		Character c= ((Character) map.get(codon));
+		if (c== null) {
+			for (int i = 0; i < STOP_CODONS.length; i++) 
+				if (STOP_CODONS[i].equals(codon))
+					return '.';
+			return '?';		// whatever
+		}
+		
+			// else
+		return c.charValue();
+	}
+	
+	public static HashMap getCodonHash() {
+		if (codonHash == null) {
+			codonHash = new HashMap(ORDER_AA.length());
+			for (int i = 0; i < CODONS_AA.length; i++) 
+				for (int j = 0; j < CODONS_AA[i].length; j++) 
+					codonHash.put(CODONS_AA[i][j], new Character(ORDER_AA.charAt(i)));
+		}
+
+		return codonHash;
+	}
+	
+	public static int getProteinID(String someID) {
+		someID= someID.toUpperCase();
+		
+			// RefSeq
+		if (someID.startsWith("NP_")|| someID.startsWith("XP_")) {
+			try {
+				Integer.parseInt(someID.substring(3, someID.length()));
+				return REFSEQ_ID;
+			} catch (NumberFormatException e) {
+				; //:)
+			}
+		}
+		
+			// Swissprot
+		if (someID.startsWith("P")|| someID.startsWith("Q")|| someID.startsWith("O")) {
+			try {
+				Integer.parseInt(someID.substring(1, someID.length()));
+				return SWISSPROT_ID;
+			} catch (NumberFormatException e) {
+				; //:)
+			}
+		}
+		
+		return UNKNOWN_ID;
+	}
 	
 	public static final String START_CODON= "ATG";
 	public static final String[] STOP_CODONS= new String[] {"TAA", "TGA", "TAG"};
 	
-	String translationID= null;
+	Vector proteinIDs= null;
 	Transcript transcript= null;
 	int splicedLength= -1;
 	int frame= -1;
+	
+	public static String[] extractCodons(String seq, int frame) {
+		Vector codons= new Vector(seq.length()/ 3);
+		int start= frame;
+		if (frame> 0)
+			--start;	// frame is 1-based
+		for (int i = start; i <= seq.length()- 3; i+= 3) 
+			codons.add(seq.substring(i, i+3));
+		
+		return (String[]) Arrays.toField(codons);
+	}
 	
 	public static int[] getCodonCount(String[] codons, String seq) {
 		int[] res= new int[3];
@@ -105,7 +236,7 @@ public class Translation extends DirectedRegion {
 		this.transcript= newTranscript;
 		this.strand= getTranscript().getStrand();
 		setID("translation");
-		setStrand(getTranscript().getGene().getStrand());
+		setStrand(getTranscript().getStrand());
 	}
 	
 	public int getSplicedLength() {
@@ -122,7 +253,7 @@ public class Translation extends DirectedRegion {
 		Exon[] ex= getTranscript().getExons();
 		Vector regV= new Vector(ex.length);
 		for (int i = 0; i < ex.length; i++) {
-			if (!ex[i].isCoding())
+			if (!ex[i].isCodingCompletely())
 				continue;
 			if (ex[i].isCoding5Prime()&& ex[i].isCoding3Prime()) {
 				regV.add(ex[i]);
@@ -142,7 +273,7 @@ public class Translation extends DirectedRegion {
 	public Translation(Transcript newTranscript, String stableTranslationID) {
 
 		this(newTranscript);
-		this.translationID= stableTranslationID;
+		addProteinID(stableTranslationID);
 	}
 
 	public String getChromosome() {
@@ -161,14 +292,31 @@ public class Translation extends DirectedRegion {
 	/**
 	 * @return Returns the translationID.
 	 */
-	public String getTranslationID() {
-		return translationID;
+	public String[] getProteinID(int idCode) {
+		Vector v= new Vector();
+		for (int i = 0; proteinIDs!= null&& i < proteinIDs.size(); i++) {
+			if (getProteinID((String) proteinIDs.elementAt(i))== idCode)
+				v.add(proteinIDs.elementAt(i));
+		}
+		
+		if (v.size()== 0)
+			return null;
+		return (String[]) Arrays.toField(v);
+	}
+	
+	public String[] getProteinIDsAll() {
+		if (proteinIDs== null|| proteinIDs.size()== 0)
+			return null;
+		return (String[]) Arrays.toField(proteinIDs);
 	}
 	/**
 	 * @param translationID The translationID to set.
 	 */
-	public void setTranslationID(String newTranslationID) {
-		this.translationID = newTranslationID;
+	public void addProteinID(String newTranslationID) {
+		
+		if (proteinIDs== null)
+			proteinIDs= new Vector();
+		proteinIDs.add(newTranslationID);
 	}
 
 	public void setSplicedLength(int splicedLength) {
@@ -343,6 +491,20 @@ public class Translation extends DirectedRegion {
 		return null;
 	}
 	
+	/**
+	 * 
+	 * @return 0-based position in the reading frame
+	 */
+	public int getTranslatedPosition(int genomicPos) {
+		int x= (getTranscript().getExonicPosition(genomicPos)
+					- getTranscript().getExonicPosition(get5PrimeEdge()));
+		return x;
+	}
+	
+	public int getFrameAtPosition(int genomicPos) {
+		return (getTranslatedPosition(genomicPos)+ 1)% 3;	// translated pos is 0-based	
+	}
+	
 	public boolean isOpenEnded5() {
 		return (get5PrimeEdge()== transcript.get5PrimeEdge());
 	}
@@ -358,7 +520,53 @@ public class Translation extends DirectedRegion {
 		return false;
 	}
 	
+	public int get3PrimeCDS(Exon ex) {
+		
+		int x= 0;
+		for (x = 0; x < getTranscript().getExons().length; x++) 
+			if (getTranscript().getExons()[x]== ex)
+				break;
+		if (x== getTranscript().getExons().length)
+			return -1;	// exon not found
+		
+		
+		if (ex.get3PrimeEdge()>= get5PrimeEdge()&& ex.get3PrimeEdge()<= get3PrimeEdge())
+			return ex.get3PrimeEdge();
+		if (get3PrimeEdge()>= ex.get5PrimeEdge()&& get3PrimeEdge()<= ex.get3PrimeEdge())
+			return get3PrimeEdge();
+		return -1;
+	}
 	
+	public int get5PrimeCDS(Exon ex) {
+		
+		int x= 0;
+		for (x = 0; x < getTranscript().getExons().length; x++) 
+			if (getTranscript().getExons()[x]== ex)
+				break;
+		if (x== getTranscript().getExons().length)
+			return -1;	// exon not found
+		
+		
+		if (ex.get5PrimeEdge()>= get5PrimeEdge()&& ex.get5PrimeEdge()<= get3PrimeEdge())
+			return ex.get5PrimeEdge();
+		if (get5PrimeEdge()>= ex.get5PrimeEdge()&& get5PrimeEdge()<= ex.get3PrimeEdge())
+			return get5PrimeEdge();
+		return -1;
+	}
+	
+	public int getStartCDS(Exon ex) {
+		if (getTranscript().isForward())
+			return get5PrimeCDS(ex);	// here not getter method, avoid init for buildup
+		return get3PrimeCDS(ex);
+	}
+
+	public int getEndCDS(Exon ex) {
+		if (getTranscript().isForward())
+			return get3PrimeCDS(ex);	// here not getter method, avoid init for buildup
+		return get5PrimeCDS(ex);
+	}
+
+
 
 	
 }
