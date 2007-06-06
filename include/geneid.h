@@ -28,7 +28,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/     
 
-/* $Id: geneid.h,v 1.35 2007-04-25 17:20:01 talioto Exp $ */
+/* $Id: geneid.h,v 1.36 2007-06-06 10:26:51 talioto Exp $ */
 
 /* Required libraries */
 #include <stdlib.h>
@@ -160,7 +160,7 @@ A. DEFINITIONS
 #define PROFILEDIM 100           
 
 /* Maximum number of chars (locus names)    */
-#define LOCUSLENGTH 100          
+#define LOCUSLENGTH 500          
 
 /* Maximum oligo (word) length (Markov)     */
 #define OLIGOLENGTH 10           

@@ -196,8 +196,9 @@ long  BuildAcceptors(char* s,
 		
 	    if (BP)
 	      scoreBP = ComputeU2BranchProfile(sOriginal,p->offset-is,l2,bp,&st[ns]);
-		  
-	    if (scoreBP > 0){score = score + scoreBP;} /* + scorePPT */
+	    
+	    /* For the time being, we will not use the BP or PPT scores */
+	    /* if (scoreBP > 0){score = score + scoreBP;} */ /* + scorePPT */
 	    score = p->afactor + (p->bfactor * score); 
 	    /* Acceptor core is used as a global cutoff */
 	    if (score >= p->cutoff) 
