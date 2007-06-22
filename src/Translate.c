@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: Translate.c,v 1.10 2007-04-25 09:08:52 talioto Exp $  */
+/*  $Id: Translate.c,v 1.11 2007-06-22 13:58:45 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -107,130 +107,130 @@ void TranslateGene(exonGFF* e,
   /* A. Translating a forward sense exon: Terminal > Internal >.. First */
   if (e->Strand == '+')
     {
-	  /* Traversing the list of exons */
-	  for(i=0, totalAA=0, currFrame=0; i<nExons; i++)
-		{
-		  /* if (strcmp(e->Type,sINTRON)){ */
-		  /* 0. Acquire the real positions of the exon in the sequence */
-		  p1 = (e->evidence)?
-			e->Acceptor->Position + e->offset1 : 
-			e->Acceptor->Position + e->offset1 - COFFSET;
-		  p2 = (e->evidence)? 
-			e->Donor->Position + e->offset2: 
-			e->Donor->Position + e->offset2 - COFFSET;
+      /* Traversing the list of exons */
+      for(i=0, totalAA=0, currFrame=0; i<nExons; i++)
+	{
+	  if (strcmp(e->Type,sINTRON)){
+	    /* 0. Acquire the real positions of the exon in the sequence */
+	    p1 = (e->evidence)?
+	      e->Acceptor->Position + e->offset1 : 
+	      e->Acceptor->Position + e->offset1 - COFFSET;
+	    p2 = (e->evidence)? 
+	      e->Donor->Position + e->offset2: 
+	      e->Donor->Position + e->offset2 - COFFSET;
 
-		  /* -- Remainder nucleotides of the last exon in the gene -- */
-		  if (!i)
-			{
-			  switch (e->Remainder)
-				{
-				case 0:
-				  rmdProt[0] = '\0'; 
-				  break;
-				case 1:
-				  rmdProt[0] = s[p2] + 32; 
-				  rmdProt[1] = '\0'; 
-				  break;
-				case 2:
-				  /* curr RMD must be TWO */
-				  rmdProt[0] = s[p2-1] + 32;
-				  rmdProt[1] = s[p2] + 32;
-				  rmdProt[2] = '\0'; 
-				  break;
-				} 
-			  /* Leaving the result into prot */
-			  sprintf(prot,"%s",rmdProt);
-			}
+	    /* -- Remainder nucleotides of the last exon in the gene -- */
+	    if (!i)
+	      {
+		switch (e->Remainder)
+		  {
+		  case 0:
+		    rmdProt[0] = '\0'; 
+		    break;
+		  case 1:
+		    rmdProt[0] = s[p2] + 32; 
+		    rmdProt[1] = '\0'; 
+		    break;
+		  case 2:
+		    /* curr RMD must be TWO */
+		    rmdProt[0] = s[p2-1] + 32;
+		    rmdProt[1] = s[p2] + 32;
+		    rmdProt[2] = '\0'; 
+		    break;
+		  } 
+		/* Leaving the result into prot */
+		sprintf(prot,"%s",rmdProt);
+	      }
 	  
-		  /* 1. Translating current exon sequence */
-		  currAA = Translate(p1 + e->Frame,
-							 p2 - (3 - e->Remainder)%3,
-							 0,
-							 0,
-							 s, dAA, sAux);
+	    /* 1. Translating current exon sequence */
+	    currAA = Translate(p1 + e->Frame,
+			       p2 - (3 - e->Remainder)%3,
+			       0,
+			       0,
+			       s, dAA, sAux);
 
-		  /* 2. Translating shared codon between current and previous exon */
-		  /* concat after the translation of the current exon in sAux */
-		  /* this amino acid has been counted into Translate */
-		  switch (currFrame)
-			{
-			case 1:
-			  /* curr RMD must be TWO */
-			  codon[0] = s[p2-1];
-			  codon[1] = s[p2];
-			  codon[3] = '\0';
-			  /* translate this codon */
-			  aa = getAADict(dAA,codon);
-			  lAux = strlen(sAux);
-			  sAux[lAux] = aa;
-			  sAux[lAux+1] = '\0'; 
-			  break;
+	    /* 2. Translating shared codon between current and previous exon */
+	    /* concat after the translation of the current exon in sAux */
+	    /* this amino acid has been counted into Translate */
+	    switch (currFrame)
+	      {
+	      case 1:
+		/* curr RMD must be TWO */
+		codon[0] = s[p2-1];
+		codon[1] = s[p2];
+		codon[3] = '\0';
+		/* translate this codon */
+		aa = getAADict(dAA,codon);
+		lAux = strlen(sAux);
+		sAux[lAux] = aa;
+		sAux[lAux+1] = '\0'; 
+		break;
             
-			case 2:
-			  /* curr RMD must be ONE */
-			  codon[0] = s[p2];
-			  codon[3] = '\0';
-			  aa = getAADict(dAA,codon);
-			  lAux = strlen(sAux);
-			  sAux[lAux] = aa;
-			  sAux[lAux+1] = '\0'; 
-			  break;
-			}
+	      case 2:
+		/* curr RMD must be ONE */
+		codon[0] = s[p2];
+		codon[3] = '\0';
+		aa = getAADict(dAA,codon);
+		lAux = strlen(sAux);
+		sAux[lAux] = aa;
+		sAux[lAux+1] = '\0'; 
+		break;
+	      }
 
-		  /* Concat translation(current exon) with translation(last exon) */
-		  strcat(sAux,prot);
-		  /* Leaving the result into prot */
-		  strcpy(prot,sAux);
+	    /* Concat translation(current exon) with translation(last exon) */
+	    strcat(sAux,prot);
+	    /* Leaving the result into prot */
+	    strcpy(prot,sAux);
 
-		  /* 3. Saving information to translate the next shared codon */
-		  currFrame = e->Frame;
-		  switch (currFrame)
-			{
-			case 1:
-			  codon[2] = s[p1];
-			  break;
+	    /* 3. Saving information to translate the next shared codon */
+	    currFrame = e->Frame;
+	    switch (currFrame)
+	      {
+	      case 1:
+		codon[2] = s[p1];
+		break;
             
-			case 2:
-			  /* curr RMD must be TWO */
-			  codon[1] = s[p1];
-			  codon[2] = s[p1+1];
-			  break;
-			}
+	      case 2:
+		/* curr RMD must be TWO */
+		codon[1] = s[p1];
+		codon[2] = s[p1+1];
+		break;
+	      }
 
-		  /* 4. Updating amino acids range for this exon. begin(0), end(1) */
-		  tAA[i][0] = MAX(1,totalAA);
+	    /* 4. Updating amino acids range for this exon. begin(0), end(1) */
+	    tAA[i][0] = MAX(1,totalAA);
         
-		  /* Discounting one uncomplete codon: twice added */
-		  if (!e->Remainder && i)
-			tAA[i][0]++;
+	    /* Discounting one uncomplete codon: twice added */
+	    if (!e->Remainder && i)
+	      tAA[i][0]++;
            
-		  if (e->Frame)
-			totalAA++;
+	    if (e->Frame)
+	      totalAA++;
         
-		  totalAA = totalAA + currAA;
-		  tAA[i][1] = totalAA;
-		  /* } */
-		  /* 5. Pointer jumping to the next exon */
-		  e = e->PreviousExon;
-		} /* endfor */
+	    totalAA = totalAA + currAA;
+	    tAA[i][1] = totalAA;
+	  }
+	  /* 5. Pointer jumping to the next exon */
+	  e = e->PreviousExon;
+	} /* endfor */
       
 	  /* 6. Adding first uncomplete codon of the first exon in the gene */    
-	  switch (currFrame)
-	    {
-	    case 0:
-	      rmdProt[0] = '\0'; 
-	      break;
-	    case 1:
-	      rmdProt[0] = codon[2] + 32; 
-	      rmdProt[1] = '\0'; 
-	      break;
-	    case 2:
-	      /* curr RMD must be TWO */
-	      rmdProt[0] = codon[1] + 32;
-	      rmdProt[1] = codon[2] + 32;
-	      rmdProt[2] = '\0'; 
-	      break;
-	    }
+      switch (currFrame)
+	{
+	case 0:
+	  rmdProt[0] = '\0'; 
+	  break;
+	case 1:
+	  rmdProt[0] = codon[2] + 32; 
+	  rmdProt[1] = '\0'; 
+	  break;
+	case 2:
+	  /* curr RMD must be TWO */
+	  rmdProt[0] = codon[1] + 32;
+	  rmdProt[1] = codon[2] + 32;
+	  rmdProt[2] = '\0'; 
+	  break;
+	}
       
       /* Concat uncomplete codon at the beginning of the protein */
       sprintf(sAux,"%s%s",rmdProt,prot);
@@ -242,141 +242,141 @@ void TranslateGene(exonGFF* e,
   else
     {
       prot[0] = '\0'; 
-	  /* Traversing the list of exons */
-	  for(i=0, totalAA=0, currRmd=0; i<nExons; i++)
-		{
-		  /* if (strcmp(e->Type,sINTRON)){ */
-		  p1 = (e->evidence)? 
-			e->Acceptor->Position + e->offset1: 
-			e->Acceptor->Position + e->offset1 - COFFSET;
-		  p2 = (e->evidence)? 
-			e->Donor->Position + e->offset2: 
-			e->Donor->Position + e->offset2 - COFFSET;
+      /* Traversing the list of exons */
+      for(i=0, totalAA=0, currRmd=0; i<nExons; i++)
+	{
+	  if (strcmp(e->Type,sINTRON)){
+	    p1 = (e->evidence)? 
+	      e->Acceptor->Position + e->offset1: 
+	      e->Acceptor->Position + e->offset1 - COFFSET;
+	    p2 = (e->evidence)? 
+	      e->Donor->Position + e->offset2: 
+	      e->Donor->Position + e->offset2 - COFFSET;
 	  
-		  /* Memory for the reverse exon sequence */
-		  if ((rs = (char*) calloc(p2-p1+2,sizeof(char))) == NULL)
-			printError("Not enough memory: reverse gene translation");
+	    /* Memory for the reverse exon sequence */
+	    if ((rs = (char*) calloc(p2-p1+2,sizeof(char))) == NULL)
+	      printError("Not enough memory: reverse gene translation");
 	 
-		  ReverseSubSequence(p1, p2, s, rs);
+	    ReverseSubSequence(p1, p2, s, rs);
 
-		  /* Frame of the last exon in sequence */
-		  if (!i)
-			{
-			  switch (e->Frame)
-				{
-				case 0:
-				  rmdProt[0] = '\0'; 
-				  break;
-				case 1:
-				  rmdProt[0] = rs[0] + 32; 
-				  rmdProt[1] = '\0'; 
-				  break;
-				case 2:
-				  /* curr RMD must be TWO */
-				  rmdProt[0] = rs[0] + 32;
-				  rmdProt[1] = rs[1] + 32;
-				  rmdProt[2] = '\0'; 
-				  break;
-				}	
-			}
+	    /* Frame of the last exon in sequence */
+	    if (!i)
+	      {
+		switch (e->Frame)
+		  {
+		  case 0:
+		    rmdProt[0] = '\0'; 
+		    break;
+		  case 1:
+		    rmdProt[0] = rs[0] + 32; 
+		    rmdProt[1] = '\0'; 
+		    break;
+		  case 2:
+		    /* curr RMD must be TWO */
+		    rmdProt[0] = rs[0] + 32;
+		    rmdProt[1] = rs[1] + 32;
+		    rmdProt[2] = '\0'; 
+		    break;
+		  }	
+	      }
 	  
-		  /* Translating the current exon (forward reading) */
-		  currAA = Translate(0 + e->Frame, p2-p1-(3 - e->Remainder)%3,
-							 0,
-							 0,
-							 rs, dAA, sAux);
+	    /* Translating the current exon (forward reading) */
+	    currAA = Translate(0 + e->Frame, p2-p1-(3 - e->Remainder)%3,
+			       0,
+			       0,
+			       rs, dAA, sAux);
 	  
-		  /* Translating shared codon between current and previous exon */
-		  switch (currRmd)
-			{
-			case 1:
-			  /* curr FRAME must be TWO */
-			  codon[1] = rs[0];
-			  codon[2] = rs[1];
-			  codon[3] = '\0';
-			  /* translate this codon */
-			  aa = getAADict(dAA,codon);
-			  lAux = strlen(prot);
-			  prot[lAux] = aa;
-			  prot[lAux+1] = '\0'; 
-			  break;
+	    /* Translating shared codon between current and previous exon */
+	    switch (currRmd)
+	      {
+	      case 1:
+		/* curr FRAME must be TWO */
+		codon[1] = rs[0];
+		codon[2] = rs[1];
+		codon[3] = '\0';
+		/* translate this codon */
+		aa = getAADict(dAA,codon);
+		lAux = strlen(prot);
+		prot[lAux] = aa;
+		prot[lAux+1] = '\0'; 
+		break;
 	      
-			case 2:
-			  /* curr FRAME must be ONE */
-			  codon[2] = rs[0];
-			  codon[3] = '\0';
-			  aa = getAADict(dAA,codon);
-			  lAux = strlen(prot);
-			  prot[lAux] = aa;
-			  prot[lAux+1] = '\0'; 
-			  break;
-			}
+	      case 2:
+		/* curr FRAME must be ONE */
+		codon[2] = rs[0];
+		codon[3] = '\0';
+		aa = getAADict(dAA,codon);
+		lAux = strlen(prot);
+		prot[lAux] = aa;
+		prot[lAux+1] = '\0'; 
+		break;
+	      }
 	  
-		  /* exon translation after translated remainder */
-		  strcat(prot,sAux);
+	    /* exon translation after translated remainder */
+	    strcat(prot,sAux);
 	  
-		  /* Codon information for translating the next shared codon */
-		  currRmd = (3 - e->Remainder)%3;
-		  switch (currRmd)
-			{
-			case 1:
-			  codon[0] = rs[p2-p1];
-			  break;
+	    /* Codon information for translating the next shared codon */
+	    currRmd = (3 - e->Remainder)%3;
+	    switch (currRmd)
+	      {
+	      case 1:
+		codon[0] = rs[p2-p1];
+		break;
 	      
-			case 2:
-			  /* curr RMD must be TWO */
-			  codon[0] = rs[p2-p1-1];
-			  codon[1] = rs[p2-p1];
-			  break;
-			}
+	      case 2:
+		/* curr RMD must be TWO */
+		codon[0] = rs[p2-p1-1];
+		codon[1] = rs[p2-p1];
+		break;
+	      }
 	  
-		  /* Updating boundary aminoacids of this exon */
-		  tAA[i][0] = MAX(1,totalAA);
+	    /* Updating boundary aminoacids of this exon */
+	    tAA[i][0] = MAX(1,totalAA);
 
-		  if (!e->Frame && i)
-			tAA[i][0]++;
+	    if (!e->Frame && i)
+	      tAA[i][0]++;
   	  
-		  if (currRmd)
-			totalAA++;
+	    if (currRmd)
+	      totalAA++;
 	  
-		  totalAA = totalAA + currAA;
-		  tAA[i][1] = totalAA;
+	    totalAA = totalAA + currAA;
+	    tAA[i][1] = totalAA;
 	  
-		  /* Next exon */
-		   
-		  /* } */
-		  e = e->PreviousExon;
-		  free(rs);
+	    /* Next exon */
+	    free(rs);
+	  }
+	  e = e->PreviousExon;
 		  
-		}
-	  /* Frame of the last exon in the gene */
-	  sprintf(sAux,"%s%s",rmdProt,prot);
-	  strcpy(prot,sAux);
+		  
+	}
+      /* Frame of the last exon in the gene */
+      sprintf(sAux,"%s%s",rmdProt,prot);
+      strcpy(prot,sAux);
       
-	  /* Remainder of the first exon in sequence */
-	  switch (currRmd)
-		{
-		case 0:
-		  rmdProt[0] = '\0'; 
-		  break;
-		case 1:
-		  rmdProt[0] = codon[0] + 32; 
-		  rmdProt[1] = '\0'; 
-		  break;
-		case 2:
-		  /* curr RMD must be TWO */
-		  rmdProt[0] = codon[0] + 32;
-		  rmdProt[1] = codon[1] + 32;
-		  rmdProt[2] = '\0'; 
-		  break;
-		}
+      /* Remainder of the first exon in sequence */
+      switch (currRmd)
+	{
+	case 0:
+	  rmdProt[0] = '\0'; 
+	  break;
+	case 1:
+	  rmdProt[0] = codon[0] + 32; 
+	  rmdProt[1] = '\0'; 
+	  break;
+	case 2:
+	  /* curr RMD must be TWO */
+	  rmdProt[0] = codon[0] + 32;
+	  rmdProt[1] = codon[1] + 32;
+	  rmdProt[2] = '\0'; 
+	  break;
+	}
       
-	  lAux = strlen(prot);
-	  for(j = 0; j < currRmd; j++)
-		prot[lAux+j] = rmdProt[j];
-	  prot[lAux+j] = '\0'; 
+      lAux = strlen(prot);
+      for(j = 0; j < currRmd; j++)
+	prot[lAux+j] = rmdProt[j];
+      prot[lAux+j] = '\0'; 
 		
-	} /* end of reverse translation */
+    } /* end of reverse translation */
 
   *nAA = totalAA;
 }
