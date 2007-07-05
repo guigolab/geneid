@@ -28,7 +28,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/     
 
-/* $Id: geneid.h,v 1.37 2007-07-05 14:33:25 talioto Exp $ */
+/* $Id: geneid.h,v 1.38 2007-07-05 14:39:29 talioto Exp $ */
 
 /* Required libraries */
 #include <stdlib.h>
@@ -51,7 +51,7 @@ A. DEFINITIONS
 #define OVERLAP 10000            
 
 /* One signal per L / RSITES bp             */
-#define RSITES 5 
+#define RSITES 3
 
 /* /\* One U12 signal per L / RU12SITES bp             *\/ */
 /* #define RU12SITES 6   */               
