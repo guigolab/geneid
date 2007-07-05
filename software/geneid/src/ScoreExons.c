@@ -636,10 +636,15 @@ long Score(exonGFF *Exons,
 	      Exons[n]=Exons[i];
 
 	      /* -E: increase/decrease current ExonWeight parameter */
-	      ExonWeight = p->ExonWeight;
-	      if (EW != NOVALUE){
-		ExonWeight = ExonWeight + EW;
-	      }
+	      if (EW == NOVALUE)
+		ExonWeight = p->ExonWeight;
+	      else
+		ExonWeight = p->ExonWeight + EW;
+
+/* 	      ExonWeight = p->ExonWeight; */
+/* 	      if (EW != NOVALUE){ */
+/* 		ExonWeight = ExonWeight + EW; */
+/* 	      } */
 	      if ((U12EW != NOVALUE)&&(((Exons+i)->Acceptor->class != U2) && ((Exons+i)->Donor->class != U2))){	    
 		ExonWeight = ExonWeight + U12EW;			       
 	      }

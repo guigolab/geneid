@@ -28,7 +28,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/     
 
-/* $Id: geneid.h,v 1.36 2007-06-06 10:26:51 talioto Exp $ */
+/* $Id: geneid.h,v 1.37 2007-07-05 14:33:25 talioto Exp $ */
 
 /* Required libraries */
 #include <stdlib.h>
@@ -45,7 +45,7 @@ A. DEFINITIONS
 *************************************************************************/
 
 /* Length of every processed fragment       */ 
-#define LENGTHSi 220000          
+#define LENGTHSi 100000          
 
 /* Overlap between 2 fragments              */
 #define OVERLAP 10000            
@@ -92,7 +92,7 @@ A. DEFINITIONS
 #define MAXSITESEVIDENCES 3*MAXEVIDENCES
 
 /* Max number of HSP per locus/frame/strand */
-#define MAXHSP 100000             
+#define MAXHSP 10000000             
 
 /* Max number of locus in multi-fasta files */
 #define MAXNSEQUENCES 10         
