@@ -1,4 +1,4 @@
-# $Id: LogServices.pm,v 1.3 2007-07-15 13:39:39 arnau Exp $
+# $Id: LogServices.pm,v 1.4 2007-07-15 14:53:01 arnau Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -141,7 +141,7 @@ our @EXPORT = qw(
 
 our $VERSION = '1.0';
 
-my $_debug = 0;
+my $_debug = 1;
 
 # Preloaded methods go here.
 
@@ -357,14 +357,12 @@ sub _do_query_getStatisticalLog {
     # Una vez recogido todos los parametros necesarios, llamamos a
     # la funcion que nos devuelve el report.
     
-	my ($reports_href, $moby_exceptions_tmp) = LogReport_call (queryID => $queryID, parameters => \%parameters, debug => $_debug);
+	my ($reports_href, $number_of_events, $moby_exceptions_tmp) = LogReport_call (queryID => $queryID, parameters => \%parameters, debug => $_debug);
 	push (@$moby_exceptions, @$moby_exceptions_tmp);
 	
 	# Ahora que tenemos la salida en el formato de la aplicacion XXXXXXX
 	# nos queda encapsularla en un Objeto bioMoby. Esta operacio
 	# la podriamos realizar en una funcion a parte si fuese compleja.
-	
-	my $number_of_events = keys (%$reports_href);
 	
 	my $logReport_xml = "<LogReport namespace='' id='' articleName=''>\n" . 
 	  "<String namespace='' id='' articleName='node'>$node</String>\n" .
@@ -377,22 +375,37 @@ sub _do_query_getStatisticalLog {
 	foreach my $id (keys (%$reports_href)) {
 	
 	  my $logEvent_href = $reports_href->{$id};
-	
-	  my $logEvent = "<LogEvent namespace='' id='' articleName=''>\n" .
-	  "<String namespace='' id='' articleName='id'>$id</String>\n" .
-	  "<String namespace='' id='' articleName='serviceName'>" . $logEvents_href->{serviceName} . "</String>\n" .
-	  "<String namespace='' id='' articleName='ip'>" . $logEvents_href->{ip} . "</String>\n" .
-	  "<DateTime namespace='' id='' articleName='start'>" . $logEvents_href->{startTime} . "</DateTime>\n" .
-          "<DateTime namespace='' id='' articleName='end'>" . $logEvents_href->{endTime} . "</DateTime>\n" .
-          "<Integer namespace='' id='' articleName='status'>" . $logEvents_href->{status} . "</Integer>\n" .
-          "<Integer namespace='' id='' articleName='numberCPUs'>" . $logEvents_href->{numberCPUs} . "</Integer>\n" .
-          "<Boolean namespace='' id='' articleName='isTest'>" . $logEvents_href->{isTest} . "</Boolean>\n" .
-	  "</LogEvent>\n";
 	  
-	  $logReport_xml .= $logEvent;
-	}
+	  if (defined $logEvent_href) {
+	  
+	    my $start = $logEvent_href->{START};
+	    my $end = $logEvent_href->{END};
+	  
+	    # format START and END
+	  
+	    my $formatted_start = "";
+	    my $formatted_end = "";
+	    # ...
 	
-	$logReport_xml .= "</LogReport>\n";
+	    if (($includeTests) || (!$includeTests && ($logEvent_href->{IS_TEST} eq "false"))) {
+	
+	      my $logEvent = "<LogEvent namespace='' id='' articleName=''>\n" .
+	        "<String namespace='' id='' articleName='id'>$id</String>\n" .
+	        "<String namespace='' id='' articleName='serviceName'>" . $logEvent_href->{SERVICE} . "</String>\n" .
+	        "<String namespace='' id='' articleName='ip'>" . $logEvent_href->{IP} . "</String>\n" .
+	        "<DateTime namespace='' id='' articleName='start'>" . $formatted_start . "</DateTime>\n" .
+	        "<DateTime namespace='' id='' articleName='end'>" . $formatted_end . "</DateTime>\n" .
+	        "<Integer namespace='' id='' articleName='status'>" . $logEvent_href->{STATUS} . "</Integer>\n" .
+	        "<Integer namespace='' id='' articleName='numberCPUs'>" . $logEvent_href->{NUMBER_CPUs} . "</Integer>\n" .
+	        "<Boolean namespace='' id='' articleName='isTest'>" . $logEvent_href->{IS_TEST} . "</Boolean>\n" .
+	        "</LogEvent>\n";
+	  
+              $logReport_xml .= $logEvent;
+            }
+          }
+        } 
+        
+        $logReport_xml .= "</LogReport>\n";
 	
 	# Bien!!! ya tenemos el objeto de salida del servicio , solo nos queda
 	# volver a encapsularlo en un objeto biomoby de respuesta. Pero
