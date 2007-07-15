@@ -1,4 +1,4 @@
-# $Id: LogServices.pm,v 1.2 2007-07-15 13:12:53 arnau Exp $
+# $Id: LogServices.pm,v 1.3 2007-07-15 13:39:39 arnau Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -371,21 +371,22 @@ sub _do_query_getStatisticalLog {
 	  "<DateTime namespace='' id='' articleName='start'>$startTime</DateTime>\n" .
 	  "<DateTime namespace='' id='' articleName='end'>$endTime</DateTime>\n" .
 	  "<Integer namespace='' id='' articleName='numberEvents'>$number_of_events</Integer>\n";
-	  
-	  
 	
 	# foreach hash entry, make a LogEvent object
 	
 	foreach my $id (keys (%$reports_href)) {
+	
+	  my $logEvent_href = $reports_href->{$id};
+	
 	  my $logEvent = "<LogEvent namespace='' id='' articleName=''>\n" .
 	  "<String namespace='' id='' articleName='id'>$id</String>\n" .
-	  "<String namespace='' id='' articleName='serviceName'>" . $reports_href->{serviceName} . "</String>\n" .
-	  "<String namespace='' id='' articleName='ip'>" . $reports_href->{ip} . "</String>\n" .
-	  "<DateTime namespace='' id='' articleName='start'>" . $reports_href->{startTime} . "</DateTime>\n" .
-          "<DateTime namespace='' id='' articleName='end'>" . $reports_href->{endTime} . "</DateTime>\n" .
-          "<Integer namespace='' id='' articleName='status'>" . $reports_href->{status} . "</Integer>\n" .
-          "<Integer namespace='' id='' articleName='numberCPUs'>" . $reports_href->{numberCPUs} . "</Integer>\n" .
-          "<Boolean namespace='' id='' articleName='isTest'>" . $reports_href->{isTest} . "</Boolean>\n" .
+	  "<String namespace='' id='' articleName='serviceName'>" . $logEvents_href->{serviceName} . "</String>\n" .
+	  "<String namespace='' id='' articleName='ip'>" . $logEvents_href->{ip} . "</String>\n" .
+	  "<DateTime namespace='' id='' articleName='start'>" . $logEvents_href->{startTime} . "</DateTime>\n" .
+          "<DateTime namespace='' id='' articleName='end'>" . $logEvents_href->{endTime} . "</DateTime>\n" .
+          "<Integer namespace='' id='' articleName='status'>" . $logEvents_href->{status} . "</Integer>\n" .
+          "<Integer namespace='' id='' articleName='numberCPUs'>" . $logEvents_href->{numberCPUs} . "</Integer>\n" .
+          "<Boolean namespace='' id='' articleName='isTest'>" . $logEvents_href->{isTest} . "</Boolean>\n" .
 	  "</LogEvent>\n";
 	  
 	  $logReport_xml .= $logEvent;
