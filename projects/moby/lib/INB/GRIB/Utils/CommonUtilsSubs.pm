@@ -925,6 +925,16 @@ sub validateDataType {
 		    }
 		}
 		
+		if ($specifiedType eq "DateTime") {
+		    if ($inputDataType eq "DateTime") {
+			$rightType = 1;
+		    }
+		    else {
+			# Wrong input type
+			return (0, $inputDataType);
+		    }
+		}
+		
 		# Not exhaustive validation !
 		
 		# ...
