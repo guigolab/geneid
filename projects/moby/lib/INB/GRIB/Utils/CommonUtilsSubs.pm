@@ -40,7 +40,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 # @EXPORT = qw( &func1 &func2);
 # 
 our @EXPORT = qw(
-  &getTextContentfromXML
+  &getTextContentFromXML
   &getArticleDataType
   &createSequenceObjectsFromFASTA
   &parseSingleGFFIntoCollectionGFF
