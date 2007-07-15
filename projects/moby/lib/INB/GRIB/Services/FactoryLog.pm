@@ -1,4 +1,4 @@
-# $Id: FactoryLog.pm,v 1.1 2007-07-15 12:34:59 arnau Exp $
+# $Id: FactoryLog.pm,v 1.2 2007-07-15 14:52:25 arnau Exp $
 #
 # INBPerl module for INB::GRIB::Services::FactoryLog
 #
@@ -150,9 +150,111 @@ sub LogReport_call {
   my $logEvents_href = {};
   my $moby_exceptions = [];
 
-  # ...
+  my $log_file = $gmaster_home . "/projects/moby_logs/moby_services_statistics.log";
+  $log_file = "/home/ug/arnau/data/moby_services_statistics.log";
+  
+  if (! -f $log_file) {
+  
+    # raise an exception
+    
+    my $note = "Internal System Error. No log file was found!!\n";
+    print STDERR "$note\n";
+    my $code = 701;
+    my $moby_exception = INB::Exceptions::MobyException->new (
+                                                              code       => $code,
+                                                              type       => 'error',
+                                                              queryID    => $queryID,
+                                                              message    => "$note",
+                                                             );
+    push (@$moby_exceptions, $moby_exception);
+    
+    return ($logEvents_href, 0, $moby_exceptions);
+  }
+  
+  # always the case for us
+  my $_number_of_cpus = 1;
+  my $number_of_events = 0;
+  
+  open LOG, "$log_file";
+  while (<LOG>) {
+    my $line = $_;
+    chomp $line;
+    
+    #2007/01/22 18:05:01> 116948550111510    START = 20070122180501
+    #2007/01/22 18:05:01> 116948550111510    SERVICE = filterSequencesAndQualityDataByLength
+    #2007/01/22 18:05:01> 116948550111510    URI = genome.imim.es
+    #2007/01/22 18:05:01> 116948550111510    IP = 137.82.67.190
+    #2007/01/22 18:05:01> 116948550111510    RESULT = filterSequencesAndQualityDataByLength terminated successfully
+    #2007/01/22 18:05:01> 116948550111510    STATUS = 0
+    #2007/01/22 18:05:01> 116948550111510    END = 20070122180501
+    #2007/01/22 18:05:01> 116948550111510    TOTALEXECUTIONTIME =  0 wallclock secs ( 0.05 usr +  0.01 sys =  0.06 CPU)
+    
+    if (! ($line =~ /#/)) {
+      if ($line =~/^.+> \d+\t\w+ = .+/) {
+        $line =~ /^.+> (\d+)\t(\w+) = (.+)/;
+        
+        my $id    = $1;
+        my $key   = $2;
+        my $value = $3;
+
+        if (!exists ($logEvents_href->{$id})) {
+        
+          # New entry
+        
+          # key must be 'START' !
+          
+          if ($_debug && ($key ne "START")) {
+            print STDERR "Error, expected the key to be START as it is a new entry\n";
+            print STDERR "line, $line\n";
+          }
+          else {
+            my $logEvent = {
+                            ID => $id,
+                            $key => $value,
+                            NUMBER_CPUS => $_number_of_cpus
+                           };
+            $logEvents_href->{$id} = $logEvent;
+            $number_of_events ++;
+          }
+        }
+        else {
+        
+          # Updating the hash data
+        
+          my $logEvent = $logEvents_href->{$id};
+          
+          if (defined $logEvent) {
+          
+            if ($key =~ /^SERVICE|IP|STATUS|END$/) {
+              $logEvent->{$key} = $value;
+              if ($key eq "IP") {
+                if ($value =~ /137.82.67.190/) {
+                  $logEvent->{IS_TEST} = "true";
+                }
+                else {
+                  $logEvent->{IS_TEST} = "false";
+                }
+              }
+            }
+          
+            # no need to put it back, as it is by reference !??
+            # $logEvents_href->{$id} = $logEvent;
+          
+          }
+          
+        }
+        
+      }
+      else {
+        print STDERR "Error, parsing log file, line, $line\n";
+        # for now, exit
+        exit 1;
+      }
+    } # End line not matching '#'
+  } # End processing current line
+  close LOG;
 	
-  return ($logEvents_href, $moby_exceptions);
+  return ($logEvents_href, $number_of_events, $moby_exceptions);
   
 }
 
