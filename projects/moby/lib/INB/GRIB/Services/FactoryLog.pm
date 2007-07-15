@@ -1,4 +1,4 @@
-# $Id: FactoryLog.pm,v 1.2 2007-07-15 14:52:25 arnau Exp $
+# $Id: FactoryLog.pm,v 1.3 2007-07-15 15:03:31 arnau Exp $
 #
 # INBPerl module for INB::GRIB::Services::FactoryLog
 #
@@ -203,7 +203,7 @@ sub LogReport_call {
         
           # key must be 'START' !
           
-          if ($_debug && ($key ne "START")) {
+          if ($debug && ($key ne "START")) {
             print STDERR "Error, expected the key to be START as it is a new entry\n";
             print STDERR "line, $line\n";
           }
@@ -211,7 +211,7 @@ sub LogReport_call {
             my $logEvent = {
                             ID => $id,
                             $key => $value,
-                            NUMBER_CPUS => $_number_of_cpus
+                            NUMBER_CPUs => $_number_of_cpus
                            };
             $logEvents_href->{$id} = $logEvent;
             $number_of_events ++;
@@ -226,6 +226,11 @@ sub LogReport_call {
           if (defined $logEvent) {
           
             if ($key =~ /^SERVICE|IP|STATUS|END$/) {
+            
+              if ($debug) {
+                # print STDERR "adding $key\n";
+              }
+            
               $logEvent->{$key} = $value;
               if ($key eq "IP") {
                 if ($value =~ /137.82.67.190/) {
