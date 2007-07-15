@@ -1,4 +1,4 @@
-# $Id: LogServices.pm,v 1.1 2007-07-15 12:31:14 arnau Exp $
+# $Id: LogServices.pm,v 1.2 2007-07-15 13:12:53 arnau Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -275,7 +275,7 @@ sub _do_query_getStatisticalLog {
               print STDERR "parsed start_time value, $startTime\n";
             }
             
-            $parameters{start_time} = $startTime;
+            $parameters{startTime} = $startTime;
         }
         if ($articleName eq "end_time") {
 
@@ -328,7 +328,7 @@ sub _do_query_getStatisticalLog {
               print STDERR "parsed end_time, $endTime\n";
             }
             
-            $parameters{end_time} = $endTime;
+            $parameters{endTime} = $endTime;
         }
         
 	
