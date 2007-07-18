@@ -1,4 +1,4 @@
-# $Id: FactoryLog.pm,v 1.3 2007-07-15 15:03:31 arnau Exp $
+# $Id: FactoryLog.pm,v 1.4 2007-07-18 21:57:02 arnau Exp $
 #
 # INBPerl module for INB::GRIB::Services::FactoryLog
 #
@@ -80,6 +80,10 @@ use INB::Exceptions::MobyException;
 # Report Unix Error codes
 use Errno qw (EINTR EIO :POSIX);
 
+# Date Format
+use DateTime;
+use DateTime::Format::W3CDTF;
+
 require Exporter;
 
 our @ISA = qw(Exporter);
@@ -126,6 +130,39 @@ BEGIN {
 
 ###############################################################################
 
+sub _W3C_to_inb {
+  my ( $w3c_time ) = @_;
+
+  # W3C -> INB
+  my $f = DateTime::Format::W3CDTF->new;
+  my $dt = $f->parse_datetime( $w3c_time );
+  my $time_inb = int(
+    (sprintf "%04d",$dt->year) . (sprintf "%02d",$dt->month) . (sprintf "%02d",$dt->day) . (sprintf
+    "%02d",$dt->hour) . (sprintf "%02d",$dt->minute) . (sprintf "%02d",$dt->second)
+    );
+  
+  return $time_inb;
+}
+  
+sub _inb_to_W3C {
+  my ( $time_inb ) = @_;
+
+  $time_inb =~ /(\d\d\d\d)(\d\d)(\d\d)(\d\d)(\d\d)(\d\d)/;
+  my $dt = DateTime->new(
+    year=> $1,
+    month  => $2,
+    day => $3,
+    hour=> $4,
+    minute => $5,
+    second => $6,
+    time_zone => 'Europe/Madrid',
+  );
+  my $f = DateTime::Format::W3CDTF->new;
+  my $time_w3c = $f->format_datetime($dt);
+ 
+ return $time_w3c;
+}  
+
 sub LogReport_call {
   my %args = @_;
 
@@ -141,8 +178,12 @@ sub LogReport_call {
   my $endTime      = $parameters->{endTime};
   my $includeTests = $parameters->{includeTests};
 
+  my $inb_startTime = _W3C_to_inb ($startTime);
+  my $inb_endTime   = _W3C_to_inb ($endTime);
+
   if ($debug) {	
     print STDERR "LogReport parameters (startTime, endTime, includeTests): $startTime, $endTime, $includeTests.\n";
+    print STDERR "INB formatted start and end time, $inb_startTime, $inb_endTime\n";
   }
 	
   # Output definition
@@ -151,7 +192,7 @@ sub LogReport_call {
   my $moby_exceptions = [];
 
   my $log_file = $gmaster_home . "/projects/moby_logs/moby_services_statistics.log";
-  $log_file = "/home/ug/arnau/data/moby_services_statistics.log";
+  $log_file = "/home/ug/arnau/data/moby_services_statistics_test.log";
   
   if (! -f $log_file) {
   
@@ -196,7 +237,7 @@ sub LogReport_call {
         my $id    = $1;
         my $key   = $2;
         my $value = $3;
-
+        
         if (!exists ($logEvents_href->{$id})) {
         
           # New entry
@@ -208,13 +249,21 @@ sub LogReport_call {
             print STDERR "line, $line\n";
           }
           else {
-            my $logEvent = {
-                            ID => $id,
-                            $key => $value,
-                            NUMBER_CPUs => $_number_of_cpus
-                           };
-            $logEvents_href->{$id} = $logEvent;
-            $number_of_events ++;
+            
+            if (($value >= $inb_startTime) && ($value <= $inb_endTime)) {
+          
+              # Log it
+              
+              my $formatted_startTime = _inb_to_W3C ($value);
+          
+              my $logEvent = {
+                              ID => $id,
+                              $key => $formatted_startTime,
+                              NUMBER_CPUs => $_number_of_cpus
+                             };
+              $logEvents_href->{$id} = $logEvent;
+              $number_of_events ++;
+            }
           }
         }
         else {
@@ -231,6 +280,10 @@ sub LogReport_call {
                 # print STDERR "adding $key\n";
               }
             
+              if ($key eq "END") {
+                $value = _inb_to_W3C ($value);
+              }
+            
               $logEvent->{$key} = $value;
               if ($key eq "IP") {
                 if ($value =~ /137.82.67.190/) {
@@ -242,7 +295,7 @@ sub LogReport_call {
               }
             }
           
-            # no need to put it back, as it is by reference !??
+            # no need to put it back, as it is by reference !
             # $logEvents_href->{$id} = $logEvent;
           
           }
