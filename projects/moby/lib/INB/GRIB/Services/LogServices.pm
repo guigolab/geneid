@@ -1,4 +1,4 @@
-# $Id: LogServices.pm,v 1.4 2007-07-15 14:53:01 arnau Exp $
+# $Id: LogServices.pm,v 1.5 2007-07-18 21:36:16 arnau Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -321,7 +321,6 @@ sub _do_query_getStatisticalLog {
 		return ($MOBY_RESPONSE, $moby_exceptions);
             }
 		
-            # ?
             $endTime = INB::GRIB::Utils::CommonUtilsSubs->getTextContentFromXML ($DOM, "DateTime");
             
             if ($_debug) {
@@ -388,6 +387,25 @@ sub _do_query_getStatisticalLog {
 	    # ...
 	
 	    if (($includeTests) || (!$includeTests && ($logEvent_href->{IS_TEST} eq "false"))) {
+
+	      # sometimes status is not set, due to a bug in some of the services
+	      # set the status to false then
+	      # this bug is to fix
+	      
+	      # is that correct 1 ?
+	      
+	      my $status = $logEvent_href->{STATUS};
+	      if (!defined $status) {
+	        $status = 1;
+	      }
+
+	      if ($_debug) {
+	        (! defined $logEvent_href->{SERVICE}) && print STDERR "service not defined for id, $id\n";
+	        (! defined $logEvent_href->{IP}) && print STDERR "ip not defined for id, $id\n";
+	        (! defined $logEvent_href->{STATUS}) && print STDERR "status not defined for id, $id - set to 1!\n";
+	        (! defined $logEvent_href->{NUMBER_CPUs}) && print STDERR "nb CPUs not defined for id, $id\n";
+	        (! defined $logEvent_href->{IS_TEST}) && print STDERR "is test not defined for id, $id\n";
+	      }
 	
 	      my $logEvent = "<LogEvent namespace='' id='' articleName=''>\n" .
 	        "<String namespace='' id='' articleName='id'>$id</String>\n" .
@@ -395,7 +413,7 @@ sub _do_query_getStatisticalLog {
 	        "<String namespace='' id='' articleName='ip'>" . $logEvent_href->{IP} . "</String>\n" .
 	        "<DateTime namespace='' id='' articleName='start'>" . $formatted_start . "</DateTime>\n" .
 	        "<DateTime namespace='' id='' articleName='end'>" . $formatted_end . "</DateTime>\n" .
-	        "<Integer namespace='' id='' articleName='status'>" . $logEvent_href->{STATUS} . "</Integer>\n" .
+	        "<Integer namespace='' id='' articleName='status'>" . $status . "</Integer>\n" .
 	        "<Integer namespace='' id='' articleName='numberCPUs'>" . $logEvent_href->{NUMBER_CPUs} . "</Integer>\n" .
 	        "<Boolean namespace='' id='' articleName='isTest'>" . $logEvent_href->{IS_TEST} . "</Boolean>\n" .
 	        "</LogEvent>\n";
