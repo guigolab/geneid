@@ -1,4 +1,4 @@
-# $Id: LogServices.pm,v 1.5 2007-07-18 21:36:16 arnau Exp $
+# $Id: LogServices.pm,v 1.6 2007-07-19 20:12:40 arnau Exp $
 #
 # This file is an instance of a template written
 # by Roman Roset, INB (Instituto Nacional de Bioinformatica), Spain.
@@ -141,7 +141,7 @@ our @EXPORT = qw(
 
 our $VERSION = '1.0';
 
-my $_debug = 1;
+my $_debug = 0;
 
 # Preloaded methods go here.
 
@@ -380,19 +380,13 @@ sub _do_query_getStatisticalLog {
 	    my $start = $logEvent_href->{START};
 	    my $end = $logEvent_href->{END};
 	  
-	    # format START and END
-	  
-	    my $formatted_start = "";
-	    my $formatted_end = "";
-	    # ...
-	
 	    if (($includeTests) || (!$includeTests && ($logEvent_href->{IS_TEST} eq "false"))) {
 
 	      # sometimes status is not set, due to a bug in some of the services
 	      # set the status to false then
 	      # this bug is to fix
 	      
-	      # is that correct 1 ?
+	      # is that correct to set '1' ?
 	      
 	      my $status = $logEvent_href->{STATUS};
 	      if (!defined $status) {
@@ -411,8 +405,8 @@ sub _do_query_getStatisticalLog {
 	        "<String namespace='' id='' articleName='id'>$id</String>\n" .
 	        "<String namespace='' id='' articleName='serviceName'>" . $logEvent_href->{SERVICE} . "</String>\n" .
 	        "<String namespace='' id='' articleName='ip'>" . $logEvent_href->{IP} . "</String>\n" .
-	        "<DateTime namespace='' id='' articleName='start'>" . $formatted_start . "</DateTime>\n" .
-	        "<DateTime namespace='' id='' articleName='end'>" . $formatted_end . "</DateTime>\n" .
+	        "<DateTime namespace='' id='' articleName='start'>" . $logEvent_href->{START} . "</DateTime>\n" .
+	        "<DateTime namespace='' id='' articleName='end'>" . $logEvent_href->{END} . "</DateTime>\n" .
 	        "<Integer namespace='' id='' articleName='status'>" . $status . "</Integer>\n" .
 	        "<Integer namespace='' id='' articleName='numberCPUs'>" . $logEvent_href->{NUMBER_CPUs} . "</Integer>\n" .
 	        "<Boolean namespace='' id='' articleName='isTest'>" . $logEvent_href->{IS_TEST} . "</Boolean>\n" .
