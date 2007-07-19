@@ -1,4 +1,4 @@
-# $Id: FactoryLog.pm,v 1.4 2007-07-18 21:57:02 arnau Exp $
+# $Id: FactoryLog.pm,v 1.5 2007-07-19 20:18:57 arnau Exp $
 #
 # INBPerl module for INB::GRIB::Services::FactoryLog
 #
@@ -166,7 +166,7 @@ sub _inb_to_W3C {
 sub LogReport_call {
   my %args = @_;
 
-  # relleno los parametros por defecto GeneID_call
+  # relleno los parametros por defecto de LogReport_call
 
   my $debug      = $args{debug}  || 0;
   my $queryID    = $args{queryID} || "";
@@ -185,14 +185,14 @@ sub LogReport_call {
     print STDERR "LogReport parameters (startTime, endTime, includeTests): $startTime, $endTime, $includeTests.\n";
     print STDERR "INB formatted start and end time, $inb_startTime, $inb_endTime\n";
   }
-	
+
   # Output definition
 	
   my $logEvents_href = {};
   my $moby_exceptions = [];
 
   my $log_file = $gmaster_home . "/projects/moby_logs/moby_services_statistics.log";
-  $log_file = "/home/ug/arnau/data/moby_services_statistics_test.log";
+  # $log_file = "/home/ug/arnau/data/moby_services_statistics.log";
   
   if (! -f $log_file) {
   
@@ -244,9 +244,16 @@ sub LogReport_call {
         
           # key must be 'START' !
           
-          if ($debug && ($key ne "START")) {
-            print STDERR "Error, expected the key to be START as it is a new entry\n";
-            print STDERR "line, $line\n";
+          if ($key ne "START") {
+          
+            if ($debug) {
+          
+              # fine in the case that start was not within the input range
+              # otherwise it is an error
+          
+              # print STDERR "Error, expected the key to be START as it is a new entry\n";
+              # print STDERR "line, $line\n";
+            }
           }
           else {
             
