@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: Translate.c,v 1.11 2007-06-22 13:58:45 talioto Exp $  */
+/*  $Id: Translate.c,v 1.12 2007-08-01 13:45:06 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -111,6 +111,7 @@ void TranslateGene(exonGFF* e,
       for(i=0, totalAA=0, currFrame=0; i<nExons; i++)
 	{
 	  if (strcmp(e->Type,sINTRON)){
+/* 	    PrintExonGFF(e,"exon","inTranslate"); */
 	    /* 0. Acquire the real positions of the exon in the sequence */
 	    p1 = (e->evidence)?
 	      e->Acceptor->Position + e->offset1 : 
@@ -252,7 +253,8 @@ void TranslateGene(exonGFF* e,
 	    p2 = (e->evidence)? 
 	      e->Donor->Position + e->offset2: 
 	      e->Donor->Position + e->offset2 - COFFSET;
-	  
+/* 	    PrintExonGFF(e,"exon","inTranslate"); */
+/* 	    printf("evidence: %i, a: %ld, d: %ld, exonsize: %ld\n",e->evidence,e->Acceptor->Position,e->Donor->Position,p2-p1+2); */
 	    /* Memory for the reverse exon sequence */
 	    if ((rs = (char*) calloc(p2-p1+2,sizeof(char))) == NULL)
 	      printError("Not enough memory: reverse gene translation");
@@ -394,7 +396,9 @@ void GetcDNA(exonGFF* e,
   char* rs;
   int i;
   long j;
-
+/*   char mess[MAXSTRING]; */
+/*   sprintf(mess,"nExons = %ld",nExons); */
+/*   printMess(mess); */
   if ((tmpDNA = (char*) calloc(MAXCDNA,sizeof(char))) == NULL)
     printError("Not enough memory: producing exonic DNA");
 
@@ -405,9 +409,15 @@ void GetcDNA(exonGFF* e,
       for(i=0, *nNN = 0; i<nExons; i++)
 		{
 		  if (strcmp(e->Type,sINTRON)){
-		    p1 = e->Acceptor->Position + e->offset1 - COFFSET;
-		  p2 = e->Donor->Position + e->offset2 - COFFSET;
-        
+/* 		    sprintf(mess,"exon = %i",i); */
+/* 		    printMess(mess); */
+		    p1 = (e->evidence)? 
+		      e->Acceptor->Position + e->offset1: 
+		      e->Acceptor->Position + e->offset1 - COFFSET;
+		    p2 = (e->evidence)? 
+		      e->Donor->Position + e->offset2: 
+		      e->Donor->Position + e->offset2 - COFFSET;
+	  
 		  /* Get the cDNA for this exon */
 		  tmpDNA[0] = '\0';
    
@@ -434,9 +444,14 @@ void GetcDNA(exonGFF* e,
       for(i=0, *nNN = 0; i<nExons; i++)
 		{
 		  if (strcmp(e->Type,sINTRON)){
-		  p1 = e->Acceptor->Position + e->offset1 - COFFSET;
-		  p2 = e->Donor->Position + e->offset2 - COFFSET;
-        
+/* 		    sprintf(mess,"exon = %i",i); */
+/* 		    printMess(mess); */
+		    p1 = (e->evidence)? 
+		      e->Acceptor->Position + e->offset1: 
+		      e->Acceptor->Position + e->offset1 - COFFSET;
+		    p2 = (e->evidence)? 
+		      e->Donor->Position + e->offset2: 
+		      e->Donor->Position + e->offset2 - COFFSET;
 		  /* Get the cDNA for this exon */
 		  tmpDNA[0] = '\0';
 		  rs[0] = '\0';

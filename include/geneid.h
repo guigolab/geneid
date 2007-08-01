@@ -28,7 +28,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/     
 
-/* $Id: geneid.h,v 1.39 2007-07-05 15:21:29 talioto Exp $ */
+/* $Id: geneid.h,v 1.40 2007-08-01 13:45:06 talioto Exp $ */
 
 /* Required libraries */
 #include <stdlib.h>
@@ -45,7 +45,7 @@ A. DEFINITIONS
 *************************************************************************/
 
 /* Length of every processed fragment       */ 
-#define LENGTHSi 100000          
+#define LENGTHSi 220000          
 
 /* Overlap between 2 fragments              */
 #define OVERLAP 10000            
@@ -88,17 +88,17 @@ A. DEFINITIONS
 #define BASEVALUEEXONS_LARGE 300000
 
 /* Max number of annotations per locus      */
-#define MAXEVIDENCES 500000       
+#define MAXEVIDENCES 300000       
 #define MAXSITESEVIDENCES 3*MAXEVIDENCES
 
 /* Max number of HSP per locus/frame/strand */
-#define MAXHSP 10000000             
+#define MAXHSP 1000000             
 
 /* Max number of locus in multi-fasta files */
-#define MAXNSEQUENCES 10         
+#define MAXNSEQUENCES 50         
 
 /* Maximum number of predicted genes        */
-#define MAXGENE 20000            
+#define MAXGENE 15000            
 
 /* Maximum number of exons in a gene        */
 #define MAXEXONGENE 1000         

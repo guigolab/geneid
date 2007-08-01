@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: CookingGenes.c,v 1.26 2007-04-25 09:08:52 talioto Exp $  */
+/*  $Id: CookingGenes.c,v 1.27 2007-08-01 13:45:06 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -250,6 +250,7 @@ long CookingInfo(exonGFF* eorig,
   stop = (e->Strand == '*');
   while (!stop)
     {
+
 	  /* A. Skip BEGIN/END features */
 	  if (!strcmp(e->Type,sEND) || !strcmp(e->Type,sBEGIN))
 		{
@@ -265,6 +266,8 @@ long CookingInfo(exonGFF* eorig,
 		  /* B. Single Genes: only one exon (don't care the strand) */
 		  if (!strcmp(e->Type,sSINGLE) || !strcmp(e->Type,sPROMOTER))
 			{
+/* 			  printf("evidence: %i\n",e->evidence); */
+/* 			  PrintExonGFF(e,"feat","cookinggenes"); */
 			  info[igen].start = e;
 			  info[igen].end = e;
 			  info[igen].nexons = 1;
@@ -281,9 +284,11 @@ long CookingInfo(exonGFF* eorig,
 		  else
 			{
 			  /* C. Reverse Genes: (BOTTOM) First->Internal->...->Terminal (TOP) */
-			  
+
 			  if (e->Strand == '-')
 				{
+/* 				  printf("evidence: %i\n",e->evidence); */
+/* 				  PrintExonGFF(e,"feat","cookinggenes"); */
 				  if(!strcmp(e->Type,sINTRON)){
 				    info[igen].nintrons++;
 				    
@@ -312,7 +317,10 @@ long CookingInfo(exonGFF* eorig,
 						   !strcmp(e->Type,sBEGIN) ||
 						   e->Strand == '+'); 
 				  while( !stop && !stop1 )
+				    
 					{  
+/* 					  printf("evidence: %i\n",e->evidence); */
+/* 					  PrintExonGFF(e,"feat","cookinggenes"); */
 					  if(!strcmp(e->Type,sINTRON)){
 
 					    info[igen].nintrons++;
@@ -344,7 +352,8 @@ long CookingInfo(exonGFF* eorig,
 				/* D. Forward Genes: (BOTTOM) Terminal->Internal->...->First (TOP) */
 				if (e->Strand == '+')
 				  {
-				    
+/* 				    printf("evidence: %i\n",e->evidence); */
+/* 				    PrintExonGFF(e,"feat","cookinggenes"); */
 				    if(!strcmp(e->PreviousExon->Type,sINTRON)){
 				      info[igen].nintrons++;
 				    }
@@ -369,7 +378,8 @@ long CookingInfo(exonGFF* eorig,
 							 e->Strand == '-'); 
 					while( !stop && !stop2 )
 					  { 
-					    
+/* 					    printf("evidence: %i\n",e->evidence); */
+/* 					    PrintExonGFF(e,"feat","cookinggenes"); */
 					    if(!strcmp(e->PreviousExon->Type,sINTRON)){
 					      info[igen].nintrons++;
 					    }
@@ -571,7 +581,7 @@ void CookingGenes(exonGFF* e,
 	  
       /* Get genomic DNA for exons if required */
       if (cDNA)
-		GetcDNA(info[igen].start,s,info[igen].nexons, tmpDNA, &nNN);
+		GetcDNA(info[igen].start,s,(info[igen].nexons + info[igen].nintrons), tmpDNA, &nNN);
       
       /* Gene header */
       if (XML)
@@ -680,7 +690,7 @@ void CookingGenes(exonGFF* e,
 		  /* Pretty-printing of every gene */
 		  for(igen=ngen-1; igen>=0; igen--)
 			{
-    		  GetcDNA(info[igen].start,s,info[igen].nexons, tmpDNA, &nNN);
+    		  GetcDNA(info[igen].start,s,(info[igen].nexons + info[igen].nintrons), tmpDNA, &nNN);
 		  printProt(Name,ngen-igen,tmpDNA,nNN,cDNA,GenePrefix);
 
 			}

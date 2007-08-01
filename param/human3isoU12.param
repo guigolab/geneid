@@ -889,7 +889,8 @@ Start_profile
 13 TTT -0.44411
 
 U12_Branch_point_profile
-12 9 2.5 2
+#len offset cutoff order a b acc_context min_dist opt_dist pen_scale
+12 9 2.5 2 0 1 50 7 13 6
 # Transition probabilities at every position
 1 AAA 0.126394
 1 AAC -0.28043
@@ -21349,7 +21350,8 @@ Start_profile
 13 TTT -0.44411
 
 U12_Branch_point_profile
-12 9 2.5 2
+#len offset cutoff order a b acc_context min_dist opt_dist pen_scale
+12 9 2.5 2 0 1 50 7 13 6
 # Transition probabilities at every position
 1 AAA 0.126394
 1 AAC -0.28043
@@ -41809,7 +41811,8 @@ Start_profile
 13 TTT -0.44411
 
 U12_Branch_point_profile
-12 9 2.5 2
+#len offset cutoff order a b acc_context min_dist opt_dist pen_scale
+12 9 2.5 2 0 1 50 7 13 6
 # Transition probabilities at every position
 1 AAA 0.126394
 1 AAC -0.28043
@@ -61393,15 +61396,21 @@ maximum_number_of_donors_per_acceptor_site
 General_Gene_Model
 # INTRAgenic connections
 First+:Internal+                Internal+:Terminal+             40:40000 block
-Terminal-:Internal-             First-:Internal-                40:40000 blockr
-# INTRAgenic connections
+Terminal-:Internal-             First-:Internal-                40:40000 block
 First+:Internal+                RSS+                            12000:40000 block
 RSS+                            Internal+:Terminal+             12000:40000 block
-Terminal-:Internal-             RSS-                            12000:40000 blockr
-RSS-                            First-:Internal-                12000:40000 blockr
-# INTRAgenic connections
+Terminal-:Internal-             RSS-                            12000:40000 block
+RSS-                            First-:Internal-                12000:40000 block
 RSS+                            RSS+                            40:40000 block
-RSS-                            RSS-                            40:40000 blockr
+RSS-                            RSS-                            40:40000 block
+First+                          Intron+                         1:1 block
+Internal+                       Intron+                         1:1 block
+Intron+                         Internal+                       1:1 block
+Intron+                         Terminal+                       1:1 block
+Intron-                         First-                          1:1 block
+Intron-                         Internal-                       1:1 block
+Internal-                       Intron-                         1:1 block
+Terminal-                       Intron-                         1:1 block
 # External features
 Promoter+                       First+:Single+                  50:4000
 Terminal+:Single+               aataaa+                         50:4000
