@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: PrintExons.c,v 1.18 2007-04-04 12:40:12 talioto Exp $  */
+/*  $Id: PrintExons.c,v 1.19 2007-08-01 13:45:06 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -370,8 +370,8 @@ void PrintGIntron(exonGFF *d,
   strcpy(intronSubtype,"GT-AG");
   short phase = (3 - d->Remainder)%3;
   /* short phase = MIN(0, 3 - a->Frame); */
-  long start = (a->evidence)? d->Donor->Position + 1: d->Donor->Position + 1 + d->offset2;
-  long end = (a->evidence)? a->Acceptor->Position - 1: a->Acceptor->Position -1 + a->offset1;
+  long start = (a->evidence)? a->Acceptor->Position: d->Donor->Position + 1 + d->offset2;
+  long end = (a->evidence)? a->Donor->Position: a->Acceptor->Position -1 + a->offset1;
   if (evidence){
     score = a->Score;
   }else{
