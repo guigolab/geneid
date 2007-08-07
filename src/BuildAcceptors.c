@@ -172,7 +172,7 @@ long  BuildAcceptors(char* s,
   /* 1. Searching sites between beginning of the sequence and p->offset */
   if (!l1)
     {
-      for (is = 0; is < p->offset && (ns<NUMSITES); is++)
+      for (is = 0; is < (p->offset)  && (ns<NUMSITES); is++)
 	{
 	  score=0.0;
 	  /* Applying part of the profile */
@@ -218,7 +218,7 @@ long  BuildAcceptors(char* s,
   
   /* 2. Normal processing: predicting using the whole profile */
   /* left and right are the true boundaries of prediction */
-  left  = MAX(0+p->order, l1 - p->offset);
+  left  = MAX(0+p->order, l1 - p->offset); 
   right = l2 - p->offset;
   s += left;
   is = 0;     
@@ -226,7 +226,7 @@ long  BuildAcceptors(char* s,
   if (p->order == 0)
     {
       /* discovering splice sites with current profile */
-      while (*(s+p->dimension) && (is < right- left + 1) && (ns<NUMSITES))
+      while (*(s+p->dimension -1) && (is < right- left + 1) && (ns<NUMSITES))
 	{ 
 	  /* is = 0..right */
 	  score=0.0;
@@ -273,7 +273,7 @@ long  BuildAcceptors(char* s,
   else if (p->order == 1)
     {
       /* discovering splice sites with current profile */
-      while (*(s+p->dimension) && (is < right- left + 1) && (ns<NUMSITES))
+      while (*(s+p->dimension -1) && (is < right- left + 1) && (ns<NUMSITES))
 	{ 
 	  /* is = 0..right */
 	  score=0.0;
@@ -320,7 +320,7 @@ long  BuildAcceptors(char* s,
   else
     {
       /* discovering splice sites with current profile */
-      while (*(s+p->dimension) && (is < right- left + 1) && (ns<NUMSITES))
+      while (*(s+p->dimension -1) && (is < right- left + 1) && (ns<NUMSITES))
 	{ 
 	  /* is = 0..right */
 	  score=0.0;

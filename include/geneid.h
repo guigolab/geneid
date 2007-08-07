@@ -28,7 +28,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/     
 
-/* $Id: geneid.h,v 1.40 2007-08-01 13:45:06 talioto Exp $ */
+/* $Id: geneid.h,v 1.41 2007-08-07 17:01:54 talioto Exp $ */
 
 /* Required libraries */
 #include <stdlib.h>
@@ -70,7 +70,7 @@ A. DEFINITIONS
 
 /* Ratios for every exon type               */
 #define RFIRST 1                 
-#define RINTER 0.25
+#define RINTER 0.2
 #define RTERMI 1
 #define RSINGL 3 
 #define RORF   3
@@ -140,7 +140,7 @@ A. DEFINITIONS
 /* and acceptor site                        */
 #define MIN_U12BPACC_DIST 7
 #define MIN_U2BPACC_DIST 15
-#define OPT_U12BP_DIST 13
+#define OPT_U12BP_DIST 12
 #define OPT_U2BP_DIST 25
 
 #define U12BP_PENALTY_SCALING_FACTOR 6 /* used to be 15 */

@@ -227,7 +227,7 @@ long  BuildU12Acceptors(char* s,
   if (u12_p->order == 0)
     {
       /* discovering splice sites with current profile */
-      while (*(s+u12_p->dimension) && (is < right- left + 1) && (ns<NUMSITES))
+      while (*(s+u12_p->dimension-1) && (is < right- left + 1) && (ns<NUMSITES))
 	{ 	
 	  if (ns<NUMSITES){
 
@@ -280,7 +280,7 @@ long  BuildU12Acceptors(char* s,
     {
 
       /* discovering splice sites with current profile */
-      while (*(s+u12_p->dimension) && (is < right- left + 1) && (ns<NUMSITES))
+      while (*(s+u12_p->dimension-1) && (is < right- left + 1) && (ns<NUMSITES))
 	{ 		
 	  if (ns<NUMSITES){
 	    /*Do for U12GTAG*/
@@ -333,7 +333,7 @@ long  BuildU12Acceptors(char* s,
   else
     {
       /* discovering splice sites with current profile */
-      while (*(s+u12_p->dimension) && (is < right- left + 1) && (ns<NUMSITES))
+      while (*(s+u12_p->dimension-1) && (is < right- left + 1) && (ns<NUMSITES))
 	{ 
 	  if (ns<NUMSITES){
 			  

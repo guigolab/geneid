@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: BuildDonors.c,v 1.4 2006-12-18 12:02:38 talioto Exp $  */
+/*  $Id: BuildDonors.c,v 1.5 2007-08-07 17:01:54 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -94,7 +94,7 @@ long  BuildDonors(char* s,
   if (p->order == 0)
     {
       /* discovering splice sites with current profile */
-      while (*(s+p->dimension) && (is < right- left + 1) && (ns<nsites))
+      while (*(s+p->dimension-1) && (is < right- left + 1) && (ns<nsites))
 		{ 
 		  /* is = 0..right */
 		  score=0.0;
@@ -126,7 +126,7 @@ long  BuildDonors(char* s,
   else if (p->order == 1)
     {
       /* discovering splice sites with current profile */
-      while (*(s+p->dimension) && (is < right- left + 1) && (ns<nsites))
+      while (*(s+p->dimension-1) && (is < right- left + 1) && (ns<nsites))
 		{ 
 		  /* is = 0..right */
 		  score=0.0;
@@ -158,7 +158,7 @@ long  BuildDonors(char* s,
   else
     {
       /* discovering splice sites with current profile */
-      while (*(s+p->dimension) && (is < right- left + 1) && (ns<nsites))
+      while (*(s+p->dimension-1) && (is < right- left + 1) && (ns<nsites))
 		{ 
 		  /* is = 0..right */
 		  score=0.0;
