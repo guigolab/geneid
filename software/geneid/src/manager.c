@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/* $Id: manager.c,v 1.12 2007-04-25 17:20:01 talioto Exp $ */
+/* $Id: manager.c,v 1.13 2007-08-07 17:01:54 talioto Exp $ */
 
 #include "geneid.h"
 
@@ -37,6 +37,14 @@ extern int U2GTA;
 extern int U2GTG;
 extern int U2GTY;
 extern int RSS;
+extern int GENAMIC;
+extern int EFP;
+extern int EIP;
+extern int ETP;
+extern int ESP;
+extern int EOP;
+extern int EXP;
+
 extern long NUMSITES,NUMEXONS;
 
 /* Management of splice sites prediction and exon construction/scoring */
@@ -236,83 +244,86 @@ void  manager(char *Sequence,
     SortSites(allSites->DonorSites,allSites->nDonorSites,donorsites,l1b,l2b);
     SortSites(allSites->AcceptorSites,allSites->nAcceptorSites,acceptorsites,l1a,l2a);
   }
-  /* 2. Building exons with splice sites predicted before */ 
-  printMess ("Computing exons ...");   
+
+  if (GENAMIC || (!GENAMIC && (EFP || EIP || ETP || ESP || EOP || EXP))){
+    /* 2. Building exons with splice sites predicted before */ 
+    printMess ("Computing exons ...");   
   
 
-  allExons->nInitialExons =
-    BuildInitialExons(allSites->StartCodons,allSites->nStartCodons,
-					  allSites->DonorSites,allSites->nDonorSites,
-					  allSites->StopCodons,allSites->nStopCodons,
-					  gp->MaxDonors,sFIRST,Sequence,
-					  allExons->InitialExons,NUMEXONS);
-  sprintf(mess,"Initial Exons \t\t%8ld", allExons->nInitialExons);
-  printRes(mess); 
-
-  allExons->nInternalExons =
-	BuildInternalExons(allSites->AcceptorSites,allSites->nAcceptorSites,
-					   allSites->DonorSites,allSites->nDonorSites,
-					   allSites->StopCodons,allSites->nStopCodons,
-					   gp->MaxDonors,sINTERNAL,Sequence,
-					   allExons->InternalExons,NUMEXONS);
-  sprintf(mess,"Internal Exons \t\t%8ld", allExons->nInternalExons);
-  printRes(mess); 
-
-  if (RSS){
-    allExons->nZeroLengthExons =
-      BuildZeroLengthExons(allSites->AcceptorSites,allSites->nAcceptorSites,
-			   allSites->DonorSites,allSites->nDonorSites,
-			   allSites->StopCodons,allSites->nStopCodons,
-			   gp->MaxDonors,sZEROLENGTH,Sequence,
-			   allExons->ZeroLengthExons,NUMEXONS);
-    sprintf(mess,"Zero-Length Exons \t%8ld", allExons->nZeroLengthExons);
+    allExons->nInitialExons =
+      BuildInitialExons(allSites->StartCodons,allSites->nStartCodons,
+			allSites->DonorSites,allSites->nDonorSites,
+			allSites->StopCodons,allSites->nStopCodons,
+			gp->MaxDonors,sFIRST,Sequence,
+			allExons->InitialExons,NUMEXONS);
+    sprintf(mess,"Initial Exons \t\t%8ld", allExons->nInitialExons);
     printRes(mess); 
-  }
-  allExons->nTerminalExons =
-    BuildTerminalExons(allSites->AcceptorSites,allSites->nAcceptorSites,
-					   allSites->StopCodons,allSites->nStopCodons,
-					   LengthSequence,cutPoint,sTERMINAL,Sequence,
-					   allExons->TerminalExons,NUMEXONS);
-  sprintf(mess,"Terminal Exons \t\t%8ld", allExons->nTerminalExons);
-  printRes(mess); 
-  
-  allExons->nSingles =
-    BuildSingles(allSites->StartCodons,allSites->nStartCodons,
-				 allSites->StopCodons,allSites->nStopCodons,
-				 cutPoint, Sequence,
-				 allExons->Singles);
-  sprintf(mess,"Single genes \t\t%8ld", allExons->nSingles);
-  printRes(mess); 
 
-  if (scanORF)
-    {
-      allExons->nORFs =
-        BuildORFs(allSites->StopCodons,allSites->nStopCodons,
-				  allSites->StopCodons,allSites->nStopCodons,
-				  cutPoint, Sequence,
-				  allExons->ORFs);
-      sprintf(mess,"ORFs \t\t\t%8ld", allExons->nORFs);
+    allExons->nInternalExons =
+      BuildInternalExons(allSites->AcceptorSites,allSites->nAcceptorSites,
+			 allSites->DonorSites,allSites->nDonorSites,
+			 allSites->StopCodons,allSites->nStopCodons,
+			 gp->MaxDonors,sINTERNAL,Sequence,
+			 allExons->InternalExons,NUMEXONS);
+    sprintf(mess,"Internal Exons \t\t%8ld", allExons->nInternalExons);
+    printRes(mess); 
+
+    if (RSS){
+      allExons->nZeroLengthExons =
+	BuildZeroLengthExons(allSites->AcceptorSites,allSites->nAcceptorSites,
+			     allSites->DonorSites,allSites->nDonorSites,
+			     allSites->StopCodons,allSites->nStopCodons,
+			     gp->MaxDonors,sZEROLENGTH,Sequence,
+			     allExons->ZeroLengthExons,NUMEXONS);
+      sprintf(mess,"Zero-Length Exons \t%8ld", allExons->nZeroLengthExons);
       printRes(mess); 
     }
-  else
-	allExons->nORFs = 0;
-
-  /* 3. Scoring and Filtering Exons */
-  ScoreExons(Sequence, allExons, 
-             l1, l2, Strand, 
-	     external, hsp,
-             isochores,nIsochores,
-             GCInfo);
+    allExons->nTerminalExons =
+      BuildTerminalExons(allSites->AcceptorSites,allSites->nAcceptorSites,
+			 allSites->StopCodons,allSites->nStopCodons,
+			 LengthSequence,cutPoint,sTERMINAL,Sequence,
+			 allExons->TerminalExons,NUMEXONS);
+    sprintf(mess,"Terminal Exons \t\t%8ld", allExons->nTerminalExons);
+    printRes(mess); 
   
-  /* Total number of built exons in this strand */
-  allExons->nExons =
-    allExons->nInitialExons +
-    allExons->nInternalExons +
-    allExons->nZeroLengthExons +
-    allExons->nTerminalExons +
-    allExons->nSingles +
-    allExons->nORFs;
+    allExons->nSingles =
+      BuildSingles(allSites->StartCodons,allSites->nStartCodons,
+		   allSites->StopCodons,allSites->nStopCodons,
+		   cutPoint, Sequence,
+		   allExons->Singles);
+    sprintf(mess,"Single genes \t\t%8ld", allExons->nSingles);
+    printRes(mess); 
 
-  sprintf(mess,"---------\t\t%8ld", allExons->nExons);
-  printRes(mess); 
+    if (scanORF)
+      {
+	allExons->nORFs =
+	  BuildORFs(allSites->StopCodons,allSites->nStopCodons,
+		    allSites->StopCodons,allSites->nStopCodons,
+		    cutPoint, Sequence,
+		    allExons->ORFs);
+	sprintf(mess,"ORFs \t\t\t%8ld", allExons->nORFs);
+	printRes(mess); 
+      }
+    else
+      allExons->nORFs = 0;
+
+    /* 3. Scoring and Filtering Exons */
+    ScoreExons(Sequence, allExons, 
+	       l1, l2, Strand, 
+	       external, hsp,
+	       isochores,nIsochores,
+	       GCInfo);
+  
+    /* Total number of built exons in this strand */
+    allExons->nExons =
+      allExons->nInitialExons +
+      allExons->nInternalExons +
+      allExons->nZeroLengthExons +
+      allExons->nTerminalExons +
+      allExons->nSingles +
+      allExons->nORFs;
+
+    sprintf(mess,"---------\t\t%8ld", allExons->nExons);
+    printRes(mess); 
+  }
 }
