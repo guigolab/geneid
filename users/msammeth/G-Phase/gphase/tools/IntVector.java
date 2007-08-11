@@ -27,6 +27,24 @@ public class IntVector {
 		vector[length++]= x;
 	}
 	
+	@Override
+	protected Object clone() throws CloneNotSupportedException {
+		IntVector newV= new IntVector();
+		newV.vector= this.vector.clone();
+		newV.length= this.length;
+		newV.incrementSize= this.incrementSize;
+		return newV;
+	}
+	
+	public IntVector cloneIntVector() {
+		try {
+			return (IntVector) clone();
+		} catch (CloneNotSupportedException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
 	void extendVector() {
 		int[] newVector= new int[vector.length+ incrementSize];
 		for (int i = 0; i < vector.length; i++) 

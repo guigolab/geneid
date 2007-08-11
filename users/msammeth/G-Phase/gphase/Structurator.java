@@ -16,6 +16,7 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.Properties;
 import java.util.Vector;
 
@@ -32,6 +33,7 @@ import gphase.io.gtf.GTFObject;
 import gphase.io.gtf.GTFWrapper;
 import gphase.model.ASMultiVariation;
 import gphase.model.ASVariation;
+import gphase.model.Gene;
 import gphase.model.Graph;
 import gphase.model.Species;
 import gphase.model.SpliceSite;
@@ -102,6 +104,16 @@ public class Structurator {
 	static String annStr= Species.SP_UCSC_CGI_STRINGS[0];
 	static boolean outputASTA= false;
 	static boolean outputGTF= false;
+	static boolean codingTranscripts= false;
+	static boolean noncodTranscripts= false;
+	static int filterCode= ASMultiVariation.FILTER_HIERARCHICALLY;
+	static int codingCode= ASVariation.TYPE_ALL;
+	static String fName= null;
+	static boolean html= false;
+	static boolean nmd= false;
+	static boolean filtGTAG= false;
+	static boolean killError= false;
+	static String path= null;
 	
 	static void include(PrintStream p, String fName) {
 		
@@ -114,6 +126,8 @@ public class Structurator {
 			e.printStackTrace();
 		}
 	}
+	
+	
 	
 	static ASVariation[][] filter(ASVariation[][] vars, int codingC) {
 		ASVariation[][] filtClasses= null;
@@ -157,29 +171,19 @@ public class Structurator {
 //	      props.put(SAVE_AS_TYPE,currentType().getFileFilter().getDescription());
 	}
 	
-	public static void main(String[] args) {
-
-		//
-		long t0= System.currentTimeMillis();
-		boolean codingTranscripts= false;
-		boolean noncodTranscripts= false;
-		int filterCode= ASMultiVariation.FILTER_HIERARCHICALLY;
-		int codingCode= ASVariation.TYPE_ALL;
-		String fName= null;
-		boolean html= false;
-		boolean nmd= false;
-		boolean filtGTAG= false;
+	static void parseArguments(String[] args) {
 		for (int i = 0; i < args.length; i++) {
-
 				// let this first check else all double arg flags have to continue
-			if (!args[i].startsWith("-")|| args[i].contains(File.separator))
+			if (!args[i].startsWith("-")|| args[i].contains(File.separator)) {
 				fName= args[i];
-
+				//path= new gphase.tools.File(fName).getPathOnly();
+			}
+	
 			if (args[i].equalsIgnoreCase("-codingTranscripts"))
 				codingTranscripts= true;
 			if (args[i].equalsIgnoreCase("-noncodTranscripts"))
 				noncodTranscripts= true;
-
+	
 			if (args[i].equalsIgnoreCase("-noFilter"))
 				filterCode= ASMultiVariation.FILTER_NONE;
 			if (args[i].equalsIgnoreCase("-structFilter"))
@@ -193,7 +197,7 @@ public class Structurator {
 				codingCode= ASVariation.TYPE_5UTR;
 			if (args[i].equalsIgnoreCase("-3UTR"))
 				codingCode= ASVariation.TYPE_3UTR;
-
+	
 			if (args[i].equalsIgnoreCase("-html")) {
 				html= true;
 			}
@@ -249,7 +253,7 @@ public class Structurator {
 				
 				
 			}
-
+	
 			
 			if (args[i].equalsIgnoreCase("-genome")) {
 				if (i+1>= args.length) {
@@ -264,8 +268,19 @@ public class Structurator {
 				} else 
 					annStr= args[i+1];	// not tested, check for mapping to UCSC string
 				++i;
-			}
 		}
+		
+		if (args[i].equalsIgnoreCase("-killError")) {
+			killError= true;
+		}
+	}
+	}
+	
+	public static void main(String[] args) {
+
+		//
+		long t0= System.currentTimeMillis();
+		parseArguments(args);
 		
 		if (html) {
 			if (fName== null) {
@@ -279,8 +294,9 @@ public class Structurator {
 				try {
 					PipedOutputStream pout= new PipedOutputStream(pin);
 					PrintStream p= new PrintStream(pout);
-					System.setOut(p);
-					System.setErr(p);	// kill stderr, sylvain stops otherwise
+					//System.setOut(p);
+					if (killError)
+						System.setErr(p);	// kill stderr, sylvain stops otherwise
 				} catch (IOException e) {	
 					e.printStackTrace();
 				}
@@ -302,8 +318,8 @@ public class Structurator {
 		//enc.setSilent(true);
 		
 		if (filtGTAG) {
-			enc.setSpeName(speStr);
-			enc.setGenomeVer(annStr);
+			//enc.setSpeName(speStr);
+			//enc.setGenomeVer(annStr);
 		}
 		boolean encode= false;
 //		if (fName.toUpperCase().contains("ENCODE"))
@@ -312,6 +328,7 @@ public class Structurator {
 		enc= null;
 		System.gc();
 		Thread.currentThread().yield();
+		Gene[] ge= g.getSpecies()[0].getGenes();
 		
 		if (g== null) {
 			System.exit(-1);
@@ -325,6 +342,7 @@ public class Structurator {
 		
 			// get vars 
 		ASVariation[][] vars= g.getASVariations(filterCode);
+		
 		if (filtGTAG) {
 			Vector v= new Vector();
 			int cntFiltEv= 0;
@@ -389,7 +407,7 @@ public class Structurator {
 		for (int i = 0; vars!= null&& i < vars.length; i++) 
 			for (int j = 0; j < vars[i].length; j++) {
 				GTFObject o= new GTFObject();
-				o.setSeqname(vars[i][j].getGene().getChromosome());
+				o.setSeqname(vars[i][j].getGene().getChromosome());				
 				o.setSource("astalavista");
 				o.setFeature("as_event");
 				SpliceSite[] su= vars[i][j].getSpliceUniverse();
@@ -683,7 +701,7 @@ public class Structurator {
 		p.println("</HTML>");
 	}
 
-	private static String convertFName(String in) {
+	protected static String convertFName(String in) {
 		StringBuffer sb= new StringBuffer(in);
 			// kill spaces
 		for (int i = 0; i < sb.length(); i++) 
@@ -693,13 +711,21 @@ public class Structurator {
 		out= out.replace('^', 'd');
 		out= out.replace('-', 'a');
 		out= out.replace(',', 'I');
-		if (out.length()> 245)	
-			out= out.substring(0, 245);	// max fname len
-		
-		return out;
+		Integer name= (Integer) fileNameMap.get(out);
+		if (name== null) {
+			name= new Integer(++eventTypeNr);
+			fileNameMap.put(out, name);
+		}
+		return name.toString();
+//		if (out.length()> 245)	{
+//			System.out.println("WARNING: shorted filename "+out);
+//			out= out.substring(0, 245);	// max fname len
+//		}
+//		
+//		return out;
 	}
 	
-	static void writeEventsHTML(ASVariation[] vars, PrintStream p) {
+	protected static void writeEventsHTML(ASVariation[] vars, PrintStream p) {
 //		p.println("<HTML>");
 //		p.println("<HEAD>");
 //		p.println("<TITLE>Event Details</TITLE>");
@@ -962,4 +988,7 @@ public class Structurator {
 		p.println("</BODY>");
 		p.println("</HTML>");
 	}
+
+	static int eventTypeNr= 0;
+	static HashMap fileNameMap= new HashMap();
 }

@@ -55,6 +55,78 @@ public class Translation extends DirectedRegion {
 		new String[] {"AAA", "AAG"},
 		new String[] {"CGT", "CGC", "CGA", "CGG", "AGA", "AGG"}
 	};
+	
+	public static HashMap<String, String> CODON_HASH= new HashMap<String, String>();
+	{
+		CODON_HASH.put("TTT", "F");
+		CODON_HASH.put("TTC", "F");
+		CODON_HASH.put("TTA", "L");
+		CODON_HASH.put("TTG", "L");
+		CODON_HASH.put("CTT", "L");
+		CODON_HASH.put("CTC", "L");
+		CODON_HASH.put("CTA", "L");
+		CODON_HASH.put("CTG", "L");
+		CODON_HASH.put("ATT", "I");
+		CODON_HASH.put("ATC", "I");
+		CODON_HASH.put("ATA", "I");
+		CODON_HASH.put("ATG", "M");
+		CODON_HASH.put("GTT", "V");
+		CODON_HASH.put("GTC", "V");
+		CODON_HASH.put("GTA", "V");
+		CODON_HASH.put("GTG", "V");
+		
+		CODON_HASH.put("TCT", "S");
+		CODON_HASH.put("TCC", "S");
+		CODON_HASH.put("TCA", "S");
+		CODON_HASH.put("TCG", "S");
+		CODON_HASH.put("CCT", "P");
+		CODON_HASH.put("CCC", "P");
+		CODON_HASH.put("CCA", "P");
+		CODON_HASH.put("CCG", "P");
+		CODON_HASH.put("ACT", "T");
+		CODON_HASH.put("ACC", "T");
+		CODON_HASH.put("ACA", "T");
+		CODON_HASH.put("ACG", "T");
+		CODON_HASH.put("GCT", "A");
+		CODON_HASH.put("GCC", "A");
+		CODON_HASH.put("GCA", "A");
+		CODON_HASH.put("GCG", "A");
+		
+		CODON_HASH.put("TAT", "Y");
+		CODON_HASH.put("TAC", "Y");
+		CODON_HASH.put("TAA", "");	// stop
+		CODON_HASH.put("TAG", "");	// stop
+		CODON_HASH.put("CAT", "H");
+		CODON_HASH.put("CAC", "H");
+		CODON_HASH.put("CAA", "Q");
+		CODON_HASH.put("CAG", "Q");
+		CODON_HASH.put("AAT", "N");
+		CODON_HASH.put("AAC", "N");
+		CODON_HASH.put("AAA", "K");
+		CODON_HASH.put("AAG", "K");
+		CODON_HASH.put("GAT", "D");
+		CODON_HASH.put("GAC", "D");
+		CODON_HASH.put("GAA", "E");
+		CODON_HASH.put("GAG", "E");
+		
+		CODON_HASH.put("TGT", "C");
+		CODON_HASH.put("TGC", "C");
+		CODON_HASH.put("TGA", "");	// stop
+		CODON_HASH.put("TGG", "W");
+		CODON_HASH.put("CGT", "R");
+		CODON_HASH.put("CGC", "R");
+		CODON_HASH.put("CGA", "R");
+		CODON_HASH.put("CGG", "R");
+		CODON_HASH.put("AGT", "S");
+		CODON_HASH.put("AGC", "S");
+		CODON_HASH.put("AGA", "R");
+		CODON_HASH.put("AGG", "R");
+		CODON_HASH.put("GGT", "G");
+		CODON_HASH.put("GGC", "G");
+		CODON_HASH.put("GGA", "G");
+		CODON_HASH.put("GGG", "G");
+
+	}
 	public static HashMap codonHash= null;
 	
 	
@@ -235,7 +307,7 @@ public class Translation extends DirectedRegion {
 	public Translation(Transcript newTranscript) {
 		this.transcript= newTranscript;
 		this.strand= getTranscript().getStrand();
-		setID("translation");
+		setID("CDS");
 		setStrand(getTranscript().getStrand());
 	}
 	
@@ -279,6 +351,7 @@ public class Translation extends DirectedRegion {
 	public String getChromosome() {
 		return getTranscript().getChromosome();
 	}
+	
 	/**
 	 * @return Returns the transcript.
 	 */
@@ -287,7 +360,7 @@ public class Translation extends DirectedRegion {
 	}
 	
 	public Species getSpecies() {
-		return getTranscript().getSpecies();
+		return getTranscript().getGene().getSpecies();
 	}
 	/**
 	 * @return Returns the translationID.
@@ -319,6 +392,25 @@ public class Translation extends DirectedRegion {
 		proteinIDs.add(newTranslationID);
 	}
 
+	public String translate() {
+		String s= getSplicedSequence();
+		if (s.length()%3!= 0)
+			return null;
+		StringBuffer b= new StringBuffer(s.length()/3);
+		for (int i = 0; i < s.length()- 3; i+= 3) {
+			String c= CODON_HASH.get(s.substring(i, i+3).toUpperCase());
+			if (c== null|| c.equals(""))	// stop
+				return null;
+			b.append(c);
+		}
+		if (s.length()< 3)
+			return null;
+		String c= CODON_HASH.get(s.substring(s.length()- 3, s.length()).toUpperCase());
+		if (c!= null&& !c.equals(""))	// stop
+			b.append(c);
+		return b.toString();
+	}
+	
 	public void setSplicedLength(int splicedLength) {
 		this.splicedLength = splicedLength;
 	}
@@ -382,8 +474,13 @@ public class Translation extends DirectedRegion {
 				frame= 0;	// guess 0, good for predicted reading frames
 			
 			int tlnExStart= getTranscript().getExonicPosition(get5PrimeEdge())+ frame;
-			String exSeq= getTranscript().getSplicedSequence();		
-				String startCodon= exSeq.substring(tlnExStart, tlnExStart+3);
+			String exSeq= getTranscript().getSplicedSequence();
+			String startCodon= null;
+			try {
+				startCodon= exSeq.substring(tlnExStart, tlnExStart+3);
+			} catch (Exception e) {
+				System.currentTimeMillis();
+			}
 				if (startCodon.equalsIgnoreCase(START_CODON))
 					return frame;	// if there is a start codon here, trust the annotated frame
 			

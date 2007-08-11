@@ -36,7 +36,7 @@ import java.util.Vector;
 public class GTFWrapper extends DefaultIOWrapper {
 	
 	GTFObject[] gtfObj= null;
-	String[] sortAttributes= null;
+	String[] sortAttributes= new String[] {GTFObject.TRANSCRIPT_ID_TAG};
 	
 	
 	public static void main(String[] args) {
@@ -144,6 +144,9 @@ public class GTFWrapper extends DefaultIOWrapper {
 	//			outName+= "_out";
 			BufferedWriter buffy= new BufferedWriter(new FileWriter(outName, append));
 			for (int i = 0; gtfObj!= null&& i < gtfObj.length; i++) {
+				if (gtfObj[i]== null)
+					continue;
+				
 				// <seqname> <source> <feature> <start> <end> <score> <strand> <frame> [attributes] [comments]
 				String scoreStr= ".";
 				String line= gtfObj[i].seqname+ "\t"+	//!! getter removes "chr"

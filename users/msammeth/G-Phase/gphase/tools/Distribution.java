@@ -23,13 +23,13 @@ public class Distribution {
 	
 	public double getMin() {
 		if (arrayD!= null) {
-			double min= Double.MAX_VALUE;
+			double min= java.lang.Double.MAX_VALUE;
 			for (int i = 0; i < arrayD.length; i++) 
 				if (arrayD[i]< min)
 					min= arrayD[i];
 			return min;
 		} else {
-			int min= Integer.MAX_VALUE;
+			int min= java.lang.Integer.MAX_VALUE;
 			for (int i = 0; i < arrayI.length; i++) 
 				if (arrayI[i]< min)
 					min= arrayI[i];
@@ -39,13 +39,13 @@ public class Distribution {
 	
 	public double getMax() {
 		if (arrayD!= null) {
-			double max= Double.MIN_VALUE;
+			double max= java.lang.Double.MIN_VALUE;
 			for (int i = 0; i < arrayD.length; i++) 
 				if (arrayD[i]> max)
 					max= arrayD[i];
 			return max;
 		} else {
-			int max= Integer.MIN_VALUE;
+			int max= java.lang.Integer.MIN_VALUE;
 			for (int i = 0; i < arrayI.length; i++) 
 				if (arrayI[i]> max)
 					max= arrayI[i];

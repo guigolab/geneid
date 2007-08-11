@@ -1,125 +1,146 @@
 /*
- * Created on Mar 6, 2006
+ * Created on Feb 23, 2006
  *
  * To change the template for this generated file go to
  * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 package gphase.model;
 
+import gphase.AStaLaVista;
+import gphase.tools.ENCODE;
+import gphase.tools.IntVector;
+
+import java.io.PrintStream;
 import java.io.Serializable;
+import java.lang.reflect.Method;
+import java.text.Collator;
+import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Vector;
 
+import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
+import com.sun.org.apache.xerces.internal.impl.xs.SubstitutionGroupHandler;
+
 /**
- * alternate donor/acceptor are overlapping, if not -> two exon skipping
  * 
  * 
  * @author msammeth
  */
 public class ASEvent implements Serializable {
 
-	public static class PositionComparator implements Comparator {
+	byte ssRegionID3UTR= 0;
+	byte ssRegionIDCDS= 0;
+	byte ssRegionID5UTR= 0;
+	Transcript[][] trpts;
+	SpliceSite[][] spliceChains;	// sorted!
+	String stringRep= null;
 
-		public int compare(Object arg0, Object arg1) {
-			
-			ASEvent asEv1= (ASEvent) arg0;
-			ASEvent asEv2= (ASEvent) arg1;
-			
-			int ss1= Math.min(asEv1.ss1.getPos(),asEv1.ss2.getPos());
-			int ss2= Math.min(asEv2.ss1.getPos(),asEv2.ss2.getPos());
-			
-			if (ss1< ss2)
-				return (-1);
-			if (ss1> ss2)
-				return 1;
-			return 0;
+	public ASEvent(Transcript[][] newTrpts, SpliceSite[][] ss) {
+		SpliceSite[] firsts= new SpliceSite[ss.length];
+		HashMap<SpliceSite, Transcript[]> map= new HashMap<SpliceSite, Transcript[]>();
+		HashMap<SpliceSite, SpliceSite[]> map2= new HashMap<SpliceSite, SpliceSite[]>();
+		for (int i = 0; i < ss.length; i++) {
+			if (ss[i].length> 0) 
+				firsts[i]= ss[i][0];
+		  	else
+				firsts[i]= new SpliceSite(Integer.MAX_VALUE,SpliceSite.TYPE_NOT_INITED);	// empty at end
+			map.put(firsts[i], newTrpts[i]);
+			map2.put(firsts[i], ss[i]);
+		}
+		Arrays.sort(firsts, SpliceSite.getDefaultPositionTypeComparator());
+		trpts= new Transcript[newTrpts.length][];
+		spliceChains= new SpliceSite[ss.length][];
+		for (int i = 0; i < firsts.length; i++) {
+			trpts[i]= map.get(firsts[i]);
+			spliceChains[i]= map2.get(firsts[i]);
 		}
 	}
-	
-	public final static String TYPE_ALTERNATE_ACCEPTOR= "AA";
-	public final static String TYPE_ALTERNATE_DONOR= "AD";
-	public final static String TYPE_EXON_SKIPPING= "ES";
-	public final static String TYPE_MUTUALLY_EXCLUSIVE= "ME";	// mutually exclusive exons: 2 events
-	public final static String TYPE_INTRON_RETENTION= "IR";
-	
-	ASVariation variation= null;
-	int transcriptNr= -1; // 0= both, 1= pattern.trans1, 2= pattern.trans2
-	SpliceSite ss1= null, ss2= null; // transcriptNr= 0: ss1 in pattern.trans1, ss2 in pattern.trans2
-	String type= null;
-	
-	public static ASEvent[] toArray(Vector v) {
-		ASEvent[] result= new ASEvent[v.size()];
-		for (int i = 0; i < result.length; i++) 
-			result[i]= (ASEvent) v.elementAt(i);
-		
-		return result;
-	}
-	
-	
-	public ASEvent(ASVariation newVar, int newTransNr, SpliceSite newSS1, SpliceSite newSS2) {
-		
-		this.variation= newVar;
-		this.transcriptNr= newTransNr;
-		this.ss1= newSS1;
-		this.ss2= newSS2;
-		if (transcriptNr> 0&& newSS2.getPos()< newSS1.getPos()) {	// order ss in same transcript
-			this.ss1= newSS2;
-			this.ss2= newSS1;
-		}
-		
-		this.type= getType();
-	}
-	
-	String getType() {
-		if (transcriptNr== 0) {	// two transcripts involved: alternate donor/acceptor
-			if (ss1.isDonor()&& ss2.isDonor())
-				return TYPE_ALTERNATE_DONOR;
-			if (ss1.isAcceptor()&& ss2.isAcceptor())
-				return TYPE_ALTERNATE_ACCEPTOR;
-			System.err.println("Unknown splice type ("+ss1+","+ss2
-					+") in "+variation.getTranscript1()+","+variation.getTranscript2());
-		} else {	// only one transcript involved: exon skipping/ intron retention
-			if (ss1.isDonor()&& ss2.isAcceptor())
-				return TYPE_INTRON_RETENTION;
-			if (ss1.isAcceptor()&& ss2.isDonor())
-				return TYPE_EXON_SKIPPING;
-			System.err.println("Unknown splice type ("+ss1+","+ss2
-					+") in "+((transcriptNr== 1)?variation.getTranscript1():variation.getTranscript2()));
-		}
-		return null;
-	}
 
-	public boolean isAlternateAcceptor() {
-		return type.equals(TYPE_ALTERNATE_ACCEPTOR);
-	}
-
-	public boolean isAlternateDonor() {
-		return type.equals(TYPE_ALTERNATE_DONOR);
-	}
-
-	public boolean isExonSkipping() {
-		return type.equals(TYPE_EXON_SKIPPING);
-	}
-
-	public boolean isMutuallyExclusive() {
-		return type.equals(TYPE_MUTUALLY_EXCLUSIVE);
-	}
-
-	public boolean isIntronRetention() {
-		return type.equals(TYPE_INTRON_RETENTION);
-	}
-	public int getTranscriptNr() {
-		return transcriptNr;
-	}
-	
-	public void setType(String newType) {
-		if (!newType.equals(TYPE_MUTUALLY_EXCLUSIVE))
-			return;		// allow only mutually exclusive to be set
-						// (uses 2 exon skipping splice events)
-		this.type = newType;
-	}
-	
+	/**
+	 * One line schematical representation of the splicing variation.
+	 */
 	public String toString() {
-		return type;
+		
+		if (stringRep== null) {
+			int[] p= new int[spliceChains.length];
+			StringBuffer[] sb= new StringBuffer[spliceChains.length];
+			for (int i = 0; i < p.length; i++) { 
+				p[i]= 0;
+				sb[i]= new StringBuffer();
+			}
+			int cnt= 1;
+			
+			while (true) {
+				IntVector nextI= new IntVector();
+				int nextVal= Integer.MAX_VALUE;
+				for (int i = 0; i < spliceChains.length; i++) {
+					if (p[i]== spliceChains[i].length)
+						continue;
+					if (spliceChains[i][p[i]].getPos()< nextVal) {						
+						nextI= new IntVector();
+						nextI.add(i);
+						nextVal= spliceChains[i][p[i]].getPos();
+					} else if (spliceChains[i][p[i]].getPos()== nextVal)
+						nextI.add(i);
+				}
+				
+				for (int i = 0; i < nextI.size(); i++) {
+					sb[nextI.get(i)].append(cnt++);
+					sb[nextI.get(i)].append(spliceChains[nextI.get(i)][p[nextI.get(i)]++].getSiteSymbol());
+				}
+				
+				int x= 0;
+				for (; x < p.length; x++) 
+					if (p[x]< spliceChains[x].length)
+						break;
+				if (x== p.length)
+					break;
+			}
+
+			StringBuffer stringBuf= new StringBuffer();
+			for (int i = 0; i < sb.length; i++) {
+				if (sb[i].length()> 0)
+					stringBuf.append(sb[i]);
+				else 
+					stringBuf.append('0');
+				stringBuf.append(",");
+			}
+			stringBuf.deleteCharAt(stringBuf.length()- 1);
+			stringRep= stringBuf.toString();
+		}
+		
+		return stringRep;
 	}
+
+	/**
+	 * One line schematical representation of the splicing variation.
+	 */
+	public String toStringASTA() {
+	
+			// build final string
+		String evCode= toString();
+		StringBuffer result= new StringBuffer(evCode+ "\t"+ trpts[0][0].getChromosome());
+		
+		for (int i = 0; i < spliceChains.length; i++) {
+			result.append("\t");
+			for (int j = 0; j < trpts[i].length; j++) 
+				result.append(trpts[i][j].getTranscriptID()+ ",");
+			result.deleteCharAt(result.length()- 1);
+			result.append("\t");
+			if (spliceChains[i].length> 0) {
+				if (spliceChains[i][0].getPos()>= 0)
+					for (int x = 0; x < spliceChains[i].length; x++) 
+						result.append(spliceChains[i][x].getPos()+",");
+				else
+					for (int x = spliceChains[i].length- 1; x >= 0; --x) 
+						result.append(Math.abs(spliceChains[i][x].getPos())+",");
+				result.deleteCharAt(result.length()- 1);
+			}
+		}
+		
+		return result.toString();
+	}
+	
+	
 }

@@ -1,9 +1,9 @@
 package gphase.io;
 
+import gphase.Analyzer;
 import gphase.Constants;
 import gphase.algo.ASAnalyzer;
 import gphase.algo.AlgoHandler;
-import gphase.algo.Analyzer;
 import gphase.db.MapTable;
 import gphase.io.gtf.GTFChrReader;
 import gphase.model.ASMultiVariation;
@@ -13,6 +13,8 @@ import gphase.model.DirectedRegion;
 import gphase.model.Gene;
 import gphase.model.Transcript;
 import gphase.tools.Arrays;
+import gphase.tools.Distribution;
+import gphase.tools.DoubleVector;
 import gphase.tools.Formatter;
 import gphase.tools.IntVector;
 
@@ -181,7 +183,7 @@ public class DouglasDomainWrapper extends DefaultIOWrapper {
 			int oldCntASEvents= cntASEvents;
 			for (int x = 0; vars!= null&& x < vars.length; x++) {
 				for (int xx = 0; xx < vars[x].length; xx++) {
-					if (!vars[x][xx].is_contained_in_CDS())
+					if (!vars[x][xx].isContainedCDS())
 						continue;
 					++cntASEvents;
 					DirectedRegion asReg= vars[x][xx].getRegion();
@@ -306,6 +308,7 @@ public class DouglasDomainWrapper extends DefaultIOWrapper {
 		String line= buffy.readLine();
 		while (buffy.ready()&& !line.startsWith(ID_ARBITRARY))
 			line= buffy.readLine();
+		DoubleVector remScoreV= new DoubleVector();
 		while (buffy.ready()) {
 			String protID= line.substring(ID_ARBITRARY.length());
 			buffy.readLine();	// skip other IDs
@@ -320,7 +323,28 @@ public class DouglasDomainWrapper extends DefaultIOWrapper {
 				DefaultRegion reg= new DefaultRegion(start, end);
 				reg.setID(tokens[0]);
 				reg.setScore(score);
-				v.add(reg);
+				boolean add= true;	// greedily add
+				for (int i = 0; i < v.size(); i++) {
+					DefaultRegion reg2= (DefaultRegion) v.elementAt(i);
+					if (reg.overlaps(reg2)) {
+						if (reg.getScore()> reg2.getScore())
+							add= true;
+						else
+							add= false;
+					}
+				}
+				if (add) {
+					for (int i = 0; i < v.size(); i++) {
+						DefaultRegion reg2= (DefaultRegion) v.elementAt(i);
+						if (reg.overlaps(reg2)) {
+							remScoreV.add(reg2.getScore());
+							v.remove(i--);
+						}
+					}
+					v.add(reg);
+				} else {
+					remScoreV.add(reg.getScore());
+				}
 				line= buffy.readLine();
 			}
 			if (line.startsWith(ID_NO_HITS)&& buffy.ready())
@@ -328,6 +352,11 @@ public class DouglasDomainWrapper extends DefaultIOWrapper {
 			if (v.size()> 0)
 				map.put(protID, v);
 		}
+		
+		Distribution dist= new Distribution(remScoreV.toDoubleArray());
+		System.out.println("Read "+(map.size()+remScoreV.size())+" domains, of which I removed"+
+				remScoreV.size()+" domains due to overlap (med score "+Formatter.fprint(dist.getMedian(), 5)+"), left"+
+				map.size()+" domains.");
 	}
 
 	public void write() throws Exception {

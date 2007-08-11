@@ -22,7 +22,7 @@ public class ASVariationGroup extends ASVariation {
 	
 	@Override
 	public boolean equals(Object obj) {
-		Comparator compi= new StructureComparator();
+		Comparator compi= new IdentityComparator();
 		return (compi.compare(this, obj)== 0);
 	}
 }

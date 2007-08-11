@@ -74,6 +74,14 @@ public abstract class AbstractRegion implements Region {
 			
 			public int compare(Object o1, Object o2) {
 	
+				AbstractRegion reg1= (DirectedRegion) o1;
+				AbstractRegion reg2= (DirectedRegion) o2;
+				
+				if (reg1.getChromosome()!= null&& reg2.getChromosome()!= null) {
+					if (!reg1.getChromosome().equalsIgnoreCase(reg2.getChromosome()))
+						return (reg1.getChromosome().compareTo(reg2.getChromosome()));
+				}
+
 				int end1= ((Region) o1).getEnd();
 				int start2= ((Region) o2).getStart();
 				int end2= ((Region) o2).getEnd();
@@ -103,6 +111,24 @@ public abstract class AbstractRegion implements Region {
 				//System.err.println("assertion in abstractregion.positioncomparator failed");
 				return 0;	// identical positions --> never reached
 				
+			}
+		}
+
+	/* assumption: exons share same strand
+		 * 
+		 * @author micha
+		 */
+		public static class EndComparator implements Comparator {
+			
+			public int compare(Object o1, Object o2) {
+		
+				int end2= ((Region) o2).getEnd();
+				int end1= ((Region) o1).getEnd();
+				if (end1== end2)
+					return 0;
+				if (end1< end2)
+					return -1;
+				return 1;
 			}
 		}
 

@@ -1,12 +1,11 @@
 package gphase;
 
+import gphase.Analyzer.VectorSizeComparator;
 import gphase.algo.ASAnalyzer;
-import gphase.algo.Analyzer;
-import gphase.algo.Analyzer.VectorSizeComparator;
 import gphase.io.DomainWrapper;
 import gphase.io.DouglasDomainWrapper;
 import gphase.io.gtf.GTFChrReader;
-import gphase.model.ASEvent;
+import gphase.model.ASEventold;
 import gphase.model.ASMultiVariation;
 import gphase.model.ASVariation;
 import gphase.model.DefaultRegion;
@@ -22,8 +21,10 @@ import gphase.tools.DoubleVector;
 import gphase.tools.Formatter;
 import gphase.tools.IntVector;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.util.Comparator;
@@ -35,16 +36,58 @@ import java.util.Vector;
 import org.apache.commons.collections.BidiMap;
 import org.apache.commons.collections.bidimap.DualHashBidiMap;
 
-import com.sun.org.apache.xerces.internal.dom.ASDOMImplementationImpl;
 
 public class Douglas {
+	
+	
 	public static void main(String[] args) {
 		//_05_01_entireDistribution();
 		
 		//_05_00_pfamDomains_all();
 		//_05_00_pfamDomains_all_contained();
 		
-		_05_exonsStatistic();
+		//_05_exonsStatistic();
+		
+		_070716_getAllAAsequences();
+	}
+	
+	static void _070716_getAllAAsequences() {
+		try {
+			GTFChrReader reader= new GTFChrReader("/home/msammeth/annotations/human_hg18_RefSeqGenes_fromUCSC070716_mRNAs_fromUCSC070716_CDS_chr8.gtf");
+			reader.setReadGene(true);
+			reader.setChromosomeWise(true);
+			reader.read();
+			Gene[] g= reader.getGenes();
+			BufferedWriter writer= new BufferedWriter(new FileWriter("/home/msammeth/annotations/human_hg18_RefSeqGenes_fromUCSC070716_mRNAs_fromUCSC070716_CDS_aaSequences.txt"));
+			Species spe= new Species("human");
+			spe.setGenomeVersion("hg18");
+			while (g!= null) {
+				
+				for (int i = 0; i < g.length; i++) {
+					g[i].setSpecies(spe);
+					Transcript[] t= g[i].getTranscripts();
+					for (int j = 0; j < t.length; j++) {
+						t[j].setGene(g[i]);		// TODO repair this !!!
+						if (!t[j].isCoding())
+							continue;
+						String s= t[j].getTranslations()[0].translate();
+						if (s== null)
+							continue;
+						writer.write(">"+t[j].getTranscriptID()+"\n");
+						for (int x = 0; x < s.length(); x+=50) 
+							writer.write(s.substring(x, Math.min(x+50, s.length()))+"\n");						
+					}
+				}
+				
+				reader.read();
+				g= reader.getGenes();
+			}
+			
+			writer.flush();
+			writer.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	static int[] countExonDomOvl(Vector<Exon> eVector, HashMap regMap, IntVector lenCDom, IntVector lenSDom, IntVector lenTot, 
@@ -237,7 +280,7 @@ public class Douglas {
 				int oldCntASEvents= cntASEvents;
 				for (int x = 0; vars!= null&& x < vars.length; x++) {
 					for (int xx = 0; xx < vars[x].length; xx++) {
-						if (!vars[x][xx].is_contained_in_CDS())
+						if (!vars[x][xx].isContainedCDS())
 							continue;
 						++cntASEvents;
 						DirectedRegion asReg= vars[x][xx].getRegion();
@@ -1437,7 +1480,7 @@ public class Douglas {
 					} 
 					for (int x = 0; vars!= null&& x < vars.length; x++) {
 						for (int xx = 0; xx < vars[x].length; xx++) {
-							if (!vars[x][xx].is_contained_in_CDS())
+							if (!vars[x][xx].isContainedCDS())
 								continue;
 							++cntASEvents;
 							Vector v= (Vector) mapLandscapeAll.get(vars[x][xx].toString());
@@ -1702,7 +1745,7 @@ public class Douglas {
 					ASVariation[] vars= genes[i].getASVariations(ASMultiVariation.FILTER_HIERARCHICALLY);
 					int localCntMutEx= 0;
 					for (int j = 0; vars!= null&& j < vars.length; j++) {
-						if (vars[j].toString().equals(ASVariation.ID_MUTEX)&& vars[j].is_contained_in_CDS())
+						if (vars[j].toString().equals(ASVariation.ID_MUTEX)&& vars[j].isContainedCDS())
 							++localCntMutEx;
 					}
 					cntMutexEv+= localCntMutEx;
@@ -1922,7 +1965,7 @@ public class Douglas {
 				boolean overlapASdom= false;
 				for (int x = 0; vars!= null&& x < vars.length; x++) {
 					for (int xx = 0; xx < vars[x].length; xx++) {
-						if (!vars[x][xx].is_contained_in_CDS())
+						if (!vars[x][xx].isContainedCDS())
 							continue;
 						++cntASEvents;
 						Vector v= (Vector) mapLandscapeAll.get(vars[x][xx].toString());

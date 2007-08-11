@@ -6,6 +6,7 @@
  */
 package gphase.model;
 
+import gphase.io.gtf.GTFObject;
 import gphase.tools.Arrays;
 
 import java.io.Serializable;
@@ -15,6 +16,8 @@ import java.util.Vector;
 
 import org.freehep.graphicsio.swf.SWFAction.RemoveSprite;
 
+import com.sun.net.ssl.SSLContext;
+
 /**
  * 
  * 
@@ -22,9 +25,19 @@ import org.freehep.graphicsio.swf.SWFAction.RemoveSprite;
  */
 public class SpliceSite extends AbstractSite {
 
-	public final static int NOTYPE_SS= 0;
-	public final static int CONSTITUTIVE_SS= 1;
-	public final static int ALTERNATE_SS= 2;
+	public static final String ATTRIBUTE_ID_SS_TYPE= "ss_type";
+	
+	public final static byte TYPE_NOT_INITED= -1;
+	public final static byte TYPE_TSS= 0;
+	public final static byte TYPE_ACCEPTOR= 1;
+	public final static byte TYPE_DONOR= 2;
+	public final static byte TYPE_TES= 3;
+	
+	
+	public final static byte NOTYPE_SS= 0;
+	public final static byte CONSTITUTIVE= 1;
+	public final static byte ALTERNATIVE= 2;
+	
 	public final static int DEFAULT_DONOR_5FLANK= 2;
 	public final static int DEFAULT_DONOR_3FLANK= 6;
 	public final static int DEFAULT_ACCEPTOR_5FLANK= 15;
@@ -45,39 +58,202 @@ public class SpliceSite extends AbstractSite {
 	public static final int SHAPIRO_ACC5_FIRST= -13;
 	public static final int SHAPIRO_ACC3_LAST= +1;
 
+	public static final String CANONICAL_DONOR = "GT";
+
+	public static final String CANONICAL_ACCEPTOR = "AG";
+
+
+	static PositionTypeComparator defaultPositionTypeComparator= null;
+
+	public static char CHAR_ACCEPTOR = '-';
+
+	public static char CHAR_DONOR = '^';
+
+	public static char CHAR_TES = ';';
+
+	public static char CHAR_TSS = '*';
+	public static char CHAR_UNDEFINED = '?';
 	
+	public static PositionTypeComparator getDefaultPositionTypeComparator() {
+		if (defaultPositionTypeComparator == null) {
+			defaultPositionTypeComparator = new PositionTypeComparator();			
+		}
+
+		return defaultPositionTypeComparator;
+	}
+	
+	
+	float scoreU12= Float.NaN;
 	
 	HashMap hitparade= null;
 	HashMap homologs= null;	// maps genes to exon homologs
 	
 	Exon[] exons= null;
-	boolean donor= false;
+	byte type= TYPE_NOT_INITED;
+	byte modality= NOTYPE_SS;
 	boolean constitutive= true;
-	ASVariation[] asVars= null;
-	public static class PositionComparator extends AbstractSite.PositionComparator {
+	String dinucleotide= null, stringRep= null;
+
+	
+	ASVariation[] asVars = null;
+	
+	public static class PositionComparator implements Comparator {
 		public int compare(Object arg0, Object arg1) {
-			int res= super.compare(arg0, arg1);
-			if (res!= 0)
-				return res;
-			if (arg0 instanceof SpliceSite&& arg1 instanceof SpliceSite) {
-				SpliceSite s0= (SpliceSite) arg0;
-				SpliceSite s1= (SpliceSite) arg1;
-				if (s0.isDonor()!= s1.isDonor())
-					return -1;
-			}
+			SpliceSite ss1= (SpliceSite) arg0;
+			SpliceSite ss2= (SpliceSite) arg1;
+			if (ss1.getPos()< ss2.getPos())
+				return -1;
+			if (ss2.getPos()< ss1.getPos())
+				return 1;
 			return 0;
 		}
 	}
 	
-	public SpliceSite(Gene gene, int pos, boolean donor) {
+	public static class PositionTypeComparator extends PositionComparator {
+		public int compare(Object arg0, Object arg1) {
+			
+			int res= super.compare(arg0, arg1);
+			if (res!= 0)
+				return res;
+			
+			// positions equal
+			if (arg0 instanceof SpliceSite) {
+				if (arg1 instanceof SpliceSite) {
+					SpliceSite s0= (SpliceSite) arg0;
+					SpliceSite s1= (SpliceSite) arg1;
+					if (s0.isDonor()&& !s1.isDonor())
+						return 1;	// for 1-lentgth exons, sort acceptor before donor (same pos)
+					if (s1.isDonor()&& !s0.isDonor())
+						return -1;
+					return 0;	// same type and position					
+				} else 
+					return 1;	// arg1 is no SS					
+			} else {
+				if (arg1 instanceof SpliceSite) 
+					return -1;	// arg0 is no SS
+				else {	// 2 no SS
+					boolean tss0= ((AbstractSite) arg0).isTSS();
+					boolean tss1= ((AbstractSite) arg1).isTSS();
+					if (tss0== tss1)
+						return 0;
+					if (tss0)
+						return -1;
+					return 1;
+				}
+			}
+		}
 
-		super(pos);
-		this.donor= donor;
-		this.gene= gene;
+		public int compare_old(Object arg0, Object arg1) {
+				// positions equal
+			if (arg0 instanceof SpliceSite) {
+				if (arg1 instanceof SpliceSite) {
+					SpliceSite s0= (SpliceSite) arg0;
+					SpliceSite s1= (SpliceSite) arg1;
+					if (s0.isDonor()&& !s1.isDonor())
+						return 1;	// for 1-lentgth exons, sort acceptor before donor (same pos)
+					if (s1.isDonor()&& !s0.isDonor())
+						return -1;
+					return 0;	// same type and position					
+				} else 
+					return 1;	// arg1 is no SS					
+			} else {
+				if (arg1 instanceof SpliceSite) 
+					return -1;	// arg0 is no SS
+				else {	// 2 no SS
+					boolean tss0= ((AbstractSite) arg0).isTSS();
+					boolean tss1= ((AbstractSite) arg1).isTSS();
+					if (tss0== tss1)
+						return 0;
+					if (tss0)
+						return -1;
+					return 1;
+				}
+			}
+		}
+	}
+
+	public static class PositionEqualSSTypeComparator extends PositionComparator {
+		public int compare(Object arg0, Object arg1) {
+			
+			int res= super.compare(arg0, arg1);
+			if (res!= 0)
+				return res;
+			
+			// positions equal: TSS before donor, acc, TES
+			SpliceSite s0= (SpliceSite) arg0;
+			SpliceSite s1= (SpliceSite) arg1;
+			if (s0.isTSS()&& !s1.isTSS())
+				return -1;
+			if ((!s0.isTSS())&& s1.isTSS())
+				return 1;
+			if (s0.isDonor()&& !s1.isDonor())
+				return -1;
+			if ((!s0.isDonor())&& s1.isDonor())
+				return 1;
+			if (s0.isAcceptor()&& !s1.isAcceptor())
+				return -1;
+			if ((!s0.isAcceptor())&& s1.isAcceptor())
+				return 1;
+			if (s0.isTES()&& !s1.isTES())
+				return -1;
+			if ((!s0.isTES())&& s1.isTES())
+				return 1;
+			
+			return 0; 	// everything equal
+		}
+	
+		public int compare_old(Object arg0, Object arg1) {
+				// positions equal
+			if (arg0 instanceof SpliceSite) {
+				if (arg1 instanceof SpliceSite) {
+					SpliceSite s0= (SpliceSite) arg0;
+					SpliceSite s1= (SpliceSite) arg1;
+					if (s0.isDonor()&& !s1.isDonor())
+						return 1;	// for 1-lentgth exons, sort acceptor before donor (same pos)
+					if (s1.isDonor()&& !s0.isDonor())
+						return -1;
+					return 0;	// same type and position					
+				} else 
+					return 1;	// arg1 is no SS					
+			} else {
+				if (arg1 instanceof SpliceSite) 
+					return -1;	// arg0 is no SS
+				else {	// 2 no SS
+					boolean tss0= ((AbstractSite) arg0).isTSS();
+					boolean tss1= ((AbstractSite) arg1).isTSS();
+					if (tss0== tss1)
+						return 0;
+					if (tss0)
+						return -1;
+					return 1;
+				}
+			}
+		}
+	}
+
+	public static boolean isU2ss(String id) {
+		if (id.contains("U2"))
+			return true;
+		return false;
 	}
 	
-	public SpliceSite(Gene gene, int pos, boolean donor, Exon exon) {
-		this(gene,pos,donor);
+	public static int[] getPositions(SpliceSite[] ss) {
+		if (ss== null)
+			return null;
+		int[] pos= new int[ss.length];
+		for (int i = 0; i < pos.length; i++) 
+			pos[i]= ss[i].getPos();
+		return pos;
+	}
+	
+	public SpliceSite(int pos, byte newType) {
+
+		super(pos);
+		setType(newType);		
+	}
+	
+	public SpliceSite(int pos, byte newType, Exon exon) {
+		this(pos,newType);
 		addExon(exon);
 	}
 	
@@ -115,31 +291,29 @@ public class SpliceSite extends AbstractSite {
 		return false;
 	}
 	
-	public void addASVar(ASVariation newASVar) {
-		if (asVars== null) 
-			asVars= new ASVariation[] {newASVar};
-		
-		asVars= (ASVariation[]) Arrays.add(asVars, newASVar);
-	}
-	
 	/**
 	 * checks for identity, not for homology
 	 */
-	public boolean equals(Object anotherSS) {
+	public boolean equals(Object obj) {
 		
-		if (!super.equals(anotherSS))
-			return false;
+		SpliceSite otherSS= (SpliceSite) obj;
+		if (getPos()== otherSS.getPos()&& getType()== otherSS.getType())
+			return true;
+		return false;
 		
-		if (!(anotherSS instanceof SpliceSite))
-			return false;
-		
-		SpliceSite s2= (SpliceSite) anotherSS;
-		if (s2.isDonor()!= isDonor())
-			return false;
-//		SpliceSite aSS= (SpliceSite) anotherSS;
-//		if (gene!= aSS.getGene()|| pos!= aSS.getPos())
+//		if (!super.equals(anotherSS))
 //			return false;
-		return true;
+//		
+//		if (!(anotherSS instanceof SpliceSite))
+//			return false;
+//		
+//		SpliceSite s2= (SpliceSite) anotherSS;
+//		if (s2.isDonor()!= isDonor())
+//			return false;
+////		SpliceSite aSS= (SpliceSite) anotherSS;
+////		if (gene!= aSS.getGene()|| pos!= aSS.getPos())
+////			return false;
+//		return true;
 	}
 	
 //	---------------------------------------------- 
@@ -173,18 +347,55 @@ public class SpliceSite extends AbstractSite {
 		// not required, read text
 		// bullshit, gotta change otherwise ss overwrite as in hash
 		// and the other way
-		return super.hashCode();
+		return getPos(); //super.hashCode();
 		
 	}
 	
 	public boolean isDonor() {
-		return donor;
+		return (type== TYPE_DONOR);
 	}
+
+	public boolean isTSS() {
+		return (type== TYPE_TSS);
+	}
+	
+	public boolean isTES() {
+		return (type== TYPE_TES);
+	}
+	
+	public boolean isSpliceSite() {
+		return (isDonor()|| isAcceptor());
+	}
+
 	public boolean isAcceptor() {
-		return !donor;
+		return (type== TYPE_ACCEPTOR);
 	}
-	public void setDonor(boolean donor) {
-		this.donor = donor;
+	
+	public boolean isCanonical() {
+		if ((!this.isDonor())&& (!this.isAcceptor()))
+			System.err.println("Not canonical() called for non-splicesite");
+		
+		String seq= getDinucleotide();		
+		if ((isDonor()&& seq.equalsIgnoreCase(CANONICAL_DONOR))||
+				(isAcceptor()&& seq.equalsIgnoreCase(CANONICAL_ACCEPTOR)))
+			return true;
+		return false;				
+	}
+	
+	public String getDinucleotide() {
+		if (dinucleotide == null) {
+			dinucleotide = Graph.readSequence(this, 0, 0);
+		}
+
+		return dinucleotide;
+	}
+	
+	public void setType(byte newType) {
+		this.type = newType;
+		if (isDonor())
+			setID(GTFObject.FEATURE_ID_DONOR);
+		else if (isAcceptor())
+			setID(GTFObject.FEATURE_ID_ACCEPTOR);
 	}
 	public Exon[] getExons() {
 		return exons;
@@ -193,13 +404,20 @@ public class SpliceSite extends AbstractSite {
 		this.exons = exons;
 	}
 	public String toString() {
-		String result= "";
-		if (!isDonor())
-			result+= ">";				
-		result+= getPos();
-		if (isDonor())
-			result+= ">";
-		return result;
+		if (stringRep == null) {	// || stringRep.charAt(stringRep.length()- 1)== '?'
+			if (isDonor())
+				stringRep= getPos()+ "^";
+			else if (isAcceptor())
+				stringRep= getPos()+ "-";
+			else if (isTSS())
+				stringRep= getPos()+ "*";
+			else if (isTES())
+				stringRep= getPos()+ ";";
+			else 
+				stringRep= getPos()+ "?";
+		}
+
+		return stringRep;
 	}
 	
 	public String toOutString() {
@@ -207,11 +425,6 @@ public class SpliceSite extends AbstractSite {
 		return result;
 	}
 
-	public boolean isConstitutive() {
-		//return constitutive;
-		return (asVars== null|| asVars.length< 1);
-	}
-	
 	public boolean isCDSRealTranscript() {
 		
 				// net gut, twilight-frontier events !
@@ -259,6 +472,30 @@ public class SpliceSite extends AbstractSite {
 		return (ctr> 0);	// at least one transcript w annotated CDS found
 	}
 	
+	public String getGenicLocation() {
+		Transcript[] t= getTranscripts();
+		boolean cds= false, utr5= false, utr3= false;
+		int pos= getRealSSpos();
+		for (int i = 0; i < t.length; i++) {
+			if (!t[i].isCoding())
+				continue;
+			if (t[i].getTranslations()[0].contains(pos))
+				cds= true;
+			else if (pos < t[i].getTranslations()[0].get5PrimeEdge())
+				utr5= true;
+			else if (pos > t[i].getTranslations()[0].get3PrimeEdge())
+				utr3= true;
+		}
+
+		if (cds)
+			return "CDS";
+		if (utr5&& !utr3)
+			return "5UTR";
+		if (utr3&& !utr5)
+			return "3UTR";
+		return "UNDEFINED";
+	}
+	
 	public boolean is5UTRMaxTranscript() {
 		for (int i = 0; i < transcripts.length; i++) {
 			if (transcripts[i].getTranslations()== null|| transcripts[i].getTranslations().length< 1
@@ -291,14 +528,6 @@ public class SpliceSite extends AbstractSite {
 		this.constitutive = constitutive;
 	}
 	
-	public void removeASVar(ASVariation var) {
-		asVars= (ASVariation[]) Arrays.remove(asVars, var);
-	}
-
-	public ASVariation[] getAsVars() {
-		return asVars;
-	}
-
 	public boolean addHit(Gene g, PWHit h) {
 			
 			Vector v= null;
@@ -444,5 +673,76 @@ public class SpliceSite extends AbstractSite {
 	
 		homologs.put(g, e);
 		return true;
+	}
+
+	public float getScoreU12() {
+		return scoreU12;
+	}
+
+	public void setScoreU12(float scoreU12) {
+		this.scoreU12 = scoreU12;
+	}
+
+	public byte getType() {
+		return type;
+	}
+
+	public char getSiteSymbol() {
+		if (isDonor())
+			return CHAR_DONOR;
+		if (isAcceptor())
+			return CHAR_ACCEPTOR;
+		if (isTSS())
+			return CHAR_TSS;
+		if (isTES())
+			return CHAR_TES;
+		
+		return CHAR_UNDEFINED;
+	}
+	
+	/**
+	 * +1 for donors, -1 for acceptors
+	 * @return
+	 */
+	public int getRealSSpos() {
+		if (isDonor())
+			return getPos()+ 1;
+		if (isAcceptor())
+			return getPos()- 1;
+		return getPos();
+	}
+
+	public void addASVar(ASVariation newASVar) {
+		if (asVars== null) 
+			asVars= new ASVariation[] {newASVar};
+		else 
+			asVars= (ASVariation[]) Arrays.add(asVars, newASVar);
+	}
+
+	public boolean isAlternative() {
+		//return (!isConstitutive());
+		return (modality== ALTERNATIVE);
+	}
+
+	public boolean isConstitutive() {
+		//return constitutive;
+		//return (asVars== null|| asVars.length< 1);
+		return (modality== CONSTITUTIVE);
+	}
+
+	public ASVariation[] getAsVars() {
+		return asVars;
+	}
+
+	public void removeASVar(ASVariation var) {
+		asVars= (ASVariation[]) Arrays.remove(asVars, var);
+	}
+
+	public byte getModality() {
+		return modality;
+	}
+
+	public void setModality(byte modality) {
+		this.modality = modality;
 	}
 }

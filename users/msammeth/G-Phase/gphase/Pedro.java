@@ -4,7 +4,7 @@ import gphase.io.TabPedroReader;
 import gphase.io.gtf.GTFChrReader;
 import gphase.io.gtf.GTFObject;
 import gphase.io.gtf.GTFWrapper;
-import gphase.model.ASEvent;
+import gphase.model.ASEventold;
 import gphase.model.ASMultiVariation;
 import gphase.model.ASVariation;
 import gphase.model.DirectedRegion;
@@ -16,6 +16,7 @@ import gphase.model.Transcript;
 import gphase.model.VariantGroup_SpliceChain;
 import gphase.tools.Arrays;
 import gphase.tools.Distribution;
+import gphase.tools.DoubleVector;
 import gphase.tools.Formatter;
 import gphase.tools.IntVector;
 import gphase.tools.Sequence;
@@ -25,6 +26,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Observable;
@@ -88,19 +91,32 @@ public class Pedro {
 	static DualHashBidiMap virtTagHash= null;
 
 	public static void main(String[] args) {
-		String speName= "human";
-		String annoName= "ASD";
-		String fName= Species.getAnnotation(speName, null, annoName, null);
-		//_00_convertToGTF();
-		//_01_grepVirtualTags();
-		//_02_findTagsInTranscripts(fName);
 		
-		String[] marker= new String[] {"_tagged"};
-		fName= Species.getAnnotation(speName, null, annoName, marker);
-		_03_getStatistics(true, fName);
-		//_04_diversityPerGene(fName);
-		//_05_overlapASEvents(fName);
-		_05_assignASevents(fName);
+		//_070806_countDigestionSites();
+		_070807_countTetramers();
+		if (1== 1)
+			System.exit(0);
+		
+		// /home/msammeth/annotations/human_hg18_RefSeqGenes_fromUCSC070716_mRNAs_fromUCSC070716_CDS.gtf
+		// /home/msammeth/annotations/human_hg18_RefSeqGenes_fromUCSC070716_mRNAs_fromUCSC070716_splicedESTs_from_UCSC0703.gtf				
+		Pedro pedro= new Pedro(new gphase.tools.File("/home/msammeth/annotations/human_hg18_RefSeqGenes_fromUCSC070716_mRNAs_fromUCSC070716_splicedESTs_from_UCSC0703.gtf"), "human_hg18");
+		pedro.tagFile2(4);
+		
+		
+		// old stuff
+//		String speName= "human";
+//		String annoName= "ASD";
+//		String fName= Species.getAnnotation(speName, null, annoName, null);
+//		//_00_convertToGTF();
+//		//_01_grepVirtualTags();
+//		//_02_findTagsInTranscripts(fName);
+//		
+//		String[] marker= new String[] {"_tagged"};
+//		fName= Species.getAnnotation(speName, null, annoName, marker);
+//		_03_getStatistics(true, fName);
+//		//_04_diversityPerGene(fName);
+//		//_05_overlapASEvents(fName);
+//		_05_assignASevents(fName);
 	}
 	
 	/**	  
@@ -433,7 +449,7 @@ public class Pedro {
 //					cnt3Pincl= new Integer(cnt3Pincl+ 1);
 //					continue;	// not 3' complete
 //				}
-				if (!trpt.is3Pcomplete()) {
+				if ((trpt.getSource().toUpperCase().contains("MRNA")|| trpt.getSource().toUpperCase().contains("EST"))&& (!trpt.is3Pcomplete())) {
 					cnt3Pincl= new Integer(cnt3Pincl+ 1);
 					++trptIncomplete;
 					continue;
@@ -1045,7 +1061,7 @@ public class Pedro {
 						beforeRedFilt= vars.length;
 					vars= ASMultiVariation.removeRedundancy(
 							vars, 
-							new ASVariation.StructureComparator());
+							new ASVariation.IdentityComparator());
 					if (vars== null)
 						cntRedFilt+= (beforeRedFilt- 0);
 					else
@@ -1177,6 +1193,237 @@ public class Pedro {
 			System.out.println("MPSS total: "+cntTotMPSS+", "+cntOvlEventsMPSS+" overlapped by ASevents and "+cntOvlEJMPSS+" by EJ.");
 			System.out.println("SAGE total: "+cntTotSAGE+", "+cntOvlEventsSAGE+" overlapped by ASevents and "+cntOvlEJSAGE+" by EJ.");
 			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void _070806_countDigestionSites() {
+			long t0= System.currentTimeMillis();
+			Species species= new Species("human");
+			species.setGenomeVersion("hg17");
+			//	dm3_0604_RefSeq_mRNA_fromUCSC_070807.gtf
+			// /home/msammeth/annotations/human_hg18_RefSeqGenes_fromUCSC070716_mRNAs_fromUCSC070716_CDS.gtf
+			// /home/msammeth/annotations/human_hg18_RefSeqGenes_fromUCSC070716.gtf
+			// /home/msammeth/annotations/mm8_0602_RefSeq_fromUCSC_070807.gtf
+			// /home/msammeth/annotations/mm8_0602_RefSeq_fromUCSC_070807.gtf
+			// /home/msammeth/annotations/danRer4_gp0603_RefSeq_fromUCSC_070807.gtf
+			gphase.tools.File file= new gphase.tools.File("/home/msammeth/annotations/human_hg17_GENCODEv03.1mar07.gtf");
+			GTFChrReader reader= new GTFChrReader(file.getAbsolutePath());
+			try {
+				reader.read();
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+			Gene[] g= reader.getGenes();
+			DoubleVector mpssExon= new DoubleVector(), mpssIntron= new DoubleVector(), sageExon= new DoubleVector(), sageIntron= new DoubleVector();
+			Vector mExV= new Vector(), mInV= new Vector(), sExV= new Vector(), sInV= new Vector(), mIGV= new Vector(), sIGV= new Vector();
+			Comparator compi= new DirectedRegion.PositionComparator();
+			while (g!= null) {
+				java.util.Arrays.sort(g, compi);
+				for (int i = 0; i < g.length; i++) {
+					g[i].setSpecies(species);
+					if (1==2&& i>0&& g[i-1].isForward()== g[i].isForward()) {
+						DirectedRegion reg= new DirectedRegion(g[i-1].get3PrimeEdge(), g[i].get5PrimeEdge(),g[i].getStrand());
+						reg.setChromosome(g[i].getChromosome());
+						reg.setSpecies(g[i].getSpecies());
+						int[][] mpssInt= g[i].getTranscripts()[0].countOccurrences(new DirectedRegion[] {reg}, MPSS_DIGEST_SITE_DPNII);
+						mIGV.add(((double) mpssInt.length)/ reg.getLength());
+						int[][] sageInt= g[i].getTranscripts()[0].countOccurrences(new DirectedRegion[] {reg}, SAGE_DIGEST_SITE_NLAIII);
+						sIGV.add(((double) sageInt.length)/ reg.getLength());
+					}
+	//				if (1==1)
+	//					continue;
+					
+					if (g[i].getTranscripts().length> 1000)
+						continue;
+					Transcript[] t= g[i].getTranscripts();
+					for (int j = 0; j < t.length; j++) {
+						int exLen= t[j].getExonicLength();
+						int inLen= t[j].getIntronicLength();
+						int[][] mpssEx=  t[j].countOccurrences(t[j].getExons(),MPSS_DIGEST_SITE_DPNII);
+						for (int k = 0; k < mpssEx.length; k++) 
+							mExV.add(mpssEx[k]);
+						int[][] mpssIn= t[j].countOccurrences(t[j].getIntrons(), MPSS_DIGEST_SITE_DPNII);
+						for (int k = 0; k < mpssIn.length; k++) 
+							mInV.add(mpssIn[k]);
+						int[][] sageEx= t[j].countOccurrences(t[j].getExons(), SAGE_DIGEST_SITE_NLAIII);
+						for (int k = 0; k < sageEx.length; k++) 
+							sExV.add(sageEx[k]);
+						int[][] sageIn= t[j].countOccurrences(t[j].getIntrons(), SAGE_DIGEST_SITE_NLAIII);
+						for (int k = 0; k < sageIn.length; k++) 
+							sInV.add(sageIn[k]);
+						mpssExon.add(((double) mpssEx.length)/ exLen);
+						sageExon.add(((double) sageEx.length)/ exLen);
+						if (inLen> 0) {
+							mpssIntron.add(((double) mpssIn.length)/ inLen);
+							sageIntron.add(((double) sageIn.length)/ inLen);
+						}
+					}
+				}
+				
+				try {
+					reader.read();
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}
+				g= reader.getGenes();
+				System.gc();
+				Thread.currentThread().yield();
+			}
+			
+			System.out.println("MPSS: exon "+new Distribution(mpssExon.toDoubleArray()).getMedian()
+					+", intron "+ new Distribution(mpssIntron.toDoubleArray()).getMedian());
+			System.out.println("SAGE: exon "+new Distribution(sageExon.toDoubleArray()).getMedian()
+					+", intron "+ new Distribution(sageIntron.toDoubleArray()).getMedian());
+			System.out.println("took "+((System.currentTimeMillis()- t0)/1000)+" sec.");
+			try {
+				BufferedWriter buffy= new BufferedWriter(new FileWriter("mpss_exon.txt"));
+				for (int i = 0; i < mpssExon.length; i++) 
+					buffy.write(mpssExon.getValue(i)+"\n");
+				buffy.flush(); buffy.close();
+				buffy= new BufferedWriter(new FileWriter("mpss_intron.txt"));
+				for (int i = 0; i < mpssIntron.length; i++) 
+					buffy.write(mpssIntron.getValue(i)+"\n");
+				buffy.flush(); buffy.close();
+				buffy= new BufferedWriter(new FileWriter("sage_exon.txt"));
+				for (int i = 0; i < sageExon.length; i++) 
+					buffy.write(sageExon.getValue(i)+"\n");
+				buffy.flush(); buffy.close();
+				buffy= new BufferedWriter(new FileWriter("sage_intron.txt"));
+				for (int i = 0; i < sageIntron.length; i++) 
+					buffy.write(sageIntron.getValue(i)+"\n");
+				buffy.flush(); buffy.close();
+				buffy= new BufferedWriter(new FileWriter("mpss_exon5_flank.txt"));
+				for (int i = 0; i < mExV.size(); i++) 
+					buffy.write(((int[]) mExV.elementAt(i))[0]+"\n");
+				buffy.flush(); buffy.close();
+				buffy= new BufferedWriter(new FileWriter("mpss_exon3_flank.txt"));
+				for (int i = 0; i < mExV.size(); i++) 
+					buffy.write(((int[]) mExV.elementAt(i))[1]+"\n");
+				buffy.flush(); buffy.close();
+				buffy= new BufferedWriter(new FileWriter("mpss_intron5_flank.txt"));
+				for (int i = 0; i < mInV.size(); i++) 
+					buffy.write(((int[]) mInV.elementAt(i))[0]+"\n");
+				buffy.flush(); buffy.close();
+				buffy= new BufferedWriter(new FileWriter("mpss_intron3_flank.txt"));
+				for (int i = 0; i < mInV.size(); i++) 
+					buffy.write(((int[]) mInV.elementAt(i))[1]+"\n");
+				buffy.flush(); buffy.close();
+				buffy= new BufferedWriter(new FileWriter("sage_exon5_flank.txt"));
+				for (int i = 0; i < sExV.size(); i++) 
+					buffy.write(((int[]) sExV.elementAt(i))[0]+"\n");
+				buffy.flush(); buffy.close();
+				buffy= new BufferedWriter(new FileWriter("sage_exon3_flank.txt"));
+				for (int i = 0; i < sExV.size(); i++) 
+					buffy.write(((int[]) sExV.elementAt(i))[1]+"\n");
+				buffy.flush(); buffy.close();
+				buffy= new BufferedWriter(new FileWriter("sage_intron5_flank.txt"));
+				for (int i = 0; i < sInV.size(); i++) 
+					buffy.write(((int[]) sInV.elementAt(i))[0]+"\n");
+				buffy.flush(); buffy.close();
+				buffy= new BufferedWriter(new FileWriter("sage_intron3_flank.txt"));
+				for (int i = 0; i < sInV.size(); i++) 
+					buffy.write(((int[]) sInV.elementAt(i))[0]+"\n");
+				buffy.flush(); buffy.close();
+				buffy= new BufferedWriter(new FileWriter("mpss_intergenic.txt"));
+				for (int i = 0; i < mIGV.size(); i++) 
+					buffy.write(mIGV.elementAt(i)+"\n");
+				buffy.flush(); buffy.close();
+				buffy= new BufferedWriter(new FileWriter("sage_intergenic.txt"));
+				for (int i = 0; i < sIGV.size(); i++) 
+					buffy.write(sIGV.elementAt(i)+"\n");
+				buffy.flush(); buffy.close();
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
+	public static void _070807_countTetramers() {
+		long t0= System.currentTimeMillis();
+		Species species= new Species("human");
+		species.setGenomeVersion("hg18");
+		//	dm3_0604_RefSeq_mRNA_fromUCSC_070807.gtf
+		// /home/msammeth/annotations/human_hg18_RefSeqGenes_fromUCSC070716_mRNAs_fromUCSC070716_CDS.gtf
+		// /home/msammeth/annotations/human_hg18_RefSeqGenes_fromUCSC070716.gtf
+		// /home/msammeth/annotations/mm8_0602_RefSeq_fromUCSC_070807.gtf
+		gphase.tools.File file= new gphase.tools.File("/home/msammeth/annotations/mm8_0602_RefSeq_fromUCSC_070807.gtf");
+		GTFChrReader reader= new GTFChrReader(file.getAbsolutePath());
+		try {
+			reader.read();
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}
+		Gene[] g= reader.getGenes();
+		Comparator compi= new DirectedRegion.PositionComparator();
+		char[] bases= new char[] {'A','C','G','T'};
+		DoubleVector[] exonOcc= new DoubleVector[256], intronOcc= new DoubleVector[256];
+		for (int i = 0; i < intronOcc.length; i++) {
+			exonOcc[i]= new DoubleVector();
+			intronOcc[i]= new DoubleVector();
+		}
+		while (g!= null) {
+			java.util.Arrays.sort(g, compi);
+			for (int i = 0; i < g.length; i++) {
+				g[i].setSpecies(species);
+				if (g[i].getTranscripts().length> 1000)
+					continue;
+				Transcript[] t= g[i].getTranscripts();
+				for (int j = 0; j < t.length; j++) {
+					int exLen= t[j].getExonicLength();
+					int inLen= t[j].getIntronicLength();
+					int idCtr= 0;
+					for (int x = 0; x < bases.length; x++) {
+						for (int y = 0; y < bases.length; y++) {
+							for (int z = 0; z < bases.length; z++) {
+								for (int a = 0; a < bases.length; a++) {
+									String label= new String(new char[] {bases[x],bases[y],bases[z],bases[a]});
+									int[][] aa=  t[j].countOccurrences(t[j].getExons(),label);
+									exonOcc[idCtr].add(((double) aa.length)/ exLen);
+									aa= t[j].countOccurrences(t[j].getIntrons(), label);
+									intronOcc[idCtr].add(((double) aa.length)/ inLen);
+									++idCtr;
+								}
+							}
+						}
+					}
+				}
+			}
+			
+			try {
+				reader.read();
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+			g= reader.getGenes();
+			System.gc();
+			Thread.currentThread().yield();
+		}
+		
+		System.out.println("took "+((System.currentTimeMillis()- t0)/1000)+" sec.");
+		try {
+			int idCtr= 0;
+			for (int x = 0; x < bases.length; x++) {
+				for (int y = 0; y < bases.length; y++) {
+					for (int z = 0; z < bases.length; z++) {
+						for (int a = 0; a < bases.length; a++) {
+							String fName= new String(new char[] {bases[x],bases[y],bases[z],bases[a]});
+							
+							BufferedWriter buffy= new BufferedWriter(new FileWriter("exon_"+fName+"_.txt"));
+							for (int i = 0; i < exonOcc[idCtr].size(); i++) 
+								buffy.write(exonOcc[idCtr].getValue(i)+"\n");
+							buffy.flush(); buffy.close();
+							
+							buffy= new BufferedWriter(new FileWriter("intron_"+fName+"_.txt"));
+							for (int i = 0; i < intronOcc[idCtr].size(); i++) 
+								buffy.write(intronOcc[idCtr].getValue(i)+"\n");
+							buffy.flush(); buffy.close();
+							++idCtr;
+						}
+					}
+				}
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -1319,6 +1566,256 @@ public class Pedro {
 			// sliding window, size 10, 8nt A
 		
 	}
+	
+	
+	gphase.tools.File file;
+	Species species;
+	
+	public Pedro(gphase.tools.File newFile, String genomeName) {
+		this.file= newFile;
+		setGenomeVersion(genomeName);
+	}
+	public void setGenomeVersion(String genomeName) {
+		String[] token= genomeName.split("_");
+		this.species= new Species(token[0]);
+		species.setGenomeVersion(token[1]);
+	}
+
+	
+	public void tagFile(int tagsPerTrpt) {
+		
+		GTFChrReader reader= new GTFChrReader(file.getAbsolutePath());
+		String outFileName= file.getPathOnly()+ File.separator+ file.getFileNameWithoutExtension()+ "_tags."+ file.getExtension();
+		outFileName= Toolbox.checkFileExists(outFileName);
+		GTFChrReader buffy= new GTFChrReader(outFileName);
+		try {
+			reader.read();
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}
+		Gene[] g= reader.getGenes();
+		int[] mpssEJC= new int[4], sagelEJC= new int[4], sagesEJC= new int[4], mpssNorm= new int[4], sagelNorm= new int[4], sagesNorm= new int[4];
+		for (int i = 0; i < sagesEJC.length; i++) {
+			mpssEJC[i]= 0; sagelEJC[i]= 0; sagesEJC[i]= 0; mpssNorm[i]= 0; sagelNorm[i]= 0; sagesNorm[i]= 0;
+		}
+		int cntIncomplete= 0, cntComplete= 0, cntTagsMPSS= 0, cntTagsSageL= 0, cntTagsSageS= 0;
+		while (g!= null) {
+			for (int i = 0; i < g.length; i++) {
+				g[i].setSpecies(this.species);
+				Transcript[] t= g[i].getTranscripts();
+				for (int j = 0; j < t.length; j++) {
+					
+					if ((t[j].getSource().toUpperCase().contains("MRNA")|| 
+						t[j].getSource().toUpperCase().contains("EST"))&&
+						(!t[j].is3Pcomplete())) {
+						++cntIncomplete;
+						continue;
+					}
+					 
+					++cntComplete;
+					
+					GTFObject[] tagsMPSS= t[j].extract3Tag(MPSS_DIGEST_SITE_DPNII, MPSS_TAG_LENGTH, tagsPerTrpt);
+					buffy.setGtfObj(tagsMPSS);
+					try {
+						buffy.write(true);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					for (int k = 0; k < tagsMPSS.length; k++) 
+						if (tagsMPSS[k]!= null)
+							++cntTagsMPSS;
+					GTFObject[] tagsSAGElong= t[j].extract3Tag(SAGE_DIGEST_SITE_NLAIII, SAGE_TAG_LENGTH_LONG, tagsPerTrpt);
+					buffy.setGtfObj(tagsSAGElong);
+					try {
+						buffy.write(true);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					for (int k = 0; k < tagsSAGElong.length; k++) 
+						if (tagsSAGElong[k]!= null)
+							++cntTagsSageL;
+					GTFObject[] tagsSAGEshort= t[j].extract3Tag(SAGE_DIGEST_SITE_NLAIII, SAGE_TAG_LENGTH_SHORT, tagsPerTrpt);
+					buffy.setGtfObj(tagsSAGEshort);
+					try {
+						buffy.write(true);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					for (int k = 0; k < tagsSAGEshort.length; k++) 
+						if (tagsSAGEshort[k]!= null)
+							++cntTagsSageS;
+					
+					checkEJCOverlap(tagsMPSS, t[j].getExons(), MPSS_TAG_LENGTH, mpssEJC, mpssNorm);
+					checkEJCOverlap(tagsSAGElong, t[j].getExons(), SAGE_TAG_LENGTH_LONG, sagelEJC, sagelNorm);
+					checkEJCOverlap(tagsSAGEshort, t[j].getExons(), SAGE_TAG_LENGTH_SHORT, sagesEJC, sagesNorm);
+				}
+			}
+			
+			try {
+				reader.read();
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+			g= reader.getGenes();
+			System.gc();
+			Thread.currentThread().yield();
+		}
+		
+		System.out.println(cntComplete+" complete, "+cntIncomplete+" incomplete trpts.");
+		for (int i = 0; i < tagsPerTrpt; i++) 
+			System.out.print("\t"+(i+1)+"EJC\t"+"total");
+		System.out.println("\ttotal");
+		
+		System.out.print("MPSS");
+		for (int i = 0; i < mpssEJC.length; i++) 
+			System.out.print("\t"+mpssEJC[i]+"\t"+mpssNorm[i]);
+		System.out.println("\t"+cntTagsMPSS);
+		
+		System.out.print("SAGEl");
+		for (int i = 0; i < sagelEJC.length; i++) 
+			System.out.print("\t"+sagelEJC[i]+"\t"+sagelNorm[i]);
+		System.out.println("\t"+cntTagsSageL);
+	
+		System.out.print("SAGEs");
+		for (int i = 0; i < sagesEJC.length; i++) 
+			System.out.print("\t"+sagesEJC[i]+"\t"+sagesNorm[i]);
+		System.out.println("\t"+cntTagsSageS);
+	}
+
+	public void tagFile2(int tagsPerTrpt) {
+		
+		long t0= System.currentTimeMillis();
+		GTFChrReader reader= new GTFChrReader(file.getAbsolutePath());
+		String outFileName= file.getPathOnly()+ File.separator+ file.getFileNameWithoutExtension()+ "_tags."+ file.getExtension();
+		outFileName= Toolbox.checkFileExists(outFileName);
+		GTFChrReader buffy= new GTFChrReader(outFileName);
+		try {
+			reader.read();
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}
+		Gene[] g= reader.getGenes();
+		int[] mpssEJC= new int[4], sagelEJC= new int[4], sagesEJC= new int[4], mpssNorm= new int[4], sagelNorm= new int[4], sagesNorm= new int[4];
+		for (int i = 0; i < sagesEJC.length; i++) {
+			mpssEJC[i]= 0; sagelEJC[i]= 0; sagesEJC[i]= 0; mpssNorm[i]= 0; sagelNorm[i]= 0; sagesNorm[i]= 0;
+		}
+		int cntIncomplete= 0, cntComplete= 0, cntTagsMPSS= 0, cntTagsSageL= 0, cntTagsSageS= 0;
+		while (g!= null) {
+			for (int i = 0; i < g.length; i++) {
+				if (g[i].getTranscriptNbFromSource(GTFObject.SOURCE_MRNA)> 1000)
+					continue;
+				g[i].setSpecies(this.species);
+				g[i].markAlternativeSpliceSites();
+				Transcript[] t= g[i].getTranscripts();
+				for (int j = 0; j < t.length; j++) {
+					
+					if (t[j].getSource().toUpperCase().contains("EST"))
+						continue;
+					
+					if (t[j].getSource().toUpperCase().contains("MRNA")&&
+						(!t[j].is3Pcomplete())) {
+						++cntIncomplete;
+						continue;
+					}
+					 
+					++cntComplete;
+					
+					GTFObject[] tagsMPSS= t[j].extract3Tag(MPSS_DIGEST_SITE_DPNII, MPSS_TAG_LENGTH, tagsPerTrpt);
+					buffy.setGtfObj(tagsMPSS);
+					try {
+						buffy.write(true);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					for (int k = 0; k < tagsMPSS.length; k++) 
+						if (tagsMPSS[k]!= null)
+							++cntTagsMPSS;
+					GTFObject[] tagsSAGElong= t[j].extract3Tag(SAGE_DIGEST_SITE_NLAIII, SAGE_TAG_LENGTH_LONG, tagsPerTrpt);
+					buffy.setGtfObj(tagsSAGElong);
+					try {
+						buffy.write(true);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					for (int k = 0; k < tagsSAGElong.length; k++) 
+						if (tagsSAGElong[k]!= null)
+							++cntTagsSageL;
+					GTFObject[] tagsSAGEshort= t[j].extract3Tag(SAGE_DIGEST_SITE_NLAIII, SAGE_TAG_LENGTH_SHORT, tagsPerTrpt);
+					buffy.setGtfObj(tagsSAGEshort);
+					try {
+						buffy.write(true);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					for (int k = 0; k < tagsSAGEshort.length; k++) 
+						if (tagsSAGEshort[k]!= null)
+							++cntTagsSageS;
+					
+					checkEJCOverlap(tagsMPSS, t[j].getExons(), MPSS_TAG_LENGTH, mpssEJC, mpssNorm);
+					checkEJCOverlap(tagsSAGElong, t[j].getExons(), SAGE_TAG_LENGTH_LONG, sagelEJC, sagelNorm);
+					checkEJCOverlap(tagsSAGEshort, t[j].getExons(), SAGE_TAG_LENGTH_SHORT, sagesEJC, sagesNorm);
+				}
+			}
+			
+			try {
+				reader.read();
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+			g= reader.getGenes();
+			System.gc();
+			Thread.currentThread().yield();
+		}
+		
+		System.out.println(cntComplete+" complete, "+cntIncomplete+" incomplete trpts.");
+		for (int i = 0; i < tagsPerTrpt; i++) 
+			System.out.print("\t"+(i+1)+"EJC\t"+"total");
+		System.out.println("\ttotal");
+		
+		System.out.print("MPSS");
+		for (int i = 0; i < mpssEJC.length; i++) 
+			System.out.print("\t"+mpssEJC[i]+"\t"+mpssNorm[i]);
+		System.out.println("\t"+cntTagsMPSS);
+		
+		System.out.print("SAGEl");
+		for (int i = 0; i < sagelEJC.length; i++) 
+			System.out.print("\t"+sagelEJC[i]+"\t"+sagelNorm[i]);
+		System.out.println("\t"+cntTagsSageL);
+
+		System.out.print("SAGEs");
+		for (int i = 0; i < sagesEJC.length; i++) 
+			System.out.print("\t"+sagesEJC[i]+"\t"+sagesNorm[i]);
+		System.out.println("\t"+cntTagsSageS);
+		
+		System.out.println("\n\ntook "+(System.currentTimeMillis()-t0/1000)+" [sec]");
+	}
+	
+	int checkEJCOverlap(GTFObject[] tags, Exon[] e, int taglen, int[] hits, int[] total) {
+		int hitCount= 0;
+		for (int i = 0; i < tags.length; i++) {
+			if (tags[i]== null)
+				continue;
+
+			++total[i];
+			
+			// too unsafe
+			//if (tags[i].getEnd()- tags[i].getStart()+ 1> taglen) {	// < can be truncated tag
+			int j;
+			for (j = e.length- 1; j > 0; --j) {
+				int x= Math.abs(e[j].get5PrimeEdge());
+				int y= Math.abs(e[j-1].get3PrimeEdge());
+				if (x> tags[i].getStart()&& x< tags[i].getEnd()&& y> tags[i].getStart()&& y< tags[i].getEnd()) {
+					++hitCount;
+					++hits[i];
+					break;
+				}
+			}
+				
+		}
+		return hitCount;
+	}
+	
+
 	
 	public static String getDigSiteQualifier(String digSite) {
 		if (digSite.equalsIgnoreCase(MPSS_DIGEST_SITE_DPNII))

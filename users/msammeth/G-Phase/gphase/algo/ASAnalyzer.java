@@ -40,7 +40,7 @@ import gphase.io.gtf.ATDWrapper;
 import gphase.io.gtf.EncodeWrapper;
 import gphase.io.gtf.GTFObject;
 import gphase.io.gtf.GTFWrapper;
-import gphase.model.ASEvent;
+import gphase.model.ASEventold;
 import gphase.model.ASMultiVariation;
 import gphase.model.ASVariation;
 import gphase.model.AbstractRegion;
@@ -1681,7 +1681,7 @@ public class ASAnalyzer {
 			AbstractRegion re;
 			for (int i = 0; i < ge.length; i++) {
 				SpliceSite[] ss= 
-					ge[i].getSpliceSites(SpliceSite.CONSTITUTIVE_SS, Gene.REGION_REAL_3UTR);
+					ge[i].getSpliceSites(SpliceSite.CONSTITUTIVE, Gene.REGION_REAL_3UTR);
 				for (int j = 0; ss!= null&& j < ss.length; j++) 
 					buffy.println(ge[i].getChromosome()+ " "+ ss[j].getPos());
 			}
@@ -2785,7 +2785,7 @@ public class ASAnalyzer {
 								} catch (Exception e) {
 									e.printStackTrace();
 								}
-								Comparator compi= new ASVariation.StructureComparator();
+								Comparator compi= new ASVariation.IdentityComparator();
 								for (int i = 0; filtClasses!= null&& i < filtClasses.length; i++) 
 									filtClasses[i]= ASMultiVariation.removeRedundancy(classes[i], compi);
 								filtClasses= (ASVariation[][]) Arrays.filter(filtClasses, m);
@@ -2997,7 +2997,7 @@ public class ASAnalyzer {
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
-						Comparator compi= new ASVariation.StructureComparator();
+						Comparator compi= new ASVariation.IdentityComparator();
 						for (int i = 0; filtClasses!= null&& i < filtClasses.length; i++) 
 							filtClasses[i]= ASMultiVariation.removeRedundancy(classes[i], compi);
 						filtClasses= (ASVariation[][]) Arrays.filter(filtClasses, m);
@@ -3149,7 +3149,7 @@ public class ASAnalyzer {
 //					g.filterNMDTranscripts();
 //					ASVariation[][] classes= g.getASVariations(ASMultiVariation.FILTER_NONE);
 //					classes= (ASVariation[][]) Arrays.sort2DFieldRev(classes);
-					Comparator compi= new ASVariation.StructureComparator();
+					Comparator compi= new ASVariation.IdentityComparator();
 //					for (int i = 0; i < classes.length; i++) 
 //						classes[i]= ASMultiVariation.removeRedundancy(classes[i], compi);
 //					outputVariations(classes, false, true, System.out);
@@ -3593,10 +3593,10 @@ public class ASAnalyzer {
 		for (int i = 0; i < vars.length; i++) {
 			for (int j = 0; j < vars[i].length; j++) {
 				int l1, l2;
-				if (vars[i][j].is_contained_in_5UTR()) {
+				if (vars[i][j].isContained5UTR()) {
 					l1= vars[i][j].getTranscript1().get5UTRLength(true);
 					l2= vars[i][j].getTranscript2().get5UTRLength(true);
-				} else if (vars[i][j].is_contained_in_CDS()) {
+				} else if (vars[i][j].isContainedCDS()) {
 					l1= vars[i][j].getTranscript1().getCDSLength(true);
 					l2= vars[i][j].getTranscript2().getCDSLength(true);
 				} else
@@ -3616,10 +3616,10 @@ public class ASAnalyzer {
 				
 				if (v1> l1|| v2> l2)
 					System.currentTimeMillis();
-				if (vars[i][j].is_contained_in_5UTR()) {
+				if (vars[i][j].isContained5UTR()) {
 					fracV[0].add(new Double(((double) l1- v1)/ l1));
 					fracV[0].add(new Double(((double) l2- v2)/ l2));
-				} else if (vars[i][j].is_contained_in_CDS()) {
+				} else if (vars[i][j].isContainedCDS()) {
 					fracV[1].add(new Double(((double) l1- v1)/ l1));
 					fracV[1].add(new Double(((double) l2- v2)/ l2));
 				}
@@ -4752,32 +4752,32 @@ public class ASAnalyzer {
 		SpliceSite[] ss;
 		String[] attributes;
 		for (int i = 0; i < ge.length; i++) {
-			ss= ge[i].getSpliceSites(SpliceSite.CONSTITUTIVE_SS, Gene.REGION_REAL_5UTR);
+			ss= ge[i].getSpliceSites(SpliceSite.CONSTITUTIVE, Gene.REGION_REAL_5UTR);
 			attributes= new String[] {"CONSTITUTIVE_SS", "REGION_REAL_5UTR"};
 			for (int j = 0; ss!= null&& j < ss.length; j++) 
 				gffV.add(GTFObject.createGFFObject(ss[j], source, attributes));
 			
-			ss= ge[i].getSpliceSites(SpliceSite.ALTERNATE_SS, Gene.REGION_REAL_5UTR);
+			ss= ge[i].getSpliceSites(SpliceSite.ALTERNATIVE, Gene.REGION_REAL_5UTR);
 			attributes= new String[] {"ALTERNATE_SS", "REGION_REAL_5UTR"};
 			for (int j = 0; ss!= null&& j < ss.length; j++) 
 				gffV.add(GTFObject.createGFFObject(ss[j], source, attributes));
 
-			ss= ge[i].getSpliceSites(SpliceSite.CONSTITUTIVE_SS, Gene.REGION_REAL_CDS);
+			ss= ge[i].getSpliceSites(SpliceSite.CONSTITUTIVE, Gene.REGION_REAL_CDS);
 			attributes= new String[] {"CONSTITUTIVE_SS", "REGION_REAL_CDS"};
 			for (int j = 0; ss!= null&& j < ss.length; j++) 
 				gffV.add(GTFObject.createGFFObject(ss[j], source, attributes));
 
-			ss= ge[i].getSpliceSites(SpliceSite.ALTERNATE_SS, Gene.REGION_REAL_CDS);
+			ss= ge[i].getSpliceSites(SpliceSite.ALTERNATIVE, Gene.REGION_REAL_CDS);
 			attributes= new String[] {"ALTERNATE_SS", "REGION_REAL_CDS"};
 			for (int j = 0; ss!= null&& j < ss.length; j++) 
 				gffV.add(GTFObject.createGFFObject(ss[j], source, attributes));
 			
-			ss= ge[i].getSpliceSites(SpliceSite.CONSTITUTIVE_SS, Gene.REGION_REAL_3UTR);
+			ss= ge[i].getSpliceSites(SpliceSite.CONSTITUTIVE, Gene.REGION_REAL_3UTR);
 			attributes= new String[] {"CONSTITUTIVE_SS", "REGION_REAL_3UTR"};
 			for (int j = 0; ss!= null&& j < ss.length; j++) 
 				gffV.add(GTFObject.createGFFObject(ss[j], source, attributes));
 			
-			ss= ge[i].getSpliceSites(SpliceSite.ALTERNATE_SS, Gene.REGION_REAL_3UTR);
+			ss= ge[i].getSpliceSites(SpliceSite.ALTERNATIVE, Gene.REGION_REAL_3UTR);
 			attributes= new String[] {"ALTERNATE_SS", "REGION_REAL_3UTR"};
 			for (int j = 0; ss!= null&& j < ss.length; j++) 
 				gffV.add(GTFObject.createGFFObject(ss[j], source, attributes));

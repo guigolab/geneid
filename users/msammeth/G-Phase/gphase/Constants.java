@@ -44,7 +44,7 @@ public class Constants {
 	public static String SUBDIR_ANNOTATION= null;
 	static {
 		if (OSChecker.isLinux())
-			SUBDIR_ANNOTATION= null;
+			SUBDIR_ANNOTATION= "/home/msammeth/annotations";
 		else if (OSChecker.isWindows())
 			SUBDIR_ANNOTATION= "H:"+File.separator+"annotations";
 	}

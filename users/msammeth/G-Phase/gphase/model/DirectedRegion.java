@@ -10,7 +10,42 @@ import java.util.Vector;
 public class DirectedRegion extends DefaultRegion {
 
 	static final long serialVersionUID = 4346170163999111167l;
-	
+	public static class StartComparator implements Comparator {
+		public int compare(Object o1, Object o2) {
+			DirectedRegion reg0= (DirectedRegion) o1;
+			DirectedRegion reg1= (DirectedRegion) o2;
+			if (reg0.get5PrimeEdge()< reg1.get5PrimeEdge())
+				return -1;
+			if (reg0.get5PrimeEdge()> reg1.get5PrimeEdge())
+				return 1;
+			return 0;
+		}
+	}
+
+	public static class EndComparator implements Comparator {
+		public int compare(Object o1, Object o2) {
+			DirectedRegion reg0= (DirectedRegion) o1;
+			DirectedRegion reg1= (DirectedRegion) o2;
+			if (reg0.get3PrimeEdge()< reg1.get3PrimeEdge())
+				return -1;
+			if (reg0.get3PrimeEdge()> reg1.get3PrimeEdge())
+				return 1;
+			return 0;
+		}
+	}
+
+	public static class EndsBeforeComparator implements Comparator {
+		public int compare(Object o1, Object o2) {
+			DirectedRegion reg0= (DirectedRegion) o1;
+			DirectedRegion reg1= (DirectedRegion) o2;
+			if (reg0.get3PrimeEdge()< reg1.get5PrimeEdge())
+				return -1;
+			if (reg1.get3PrimeEdge()< reg0.get5PrimeEdge())
+				return 1;
+			return 0;
+		}
+	}
+
 	public static class LengthComparator implements Comparator {
 		public int compare(Object arg0, Object arg1) {
 			DirectedRegion reg0= (DirectedRegion) arg0;
@@ -59,6 +94,25 @@ public class DirectedRegion extends DefaultRegion {
 		
 		return (AbstractSite[]) Arrays.toField(v);
 	}
+	
+	public static DirectedRegion getUnion(DirectedRegion[] regs) {
+		if (regs== null)
+			return null;
+		int min= Integer.MAX_VALUE;
+		int max= Integer.MIN_VALUE;
+		for (int i = 0; i < regs.length; i++) {
+			if (regs[i].get5PrimeEdge()< min)
+				min= regs[i].get5PrimeEdge();
+			if (regs[i].get3PrimeEdge()> max)
+				max= regs[i].get3PrimeEdge();
+		}
+		
+		DirectedRegion result= new DirectedRegion(min, max, regs[0].getStrand());
+		result.setChromosome(regs[0].getChromosome());
+		result.setSpecies(regs[0].getSpecies());
+		return result;
+	}
+	
 	
 	/**
 	 * deletes contained regions, concatenates overlapping regions, st every nt is only covered once
@@ -363,6 +417,10 @@ public class DirectedRegion extends DefaultRegion {
 		setStart(newStart);
 		setEnd(newEnd);
 	}
+	public DirectedRegion(int newStart, int newEnd, int strand, String newChr) {
+		this(newStart, newEnd, strand);
+		setChromosome(newChr);
+	}
 	
 	public DirectedRegion(DirectedRegion source) {
 		setStrand(source.getStrand());
@@ -393,6 +451,8 @@ public class DirectedRegion extends DefaultRegion {
 			return true;
 		return false;
 	}
+	
+
 	
 	public boolean isUpstream(int pos) {
 		if ((isForward()&& pos< start)||
@@ -472,10 +532,15 @@ public class DirectedRegion extends DefaultRegion {
 				getStrand()!= anotherRegion.getStrand())
 			return false;
 		
+		// includes contains
+		if (this.contains(anotherRegion)|| anotherRegion.contains(this))
+			return true;
+		
+		// overlaps
 		if ((Math.abs(getStart())>= Math.abs(anotherRegion.getStart())&& 
-				Math.abs(getStart())< Math.abs(anotherRegion.getEnd()))
+				Math.abs(getStart())<= Math.abs(anotherRegion.getEnd()))
 				|| (Math.abs(anotherRegion.getStart())>= Math.abs(getStart())
-						&& Math.abs(anotherRegion.getStart())< Math.abs(getEnd())))
+						&& Math.abs(anotherRegion.getStart())<= Math.abs(getEnd())))
 			return true;
 		return false;
 	}
@@ -576,7 +641,7 @@ public class DirectedRegion extends DefaultRegion {
 	}
 	
 	public String toUCSCString() {
-		return "chr"+ getChromosome()+":"+Math.abs(getStart())+"-"+Math.abs(getEnd());
+		return getChromosome()+":"+Math.abs(getStart())+"-"+Math.abs(getEnd());
 	}
 	
 	public int get3PrimeEdge() {

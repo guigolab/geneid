@@ -84,11 +84,42 @@ public class ASMultiVariation implements Serializable {
 			return 0;
 		}
 	}
+	public static ASVariation[][] clusterIdenticalEvents(ASVariation[] inVars) {
+		if (inVars== null)
+			return null;
+		
+		Comparator compi= new ASVariation.IdentityComparator();
+		Vector jumpV= new Vector();
+		Vector clusterV= new Vector();
+		for (int i = 0; i < inVars.length; i++) {
+			int x;
+			for (x = 0; x < jumpV.size(); x++) 
+				if (jumpV.elementAt(x)== inVars[i])
+					break;
+			if (x< jumpV.size())
+				continue;
+			
+			Vector thisClusterV= new Vector();
+			thisClusterV.add(inVars[i]);
+			for (int j = i+1; j < inVars.length; j++) {
+				if (compi.compare(inVars[i], inVars[j])== 0) {
+					thisClusterV.add(inVars[j]);
+					jumpV.add(inVars[j]);
+				}
+			}
+			clusterV.add(thisClusterV);
+		}
+		
+		return (ASVariation[][]) Arrays.toField(clusterV);
+	}
+	
+
 	public static final int FILTER_NONE= 0;
 	public static final int FILTER_HIERARCHICALLY= 1;
 	public static final int FILTER_CODING_REDUNDANT= 2;
 	public static final int FILTER_STRUCTURALLY= 3;
 	public static final int FILTER_CONTAINED_IN_CDS= 4;
+	public static final int FILTER_IDENTICALLY= 5;
 	public static String[] FILTER_TO_STRING= {"none", "hierarchically", "coding_redundant", "structurally"};
 	
 	ASVariation[] asVariations= null;
@@ -180,7 +211,7 @@ public class ASMultiVariation implements Serializable {
 	public static ASVariation[] filterNonGTAG(ASVariation[] vars) {
 		Vector v= new Vector();
 		for (int i = 0; i < vars.length; i++) 
-			if (!vars[i].has_nonGTAG_Intron())
+			if (!vars[i].hasNonGTAGintron())
 				v.add(vars[i]);
 		return (ASVariation[]) Arrays.toField(v);
 	}
@@ -194,8 +225,10 @@ public class ASMultiVariation implements Serializable {
 		
 		for (int i = 0; i < v.size(); i++) 
 			for (int j = i+1; j < v.size(); j++) {
-				if (compi.compare(v.elementAt(i), v.elementAt(j))== 0)
-					v.remove(j--);
+				if (compi.compare(v.elementAt(i), v.elementAt(j))== 0) {
+					((ASVariation) v.elementAt(j)).removeFromSpliceSites();
+					v.remove(j--);					
+				}
 			}
 		
 		return (ASVariation[]) Arrays.toField(v);
@@ -214,7 +247,7 @@ public class ASMultiVariation implements Serializable {
 	}
 		
 		public ASVariation[] getASVariationsStructurallyFiltered() {
-			return removeRedundancy(asVariations, new ASVariation.StructureComparator());
+			return removeRedundancy(asVariations, new ASVariation.IdentityComparator());
 		}
 		
 	public ASVariation[] getASVariations(Transcript transcriptID_1, Transcript transcriptID_2) {

@@ -7,6 +7,7 @@ import gphase.model.ASVariation;
 import gphase.model.DirectedRegion;
 import gphase.model.Gene;
 import gphase.model.Graph;
+import gphase.model.Species;
 import gphase.model.SpliceSite;
 import gphase.tools.Formatter;
 
@@ -508,16 +509,16 @@ public class Noboru {
 					lowIRFdonorV.add(seqDon);
 					lowIRFacceptorV.add(seqAcc);
 					lowIRFintronV.add(regIntron.getLength()+"\t"+
-							((ASVariation) v.elementAt(i)).is_affecting_5UTR()+ "\t"+
-							((ASVariation) v.elementAt(i)).is_affecting_CDS()+"\t"+
-							((ASVariation) v.elementAt(i)).is_affecting_3UTR());
+							((ASVariation) v.elementAt(i)).isAffecting5UTR()+ "\t"+
+							((ASVariation) v.elementAt(i)).isAffectingCDS()+"\t"+
+							((ASVariation) v.elementAt(i)).isAffecting3UTR());
 				} else  if (cntRetained> cntNotRetained) {
 					highIRFdonorV.add(seqDon);
 					highIRFacceptorV.add(seqAcc);
 					highIRFintronV.add(regIntron.getLength()+"\t"+
-							((ASVariation) v.elementAt(i)).is_affecting_5UTR()+ "\t"+
-							((ASVariation) v.elementAt(i)).is_affecting_CDS()+"\t"+
-							((ASVariation) v.elementAt(i)).is_affecting_3UTR());
+							((ASVariation) v.elementAt(i)).isAffecting5UTR()+ "\t"+
+							((ASVariation) v.elementAt(i)).isAffectingCDS()+"\t"+
+							((ASVariation) v.elementAt(i)).isAffecting3UTR());
 				} else {	// equal
 					map.put(ID_NB_SS_EQ_IRF_FREQ, new Integer(++cntEQfreqIR));
 				}
@@ -764,7 +765,7 @@ public class Noboru {
 	 **/
 	public double[][] getDonorFreqTable() {
 		if (donTab == null) {
-			String fName= Constants.getAnnotationFile(speName, annoName);
+			String fName= Species.getAnnotation(speName, null, annoName, null);
 			File f= new File(fName+SFX_DONOR_TABLE);
 			if (!f.exists()) { 
 				generateFreqTables();
@@ -788,7 +789,7 @@ public class Noboru {
 	 **/
 	public double[][] getAcceptorFreqTable() {
 		if (accTab == null) {
-			String fName= Constants.getAnnotationFile(speName, annoName);
+			String fName= Species.getAnnotation(speName, null, annoName, null);
 			File f= new File(fName+SFX_ACCEPTOR_TABLE);
 			if (!f.exists()) {
 				generateFreqTables();
@@ -809,7 +810,7 @@ public class Noboru {
 
 	void generateFreqTables() {
 		try {
-			String fName= Constants.getLatestUCSCAnnotation(speName, annoName, null);
+			String fName= Species.getAnnotation(speName, null, annoName, null);
 			System.out.println("Generating freq table for "+fName);
 			GTFChrReader reader= new GTFChrReader(fName);
 			reader.setChromosomeWise(true);
@@ -1087,7 +1088,7 @@ public class Noboru {
 	}
 	public String getInFile() {
 		if (inFile == null) {
-			inFile = Constants.getLatestUCSCAnnotation(speName, annoName, null);
+			inFile = Species.getAnnotation(speName, null, annoName, null);
 		}
 
 		return inFile;

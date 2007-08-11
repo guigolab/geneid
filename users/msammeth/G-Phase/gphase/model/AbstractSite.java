@@ -10,6 +10,7 @@ import gphase.tools.Arrays;
 
 import java.io.Serializable;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Vector;
 
 /**
@@ -18,10 +19,12 @@ import java.util.Vector;
  * @author msammeth
  */
 public class AbstractSite implements Serializable {
-	int pos= -1;
-	Gene gene= null;
-	Transcript[] transcripts = null;
 	
+	int pos= -1;
+	Transcript[] transcripts = null;
+	HashMap attributes = null;
+	String id = null;
+	float score= Float.NaN;
 	static final long serialVersionUID = 3169139368723074072L;
 	
 	public static class PositionToSpliceSiteComparator implements Comparator {
@@ -130,11 +133,18 @@ public class AbstractSite implements Serializable {
 	public void setPos(int pos) {
 		this.pos = pos;
 	}
-	public Gene getGene() {
-		return gene;
+	public boolean isTSS() {
+		for (int i = 0; i < getTranscripts().length; i++) {
+			if (getPos()== getTranscripts()[i].get5PrimeEdge())
+				return true;
+		}
+		return false;
 	}
-	public void setGene(Gene gene) {
-		this.gene = gene;
+	
+	public Gene getGene() {
+		if (transcripts== null|| transcripts.length< 1)
+			return null;
+		return transcripts[0].getGene();
 	}
 	public Transcript[] getTranscripts() {
 		return transcripts;
@@ -164,5 +174,47 @@ public class AbstractSite implements Serializable {
 		
 		for (int i = 0; i < v.size(); i++) 
 			transcripts= (Transcript[]) Arrays.add(transcripts, v.elementAt(i));		
+	}
+	
+	public boolean addTranscript(Transcript newTrans) {
+	
+		for (int i = 0; transcripts!= null&& i < transcripts.length; i++) 
+			if (transcripts[i].getTranscriptID().equalsIgnoreCase(newTrans.getTranscriptID()))
+				return false;
+		
+		transcripts= (Transcript[]) Arrays.add(transcripts, newTrans);
+		return true;
+	}
+
+	public void addAttribute(Object id, Object val) {
+		if (attributes== null)
+			attributes= new HashMap();
+		attributes.put(id, val);
+	}
+
+	public Object getAttribute(Object id) {
+		if (attributes== null)
+			return null;
+		return attributes.get(id);
+	}
+
+	public HashMap getAttributes() {
+		return attributes;
+	}
+
+	public String getID() {
+		return id;
+	}
+
+	public void setID(String id) {
+		this.id = id;
+	}
+
+	public float getScore() {
+		return score;
+	}
+
+	public void setScore(float score) {
+		this.score = score;
 	}
 }

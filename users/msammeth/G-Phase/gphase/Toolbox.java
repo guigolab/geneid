@@ -56,6 +56,7 @@ public class Toolbox {
 			s= s.trim();
 			if (s.length()< 1) {
 				System.out.println("Overwritten.");
+				f.delete();
 				return getAbsFileName(fName);
 			}
 			String p= "";

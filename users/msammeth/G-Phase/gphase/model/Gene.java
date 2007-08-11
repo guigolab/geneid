@@ -38,11 +38,13 @@ public class Gene extends DirectedRegion {
 
 	String geneID_triv= null;	// trivial name for HOX genes in GenoScan tetraodon
 	SpliceSite[] spliceSites= null; // ordered according to position
+	SpliceSite[] tssSites= null, tesSites= null;
+	AbstractSite[] abstractSites= null; // ordered according to position
 	ASMultiVariation[] asComplexes= null;
 	AbstractSite[] sites= null;
 	TU[] tu= null;
 	Exon[] exons= null;
-	DirectedRegion[] introns= null;
+	Intron[] introns= null;
 	ASVariation[] vars= null;
 	int varCC= -1;
 	
@@ -324,7 +326,7 @@ public class Gene extends DirectedRegion {
 		reg.setChromosome(getChromosome());
 		return reg;
 
-	}
+	} 
 	
 	public boolean isRealCDS(DirectedRegion reg) {
 		if (getRealCDS().contains(reg))
@@ -522,6 +524,21 @@ public class Gene extends DirectedRegion {
 		}
 		return null;
 	}
+
+	public AbstractSite addAbstractSite(AbstractSite as) {
+		if (abstractSites== null) {
+			abstractSites= new AbstractSite[] {as};
+			return as;
+		}
+		
+		int p= Arrays.binarySearch(abstractSites, as, new AbstractSite.PositionComparator());
+		if (p>= 0) 
+			return abstractSites[p];
+		else {
+			abstractSites= (AbstractSite[]) gphase.tools.Arrays.insert(abstractSites, as, p);
+			return as;
+		}
+	}
 	
 	public int[] getTranslationInitSites() {
 		int[] met= new int[0];
@@ -582,20 +599,121 @@ public class Gene extends DirectedRegion {
 		return ((Transcript[]) gphase.tools.Arrays.toField(v));
 	}
 	
+	/**
+	 * @param ss
+	 * @return
+	 */
 	public boolean addSpliceSite(SpliceSite ss) {
 		
-		if (checkSpliceSite(ss)!= null)
-			return false;
+//		if (1== 1)
+//			return false;
+//		
+//		if (getSite(ss)!= null)
+//			return false;
 		
 			// insert new splice site
 		if(spliceSites== null) 
 			spliceSites= new SpliceSite[] {ss};
 		else {
-			int p= Arrays.binarySearch(spliceSites, ss, new SpliceSite.PositionComparator());
+			int p= Arrays.binarySearch(spliceSites, ss, SpliceSite.getDefaultPositionTypeComparator());
 			if (p< 0)
 				spliceSites= (SpliceSite[]) gphase.tools.Arrays.insert(spliceSites, ss, p);
+			else {
+				for (int i = 0; i < ss.getExons().length; i++) 
+					ss.getExons()[i].replaceSite(ss, spliceSites[p]);
+				
+				for (int i = 0; i < ss.getTranscripts().length; i++) 
+					spliceSites[p].addTranscript(ss.getTranscripts()[i]);
+				
+			}
 		}
 		return true;
+	}
+	
+	public boolean replaceSite(SpliceSite oldSite, SpliceSite newSite) {
+		for (int i = 0; spliceSites!= null&& i < spliceSites.length; i++) {
+			if (spliceSites[i]== oldSite) {
+				spliceSites[i]= newSite;
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public AbstractSite getTSS(AbstractSite as) {
+		Comparator compi= new AbstractSite.PositionComparator();	// make static
+		if (tssSites== null) {	// init
+			HashMap<Integer,AbstractSite> map= new HashMap<Integer,AbstractSite>();
+			for (int i = 0; i < transcripts.length; i++) {
+				Integer pos= new Integer(transcripts[i].getTSSPos());
+				AbstractSite site= map.remove(pos);
+				if (site== null)
+					site= new AbstractSite(pos.intValue());
+				site.addTranscript(transcripts[i]);
+				map.put(pos, site);
+			}
+			tssSites= (AbstractSite[]) gphase.tools.Arrays.convertTo(AbstractSite.class, map.values().toArray());
+			Arrays.sort(tssSites, compi);
+		}
+		
+		int p= Arrays.binarySearch(tssSites, as, compi);
+		assert(p>= 0);
+		return tssSites[p];
+	}
+
+	public SpliceSite getSite(SpliceSite as) {
+		int p= -1;
+		if (as.isSpliceSite()) {
+			if (getSpliceSites()== null)
+				return null;
+			p= Arrays.binarySearch(getSpliceSites(), as, SpliceSite.getDefaultPositionTypeComparator());
+			if (p>= 0)
+				as= getSpliceSites()[p];
+		} else if (as.isTSS()) {
+			p= Arrays.binarySearch(getTSSsites(), as, SpliceSite.getDefaultPositionTypeComparator());
+			if (p>= 0)
+				as= getTSSsites()[p];
+		} else if (as.isTES()) {
+			p= Arrays.binarySearch(getTESsites(), as, SpliceSite.getDefaultPositionTypeComparator());
+			if (p>= 0)
+				as= getTESsites()[p];
+		} else
+			System.err.println("ERROR: unknown type "+as.getType());
+		
+		return as;
+	}
+	public SpliceSite[] getTESsites() {
+		if (tesSites== null) {	// init
+			HashMap<Integer,SpliceSite> map= new HashMap<Integer,SpliceSite>();
+			for (int i = 0; i < transcripts.length; i++) {
+				Integer pos= new Integer(transcripts[i].getTESPos());
+				SpliceSite site= map.get(pos);
+				if (site== null)
+					site= new SpliceSite(pos.intValue(), SpliceSite.TYPE_TES);
+				site.addTranscript(transcripts[i]);
+				map.put(pos, site);
+			}
+			tesSites= (SpliceSite[]) gphase.tools.Arrays.convertTo(SpliceSite.class, map.values().toArray());
+			Arrays.sort(tesSites, SpliceSite.getDefaultPositionTypeComparator());
+		}
+		return tesSites;
+	}
+	
+	public SpliceSite[] getTSSsites() {
+		if (tssSites== null) {	// init
+			HashMap<Integer,SpliceSite> map= new HashMap<Integer,SpliceSite>();
+			for (int i = 0; i < transcripts.length; i++) {
+				Integer pos= new Integer(transcripts[i].getTSSPos());
+				SpliceSite site= map.get(pos);
+				if (site== null)
+					site= new SpliceSite(pos.intValue(), SpliceSite.TYPE_TSS);
+				site.addTranscript(transcripts[i]);
+				map.put(pos, site);
+			}
+			tssSites= (SpliceSite[]) gphase.tools.Arrays.convertTo(SpliceSite.class, map.values().toArray());
+			Arrays.sort(tssSites, SpliceSite.getDefaultPositionTypeComparator());
+		}
+		return tssSites;
 	}
 
 	/**
@@ -702,7 +820,19 @@ public class Gene extends DirectedRegion {
 			return false;
 		
 		return (Constants.CONFIDENCES[type].equalsIgnoreCase(matchType));
-	}	
+	}
+	
+	public boolean isConstitutive(DirectedRegion intron, int eventFilter) {
+		DirectedRegion[] intrns= getIntrons();
+		for (int i = 0; i < intrns.length; i++) {
+			if (!intrns[i].overlaps(intron))
+				continue;
+			if (intron.get5PrimeEdge()!= intrns[i].get5PrimeEdge()||
+					intron.get3PrimeEdge()!= intrns[i].get3PrimeEdge())
+				return false;
+		}
+		return true;
+	}
 	
 	
 	public final static Gene[] toGeneArray(Vector v) {
@@ -929,26 +1059,50 @@ public class Gene extends DirectedRegion {
 		return assembly;
 	}
 
-	public DirectedRegion[] getIntrons() {
+	public Intron[] getIntrons() {
 		if (introns == null) {
 			Transcript[] trpts= getTranscripts();
-			Vector intronV= new Vector();
-			Comparator compi= new AbstractRegion.PositionComparator();
+			Vector<Intron> intronV= new Vector<Intron>();
+			Comparator compi= new AbstractRegion.PositionComparator();	// position
 			for (int i = 0; trpts!= null&& i < trpts.length; i++) {
-				Exon[] ex= trpts[i].getExons();
-				for (int j = 1; j < ex.length; j++) {
-					DirectedRegion intron= new DirectedRegion(
-							ex[j-1].get3PrimeEdge()+1, 
-							ex[j].get5PrimeEdge()- 1,
-							getStrand());
-					intron.setChromosome(getChromosome());
-					intronV= gphase.tools.Arrays.addUnique(intronV, intron, compi);
+				Intron[] intrs= trpts[i].getIntrons();
+				Vector<Intron> tmpV= new Vector<Intron>();
+				for (int j = 0; intrs!= null&& j < intrs.length; j++) {
+					int k;
+					for (k = 0; k < intronV.size(); k++) {
+						if (compi.compare(intronV.elementAt(k), intrs[j])== 0) {
+							intronV.elementAt(k).addTranscript(intrs[j].getTranscripts()[0]);
+							break;
+						}
+					}
+					if (k== intronV.size())
+						tmpV.add(intrs[j]);
 				}
+				for (int j = 0; j < tmpV.size(); j++) 
+					intronV.add(tmpV.elementAt(j));
 			}
-			introns= (DirectedRegion[]) gphase.tools.Arrays.toField(intronV);
+			introns= (Intron[]) gphase.tools.Arrays.toField(intronV);
 		}
 
 		return introns;
+	}
+	
+	public Vector<DirectedRegion> getAdjacentStructures(DirectedRegion reg, boolean prime5, boolean exon) {
+		DirectedRegion[] regs= null;
+		if (exon)
+			regs= getExons();
+		else
+			regs= getIntrons();
+		
+		Vector<DirectedRegion> resReg= new Vector<DirectedRegion>();
+		for (int i = 0; regs!= null&& i < regs.length; i++) {
+			if (prime5&& regs[i].get3PrimeEdge()+ 1== reg.get5PrimeEdge())
+				resReg.add(regs[i]);
+			else if ((!prime5)&& regs[i].get5PrimeEdge()- 1== reg.get3PrimeEdge())
+				resReg.add(regs[i]);
+		}
+		
+		return resReg;
 	}
 	/**
 	 * @return
@@ -968,11 +1122,12 @@ public class Gene extends DirectedRegion {
 	
 	public void merge(Gene anotherGene) {
 		
-		spliceSites= (SpliceSite[]) gphase.tools.Arrays.addAll(spliceSites, anotherGene.getSpliceSites());
+		//spliceSites= (SpliceSite[]) gphase.tools.Arrays.addAll(spliceSites, anotherGene.getSpliceSites());
 		for (int i = 0; i < anotherGene.getTranscripts().length; i++) 
 			addTranscript(anotherGene.getTranscripts()[i]);
-		for (int i = 0; i < anotherGene.getTranscripts().length; i++)  
-			updateBoundaries(anotherGene.getTranscripts()[i]);
+		// done in addTranscript()
+//		for (int i = 0; i < anotherGene.getTranscripts().length; i++)  
+//			updateBoundaries(anotherGene.getTranscripts()[i]);
 	}
 	
 	public DirectedRegion[] getExonicRegions() {
@@ -1139,9 +1294,9 @@ public class Gene extends DirectedRegion {
 		return transcripts.length;
 	}
 	
-	public ASVariation[] getASVariations(int codingCode) {
+	public ASVariation[] getASVariations(int codingCode, HashMap refTrptIDs) {
 		if (vars== null|| (varCC!= codingCode)) {
-			ASMultiVariation[] asm= getASMultiVariations();
+			ASMultiVariation[] asm= getASMultiVariations(refTrptIDs);
 			if (asm== null)
 				return null;
 			Vector resVec= new Vector(asm.length);
@@ -1158,7 +1313,7 @@ public class Gene extends DirectedRegion {
 				else if (codingCode== ASMultiVariation.FILTER_CONTAINED_IN_CDS) {
 					as= asm[i].getASVariationsAll();
 					for (int j = 0; j < as.length; j++) {
-						if (as[j].is_contained_in_CDS())
+						if (as[j].isContainedCDS())
 							resVec.add(as[j]);
 					}
 					continue;
@@ -1169,6 +1324,111 @@ public class Gene extends DirectedRegion {
 			vars= (ASVariation[]) gphase.tools.Arrays.toField(resVec);
 			varCC= codingCode;
 		}			
+		return vars;
+	}
+
+	public static ASVariation[] getASVariations(Transcript[] t, HashMap refTrptIDs) {
+		
+		SpliceSite.PositionComparator c= new SpliceSite.PositionEqualSSTypeComparator();	// here! SpliceSite.PositionComparator
+		Vector result= new Vector();
+
+		for (int x = 0; x < t.length; x++) {
+			for (int y = x+1; y < t.length; y++) {
+				if (refTrptIDs!= null&& refTrptIDs.size()> 0&&
+						refTrptIDs.get(t[x].getTranscriptID())== null&& 
+						refTrptIDs.get(t[y].getTranscriptID())== null)
+					continue;
+
+				SpliceSite[][] spliceChains= new SpliceSite[2][];
+				spliceChains[0]= t[x].getSpliceChainComplete();
+				spliceChains[1]= t[y].getSpliceChainComplete();
+				for (int i = 0; i < spliceChains.length; i++) { 						
+					Arrays.sort(spliceChains[i], c);	// TODO remove, efficiency, just to make sure..
+				}
+				
+					// find common sites
+				Vector tokens= new Vector();
+				for (int i = 0; i < spliceChains[0].length; i++) {
+					SpliceSite s= spliceChains[0][i];
+					int[] pos= new int[spliceChains.length];
+					pos[0]= i;
+					int j;
+					for (j = 1; j < spliceChains.length; j++) {
+						int p= Arrays.binarySearch(spliceChains[j], s, c);
+						if (p< 0)
+							break;	// as soon as not found in one schain, give up..
+						else
+							pos[j]= p;
+					}
+					if (j>= spliceChains.length)	// found
+						tokens.add(pos);
+				}
+				
+					// tokenize by these conserved splice sites
+				SpliceSite[][] ss= new SpliceSite[spliceChains.length][];
+				int[] posOld= new int[spliceChains.length];
+				for (int i = 0; i < posOld.length; i++) 
+					posOld[i]= (-1);	// anchor before sequence start	
+				int[] pos;
+				for (int i = 0; i < tokens.size(); i++) {
+					pos= (int[]) tokens.elementAt(i);
+								
+					SpliceSite[][] ass= new SpliceSite[pos.length][];
+					for (int j = 0; j < ass.length; j++) {
+						int len= pos[j]- posOld[j]- 1;
+						if (len< 0)
+							break;
+						ass[j]= new SpliceSite[len];
+						for (int k = 0; k < ass[j].length; k++) { 
+							ass[j][k]= spliceChains[j][posOld[j]+ k+ 1];
+						}
+					}
+					for (int j = 0; j < ass.length; j++) 	// at least one transcript needs to provide alternative SSs
+						if (ass[j]!= null&& ass[j].length> 0) {
+							ASVariation var= new ASVariation(t[x], t[y], ass[0], ass[1]);
+							SpliceSite flank5;
+							if (i== 0)
+								flank5= null;
+							else
+								flank5= spliceChains[j][posOld[j]];
+							SpliceSite flank3= spliceChains[j][pos[j]];
+							var.setAnchors(flank5, flank3);
+							result.add(var);
+							break;
+						}
+					posOld= pos;
+				}
+				
+					// last
+				pos= new int[spliceChains.length];		// anchor after sequence end
+				for (int i = 0; i < pos.length; i++) 
+					pos[i]= spliceChains[i].length;
+				SpliceSite[][] ass= new SpliceSite[pos.length][];
+				for (int j = 0; j < ass.length; j++) {
+					ass[j]= new SpliceSite[pos[j]- posOld[j]- 1];
+					for (int k = 0; k < (pos[j]- posOld[j]- 1); k++) 
+						ass[j][k]= spliceChains[j][posOld[j]+ k+ 1];				
+				}
+				for (int j = 0; j < ass.length; j++) 	// at least one transcript needs to provide alternative SSs 
+					if (ass[j].length> 0) {
+						ASVariation var= new ASVariation(t[x], t[y], ass[0], ass[1]);
+						SpliceSite flank5;
+						if (tokens.size()== 0)
+							flank5= null;
+						else
+							flank5= spliceChains[j][posOld[j]];
+						SpliceSite flank3= null;
+						var.setAnchors(flank5, flank3);
+						result.add(var);
+						break;
+					}
+				
+
+			}
+		}
+		
+		ASVariation[] vars= (ASVariation[]) gphase.tools.Arrays.toField(result);
+		
 		return vars;
 	}
 	
@@ -1188,6 +1448,15 @@ public class Gene extends DirectedRegion {
 				resEx.add(ex[i]);
 		}
 		return (Exon[]) gphase.tools.Arrays.toField(resEx);
+	}
+	
+	public int getTranscriptNbFromSource(String source) {
+		int nb= 0;
+		for (int i = 0; i < transcripts.length; i++) {
+			if (transcripts[i].getTranscriptID().contains(source))
+				++nb;
+		}
+		return nb;
 	}
 	
 	/**
@@ -1220,49 +1489,128 @@ public class Gene extends DirectedRegion {
 		return null;
 	}
 	
-	public ASMultiVariation[] getASMultiVariations() {
+	public ASMultiVariation[] getASMultiVariations(HashMap refTrptIDs) {
+			
+			asComplexes= null;
+			if (asComplexes == null) {
+				if (transcripts== null|| transcripts.length< 2) 
+					return null;			
+				
+				SpliceSite[][] spliceChains= new SpliceSite[transcripts.length][];
+				for (int i = 0; i < transcripts.length; i++) 
+					spliceChains[i]= transcripts[i].getSpliceChainComplete();
+				
+				Vector spliceClusters= tokenizeASClusters(spliceChains, false, false);	// get splice clusters across all sequences
+																				//TODO warning! TSS/TES flanked events included !!
+				
+					// determine pw splice vars
+				Vector asComp= new Vector(spliceClusters.size());
+				int[] rightEdge= new int[transcripts.length];
+				for (int x = 0; x < spliceClusters.size(); x++) {	// iterate complexes
+					
+					SpliceSite[][] cluster= (SpliceSite[][]) spliceClusters.elementAt(x);
+					
+					Vector as2Events= new Vector();
+					for (int i = 0; i < transcripts.length; i++) {		// iterate pw combinations for a complex 
+						for (int j = (i+1); j < transcripts.length; j++) {
+							
+							if (refTrptIDs!= null&& refTrptIDs.size()> 0&& 
+									refTrptIDs.get(transcripts[i].getTranscriptID())== null&& 
+									refTrptIDs.get(transcripts[j].getTranscriptID())== null)
+								continue;
+							
+							SpliceSite[][] ss2= new SpliceSite[2][];
+							ss2[0]= cluster[i];
+							ss2[1]= cluster[j];
+							if (ss2[0].length< 1&& ss2[1].length< 1)	// skip when both are empty
+								continue;
+							
 		
-		asComplexes= null;
-		if (asComplexes == null) {
-			if (transcripts== null|| transcripts.length< 2) 
+							Transcript[] tt= new Transcript[2];
+							tt[0]= transcripts[i];
+							tt[1]= transcripts[j];
+							
+							AbstractSite[] trimSites= new AbstractSite[2];
+							//ss2= ASVariation.trim(ss2, tt, trimSites);	// trim left in first, last at right
+							
+							//Vector cc2= tokenizeASClusters(ss2, false, false);
+							Vector cc2= tokenizeASEvents(ss2, tt, false, false);
+							for (int k = 0; k < cc2.size(); k++) {			// maybe more than one AS variation for a pair
+	//							SpliceSite[][] pwEvent= (SpliceSite[][]) cc2.elementAt(k);
+	//							ASVariation as2= new ASVariation(transcripts[i], transcripts[j],
+	//									pwEvent[0], pwEvent[1]);
+	//							as2Events.add(as2);
+								as2Events.add(cc2.elementAt(k));
+							}
+						}
+					}
+					
+					ASVariation[] as2Evs= new ASVariation[as2Events.size()];
+					for (int i = 0; i < as2Events.size(); i++) 
+						as2Evs[i]= (ASVariation) as2Events.elementAt(i);
+					if (as2Evs.length!= 0)		// no pw var without a TSS/TES in multi-cluster
+						asComp.add(new ASMultiVariation(as2Evs));
+				}
+				
+				asComplexes = new ASMultiVariation[asComp.size()];
+				for (int i = 0; i < asComplexes.length; i++) 
+					asComplexes[i]= (ASMultiVariation) asComp.elementAt(i);
+			}
+		
+			return asComplexes;
+		}
+
+	public static ASMultiVariation[] getASMultiVariations(Transcript[] t, HashMap refTrptIDs) {
+			
+			ASMultiVariation[] asComplexes= null;
+			if (t== null|| t.length< 2) 
 				return null;			
 			
-			SpliceSite[][] spliceChains= new SpliceSite[transcripts.length][];
-			for (int i = 0; i < transcripts.length; i++) 
-				spliceChains[i]= transcripts[i].getSpliceChain();
+			SpliceSite[][] spliceChains= new SpliceSite[t.length][];
+			for (int i = 0; i < t.length; i++) 
+				spliceChains[i]= t[i].getSpliceChainComplete();
 			
 			Vector spliceClusters= tokenizeASClusters(spliceChains, false, false);	// get splice clusters across all sequences
 																			//TODO warning! TSS/TES flanked events included !!
 			
 				// determine pw splice vars
 			Vector asComp= new Vector(spliceClusters.size());
-			int[] rightEdge= new int[transcripts.length];
+			int[] rightEdge= new int[t.length];
 			for (int x = 0; x < spliceClusters.size(); x++) {	// iterate complexes
 				
 				SpliceSite[][] cluster= (SpliceSite[][]) spliceClusters.elementAt(x);
 				
 				Vector as2Events= new Vector();
-				for (int i = 0; i < transcripts.length; i++) {		// iterate pw combinations for a complex 
-					for (int j = (i+1); j < transcripts.length; j++) {
+				for (int i = 0; i < t.length; i++) {		// iterate pw combinations for a complex 
+					for (int j = (i+1); j < t.length; j++) {
+						
+						if (refTrptIDs!= null&& refTrptIDs.size()> 0&& 
+								refTrptIDs.get(t[i].getTranscriptID())== null&& 
+								refTrptIDs.get(t[j].getTranscriptID())== null)
+							continue;
+						
 						SpliceSite[][] ss2= new SpliceSite[2][];
 						ss2[0]= cluster[i];
 						ss2[1]= cluster[j];
-	
-						Transcript[] tt= new Transcript[2];
-						tt[0]= transcripts[i];
-						tt[1]= transcripts[j];
-						
-						ss2= ASVariation.trim(ss2, tt);	// trim left in first, last at right
-						
 						if (ss2[0].length< 1&& ss2[1].length< 1)	// skip when both are empty
 							continue;
 						
-						Vector cc2= tokenizeASClusters(ss2, false, false);
+	
+						Transcript[] tt= new Transcript[2];
+						tt[0]= t[i];
+						tt[1]= t[j];
+						
+						AbstractSite[] trimSites= new AbstractSite[2];
+						//ss2= ASVariation.trim(ss2, tt, trimSites);	// trim left in first, last at right
+						
+						//Vector cc2= tokenizeASClusters(ss2, false, false);
+						Vector cc2= tokenizeASEvents(ss2, tt, false, false);
 						for (int k = 0; k < cc2.size(); k++) {			// maybe more than one AS variation for a pair
-							SpliceSite[][] pwEvent= (SpliceSite[][]) cc2.elementAt(k);
-							ASVariation as2= new ASVariation(transcripts[i], transcripts[j],
-									pwEvent[0], pwEvent[1]);
-							as2Events.add(as2);
+//							SpliceSite[][] pwEvent= (SpliceSite[][]) cc2.elementAt(k);
+//							ASVariation as2= new ASVariation(transcripts[i], transcripts[j],
+//									pwEvent[0], pwEvent[1]);
+//							as2Events.add(as2);
+							as2Events.add(cc2.elementAt(k));
 						}
 					}
 				}
@@ -1277,10 +1625,9 @@ public class Gene extends DirectedRegion {
 			asComplexes = new ASMultiVariation[asComp.size()];
 			for (int i = 0; i < asComplexes.length; i++) 
 				asComplexes[i]= (ASMultiVariation) asComp.elementAt(i);
+			
+			return asComplexes;
 		}
-	
-		return asComplexes;
-	}
 
 	public ASMultiVariation[] getASMultiVariations2() {
 		
@@ -1393,10 +1740,277 @@ public class Gene extends DirectedRegion {
 		return trptHash;
 	}
 	
-	Vector tokenizeASClusters(SpliceSite[][] spliceChains, boolean omitStart, boolean omitEnd) {
+	Vector tokenizeASEvents(SpliceSite[][] spliceChains, Transcript[] tt, AbstractSite[] trimSites, boolean omitStart, boolean omitEnd) {
 		
 			// find splice sites common in ALL transcripts
 		SpliceSite.PositionComparator c= new SpliceSite.PositionComparator();	// here! SpliceSite.PositionComparator
+		Vector tokens= new Vector();
+		for (int i = 0; i < spliceChains[0].length; i++) {
+			SpliceSite s= spliceChains[0][i];
+			int[] pos= new int[spliceChains.length];
+			pos[0]= i;
+			int j;
+			for (j = 1; j < spliceChains.length; j++) {
+				int p= Arrays.binarySearch(spliceChains[j], s, c);
+				if (p< 0)
+					break;	// as soon as not found in one schain, give up..
+				else
+					pos[j]= p;
+			}
+			if (j>= spliceChains.length)	// found
+				tokens.add(pos);
+		}
+		
+			// tokenize by these conserved splice sites
+		SpliceSite[][] ss= new SpliceSite[spliceChains.length][];
+		int[] posOld= new int[spliceChains.length];
+		for (int i = 0; i < posOld.length; i++) 
+			posOld[i]= (-1);	// anchor before sequence start	
+		int[] pos;
+		Vector result= new Vector();
+		for (int i = 0; i < tokens.size(); i++) {
+			pos= (int[]) tokens.elementAt(i);
+			if (omitStart&& i== 0) {	// omit splice chains containing start
+				posOld= pos;
+				continue;
+			}
+			SpliceSite[][] ass= new SpliceSite[pos.length][];
+			for (int j = 0; j < ass.length; j++) {
+				int len= pos[j]- posOld[j]- 1;
+				if (len< 0)
+					break;
+				ass[j]= new SpliceSite[len];
+				for (int k = 0; k < ass[j].length; k++) { 
+					ass[j][k]= spliceChains[j][posOld[j]+ k+ 1];
+				}
+			}
+			int j;
+			for (j = 0; j < ass.length; j++) 	// at least one transcript needs to provide alternative SSs
+				if (ass[j]!= null&& ass[j].length> 0) 
+					break;
+			
+			if (j< ass.length) {
+				ASVariation var= new ASVariation(tt[0], tt[1], ass[0], ass[1]);
+				AbstractSite flank5= null;
+				if (i== 0)
+					flank5= addAbstractSite(trimSites[0]);
+				else
+					flank5= spliceChains[j][posOld[j]];
+				AbstractSite flank3= null;
+				flank3= spliceChains[j][pos[j]];
+				var.setAnchors(flank5, flank3);
+				result.add(var);
+			}
+			
+			posOld= pos;
+		}
+		
+		if (!omitEnd) {
+			pos= new int[spliceChains.length];		// anchor after sequence end
+			for (int i = 0; i < pos.length; i++) 
+				pos[i]= spliceChains[i].length;
+			SpliceSite[][] ass= new SpliceSite[pos.length][];
+			for (int j = 0; j < ass.length; j++) {
+				ass[j]= new SpliceSite[pos[j]- posOld[j]- 1];
+				for (int k = 0; k < (pos[j]- posOld[j]- 1); k++) 
+					ass[j][k]= spliceChains[j][posOld[j]+ k+ 1];				
+			}
+			int j;
+			for (j = 0; j < ass.length; j++) 	// at least one transcript needs to provide alternative SSs 
+				if (ass[j].length> 0) 
+					break;
+			if (j< ass.length) {
+				ASVariation var= new ASVariation(tt[0], tt[1], ass[0], ass[1]);
+				AbstractSite flank5= null;
+				if (tokens.size()== 0)
+					flank5= addAbstractSite(trimSites[0]);
+				else
+					flank5= spliceChains[j][posOld[j]];
+				AbstractSite flank3= addAbstractSite(trimSites[1]);
+				var.setAnchors(flank5, flank3);
+				result.add(var);
+			}
+	
+		}
+		
+		return result;
+	}
+
+	static Vector tokenizeASEvents(SpliceSite[][] spliceChains, Transcript[] tt, boolean omitStart, boolean omitEnd) {
+		
+			// find splice sites common in ALL transcripts
+		SpliceSite.PositionComparator c= new SpliceSite.PositionEqualSSTypeComparator();	// here! SpliceSite.PositionComparator
+		Vector tokens= new Vector();
+		for (int i = 0; i < spliceChains[0].length; i++) {
+			AbstractSite s= spliceChains[0][i];
+			int[] pos= new int[spliceChains.length];
+			pos[0]= i;
+			int j;
+			for (j = 1; j < spliceChains.length; j++) {
+				int p= Arrays.binarySearch(spliceChains[j], s, c);
+				if (p< 0)
+					break;	// as soon as not found in one schain, give up..
+				else
+					pos[j]= p;
+			}
+			if (j>= spliceChains.length)	// found
+				tokens.add(pos);
+		}
+		
+			// tokenize by these conserved splice sites
+		int[] posOld= new int[spliceChains.length];
+		for (int i = 0; i < posOld.length; i++) 
+			posOld[i]= (-1);	// anchor before sequence start	
+		int[] pos;
+		Vector result= new Vector();
+		for (int i = 0; i < tokens.size(); i++) {
+			pos= (int[]) tokens.elementAt(i);
+			if (omitStart&& i== 0) {	// omit splice chains containing start
+				posOld= pos;
+				continue;
+			}
+			SpliceSite[][] ass= new SpliceSite[pos.length][];
+			for (int j = 0; j < ass.length; j++) {
+				int len= pos[j]- posOld[j]- 1;
+				if (len< 0)
+					break;
+				ass[j]= new SpliceSite[len];
+				for (int k = 0; k < ass[j].length; k++) { 
+					ass[j][k]= spliceChains[j][posOld[j]+ k+ 1];
+				}
+			}
+			int j;
+			for (j = 0; j < ass.length; j++) 	// at least one transcript needs to provide alternative SSs
+				if (ass[j]!= null&& ass[j].length> 0) 
+					break;
+			
+			if (j< ass.length) {
+				ASVariation var= new ASVariation(tt[0], tt[1], ass[0], ass[1]);
+				AbstractSite flank5= null;
+				if (i== 0)
+					flank5= null;
+				else
+					flank5= spliceChains[j][posOld[j]];
+				AbstractSite flank3= spliceChains[j][pos[j]];
+				var.setAnchors(flank5, flank3);
+				result.add(var);
+				
+			}
+			
+			posOld= pos;
+		}
+		
+		if (!omitEnd) {
+			pos= new int[spliceChains.length];		// anchor after sequence end
+			for (int i = 0; i < pos.length; i++) 
+				pos[i]= spliceChains[i].length;
+			SpliceSite[][] ass= new SpliceSite[pos.length][];
+			for (int j = 0; j < ass.length; j++) {
+				ass[j]= new SpliceSite[pos[j]- posOld[j]- 1];
+				for (int k = 0; k < (pos[j]- posOld[j]- 1); k++) 
+					ass[j][k]= spliceChains[j][posOld[j]+ k+ 1];				
+			}
+			int j;
+			for (j = 0; j < ass.length; j++) 	// at least one transcript needs to provide alternative SSs 
+				if (ass[j].length> 0) 
+					break;
+			if (j< ass.length) {
+				ASVariation var= new ASVariation(tt[0], tt[1], ass[0], ass[1]);
+				AbstractSite flank5= null;
+				if (tokens.size()== 0)
+					flank5= null;
+				else
+					flank5= spliceChains[j][posOld[j]];
+				AbstractSite flank3= null;
+				var.setAnchors(flank5, flank3);
+				result.add(var);
+				
+			}
+
+		}
+		
+		return result;
+	}
+
+	static Vector getASVariations(SpliceSite[][] spliceChains) {
+		
+			// find splice sites common in ALL transcripts
+		SpliceSite.PositionComparator c= new SpliceSite.PositionEqualSSTypeComparator();	// here! SpliceSite.PositionComparator
+		for (int i = 0; i < spliceChains.length; i++) 	// just to make sure
+			Arrays.sort(spliceChains[i], c);
+		
+		Vector tokens= new Vector();
+		for (int i = 0; i < spliceChains[0].length; i++) {
+			SpliceSite s= spliceChains[0][i];
+			int[] pos= new int[spliceChains.length];
+			pos[0]= i;
+			int j;
+			for (j = 1; j < spliceChains.length; j++) {
+				int p= Arrays.binarySearch(spliceChains[j], s, c);
+				if (p< 0)
+					break;	// as soon as not found in one schain, give up..
+				else
+					pos[j]= p;
+			}
+			if (j>= spliceChains.length)	// found
+				tokens.add(pos);
+		}
+		
+			// tokenize by these conserved splice sites
+		SpliceSite[][] ss= new SpliceSite[spliceChains.length][];
+		int[] posOld= new int[spliceChains.length];
+		for (int i = 0; i < posOld.length; i++) 
+			posOld[i]= (-1);	// anchor before sequence start	
+		int[] pos;
+		Vector result= new Vector();
+		for (int i = 0; i < tokens.size(); i++) {
+			pos= (int[]) tokens.elementAt(i);
+						
+			SpliceSite[][] ass= new SpliceSite[pos.length][];
+			for (int j = 0; j < ass.length; j++) {
+				int len= pos[j]- posOld[j]- 1;
+				if (len< 0)
+					break;
+				ass[j]= new SpliceSite[len];
+				for (int k = 0; k < ass[j].length; k++) { 
+					ass[j][k]= spliceChains[j][posOld[j]+ k+ 1];
+				}
+			}
+			for (int j = 0; j < ass.length; j++) 	// at least one transcript needs to provide alternative SSs
+				if (ass[j]!= null&& ass[j].length> 0) {
+					result.add(ass);
+					break;
+				}
+			posOld= pos;
+		}
+		
+			// last
+		pos= new int[spliceChains.length];		// anchor after sequence end
+		for (int i = 0; i < pos.length; i++) 
+			pos[i]= spliceChains[i].length;
+		SpliceSite[][] ass= new SpliceSite[pos.length][];
+		for (int j = 0; j < ass.length; j++) {
+			ass[j]= new SpliceSite[pos[j]- posOld[j]- 1];
+			for (int k = 0; k < (pos[j]- posOld[j]- 1); k++) 
+				ass[j][k]= spliceChains[j][posOld[j]+ k+ 1];				
+		}
+		for (int j = 0; j < ass.length; j++) 	// at least one transcript needs to provide alternative SSs 
+			if (ass[j].length> 0) {
+				result.add(ass);
+				break;
+			}
+		
+		
+		return result;
+	}
+
+	static Vector tokenizeASClusters(SpliceSite[][] spliceChains, boolean omitStart, boolean omitEnd) {
+		
+			// find splice sites common in ALL transcripts
+		SpliceSite.PositionComparator c= new SpliceSite.PositionEqualSSTypeComparator();	// here! SpliceSite.PositionComparator
+		for (int i = 0; i < spliceChains.length; i++) 	// just to make sure
+			Arrays.sort(spliceChains[i], c);
+		
 		Vector tokens= new Vector();
 		for (int i = 0; i < spliceChains[0].length; i++) {
 			SpliceSite s= spliceChains[0][i];
@@ -1452,6 +2066,78 @@ public class Gene extends DirectedRegion {
 			SpliceSite[][] ass= new SpliceSite[pos.length][];
 			for (int j = 0; j < ass.length; j++) {
 				ass[j]= new SpliceSite[pos[j]- posOld[j]- 1];
+				for (int k = 0; k < (pos[j]- posOld[j]- 1); k++) 
+					ass[j][k]= spliceChains[j][posOld[j]+ k+ 1];				
+			}
+			for (int j = 0; j < ass.length; j++) 	// at least one transcript needs to provide alternative SSs 
+				if (ass[j].length> 0) {
+					result.add(ass);
+					break;
+				}
+		}
+		
+		return result;
+	}
+
+	Vector tokenizeASClusters(AbstractSite[][] spliceChains, boolean omitStart, boolean omitEnd) {
+		
+			// find splice sites common in ALL transcripts
+		SpliceSite.PositionComparator c= new SpliceSite.PositionComparator();	// here! SpliceSite.PositionComparator
+		Vector tokens= new Vector();
+		for (int i = 0; i < spliceChains[0].length; i++) {
+			AbstractSite s= spliceChains[0][i];
+			int[] pos= new int[spliceChains.length];
+			pos[0]= i;
+			int j;
+			for (j = 1; j < spliceChains.length; j++) {
+				int p= Arrays.binarySearch(spliceChains[j], s, c);
+				if (p< 0)
+					break;	// as soon as not found in one schain, give up..
+				else
+					pos[j]= p;
+			}
+			if (j>= spliceChains.length)	// found
+				tokens.add(pos);
+		}
+		
+			// tokenize by these conserved splice sites
+		SpliceSite[][] ss= new SpliceSite[spliceChains.length][];
+		int[] posOld= new int[spliceChains.length];
+		for (int i = 0; i < posOld.length; i++) 
+			posOld[i]= (-1);	// anchor before sequence start	
+		int[] pos;
+		Vector result= new Vector();
+		for (int i = 0; i < tokens.size(); i++) {
+			pos= (int[]) tokens.elementAt(i);
+			if (omitStart&& i== 0) {	// omit splice chains containing start
+				posOld= pos;
+				continue;
+			}
+			AbstractSite[][] ass= new AbstractSite[pos.length][];
+			for (int j = 0; j < ass.length; j++) {
+				int len= pos[j]- posOld[j]- 1;
+				if (len< 0)
+					break;
+				ass[j]= new SpliceSite[len];
+				for (int k = 0; k < ass[j].length; k++) { 
+					ass[j][k]= spliceChains[j][posOld[j]+ k+ 1];
+				}
+			}
+			for (int j = 0; j < ass.length; j++) 	// at least one transcript needs to provide alternative SSs
+				if (ass[j]!= null&& ass[j].length> 0) {
+					result.add(ass);
+					break;
+				}
+			posOld= pos;
+		}
+		
+		if (!omitEnd) {
+			pos= new int[spliceChains.length];		// anchor after sequence end
+			for (int i = 0; i < pos.length; i++) 
+				pos[i]= spliceChains[i].length;
+			AbstractSite[][] ass= new AbstractSite[pos.length][];
+			for (int j = 0; j < ass.length; j++) {
+				ass[j]= new AbstractSite[pos[j]- posOld[j]- 1];
 				for (int k = 0; k < (pos[j]- posOld[j]- 1); k++) 
 					ass[j][k]= spliceChains[j][posOld[j]+ k+ 1];				
 			}
@@ -1558,21 +2244,87 @@ public class Gene extends DirectedRegion {
 		geneID= i; 
 	}
 
-	public Exon addExon(Exon newExon) {
-		Comparator compi= new AbstractRegion.PositionComparator();
+	/**
+	 * called during clustering process
+	 * @param newExon
+	 * @return
+	 */
+	public boolean addExon(Exon newExon) {
+		Comparator compi= new Exon.EqualComparator();	//Exon.IdentityComparator(); no, mess with dynamic ss init
 		int x= -1;	// insertion point if empty
 		if (exons!= null) {
 			x= Arrays.binarySearch(exons, newExon, compi);
-			if (x>= 0) 
-				return exons[x];	// get other exon
-			else
+			if (x>= 0) {
+				for (int i = 0; i < newExon.getTranscripts().length; i++) 
+					newExon.getTranscripts()[i].replaceExon(newExon, exons[x]);
+				return false;	// get other exon
+			} else
 				exons= (Exon[]) gphase.tools.Arrays.insert(
 						exons, newExon, x);
-		} else
+		} else 
 			exons= new Exon[] {newExon};
 		
-		return newExon;
+		addSpliceSite(newExon.getAcceptor());
+		addSpliceSite(newExon.getDonor());
+		return true;
 
+	}
+	
+	/**
+	 * 
+	 * @param newExon
+	 * @return exon already known or <code>null</code>
+	 */
+	public Exon getExon(Exon newExon) {
+		if (exons== null|| exons.length< 1)
+			return null;
+		Comparator compi= new Exon.PositionSSComparator();	// before identity comparator
+		int x= Arrays.binarySearch(exons, newExon, compi);
+		if (x>= 0) 
+			return exons[x];
+		else
+			return null;	// not found	
+	}
+	
+	/**
+	 * 
+	 * @param newExon
+	 * @return exon already known or <code>null</code>
+	 */
+	public boolean removeExon(Exon newExon) {
+		if (exons== null|| exons.length< 1)
+			return false;
+		for (int i = 0; i < exons.length; i++) {
+			if (exons[i]== newExon) {
+				exons= (Exon[]) gphase.tools.Arrays.remove(exons, i);	// get other exon
+				return true;
+			}
+		}
+
+		return false;	// not found	
+
+	}
+	
+	public void markAlternativeSpliceSites() {
+		SpliceSite[] sites= getSpliceSites();
+		Comparator compi= new SpliceSite.PositionTypeComparator();
+		for (int i = 0; i < sites.length; i++) {
+			if (sites[i].getTranscripts().length== getTranscripts().length) {
+				sites[i].setModality(SpliceSite.CONSTITUTIVE);
+				continue;
+			}
+			for (int j = 0; j < getTranscripts().length; j++) {
+				SpliceSite[] ss= getTranscripts()[j].getSpliceSitesAll();	// not schain
+				int p= Arrays.binarySearch(ss, sites[i], compi);
+				if (p< 0) {
+					p= -(p+ 1);
+					if (p!= 0&& p!= ss.length) {
+						sites[i].setModality(SpliceSite.ALTERNATIVE);
+						break;
+					}
+				}
+			}
+		}
 	}
 	
 	/**
@@ -1581,32 +2333,46 @@ public class Gene extends DirectedRegion {
 	public boolean addTranscript(Transcript newTranscript) {
 
 			// search transcript
-		for (int i = 0; transcripts!= null&& i < transcripts.length; i++) 
-			if (transcripts[i].getStableID().equalsIgnoreCase(newTranscript.getStableID()))
-				return false;
+//		for (int i = 0; transcripts!= null&& i < transcripts.length; i++) 
+//			if (transcripts[i].getStableID().equalsIgnoreCase(newTranscript.getStableID()))
+//				return false;
 
-		updateBoundaries(newTranscript);
 		newTranscript.gene= this;
+		updateBoundaries(newTranscript);
 		
-		if(transcripts== null) {
+		if(transcripts== null) 
 			transcripts= new Transcript[] {newTranscript};
-			return true;
+		else {
+			Transcript[] nTranscripts= new Transcript[transcripts.length+ 1];
+			for (int i= 0; i < transcripts.length; i++) 
+				nTranscripts[i]= transcripts[i];
+			nTranscripts[nTranscripts.length- 1]= newTranscript;
+			newTranscript.setGene(this);
+			transcripts= nTranscripts;
 		}
 		
-			// add transcript		
-		Transcript[] nTranscripts= new Transcript[transcripts.length+ 1];
-		for (int i= 0; i < transcripts.length; i++) 
-			nTranscripts[i]= transcripts[i];
-		nTranscripts[nTranscripts.length- 1]= newTranscript;
-		transcripts= nTranscripts;
-		
-		
 		for (int i = 0;newTranscript.getExons()!= null && 
-					i < newTranscript.getExons().length; i++) 
+					i < newTranscript.getExons().length; i++) {
 			addExon(newTranscript.getExons()[i]);
-		sites= null;	// are to be re-inited
+		}
+		//sites= null;	// are to be re-inited
 		
 		return true;
+	}
+	
+	public Transcript getNameTranscript() {
+		int minStart= Integer.MAX_VALUE;
+		for (int i = 0; i < transcripts.length; i++) {
+			if (transcripts[i].get5PrimeEdge()< minStart)
+				minStart= transcripts[i].get5PrimeEdge();
+		}
+		Transcript t= null;
+		for (int i = 0; i < transcripts.length; i++) {
+			if ((transcripts[i].get5PrimeEdge()== minStart) &&(t== null ||
+				(transcripts[i].getTranscriptID().compareTo(t.getTranscriptID())< 0)))
+					t= transcripts[i];
+		}
+		return t;
 	}
 	
 	public void updateBoundaries(DirectedRegion reg) {
@@ -1710,6 +2476,34 @@ public class Gene extends DirectedRegion {
 			
 		return true; 
 	}
+	
+	public boolean hasVariation(DirectedRegion intron, 
+			String varCode, int filterCode) {
+		SpliceSite donor= new SpliceSite(this, intron.get5PrimeEdge()- 1, true);
+		SpliceSite acceptor= new SpliceSite(this, intron.get3PrimeEdge()+ 1, false);
+		ASVariation[] vars= getASVariations(filterCode);
+		for (int i = 0; vars!= null&& i < vars.length; i++) {
+			if (!vars[i].toString().equals(varCode))
+				continue;
+			Comparator compi= new SpliceSite.PositionComparator();
+			SpliceSite[] sc1= vars[i].getSpliceChain1();
+			if (sc1!= null) {
+				int p1= Arrays.binarySearch(sc1, donor, compi);
+				int p2= Arrays.binarySearch(sc1, acceptor, compi);
+				if (p1>= 0&& p2>= 0&& p2==p1+1)
+					return true;
+			}
+			SpliceSite[] sc2= vars[i].getSpliceChain2();
+			if (sc2!= null) {
+				int p1= Arrays.binarySearch(sc2, donor, compi);
+				int p2= Arrays.binarySearch(sc2, acceptor, compi);
+				if (p1>= 0&& p2>= 0&& p2==p1+1)
+					return true;
+			}
+		}
+		return false;
+		
+	}
 
 	/**
 	 * @return Returns the confidence.
@@ -1737,6 +2531,10 @@ public class Gene extends DirectedRegion {
 	}
 	
 	public DirectedRegion[] getIntrons(int region) {
+		Intron[] introns= getIntrons();
+		for (int i = 0; i < introns.length; i++) {
+			if (DirectedRegion.checkOverlap(introns[i].getTranscript().))
+		}
 		Vector v= new Vector();
 		Comparator compi= new DirectedRegion.PositionComparator();
 		for (int i = 0; i < transcripts.length; i++) 
@@ -1760,7 +2558,7 @@ public class Gene extends DirectedRegion {
 	 * intronic/exonic arrays delegated to submethods..
 	 * @param regionID
 	 * @return
-	 */
+	 */ 
 	public DirectedRegion getRegion(int regionID) {
 		
 		Object o= null;
@@ -1830,7 +2628,20 @@ public class Gene extends DirectedRegion {
 	}
 
 	public SpliceSite[] getSpliceSites() {
-		return spliceSites;
+		return spliceSites;	// evtl lazy extractions from exons
+//		spliceSites= new SpliceSite[0];
+//		Comparator compi= new SpliceSite.PositionTypeComparator();
+//		for (int i = 0; i < getTranscripts().length; i++) {
+//			SpliceSite[] ss= getTranscripts()[i].getSpliceChain();
+//			for (int j = 0; j < ss.length; j++) {
+//				int p= Arrays.binarySearch(spliceSites, ss[j], compi);
+//				if (p< 0)
+//					spliceSites= (SpliceSite[]) gphase.tools.Arrays.insert(spliceSites, ss[j], p);
+//				else
+//					spliceSites[p].addTranscript(getTranscripts()[i]);
+//			}
+//		}
+//		return spliceSites;
 	}
 
 	public HashMap getSeparationIndex() {

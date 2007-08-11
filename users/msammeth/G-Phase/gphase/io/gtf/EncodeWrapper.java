@@ -378,18 +378,33 @@ public class EncodeWrapper extends GTFWrapper {
 		Iterator iter= transGTF.values().iterator();
 		HashMap chrHash= new HashMap();
 		while (iter.hasNext()) {
-			Vector gtfsVec= (Vector) iter.next();
-			GTFObject o= (GTFObject) (gtfsVec).elementAt(0);
-			HashMap tHash= (HashMap) chrHash.remove(o.getChromosome());
-			if (tHash== null)
-				tHash= new HashMap();
-			Vector v= (Vector) tHash.remove(o.getTranscriptID());
-			if (v== null)
-				v= new Vector();
-			for (int i = 0; i < gtfsVec.size(); i++) 
-				v.add(gtfsVec.elementAt(i));
-			tHash.put(o.getTranscriptID(), v);
-			chrHash.put(o.getChromosome(), tHash);
+			Vector gtfsVec= (Vector) iter.next();	// all gtfs for same tID, but can be on different chromosomes!!
+			HashMap gtfsChrHash= new HashMap();
+			for (int i = 0; i < gtfsVec.size(); i++) {
+				GTFObject obj= (GTFObject) gtfsVec.elementAt(i);
+				Vector<GTFObject> gtfsChr= (Vector<GTFObject>) gtfsChrHash.get(obj.getChromosome());
+				if (gtfsChr== null)
+					gtfsChr= new Vector<GTFObject>();
+				gtfsChr.add(obj);
+				gtfsChrHash.put(obj.getChromosome(), gtfsChr);
+			}
+			
+				// iterate eventually diffent transcripts (with same ID on different chromosomes)
+			Object[] keys= gtfsChrHash.keySet().toArray();
+			for (int i = 0; i < keys.length; i++) {
+				gtfsVec= (Vector) gtfsChrHash.get(keys[i]);
+				GTFObject o= (GTFObject) (gtfsVec).elementAt(0);
+				HashMap tHash= (HashMap) chrHash.remove(o.getChromosome());
+				if (tHash== null)
+					tHash= new HashMap();
+				Vector v= (Vector) tHash.remove(o.getTranscriptID());
+				if (v== null)
+					v= new Vector();
+				for (int j = 0; j < gtfsVec.size(); j++) 
+					v.add(gtfsVec.elementAt(j));
+				tHash.put(o.getTranscriptID(), v);
+				chrHash.put(o.getChromosome(), tHash);			
+			}
 		}
 		return chrHash;
 	}
@@ -448,7 +463,8 @@ public class EncodeWrapper extends GTFWrapper {
 			spec.setGenomeVersion(genomeVer);
 		}
 			// cluster
-		HashMap hash= getGroups("transcript_id", getGtfObj());	// cluster for genes?
+		HashMap hash= getGroups("transcript_id", getGtfObj());	// cluster for genes! 
+																// yes but now donw in getChromosomes()
 		HashMap chrHash= getChromosomes(hash);
 		
 			// construct transcripts

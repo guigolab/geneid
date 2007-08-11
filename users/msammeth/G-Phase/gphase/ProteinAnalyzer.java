@@ -16,7 +16,7 @@ import org.apache.commons.collections.bidimap.DualHashBidiMap;
 
 import prefuse.render.NullRenderer;
 
-import gphase.Structurator;
+import gphase.AStaLaVista;
 import gphase.algo.ASAnalyzer;
 import gphase.db.MapTable;
 import gphase.ext.DevNullReaderThread;
@@ -273,7 +273,7 @@ public class ProteinAnalyzer {
 				gphase.tools.Arrays.sort2DFieldRev(vars);
 				PrintStream p= new PrintStream(dir+File.separator+"landscape");
 				ASAnalyzer.outputVariations(vars, false, false, p);				
-				Structurator.writeHTML(vars, dir+File.separator+list[j]);
+				AStaLaVista.writeHTML(vars, dir+File.separator+list[j]);
 			}
 			
 		}
@@ -382,7 +382,7 @@ public class ProteinAnalyzer {
 						System.out.flush();
 						ASVariation[][] vars= sp.getASVariations(ASMultiVariation.FILTER_HIERARCHICALLY);
 						gphase.tools.Arrays.sort2DFieldRev(vars);
-						Structurator.writeHTML(vars, dir+File.separator+list[j]);
+						AStaLaVista.writeHTML(vars, dir+File.separator+list[j]);
 						System.out.println("done");
 	
 						Vector geneV= new Vector(ge.length/ 2);
@@ -409,7 +409,7 @@ public class ProteinAnalyzer {
 						
 						vars= sp.getASVariations(ASMultiVariation.FILTER_HIERARCHICALLY);
 						gphase.tools.Arrays.sort2DFieldRev(vars);
-						Structurator.writeHTML(vars, dir+File.separator+list[j]);
+						AStaLaVista.writeHTML(vars, dir+File.separator+list[j]);
 					}
 					
 				}
@@ -1153,7 +1153,7 @@ public class ProteinAnalyzer {
 					map.put(ID_SHORTSC, shortSc);
 					longSc= new Integer(longSc.intValue()+ sym[1]);
 					map.put(ID_LONGSC, longSc);
-					if (vars[m].is_affecting_CDS()) {
+					if (vars[m].isAffectingCDS()) {
 						cplxEventsCDS= new Integer(cplxEventsCDS.intValue()+ 1);
 						map.put(ID_CPLXEV_CDS, cplxEventsCDS);
 						shortScCDS= new Integer(shortScCDS.intValue()+ sym[0]);
@@ -1161,7 +1161,7 @@ public class ProteinAnalyzer {
 						longScCDS= new Integer(longScCDS.intValue()+ sym[1]);
 						map.put(ID_LONGSC_CDS, longScCDS);
 					}
-					if (vars[m].is_affecting_5UTR()) {
+					if (vars[m].isAffecting5UTR()) {
 						cplxEvents5UTR= new Integer(cplxEvents5UTR.intValue()+ 1);
 						map.put(ID_CPLXEV_5UTR, cplxEvents5UTR);
 						shortSc5UTR= new Integer(shortSc5UTR.intValue()+ sym[0]);
@@ -1173,11 +1173,11 @@ public class ProteinAnalyzer {
 				} else {
 					splEvents= new Integer(splEvents.intValue()+ 1);
 					map.put(ID_SPLEV, splEvents);
-					if (vars[m].is_affecting_CDS()) { 
+					if (vars[m].isAffectingCDS()) { 
 						splEventsCDS= new Integer(splEventsCDS.intValue()+ 1);
 						map.put(ID_SPLEV_CDS, splEventsCDS);
 					}
-					if (vars[m].is_affecting_5UTR()) { 
+					if (vars[m].isAffecting5UTR()) { 
 						splEvents5UTR= new Integer(splEvents5UTR.intValue()+ 1);
 						map.put(ID_SPLEV_5UTR, splEvents5UTR);
 					}
@@ -1345,7 +1345,7 @@ public class ProteinAnalyzer {
 			ASVariation[] vars= ge.getASVariations(ASMultiVariation.FILTER_HIERARCHICALLY);
 			int cntCplx= 0, cntSpl= 0;
 			for (int m = 0; vars!= null&& m < vars.length; m++) {				
-				if (!vars[m].is_affecting_CDS()) 
+				if (!vars[m].isAffectingCDS()) 
 					continue;
 				int deg= vars[m].getDegree();
 				if (deg> 2) {

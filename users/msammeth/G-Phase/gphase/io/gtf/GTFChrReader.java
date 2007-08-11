@@ -1,7 +1,7 @@
 	package gphase.io.gtf;
 
+import gphase.Analyzer;
 import gphase.algo.ASAnalyzer;
-import gphase.algo.Analyzer;
 import gphase.graph.SpliceGraph;
 import gphase.io.DefaultIOWrapper;
 import gphase.model.ASMultiVariation;
@@ -16,6 +16,7 @@ import gphase.model.Species;
 import gphase.model.SpliceSite;
 import gphase.model.Transcript;
 import gphase.model.Translation;
+import gphase.tools.Array;
 import gphase.tools.Arrays;
 import gphase.tools.Distribution;
 import gphase.tools.IntVector;
@@ -48,7 +49,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.collections.BidiMap;
-import org.apache.commons.collections.bidimap.DualHashBidiMap;
 
 
 import com.sun.org.apache.xalan.internal.xsltc.compiler.util.FilterGenerator;
@@ -57,6 +57,12 @@ import sun.font.GlyphLayout.GVData;
 
 
 public class GTFChrReader extends GTFWrapper {
+	static boolean sort= false;
+	static String usage= "GTFChrReader [options] <inputFile>\n\n"+
+		"where options may be\n" +
+		"-sort\t sort according to chr, transcriptID, start\n\n" +
+		"micha, 2007";
+	
 	public static final String NORMED_FILE_TAG= "norman";
 	public static final int MAX_GTF_LINE_LENGTH= 1000;
 	public static final String[] DEFAULT_CHROMOSOME_FILTER= new String[] {	
@@ -76,6 +82,7 @@ public class GTFChrReader extends GTFWrapper {
 			"^CHRXH$",
 			"^Y{1}H$",
 			"^CHRYH$",
+			"^NT_.+$"
 	};	// default chromosomes filtered off
 	public String transcript_id_tag= GTFObject.TRANSCRIPT_ID_TAG;
 	
@@ -85,8 +92,16 @@ public class GTFChrReader extends GTFWrapper {
 	int linesRead= 0;
 	long bytesRead= 0;
 	int lastPerc= 0;
-	Vector chrRead= null;
-	Vector chrSkipped= null;
+	Vector readChr= null;
+	int readTranscripts= 0;
+	int readExons= 0;
+	
+	int readGenes= 0;
+	int readChrs= 0;
+	Vector skippedChr= new Vector();
+	Vector skippedFeatures= new Vector();
+	int skippedObjects= 0;
+	Vector skippedTranscripts= new Vector();
 	String[] filtChrIDs= null;
 	HashMap filtSomeIDs= null;
 	boolean[] filtSomeIDSuccess= null;
@@ -126,307 +141,35 @@ public class GTFChrReader extends GTFWrapper {
 	}
 	
 	public static void main(String[] args) {
-		//"encode/44regions_genes_CHR_coord.gtf"
-		// "encode/RefSeqGenes_fromUCSC.gtf"
-		//"encode/EnsemblGenes_fromUCSC.gtf"
-		
-		//"encode/gencode_races.gtf"
-		//"encode/EnsemblGenes_fromUCSC.gtf"
-		// "encode/EnsemblGenes_fromUCSC_inENCODEonly.gtf"
-		// "encode/RefSeqGenes_fromUCSC.inENCODE.gtf"
-		// "encode/EnsemblGenes_all_fromENSEMBL.gtf"
-		// "encode/Sequences_mapped_HAVANA_136.gtf"
-		String fName= "encode/44regions_genes_CHR_coord.gtf";
-		GTFChrReader myWrapper= new GTFChrReader(new File(fName).getAbsolutePath()); // testGTF.gtf
-		try {
-			myWrapper.read();
-		} catch (Exception e) {
-			e.printStackTrace(); 
-		}
-		boolean encode= false;
-		if (fName.startsWith("encode/44regions_genes_CHR_coord.gtf"))
-			encode= true;
-
-		if (!myWrapper.isApplicable())
-			myWrapper.reformatFile();
-		
-		System.out.println("=== chromosome-wise ===");
-		long t0= System.currentTimeMillis();
-		String[][] varStr= 
-			Analyzer.getASVariations(myWrapper, ASMultiVariation.FILTER_HIERARCHICALLY, -1);
-//		String code= "1-2^ , 0";
-//		String[] coords= Analyzer.getASVariationCoordinates(myWrapper, code, ASMultiVariation.FILTER_HIERARCHICALLY, -1);
-		long t1= System.currentTimeMillis();
-//		
-//		System.out.println(code+"\t"+coords.length);
-//		for (int i = 0; i < coords.length; i++) 
-//			System.out.println(coords[i]);
-		for (int i = 0; i < varStr.length; i++) 
-			System.out.println(varStr[i][0]+"\t"+varStr[i].length);
-		System.out.println(t1-t0);
-		
-		EncodeWrapper yourWrapper= new EncodeWrapper(new File(fName).getAbsolutePath());
-		System.out.println("=== entire graph ===");
-		t0= System.currentTimeMillis();
-		Graph g= myWrapper.getGraph(encode);		// <===== check ENCODE here !!!
-		ASVariation[][] vars= g.getASVariations(ASMultiVariation.FILTER_HIERARCHICALLY);
-		Arrays.sort2DFieldRev(vars);
-		t1= System.currentTimeMillis();
-		for (int i = 0; i < vars.length; i++) {
-			System.out.println(vars[i][0]+"\t"+vars[i].length);
-//			if (vars[i][0].toString().equals(code)) {
-//				System.out.println(vars[i][0].toString()+"\t"+ vars[i].length);
-//				System.out.println("over in 1:");
-//				for (int j = 0; j < coords.length; j++) {
-//					String[] token= coords[j].split("\t");
-//					int k;
-//					for (k = 0; k < vars[i].length; k++) {
-//						String[] tok= vars[i][k].toStringElza().split("\t");
-//						if (tok[2].equals(token[2]))
-//							break;
-//					}
-//					if (k== vars[i].length)
-//						System.out.println(coords[j]);
-//				}
-//				System.out.println("over in 2:");
-//				for (int j = 0; j < vars[i].length; j++) {
-//					String[] token= vars[i][j].toStringElza().split("\t");
-//					int k;
-//					for (k = 0; k < coords.length; k++) {
-//						String[] tok= coords[k].split("\t");
-//						if (tok[2].equals(token[2]))
-//							break;
-//					}
-//					if (k== coords.length)
-//						System.out.println(vars[i][j].toStringElza());
-//				}
-//			}
-		}
-		System.out.println(t1-t0);
-		
-		if (1== 1)
+		if (args.length< 1) {
+			System.out.println(usage);
 			System.exit(0);
-		
-		
-		//g.filterNonCodingTranscripts();
-		//g.filterCodingTranscripts();
-		//g.initTU();
-
-//		PrintStream pr= null;
-//		try {
-//			pr = new PrintStream(new File("deg_ensembl.txt"));
-//		} catch (FileNotFoundException e1) {
-//			// TODO Auto-generated catch block
-//			e1.printStackTrace();
-//		}
-//		ASAnalyzer.test04_determineVariations(g, pr);
-		
-		
-//		ASVariation[][] classes= g.getASVariations(1);
-//		classes= (ASVariation[][]) Arrays.sort2DFieldRev(classes);
-//		for (int i = 0; i < classes.length; i++) {
-//			for (int j = 0; j < classes[i].length; j++) {
-//				if (classes[i][j].isProteinCoding_old_publ()&& !classes[i][j].isProteinCoding()) {
-//					classes[i][j].isProteinCoding_old_publ();
-//					classes[i][j].isProteinCoding();
-//				}
-//			}
-//		}
-		
-
-			// multi variations
-//		ASMultiVariation[][] vars= g.getASMultiVariations();
-//		vars= (ASMultiVariation[][]) Arrays.sort2DFieldRev(vars);
-//		for (int i = 0; i < vars.length; i++) {
-//			System.out.println(vars[i].length+"\t"+vars[i][0]);
-//		}
-		
-//		ASVariation[] vars= ASAnalyzer.getVariation("( // 1=2^)", g.getASVariations(ASMultiVariation.FILTER_NONE));
-//		System.out.println(vars.length+ " events");
-//		for (int i = 0; i < vars.length; i++) 
-//			;//vars[i].outputDetail(System.out);
-		
-//		ASAnalyzer.check_AA_AD(g, true, false, false);
-//		ASAnalyzer.check_AA_AD(g, true, true, false);
-//		ASAnalyzer.check_AA_AD(g, false, false, false);
-//		ASAnalyzer.check_AA_AD(g, false, true, false);
-		
-		ASAnalyzer.test01_clusters_coverage_as(g, System.out);
-//		if (1== 1)
-//			System.exit(0);
-		
-		
-//		try {
-//			PrintStream buffy= new PrintStream(new File("atg_aa_analysis_vars_refseq").getAbsolutePath());
-//			ASAnalyzer.outputFirstExonIntronAtg2(g, buffy);
-//			SpliceSite[] ss1= ASAnalyzer.getFirstExonIntronAtg3(g, null);
-//			SpliceSite[] ss2= ASAnalyzer.getFirstExonIntronAtg4(g, null);
-//			int dnrEq= 0, accEq= 0, dnrNe= 0, accNe= 0;
-//			for (int i = 0; i < ss2.length; i++) {
-//				int j;
-//				for (j = 0; j < ss1.length; j++) {
-//					if (ss2[i]== ss1[j]) {
-//						if (ss2[i].isDonor())
-//							dnrEq++;
-//						else
-//							accEq++;
-//						break;
-//					}						
-//				}
-//				if (j== ss1.length) {
-//					if (ss2[i].isDonor())
-//						dnrNe++;
-//					else
-//						accNe++;
-//				}
-//			}
-//			System.out.println(dnrEq+","+accEq+" : "+dnrNe+","+accNe);
-//			buffy.flush(); buffy.close();
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-		
-
-//		ASAnalyzer.outputVariations(new ASVariation[][] {ASAnalyzer.getVariation("( 1^3=// 2^4=)", g.getASVariations(ASMultiVariation.FILTER_HIERARCHICALLY))}, false, false, System.out);
-		// "output5UTR_REFSEQ"
-		try {
-			PrintStream p= new PrintStream("SSout_encode");
-//			//ASAnalyzer.output5UTRLengthAnalysis(g, p);
-//			//ASAnalyzer.outputInternalIntrons(g, p);
-			ASAnalyzer.outputSSOutCdsUtr(g, p);
-			p.flush();
-			p.close();
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
 		
+		File f= null;
+		for (int i = 0; i < args.length; i++) {
+			if (args[i].equalsIgnoreCase("-sort")) {
+				sort= true;
+				continue;
+			}
+			f= new File(args[i]);
+		}
 		
-//		ASAnalyzer.getSylvainsSize(g, System.out);
-//		ASAnalyzer.test01_clusters_coverage_as(g, System.out);
-//		ASAnalyzer.test(new String[]{"test01_clusters_coverage_as",
-//				"test02_ss_statistics",
-//				"test03_lengthVariationModulo",
-//				"test04_determineVariations"}, 
-//				new Class[] {Graph.class, PrintStream.class}, 
-//				new boolean[] {true, true, false, false});
-//		ASAnalyzer.test(new String[]{"test02_ss_statistics"}, 
-//				new Class[] {Graph.class, PrintStream.class}, 
-//				new boolean[] {true});
-//		ASAnalyzer.test02_ss_statistics(g, System.out);
-//		ASAnalyzer.test02_ss_statistics_outCDSalt(g);
-//		ASAnalyzer.test02b_ss_statistics_3P(g, System.out);
-//		ASAnalyzer.test03_lengthVariationModulo(g, System.out);
-//		ASAnalyzer.test03b_lengthVariationFirstExon(g, System.out);
-//		ASAnalyzer.test04_determineVariations(g, System.out);
+		if (f== null|| !f.exists())  {
+			System.out.println("input file invalid");
+			System.exit(0);
+		}
 		
-//		ASAnalyzer.check_AA_AD(g, true, false, false);
-//		ASAnalyzer.check_AA_AD(g, true, true, false);
-//		ASAnalyzer.check_AA_AD(g, true, false, true);
-//		ASAnalyzer.check_AA_AD(g, true, true, true);
-//		ASAnalyzer.check_AA_AD(g, false, false, false);
-//		ASAnalyzer.check_AA_AD(g, false, true, false);
-//		ASAnalyzer.check_AA_AD(g, false, false, true);
-//		ASAnalyzer.check_AA_AD(g, false, true, true);
-		
-//		long[] r=ASAnalyzer.getCDSUTRSizeComplement(g);
-//		System.out.println("5UTR "+r[0]+", CDS "+r[1]+", 3UTR "+r[2]);
-
-		//		ASVariation[] var= ASAnalyzer.getVariation("(1= // 2=)", g.getASVariations(ASMultiVariation.FILTER_HIERARCHICALLY));
-//		for (int i = 0; i < var.length; i++) {
-//			var[i].outputDetail(System.out);
-//		}
-		
-//		ASVariation[][] as= ASAnalyzer.determineVariations(g, (PrintStream) null);
-//		for (int i = 0; i < as.length; i++) {
-//			System.out.println(as[i][0].toString()+"\t"+as[i][0].toBitString());
-//		}
-		
-//		ASAnalyzer.lengthVariationModulo(g);
-//		long t1= System.currentTimeMillis();
-//		System.out.println("build up"+(t1- t0));
-//		g.getASVariations(ASMultiVariation.FILTER_NONE);
-//		long t2= System.currentTimeMillis();
-//		System.out.println("filter: "+ (t2- t1));
-//		g.getASVariations(ASMultiVariation.FILTER_REDUNDANT);
-//		long t3= System.currentTimeMillis();
-//		System.out.println("filter redundant: "+(t3- t2));
-		
-			// analyze1
-//		System.out.println("clusters: "+g.getGenes().length+" transcripts: "+g.getTranscriptCount());
-//		ASAnalyzer.filterSingleExonClusters(g);
-//		System.out.println("clusters: "+g.getGenes().length+" transcripts: "+g.getTranscriptCount());
-//		System.out.println("clusters w as: "+g.getClustersWithAS());
-		
-		//g.filterNonCodingTranscripts();
-		//System.out.println(ASAnalyzer.getPercASSpliceSites(g));
-		//ASVariation[][] classes= ASAnalyzer.determineVariations(g, "isTrue");
-		//ASAnalyzer.lengthVariation(g);
-		//ASAnalyzer.getSpecificVariations(g, System.out);
-		//ASAnalyzer.getVincenco(g);
-		//ASAnalyzer.getAllASVariation(g);
-		//ASAnalyzer.determineVariations(g, System.out);
-//		System.out.println(g.getTranscriptCount());
-		
-		
-//		ASAnalyzer.analyzeGene(g, "RNPC2", "isTrue", ASMultiVariation.FILTER_REDUNDANT);
-//		int cnt= 0, not= 0;
-//		BufferedWriter buffy= new BufferedWriter(new FileWriter)
-//		for (int i = 0; i < classes.length; i++) {
-//			for (int j = 0; j < classes[i].length; j++) {
-//				classes[i][j].outputDetail(System.out);
-//			}
-//		}
-//		System.out.println(cnt+","+not+" ("+(cnt+not)+")");
-		
-		
-//		ASVariation[][] classes= null;
-//		ASVariation[] events= ASAnalyzer.getVariation("(1=4^ // 2=3^)", classes);
-//		int cnt= 0;
-//		for (int i = 0; i < classes.length; i++) {
-//			for (int j = 0; events!= null&& j < events.length; j++) {
-//				if (events[j].includesFirstSpliceSite()) {
-//					events[j].outputDetail(System.out);
-//				}
-			//}
-//		}
-//		System.out.println("--");
-				
-		
-//			events= ASAnalyzer.getVariation("(1=3^ // 2=4^)", classes);
-////			int cnt= 0;
-////			for (int i = 0; i < classes.length; i++) {
-//				for (int j = 0; j < events.length; j++) {
-////					if (events[j].includesFirstSpliceSite()) {
-//						events[j].outputDetail(System.out);
-//					}
-				//}
-//			}
-//			System.out.println(cnt);
-		//ASVariation[][] classes2= ASAnalyzer.determineVariations(g, "isNotAtAllCoding", true);
-//		ASAnalyzer.diff(classes,classes2);
-//		classes= ASAnalyzer.getVariation("(1^ // 2^)", classes);
-//		classes= ASAnalyzer.getVariation("( // 1^2=)", classes);
-//		for (int i = 0; i < classes.length; i++) {
-//			for (int j = 0; j < 10; j++) {
-//				classes[i][j].outputDetail(System.out);
-//			}
-//		}
-		
-		//ASAnalyzer.determineVariations(g, "isPartiallyCoding");
-		
-		//ASAnalyzer.analyzeGene(g, "")
-		//ASAnalyzer.lowRepresented(g, 10);
-		//ASAnalyzer.debug(g, 10);
-		//ASAnalyzer.lengthPlot(g);
-		//ASAnalyzer.getVariation("( // 1=2^3=4^5=6^7=8^9=10^11=12^13=14^15=16^17=18^19=20^21=22^23=24^25=26^27=28^)",
-		//		g);
-
+		GTFChrReader reader= new GTFChrReader(f.getAbsolutePath());
+		if (sort) {
+			reader.reformatFile();
+		}
 	}
 	
 	public GTFChrReader(String absFName) {
 		super(absFName);	
-		chrRead= new Vector();
-		initSpecies();
+		readChr= new Vector();
+		//initSpecies();
 	}
 	
 	void initSpecies() {
@@ -485,14 +228,16 @@ public class GTFChrReader extends GTFWrapper {
 		}
 		
 		if (speName== null) {
-			System.out.println("No valid species name found in file name, guessing \'human\'.");
+			if (!silent)
+				System.out.println("No valid species name found in file name, guessing \'human\'.");
 			species= new Species("human");
 		} else 
 			species= new Species(speName);
 		
 		if (genomeVersion== null) {
 			genomeVersion= species.getDefaultGenomeVersion();
-			System.out.println("No valid build found in file name, guessing "+genomeVersion+".");
+			if (!silent)
+				System.out.println("No valid build found in file name, guessing "+genomeVersion+".");
 			species.setGenomeVersion(genomeVersion);
 		} else 
 			species.setGenomeVersion(genomeVersion);
@@ -979,6 +724,8 @@ public class GTFChrReader extends GTFWrapper {
 		if (vMinus!= null)
 			clusters.add(vMinus);
 		
+		System.gc();
+		
 		return (Transcript[][]) Arrays.toField(clusters);
 	}
 
@@ -1110,10 +857,10 @@ public class GTFChrReader extends GTFWrapper {
 			System.out.println("Found "+vv.size()+" gene ids for "+protIDs.length+" proteins.");
 			return (String[]) Arrays.toField(vv);
 		}
-	public void read(String[] geneIDs) throws Exception {
+	public void read_what_is_that(String[] geneIDs) throws Exception {
 			this.filtGeneIDs= geneIDs;
 			read();
-		}
+	}
 		
 		public void read_old() throws Exception {
 			reset();
@@ -1181,9 +928,9 @@ public class GTFChrReader extends GTFWrapper {
 								break;
 						}
 						if (u< noIDs.length) {
-							if (chrSkipped== null)
-								chrSkipped= new Vector();
-							chrSkipped= Arrays.addUnique(chrSkipped, newObj.seqname);
+							if (skippedChr== null)
+								skippedChr= new Vector();
+							skippedChr= Arrays.addUnique(skippedChr, newObj.seqname);
 							continue;		// next line
 						}
 					}
@@ -1196,9 +943,9 @@ public class GTFChrReader extends GTFWrapper {
 								break;
 						}
 						if (u== filtChrIDs.length) {
-							if (chrSkipped== null)
-								chrSkipped= new Vector();
-							chrSkipped= Arrays.addUnique(chrSkipped, newObj.seqname);
+							if (skippedChr== null)
+								skippedChr= new Vector();
+							skippedChr= Arrays.addUnique(skippedChr, newObj.seqname);
 							continue;		// next
 						}
 					}
@@ -1280,11 +1027,11 @@ public class GTFChrReader extends GTFWrapper {
 			}
 			System.out.println();
 			
-			if (chrSkipped!= null) {
+			if (skippedChr!= null) {
 				String s= "";
-				for (int i = 0; i < chrSkipped.size(); i++) 
-					s+= chrSkipped.elementAt(i)+ ", ";
-				System.out.println("\tSkipped "+ chrSkipped.size()+ " chroms: "+s.substring(0,s.length()- 2));
+				for (int i = 0; i < skippedChr.size(); i++) 
+					s+= skippedChr.elementAt(i)+ ", ";
+				System.out.println("\tSkipped "+ skippedChr.size()+ " chroms: "+s.substring(0,s.length()- 2));
 			}
 			gtfObj= (GTFObject[]) Arrays.toField(gtfVec);
 		}
@@ -1424,6 +1171,162 @@ public class GTFChrReader extends GTFWrapper {
 				return gene;
 			}
 
+	public void reformatFile_diff() {
+			try {
+				System.out.println("reformatting..");
+				HashMap chrMap= new HashMap();
+				File f= new File(fPath+ File.separator+ fName);
+				int p= fName.lastIndexOf('.');
+				if (p< 0)
+					p= fName.length();
+				//File fold= new File(fPath+ File.separator+ fName.substring(0, p)+"_original");
+				File fnew= new File(fPath+ File.separator+ fName.substring(0, p)+"_"+NORMED_FILE_TAG+"_");
+				long size= f.length(); 
+				BufferedWriter writer= null;
+				
+				BufferedReader reader= new BufferedReader(new FileReader(f));
+				String line= null;
+				long offset= 0l;
+				String lastWriterID= null;
+				System.out.print("\treformatting ");
+				System.out.flush();
+				HashMap readChrMap= new HashMap();
+				while (reader.ready()) {
+					
+						// read line
+					line= reader.readLine();
+					if (line== null)
+						break;
+						
+					offset+= line.length()+ 1;
+					int perc= (int) ((offset* 10d)/ size);
+					if (perc> lastPerc) {
+						++lastPerc;
+						System.out.print("*");
+						System.out.flush();
+					}
+					
+					String[] tokens= line.split("\t");	// must be tab, see specification
+						
+					String chrID= tokens[0];		// check chromosome
+					if (readChrMap.get(chrID)!= null)
+						continue;	// already handled
+					
+						// get all obj for chr
+					BufferedReader buffy= new BufferedReader(new FileReader(f));
+					Vector gtfObjV= new Vector();
+					while (buffy.ready()) {
+						line= buffy.readLine();
+						tokens= line.split("\t");
+						if (tokens[0].equals(chrID))
+							continue;
+						
+						GTFObject o= new GTFObject(line);
+						gtfObjV.add(o);
+					}
+					
+					String writerID= chrID+"_"+tID;
+					if (!writerID.equals(lastWriterID)) {	// change writer
+						if (writer!= null) {
+							writer.flush();
+							writer.close();
+						}
+						File fx= new File(f.getAbsolutePath()+"_"+writerID);
+						if (chrMap.get(writerID)== null) {
+							if (fx.exists())
+								fx.delete();
+							chrMap.put(writerID, writerID);
+						} 
+						writer= new BufferedWriter(new FileWriter(fx, true));
+						fx.deleteOnExit();	// doesnt work
+						lastWriterID= writerID;
+					}
+					
+					writer.write(line+"\n");
+					//writer.newLine();
+					writer.flush();
+				}
+				System.out.println();
+				reader.close();
+				//f.renameTo(fold);
+				writer= new BufferedWriter(new FileWriter(fnew.getAbsolutePath()));
+				lastPerc= 0;
+				
+					// concatenate
+				System.out.print("\tfuse ");
+				offset= 0l;
+				Object[] keys= chrMap.keySet().toArray();
+				java.util.Arrays.sort(keys);
+				Comparator gtfComp= new GTFObject.PositionComparator();
+				for (int i = 0; i < keys.length; i++) {
+					File fx= new File(f.getAbsolutePath()+"_"+keys[i]);
+					reader= new BufferedReader(new FileReader(fx));
+					HashMap trptHash= new HashMap(), startHash= new HashMap(), startHashRev= new HashMap();
+					while (reader.ready()) {
+						line= reader.readLine();
+						GTFObject o= new GTFObject(line);
+						if (o.getTranscriptID()== null|| o.getChromosome()== null|| o.getStart()<= 0)
+							System.out.println("Invalid GTF line "+line);
+						Vector v= (Vector) trptHash.get(o.getTranscriptID());
+						if (v== null)
+							v= new Vector();
+						Object[] a= v.toArray();
+						int pp= java.util.Arrays.binarySearch(a, o, gtfComp);
+						if (pp< 0)
+							pp= (pp+1)* (-1);					
+						v.insertElementAt(o, pp);
+						trptHash.put(o.getTranscriptID(), v);
+						
+						Integer start= (Integer) startHash.get(o.getTranscriptID());
+						int newStart= o.getStart();
+						if ((start== null)|| (newStart< start.intValue()))  
+							start= new Integer(newStart);
+						
+						v= (Vector) startHashRev.get(o.getTranscriptID());
+						if (v== null)
+							v= new Vector();
+						v= Arrays.addUnique(v, o.getTranscriptID());
+						startHashRev.put(start, v);
+		
+						
+						offset+= line.length()+ 1;
+						int perc= (int) ((offset* 10d)/ size);
+						if (perc> lastPerc) {
+							++lastPerc;
+							System.out.print("*");
+							System.out.flush();
+						}
+					}
+					
+					keys= startHashRev.keySet().toArray();
+					java.util.Arrays.sort(keys);
+					for (int j = 0; j < keys.length; j++) {
+						Vector v= (Vector) startHashRev.get(keys[i]);
+						for (int k = 0; k < v.size(); k++) {
+							Vector vv= (Vector) trptHash.get(v.elementAt(k));
+							for (int m = 0; m < vv.size(); m++) {
+								writer.write(vv.elementAt(m)+"\n");
+								//writer.newLine();
+							}
+						}
+					}
+					
+					
+					reader.close();
+					fx.delete();
+				}
+				System.out.println();
+				writer.flush(); writer.close();
+				
+				//System.out.println("\tsuccess, old file in "+fold.getAbsolutePath());
+				System.out.println("\tsuccess, new file in "+fnew.getAbsolutePath());
+				reset();
+			} catch (Exception e) {
+				System.err.println("Reformatting failed.");
+				e.printStackTrace();
+			}
+		}
+
 	public void reformatFile() {
 		try {
 			System.out.println("reformatting..");
@@ -1509,14 +1412,38 @@ public class GTFChrReader extends GTFWrapper {
 			offset= 0l;
 			Object[] keys= chrMap.keySet().toArray();
 			java.util.Arrays.sort(keys);
+			Comparator gtfComp= new GTFObject.PositionComparator();
 			for (int i = 0; i < keys.length; i++) {
 				File fx= new File(f.getAbsolutePath()+"_"+keys[i]);
 				reader= new BufferedReader(new FileReader(fx));
+				HashMap trptHash= new HashMap(), startHash= new HashMap(), startHashRev= new HashMap();
 				while (reader.ready()) {
 					line= reader.readLine();
-					writer.write(line+"\n");
-					//writer.newLine();
+					GTFObject o= new GTFObject(line);
+					if (o.getTranscriptID()== null|| o.getChromosome()== null|| o.getStart()<= 0)
+						System.out.println("Invalid GTF line "+line);
+					Vector v= (Vector) trptHash.get(o.getTranscriptID());
+					if (v== null)
+						v= new Vector();
+					Object[] a= v.toArray();
+					int pp= java.util.Arrays.binarySearch(a, o, gtfComp);
+					if (pp< 0)
+						pp= (pp+1)* (-1);					
+					v.insertElementAt(o, pp);
+					trptHash.put(o.getTranscriptID(), v);
+					
+					Integer start= (Integer) startHash.get(o.getTranscriptID());
+					int newStart= o.getStart();
+					if ((start== null)|| (newStart< start.intValue()))  
+						start= new Integer(newStart);
+					
+					v= (Vector) startHashRev.get(o.getTranscriptID());
+					if (v== null)
+						v= new Vector();
+					v= Arrays.addUnique(v, o.getTranscriptID());
+					startHashRev.put(start, v);
 
+					
 					offset+= line.length()+ 1;
 					int perc= (int) ((offset* 10d)/ size);
 					if (perc> lastPerc) {
@@ -1525,6 +1452,21 @@ public class GTFChrReader extends GTFWrapper {
 						System.out.flush();
 					}
 				}
+				
+				keys= startHashRev.keySet().toArray();
+				java.util.Arrays.sort(keys);
+				for (int j = 0; j < keys.length; j++) {
+					Vector v= (Vector) startHashRev.get(keys[i]);
+					for (int k = 0; k < v.size(); k++) {
+						Vector vv= (Vector) trptHash.get(v.elementAt(k));
+						for (int m = 0; m < vv.size(); m++) {
+							writer.write(vv.elementAt(m)+"\n");
+							//writer.newLine();
+						}
+					}
+				}
+				
+				
 				reader.close();
 				fx.delete();
 			}
@@ -1543,9 +1485,10 @@ public class GTFChrReader extends GTFWrapper {
 	public void reset() {
 		bytesRead= 0l;
 		linesRead= 0;
-		chrRead= null;
-		chrSkipped= null;
-		
+		readChr= new Vector();
+		skippedChr= new Vector();
+		skippedTranscripts= new Vector();
+		skippedTranscripts= new Vector();
 		// TODO: region and ID-filtering?? or do it method-level.. 
 	}
 
@@ -1645,7 +1588,7 @@ public class GTFChrReader extends GTFWrapper {
 				String line= buffy.readLine();			
 				if (line== null) {
 					if (reset) {
-						System.err.println("Not found chromosome "+chrom);
+						System.out.println("WARNING: chromosome "+chrom+" not found for sweeping");
 						break;
 					} else {
 						File file= new File(fPath+ File.separator+ fName);
@@ -1870,6 +1813,462 @@ public class GTFChrReader extends GTFWrapper {
 		return ok;
 	}
 	/**
+				 * Requires the gtf file to be ordered by chromosomes AND that
+				 * data (CDS, exon) from the same transcript is in adjacent lines
+				 * (which is good for RefSeq in worm, where the same tID/gID exists
+				 * on 4 diferent chromosomes). 
+				 * It does NOT require any order of the transcript starts within 
+				 * the chromosome, clustering is performed exhaustively.
+				 * 
+				 * retrieves every transcript that is overlapping a certain region of
+				 * <code>ovlReg</code>
+				 * @return
+				 */
+				/*
+				 * Note that the clustering cannot be separated from the dynamic
+				 * gene building, since reduncancy checks for splice sites and exons
+				 * within the genes depend on it.
+				 */
+				public void read() throws Exception { 
+								
+				
+						BufferedReader buffy= null;
+						long size= 0l;
+						
+						if (fPath!= null&& fName!= null) {
+							try {
+								File file= new File(fPath+ File.separator+ fName);
+								size= file.length();
+								inputStream= new FileInputStream(file);
+								inputStream.skip(bytesRead);
+								buffy= new BufferedReader(new InputStreamReader(inputStream));
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
+							
+						
+						Vector geneV= new Vector();
+						Comparator startCompi= new DirectedRegion.StartComparator();
+							
+						Vector gtfV= null;
+						if (readGTF)
+							gtfV = new Vector();
+						try {
+							
+							String line= null;
+							
+							String lastTID= null;			
+							String lastChrID= null;
+							Transcript trpt= null;
+							//boolean merged= true;	// for skiping insertion of init null trpt/gene
+							while (true) {
+								
+									// read line
+								buffy.mark(MAX_GTF_LINE_LENGTH);	// for skipping chromosomes
+								line= buffy.readLine();
+								if (line== null) {
+									if (readGene&& trpt!= null) 
+										geneV.add(trpt.getGene());
+									
+									
+									
+										// print statistics
+									if (!silent) {
+										System.out.println("\nRead:\t"+readChrs+" chromosomes, "+readGenes+" genes, "+readTranscripts+" transcripts, "+
+												readExons+" exons.");
+										System.out.println("Skip:\t"+skippedChr.size()+" chromosomes, "+skippedTranscripts.size()+" transcripts, "+
+												skippedFeatures.size()+" features, "+skippedObjects+" objects.");
+										System.out.print("Chromosomes:\t");
+										for (int i = 0; i < skippedChr.size(); i++) 
+											System.out.print(skippedChr.elementAt(i)+" ");
+										System.out.print("\nTranscripts:\t");
+										for (int i = 0; i < skippedTranscripts.size(); i++) 
+											System.out.print(skippedTranscripts.elementAt(i)+" ");
+										System.out.print("\nFeatures:\t");
+										for (int i = 0; i < skippedFeatures.size(); i++) 
+											System.out.print(skippedFeatures.elementAt(i)+" ");
+										System.out.println();
+									}
+									break;
+								}
+								++linesRead;
+								bytesRead+= line.length()+ 1;
+									
+								int perc= (int) ((bytesRead* 10d)/ size);
+								if (perc> lastPerc&& !silent) {
+									++lastPerc;
+									System.out.print("*");
+									System.out.flush();
+								}
+															
+								String[] tokens= line.split("\t");	// must be tab, see specification
+								if (!silent&& tokens.length< 8)
+									System.err.println("line "+ linesRead+ ": skipped (<8 token)!\n\t"+ line);
+								
+									
+								int x;		// skip mRNA, gene... 
+								for (x = 0; readFeatures!= null&& x < readFeatures.length; x++) {
+									if (readFeatures[x].equalsIgnoreCase(tokens[2]))
+										break;
+								}
+								if (readFeatures!= null&& x== readFeatures.length) {
+									skippedFeatures= Arrays.addUnique(skippedFeatures, tokens[2]);
+									continue;
+								}
+								
+								int start= Integer.parseInt(tokens[3]);
+								int end= Integer.parseInt(tokens[4]);
+								int strand= 0;
+								strand= GTFObject.parseStrand(tokens[6].trim());
+								if (strand== 0) {
+									if (!silent)
+										System.err.println("No strand assignment, line "+linesRead);
+									continue;
+								}						
+								
+								// <seqname> <source> <feature> <start> <end> <score> <strand> <frame> [attributes] [comments]
+								GTFObject obj= new GTFObject();	// build gtf-obj, handling of attributes easier
+								obj.setStart(start);
+								obj.setEnd(end);
+								obj.setStrand(strand);
+								obj.setFeature(tokens[2]);
+								obj.setSource(tokens[1]);
+								obj.setSeqname(tokens[0]);
+								obj.setScore(tokens[5]);
+								obj.setFrame(tokens[7]);
+								String[] attrTokens= new String[0];
+								if (tokens.length> 8) {
+									String h= line.substring(line.indexOf(tokens[8]), line.length()).trim();	// attributes, comments
+									attrTokens= h.split(";");
+									for (int i = 0; i < attrTokens.length; i++) {
+										h= attrTokens[i].trim();
+										h= h.replaceAll("\\s+", " ");
+										int sep= Math.max(h.indexOf(' '), h.indexOf('='));	// = in ASD gff
+										if (sep < 0) 						// comments
+											break;
+										if (sep>= 0) {
+											String id= h.substring(0, sep);
+											String val= h.substring(sep+ 1, h.length());
+											if (val.charAt(0)== '\"')
+												val= val.substring(1, val.length()- 1);
+											obj.addAttribute(id, val);
+										}
+									}
+								}
+	
+									// filter gtfs that have ID...
+								if (filtSomeIDs!= null) {
+									boolean found= false;
+									for (int i = 0; i < attrTokens.length; i++) {
+										String h= attrTokens[i].trim(); 
+										int sep= h.indexOf(' ');
+										if (sep < 0) 						// comments
+											break;
+										if (sep>= 0) {
+											String val= h.substring(sep+1, h.length()).trim();
+											if (val.startsWith("\""))
+												val= val.substring(1, val.length()-1);
+											String[] t= val.split(" ");
+											for (int j = 0; j < t.length; j++) {
+												Integer in= (Integer) filtSomeIDs.get(t[j]);
+												if (in== null)
+													continue;	// ID not in filter list
+												filtSomeIDs.put(t[j], new Integer(in.intValue()+ 1));
+												found= true;
+											}
+										}
+									}
+									if (!found) {
+										skippedObjects++;
+										continue;
+									}
+								}
+								
+									// check chromosome
+								String chrID= tokens[0];
+								if (fName.contains("cow")&& chrID.equals("30"))
+									chrID= "X";
+								if (chromosomeWise&& !chrID.equals(lastChrID)) {
+									if (lastChrID== null) {
+										// neg chromosome filtering
+										if (noIDs!= null) {
+											int u;
+											String chrIDu= chrID.toUpperCase();
+											for (u = 0; u < noIDs.length; u++) {
+												if (Pattern.matches(noIDs[u], chrIDu)) 
+													break;
+											}
+											if (u< noIDs.length) {
+												--linesRead;
+												bytesRead-= line.length()+ 1;
+												buffy.reset();
+												if (skippedChr== null)
+													skippedChr= new Vector();
+												skippedChr= Arrays.addUnique(skippedChr, chrID);
+												skipToNextChromosome(buffy, size);
+												continue;
+											}
+										}
+											// pos chromosome filtering
+										if (filtChrIDs!= null) {
+											int u;
+											for (u = 0; u < filtChrIDs.length; u++) {
+												if (filtChrIDs[u].equalsIgnoreCase(chrID))
+													break;
+											}
+											if (u== filtChrIDs.length) {
+												--linesRead;
+												bytesRead-= line.length()+ 1;
+												buffy.reset();
+												if (skippedChr== null)
+													skippedChr= new Vector();
+												skippedChr= Arrays.addUnique(skippedChr, chrID);
+												skipToNextChromosome(buffy, size);
+												continue;
+											}
+										}
+										
+										lastChrID= chrID;
+										for (int i = 0; readChr!= null&& i < readChr.size(); i++) 
+											if (readChr.elementAt(i).equals(chrID)) {
+												if (!silent) {
+													System.err.println("Chromosome "+chrID+" already read! ("+linesRead+")");
+													System.err.println(line);
+												}
+												return;
+											}
+										
+										
+									} else {
+										
+										geneV.add(trpt.getGene());
+										if (readChr== null)
+											readChr= new Vector();
+										readChr.add(lastChrID);
+										--linesRead;
+										bytesRead-= line.length()+ 1;										
+										break;
+									}
+									
+									readChrs++;
+								}
+	
+								/*	--- END OF FILTERING --- */
+								
+								if (readGTF) 
+									gtfV.add(obj);
+								if (!readGene)
+									continue;
+								
+									// get GID, TID
+								String tid= obj.getAttribute(transcript_id_tag);
+								if (tid== null) {
+									if (!silent)
+										System.err.println("No TID found.");
+									continue;
+								} 
+					
+									// new transcript?
+								if (!tid.equals(lastTID)) {
+									boolean overlap= true;
+									if (filtRegs!= null) {	// should be ok for the moment. maybe also check in merging step
+										int i;
+										for (i = 0; i < filtRegs.length; i++) 
+											if (filtRegs[i].overlaps(trpt))
+												break;
+										if (i== filtRegs.length)
+											overlap= false;
+									}
+										// pull identical exon attributes up to transcript level
+									if (trpt!= null&& trpt.getExons()[0].getAttributes()!= null) {
+										Object[] keys= trpt.getExons()[0].getAttributes().keySet().toArray();
+										for (int i = 0; i < keys.length; i++) {
+											int j;
+											for (j = 1; j < trpt.getExons().length; j++) {
+												if (!trpt.getExons()[j].getAttribute(keys[i]).equals(trpt.getExons()[0].getAttribute(keys[i])))
+													break;
+											}
+											if (j== trpt.getExons().length) {
+												Object val= trpt.getExons()[0].getAttribute(keys[i]);
+												for (int k = 0; k < trpt.getExons().length; k++) 
+													trpt.getExons()[k].getAttributes().remove(keys[i]);
+												trpt.addAttribute(keys[i], val);
+											}
+										}
+									}
+									
+		
+									// save gene
+									if (overlap) {	
+										//if (!merged) 	// if last transcript's gene couldnt be merged with anything
+										if (trpt!= null)
+											geneV.add(trpt.getGene());
+									} else {
+										skippedTranscripts.add(lastTID);
+									}
+									//merged= false;
+									Gene ge= new Gene(Gene.getUniqueID());
+									ge.setStrand(strand);
+									ge.setChromosome(tokens[0]);
+									ge.setSpecies(species);
+									trpt= new Transcript(tid);
+									lastTID= tid;
+									trpt.setStrand(strand);
+									trpt.setChromosome(tokens[0]);
+									trpt.setSource(tokens[1]);
+									ge.addTranscript(trpt);
+									readTranscripts++;
+								}
+														
+								if (obj.getFeature().equalsIgnoreCase("exon")) {
+									String exonID= obj.getAttribute(GTFObject.EXON_ID_TAG);
+									Exon e= new Exon(trpt, exonID, start, end);
+									e.setChromosome(chrID);
+									e.setStrand(strand);
+									++readExons;
+									
+										// check if gene merge, not necessary when transcript starts are sorted ascending
+									//trpt.addExon(e);		// automatically now in Exon constructor	
+	//								if (geneReg!= null) {
+	//									int p= java.util.Arrays.binarySearch(geneReg, e, startCompi);	// 
+	//									if (p>= 0) {
+	//										if (geneReg[p]!= trpt.getGene()) {
+	//											if (merged) {
+	//												trpt.getGene().merge(geneReg[p]);
+	//												geneReg= (Gene[]) Arrays.remove(geneReg, p);
+	//											} else {
+	//												geneReg[p].merge(trpt.getGene());
+	//												merged= true;
+	//											}
+	//										}
+	//									} else {	// between two
+	//										p= -(p+1);	// insertion point
+	//										int q= p-1;
+	//										if (q>= 0&& geneReg[q]!= trpt.getGene()&&
+	//												e.overlaps(geneReg[q])) { 
+	//											if (merged) {	// if already merged, one has to be removed from array
+	//												trpt.getGene().merge(geneReg[q]);
+	//												geneReg= (Gene[]) Arrays.remove(geneReg, q);
+	//											} else
+	//												geneReg[q].merge(trpt.getGene());
+	//											merged= true;
+	//										}
+	//										q= p;	//+1; NO, insertion point is the upper neighbor
+	//										if (q< geneReg.length&& geneReg[q]!= trpt.getGene()&&
+	//												e.overlaps(geneReg[q])) { 
+	//											if (merged) {
+	//												trpt.getGene().merge(geneReg[q]);
+	//												geneReg= (Gene[]) Arrays.remove(geneReg, q);
+	//											} else
+	//												geneReg[q].merge(trpt.getGene());
+	//											merged= true;
+	//										}
+	//									}
+	//								}
+									
+									
+									
+								} else if (tokens[2].equalsIgnoreCase("CDS")) {
+									trpt.addCDS(start, end);
+									Object[] keys= obj.getAttributes().keySet().toArray();
+									for (int i = 0; i < keys.length; i++) {
+										if ((!GTFObject.GENE_ID_TAG.equals(keys[i]))&&
+												(!GTFObject.TRANSCRIPT_ID_TAG.equals(keys[i]))&&
+												(!GTFObject.EXON_ID_TAG.equals(keys[i])))	{		// TODO make it nice: protein_id "...", other_id "..." 
+												String putProtID= obj.getAttribute((String) keys[i]);
+												String[] idTokens= putProtID.split(" ");
+												for (int j = 0; j < idTokens.length; j++) 
+													trpt.getTranslations()[0].addProteinID(idTokens[j]);
+										}
+									}
+									
+								} else {
+									int y;
+									for (y = 0; readFeatures!= null&& y < readFeatures.length; y++) 
+										if (readFeatures[y].equalsIgnoreCase(tokens[2]))
+											break;
+									if (readFeatures== null|| y< readFeatures.length) {
+										String regID= tokens[2];
+										DirectedRegion newReg= new DirectedRegion(
+												obj.getStart(),
+												obj.getEnd(),
+												trpt.getStrand()
+										);
+										newReg.setID(obj.getAttribute(tokens[2]+"_id"));
+										newReg.setScore(obj.getScore());
+										newReg.setChromosome(trpt.getChromosome());
+										DirectedRegion[] reg= null;
+										if (trpt.getAttributes()!= null)
+											reg= (DirectedRegion[]) trpt.getAttributes().remove(regID);
+										if (reg== null)
+											reg= new DirectedRegion[] {newReg};
+										else {
+											int i;
+											for (i = 0; i < reg.length; i++) {
+												if (reg[i].getID().equals(newReg.getID())) {
+													if (reg[i].getScore()!= newReg.getScore())
+														System.out.println("WARNING: regions with non-matching scores "+newReg+", "+reg[i]);
+													reg[i].set5PrimeEdge(Math.min(newReg.get5PrimeEdge(), reg[i].get5PrimeEdge()));
+													reg[i].set3PrimeEdge(Math.max(newReg.get3PrimeEdge(), reg[i].get3PrimeEdge()));
+													break;
+												}
+											}
+											if (i== reg.length)
+												reg= (DirectedRegion[]) Arrays.add(reg, newReg);
+										}
+										
+										trpt.addAttribute(regID, reg);	// "domain", 
+									}
+										
+									
+								}
+					
+							}
+							buffy.close();
+						} catch (IOException e) {
+							if (!silent)
+								System.err.println("line "+ linesRead);
+							e.printStackTrace();
+						}
+					
+						
+						if (bytesRead== size&& !silent)
+							System.out.println();
+						
+						if (readGene)
+							this.genes= clusterLoci((Gene[]) Arrays.toField(geneV));	// doesnt matter which sorting, no?!
+						System.gc();
+						if (genes!= null)
+							readGenes+= this.genes.length;
+						if (readGTF)
+							this.gtfObj= (GTFObject[]) Arrays.toField(gtfV);
+					}
+
+	private Gene[] clusterLoci(Gene[] g) {
+		if (g== null)
+			return null;
+		
+		Comparator compi= new DirectedRegion.StartComparator();
+		java.util.Arrays.sort(g, compi);
+		
+		Vector v= new Vector();
+		for (int i = 0; i < g.length; i++) {
+			v.add(g[i]);
+			int j;
+			for (j = i+1; j < g.length; j++) {
+				if (g[i].overlaps(g[j]))
+					g[i].merge(g[j]);
+				else 
+					break;
+			}		
+			i= j-1;
+		}
+		
+		return (Gene[]) Arrays.toField(v);
+	}
+
+	/**
 			 * Requires the gtf file to be ordered by chromosomes AND that
 			 * data (CDS, exon) from the same transcript is in adjacent lines
 			 * (which is good for RefSeq in worm, where the same tID/gID exists
@@ -1886,7 +2285,7 @@ public class GTFChrReader extends GTFWrapper {
 			 * gene building, since reduncancy checks for splice sites and exons
 			 * within the genes depend on it.
 			 */
-			public void read() throws Exception { 
+			public void read_transcript_clustering_while_reading_iefficient() throws Exception { 
 							
 			
 					BufferedReader buffy= null;
@@ -1905,8 +2304,9 @@ public class GTFChrReader extends GTFWrapper {
 					}
 						
 					
-					Gene[] geneReg= null;
+					Gene[][] geneReg= new Gene[2][];
 					Comparator startCompi= new AbstractRegion.StartComparator();
+					Comparator endCompi= new AbstractRegion.StartComparator();
 						
 					Vector gtfV= null;
 					if (readGTF)
@@ -1918,20 +2318,34 @@ public class GTFChrReader extends GTFWrapper {
 						String lastTID= null;			
 						String lastChrID= null;
 						Transcript trpt= null;
-						boolean merged= true;	// for skiping insertion of init null trpt/gene
+						//boolean merged= true;	// for skiping insertion of init null trpt/gene
 						while (true) {
 							
 								// read line
 							buffy.mark(MAX_GTF_LINE_LENGTH);	// for skipping chromosomes
 							line= buffy.readLine();
 							if (line== null) {
-								if (readGene&& !merged) {
-									if (geneReg== null)
-										geneReg= new Gene[] {trpt.getGene()};
-									else {
-										int p= java.util.Arrays.binarySearch(geneReg, trpt.getGene(), startCompi);
-										geneReg= (Gene[]) Arrays.insert(geneReg, trpt.getGene(), p);
-									}
+								if (readGene&& trpt!= null) 
+									mergeGene(geneReg, trpt.getGene(), startCompi, endCompi);
+								
+								
+								
+									// print statistics
+								if (!silent) {
+									System.out.println("\nRead:\t"+readChrs+" chromosomes, "+readGenes+" genes, "+readTranscripts+" transcripts, "+
+											readExons+" exons.");
+									System.out.println("Skip:\t"+skippedChr.size()+" chromosomes, "+skippedTranscripts.size()+" transcripts, "+
+											skippedFeatures.size()+" features, "+skippedObjects+" objects.");
+									System.out.print("Chromosomes:\t");
+									for (int i = 0; i < skippedChr.size(); i++) 
+										System.out.print(skippedChr.elementAt(i)+" ");
+									System.out.print("\nTranscripts:\t");
+									for (int i = 0; i < skippedTranscripts.size(); i++) 
+										System.out.print(skippedTranscripts.elementAt(i)+" ");
+									System.out.print("\nFeatures:\t");
+									for (int i = 0; i < skippedFeatures.size(); i++) 
+										System.out.print(skippedFeatures.elementAt(i)+" ");
+									System.out.println();
 								}
 								break;
 							}
@@ -1955,8 +2369,10 @@ public class GTFChrReader extends GTFWrapper {
 								if (readFeatures[x].equalsIgnoreCase(tokens[2]))
 									break;
 							}
-							if (readFeatures!= null&& x== readFeatures.length)
+							if (readFeatures!= null&& x== readFeatures.length) {
+								skippedFeatures= Arrays.addUnique(skippedFeatures, tokens[2]);
 								continue;
+							}
 							
 							int start= Integer.parseInt(tokens[3]);
 							int end= Integer.parseInt(tokens[4]);
@@ -1969,9 +2385,6 @@ public class GTFChrReader extends GTFWrapper {
 							}						
 							
 							// <seqname> <source> <feature> <start> <end> <score> <strand> <frame> [attributes] [comments]
-							String h= line.substring(line.indexOf(tokens[8]), line.length()).trim();	// attributes, comments
-							
-							String[] attrTokens= h.split(";");
 							GTFObject obj= new GTFObject();	// build gtf-obj, handling of attributes easier
 							obj.setStart(start);
 							obj.setEnd(end);
@@ -1981,17 +2394,23 @@ public class GTFChrReader extends GTFWrapper {
 							obj.setSeqname(tokens[0]);
 							obj.setScore(tokens[5]);
 							obj.setFrame(tokens[7]);
-							for (int i = 0; i < attrTokens.length; i++) {
-								h= attrTokens[i].trim();
-								int sep= Math.max(h.indexOf(' '), h.indexOf('='));	// = in ASD gff
-								if (sep < 0) 						// comments
-									break;
-								if (sep>= 0) {
-									String id= h.substring(0, sep);
-									String val= h.substring(sep+ 1, h.length());
-									if (val.charAt(0)== '\"')
-										val= val.substring(1, val.length()- 1);
-									obj.addAttribute(id, val);
+							String[] attrTokens= new String[0];
+							if (tokens.length> 8) {
+								String h= line.substring(line.indexOf(tokens[8]), line.length()).trim();	// attributes, comments
+								attrTokens= h.split(";");
+								for (int i = 0; i < attrTokens.length; i++) {
+									h= attrTokens[i].trim();
+									h= h.replaceAll("\\s+", " ");
+									int sep= Math.max(h.indexOf(' '), h.indexOf('='));	// = in ASD gff
+									if (sep < 0) 						// comments
+										break;
+									if (sep>= 0) {
+										String id= h.substring(0, sep);
+										String val= h.substring(sep+ 1, h.length());
+										if (val.charAt(0)== '\"')
+											val= val.substring(1, val.length()- 1);
+										obj.addAttribute(id, val);
+									}
 								}
 							}
 
@@ -1999,7 +2418,7 @@ public class GTFChrReader extends GTFWrapper {
 							if (filtSomeIDs!= null) {
 								boolean found= false;
 								for (int i = 0; i < attrTokens.length; i++) {
-									h= attrTokens[i].trim();
+									String h= attrTokens[i].trim(); 
 									int sep= h.indexOf(' ');
 									if (sep < 0) 						// comments
 										break;
@@ -2017,8 +2436,10 @@ public class GTFChrReader extends GTFWrapper {
 										}
 									}
 								}
-								if (!found)
+								if (!found) {
+									skippedObjects++;
 									continue;
+								}
 							}
 							
 								// check chromosome
@@ -2039,9 +2460,9 @@ public class GTFChrReader extends GTFWrapper {
 											--linesRead;
 											bytesRead-= line.length()+ 1;
 											buffy.reset();
-											if (chrSkipped== null)
-												chrSkipped= new Vector();
-											chrSkipped= Arrays.addUnique(chrSkipped, chrID);
+											if (skippedChr== null)
+												skippedChr= new Vector();
+											skippedChr= Arrays.addUnique(skippedChr, chrID);
 											skipToNextChromosome(buffy, size);
 											continue;
 										}
@@ -2057,17 +2478,17 @@ public class GTFChrReader extends GTFWrapper {
 											--linesRead;
 											bytesRead-= line.length()+ 1;
 											buffy.reset();
-											if (chrSkipped== null)
-												chrSkipped= new Vector();
-											chrSkipped= Arrays.addUnique(chrSkipped, chrID);
+											if (skippedChr== null)
+												skippedChr= new Vector();
+											skippedChr= Arrays.addUnique(skippedChr, chrID);
 											skipToNextChromosome(buffy, size);
 											continue;
 										}
 									}
 									
 									lastChrID= chrID;
-									for (int i = 0; chrRead!= null&& i < chrRead.size(); i++) 
-										if (chrRead.elementAt(i).equals(chrID)) {
+									for (int i = 0; readChr!= null&& i < readChr.size(); i++) 
+										if (readChr.elementAt(i).equals(chrID)) {
 											if (!silent) {
 												System.err.println("Chromosome "+chrID+" already read! ("+linesRead+")");
 												System.err.println(line);
@@ -2077,23 +2498,17 @@ public class GTFChrReader extends GTFWrapper {
 									
 									
 								} else {
-									if (!merged) {
-										if (geneReg== null)
-											geneReg= new Gene[] {trpt.getGene()};
-										else {
-											int p= java.util.Arrays.binarySearch(geneReg, trpt.getGene(), startCompi);
-											geneReg= (Gene[]) Arrays.insert(geneReg, trpt.getGene(), p);
-										}
-									}
-									if (chrRead== null)
-										chrRead= new Vector();
-									chrRead.add(lastChrID);
+									//if (!merged) 
+										mergeGene(geneReg, trpt.getGene(), startCompi, endCompi);
+									if (readChr== null)
+										readChr= new Vector();
+									readChr.add(lastChrID);
 									--linesRead;
 									bytesRead-= line.length()+ 1;
 									break;
 								}
 								
-								
+								readChrs++;
 							}
 
 							/*	--- END OF FILTERING --- */
@@ -2122,17 +2537,35 @@ public class GTFChrReader extends GTFWrapper {
 									if (i== filtRegs.length)
 										overlap= false;
 								}
-	
-								// save gene
-								if (overlap&& (!merged)) {	// if last transcript's gene couldnt be merged with anything
-									if (geneReg== null)
-										geneReg= new Gene[] {trpt.getGene()};
-									else {
-										int p= java.util.Arrays.binarySearch(geneReg, trpt.getGene(), startCompi);
-										geneReg= (Gene[]) Arrays.insert(geneReg, trpt.getGene(), p);
+									// pull identical exon attributes up to transcript level
+								if (trpt!= null&& trpt.getExons()[0].getAttributes()!= null) {
+									Object[] keys= trpt.getExons()[0].getAttributes().keySet().toArray();
+									for (int i = 0; i < keys.length; i++) {
+										int j;
+										for (j = 1; j < trpt.getExons().length; j++) {
+											if (!trpt.getExons()[j].getAttribute(keys[i]).equals(trpt.getExons()[0].getAttribute(keys[i])))
+												break;
+										}
+										if (j== trpt.getExons().length) {
+											Object val= trpt.getExons()[0].getAttribute(keys[i]);
+											for (int k = 0; k < trpt.getExons().length; k++) 
+												trpt.getExons()[k].getAttributes().remove(keys[i]);
+											trpt.addAttribute(keys[i], val);
+										}
 									}
 								}
-								merged= false;
+								
+	
+								// save gene
+								if (overlap) {	
+									//if (!merged) 	// if last transcript's gene couldnt be merged with anything
+									if (trpt!= null)
+										mergeGene(geneReg, trpt.getGene(), startCompi, endCompi);
+									readGenes++;
+								} else {
+									skippedTranscripts.add(lastTID);
+								}
+								//merged= false;
 								Gene ge= new Gene(Gene.getUniqueID());
 								ge.setStrand(strand);
 								ge.setChromosome(tokens[0]);
@@ -2143,6 +2576,7 @@ public class GTFChrReader extends GTFWrapper {
 								trpt.setChromosome(tokens[0]);
 								trpt.setSource(tokens[1]);
 								ge.addTranscript(trpt);
+								readTranscripts++;
 							}
 													
 							if (obj.getFeature().equalsIgnoreCase("exon")) {
@@ -2150,46 +2584,48 @@ public class GTFChrReader extends GTFWrapper {
 								Exon e= new Exon(trpt, exonID, start, end);
 								e.setChromosome(chrID);
 								e.setStrand(strand);
+								++readExons;
 								
 									// check if gene merge, not necessary when transcript starts are sorted ascending
-								if (geneReg!= null) {
-									int p= java.util.Arrays.binarySearch(geneReg, e, startCompi);
-									if (p>= 0) {
-										if (geneReg[p]!= trpt.getGene()) {
-											if (merged) {
-												trpt.getGene().merge(geneReg[p]);
-												geneReg= (Gene[]) Arrays.remove(geneReg, p);
-											} else {
-												geneReg[p].merge(trpt.getGene());
-												merged= true;
-											}
-										}
-									} else {	// between two
-										p= -(p+1);	// insertion point
-										int q= p-1;
-										if (q>= 0&& geneReg[q]!= trpt.getGene()&&
-												e.overlaps(geneReg[q])) { 
-											if (merged) {	// if already merged, one has to be removed from array
-												trpt.getGene().merge(geneReg[q]);
-												geneReg= (Gene[]) Arrays.remove(geneReg, q);
-											} else
-												geneReg[q].merge(trpt.getGene());
-											merged= true;
-										}
-										q= p;	//+1; NO, insertion point is the upper neighbor
-										if (q< geneReg.length&& geneReg[q]!= trpt.getGene()&&
-												e.overlaps(geneReg[q])) { 
-											if (merged) {
-												trpt.getGene().merge(geneReg[q]);
-												geneReg= (Gene[]) Arrays.remove(geneReg, q);
-											} else
-												geneReg[q].merge(trpt.getGene());
-											merged= true;
-										}
-									}
-								}
+								//trpt.addExon(e);		// automatically now in Exon constructor	
+//								if (geneReg!= null) {
+//									int p= java.util.Arrays.binarySearch(geneReg, e, startCompi);	// 
+//									if (p>= 0) {
+//										if (geneReg[p]!= trpt.getGene()) {
+//											if (merged) {
+//												trpt.getGene().merge(geneReg[p]);
+//												geneReg= (Gene[]) Arrays.remove(geneReg, p);
+//											} else {
+//												geneReg[p].merge(trpt.getGene());
+//												merged= true;
+//											}
+//										}
+//									} else {	// between two
+//										p= -(p+1);	// insertion point
+//										int q= p-1;
+//										if (q>= 0&& geneReg[q]!= trpt.getGene()&&
+//												e.overlaps(geneReg[q])) { 
+//											if (merged) {	// if already merged, one has to be removed from array
+//												trpt.getGene().merge(geneReg[q]);
+//												geneReg= (Gene[]) Arrays.remove(geneReg, q);
+//											} else
+//												geneReg[q].merge(trpt.getGene());
+//											merged= true;
+//										}
+//										q= p;	//+1; NO, insertion point is the upper neighbor
+//										if (q< geneReg.length&& geneReg[q]!= trpt.getGene()&&
+//												e.overlaps(geneReg[q])) { 
+//											if (merged) {
+//												trpt.getGene().merge(geneReg[q]);
+//												geneReg= (Gene[]) Arrays.remove(geneReg, q);
+//											} else
+//												geneReg[q].merge(trpt.getGene());
+//											merged= true;
+//										}
+//									}
+//								}
 								
-								trpt.addExon(e);
+								
 								
 							} else if (tokens[2].equalsIgnoreCase("CDS")) {
 								trpt.addCDS(start, end);
@@ -2204,6 +2640,45 @@ public class GTFChrReader extends GTFWrapper {
 												trpt.getTranslations()[0].addProteinID(idTokens[j]);
 									}
 								}
+								
+							} else {
+								int y;
+								for (y = 0; readFeatures!= null&& y < readFeatures.length; y++) 
+									if (readFeatures[y].equalsIgnoreCase(tokens[2]))
+										break;
+								if (readFeatures== null|| y< readFeatures.length) {
+									String regID= tokens[2];
+									DirectedRegion newReg= new DirectedRegion(
+											obj.getStart(),
+											obj.getEnd(),
+											trpt.getStrand()
+									);
+									newReg.setID(obj.getAttribute(tokens[2]+"_id"));
+									newReg.setScore(obj.getScore());
+									newReg.setChromosome(trpt.getChromosome());
+									DirectedRegion[] reg= null;
+									if (trpt.getAttributes()!= null)
+										reg= (DirectedRegion[]) trpt.getAttributes().remove(regID);
+									if (reg== null)
+										reg= new DirectedRegion[] {newReg};
+									else {
+										int i;
+										for (i = 0; i < reg.length; i++) {
+											if (reg[i].getID().equals(newReg.getID())) {
+												if (reg[i].getScore()!= newReg.getScore())
+													System.out.println("WARNING: regions with non-matching scores "+newReg+", "+reg[i]);
+												reg[i].set5PrimeEdge(Math.min(newReg.get5PrimeEdge(), reg[i].get5PrimeEdge()));
+												reg[i].set3PrimeEdge(Math.max(newReg.get3PrimeEdge(), reg[i].get3PrimeEdge()));
+												break;
+											}
+										}
+										if (i== reg.length)
+											reg= (DirectedRegion[]) Arrays.add(reg, newReg);
+									}
+									
+									trpt.addAttribute(regID, reg);	// "domain", 
+								}
+									
 								
 							}
 				
@@ -2220,10 +2695,132 @@ public class GTFChrReader extends GTFWrapper {
 						System.out.println();
 					
 					if (readGene)
-						this.genes= geneReg;
+						this.genes= geneReg[0];	// doesnt matter which sorting, no?!
 					if (readGTF)
 						this.gtfObj= (GTFObject[]) Arrays.toField(gtfV);
 				}
+
+	/**
+	 * per definition there cannot 2 genes with same start in the arrays (merged!) 
+	 * therefore binary search works
+	 * 
+	 * not so sure, during the multiple merges there can happen the case that two have
+	 * the same 
+	 * 
+	 * @param geneReg
+	 * @param gene
+	 * @param startCompi
+	 * @param endCompi
+	 * @return
+	 */
+	private boolean mergeGene(Gene[][] geneReg, Gene gene, Comparator startCompi, Comparator endCompi) {
+		boolean merged= false;
+		if (geneReg[0]== null) { 
+			geneReg[0]= new Gene[] {gene};
+			geneReg[1]= geneReg[0];	// not needed here, see efficient version..
+		} else {
+			Vector vRest= new Vector(geneReg[0].length);
+			for (int i = 0; i < geneReg[0].length; i++) {
+				if (geneReg[0][i].overlaps(gene)) 
+					gene.merge(geneReg[0][i]);
+				else
+					vRest.add(geneReg[0][i]);
+			}
+			vRest.add(gene);
+			geneReg[0]= (Gene[]) Arrays.toField(vRest);
+			geneReg[1]= geneReg[0];	// not needed here, see efficient version..
+		}
+	
+		return merged;
+	}
+
+	/**
+	 * per definition there cannot 2 genes with same start in the arrays (merged!) 
+	 * therefore binary search works
+	 * 
+	 * not so sure, during the multiple merges there can happen the case that two have
+	 * the same 
+	 * 
+	 * @param geneReg
+	 * @param gene
+	 * @param startCompi
+	 * @param endCompi
+	 * @return
+	 * @deprecated http://genome.ucsc.edu/cgi-bin/hgTracks?position=chr5:140207541-140372113&hgsid=95135519&refGene=pack&hgFind.matches=NM_031857,
+	 */
+	private boolean mergeGene_efficient_notwork(Gene[][] geneReg, Gene gene, Comparator startCompi, Comparator endCompi) {
+		boolean merged= false;
+		if (geneReg[0]== null) { 
+			geneReg[0]= new Gene[] {gene};
+			geneReg[1]= new Gene[] {gene};
+		} else {
+			
+				// check forward in start array for overlaps
+			int p= java.util.Arrays.binarySearch(geneReg[0], gene, startCompi);			
+			if (p< 0)
+				p= -(p+1);
+			
+			for (int i = p; i < geneReg[0].length; i++) {
+				if (geneReg[0][i]== gene)
+					continue;
+				if (!geneReg[0][i].overlaps(gene))
+					break;
+				if (merged) {	// both in array, merge step doesnt affect ordering
+					gene.merge(geneReg[0][i]);
+					
+					int q= java.util.Arrays.binarySearch(geneReg[1], geneReg[0][i], endCompi);
+					geneReg[1]= (Gene[]) Arrays.remove(geneReg[1], q);
+					geneReg[0]= (Gene[]) Arrays.remove(geneReg[0], i--);
+					// gene has not to be inserted, because already in array
+					
+				} else {	// new start/end in array
+					geneReg[0][i].merge(gene);	//.. for start it is the next one in the array, nothing happend
+					java.util.Arrays.sort(geneReg[1],endCompi);	// .. but maybe end order out of control now..
+					gene= geneReg[0][i];
+					merged= true;
+				}
+			}
+			
+			// .. and backward in reverse
+			int r= java.util.Arrays.binarySearch(geneReg[1], gene, endCompi);
+			if (r< 0)
+				r= -(r+1);
+			
+			int s= r;
+			if (r== geneReg[1].length)
+				--s;
+			for (int i = s; i >= 0; --i) {
+				if (geneReg[1][i]== gene)
+					continue;
+				if (!geneReg[1][i].overlaps(gene))
+					break;
+				if (merged) {					
+					gene.merge(geneReg[1][i]);
+					
+					int q= java.util.Arrays.binarySearch(geneReg[0], geneReg[1][i], startCompi);					
+					geneReg[0]= (Gene[]) Arrays.remove(geneReg[0], q);					
+					geneReg[1]= (Gene[]) Arrays.remove(geneReg[1], i++);	// re-iterate i
+					
+				} else {
+					geneReg[1][i].merge(gene);
+					java.util.Arrays.sort(geneReg[0],startCompi);	
+					gene= geneReg[1][i];
+					merged= true;
+				}
+			}
+			
+				// nowhere merged
+			if (!merged) {
+				//p= java.util.Arrays.binarySearch(geneReg[0], gene, startCompi);	// can have changed in size, NO: no merge ops
+				geneReg[0]= (Gene[]) Arrays.insert(geneReg[0], gene, p);
+				//r= java.util.Arrays.binarySearch(geneReg[1], gene, endCompi);
+				geneReg[1]= (Gene[]) Arrays.insert(geneReg[1], gene, r);
+			}
+
+		}
+
+		return merged;
+	}
 
 	/**
 		 * Requires the gtf file to be ordered by chromosomes AND that
@@ -2337,16 +2934,16 @@ public class GTFChrReader extends GTFWrapper {
 							 
 							if (lastChrID== null) {
 								lastChrID= chrID;
-								for (int i = 0; chrRead!= null&& i < chrRead.size(); i++) 
-									if (chrRead.elementAt(i).equals(chrID)) {
+								for (int i = 0; readChr!= null&& i < readChr.size(); i++) 
+									if (readChr.elementAt(i).equals(chrID)) {
 										System.err.println("Chromosome "+chrID+" already read! ("+linesRead+")");
 										System.err.println(line);
 										return null;
 									}
 							} else {
-								if (chrRead== null)
-									chrRead= new Vector();
-								chrRead.add(lastChrID);
+								if (readChr== null)
+									readChr= new Vector();
+								readChr.add(lastChrID);
 								--linesRead;
 								bytesRead-= line.length()+ 1;
 								break;
@@ -2505,7 +3102,7 @@ public class GTFChrReader extends GTFWrapper {
 		} else if(inputStream!= null)
 			System.err.println(this.getClass()+" only supports input from Files.");
 		
-		chrRead= new Vector();
+		readChr= new Vector();
 		Gene[] geneReg= null;
 		Comparator startCompi= new AbstractRegion.StartComparator();
 		try {
@@ -2557,12 +3154,12 @@ public class GTFChrReader extends GTFWrapper {
 				if (!chrID.equals(lastChrID)) {
 					if (lastChrID== null) {
 						lastChrID= chrID;
-						for (int i = 0; i < chrRead.size(); i++) 
-							if (chrRead.elementAt(i).equals(chrID)) {
+						for (int i = 0; i < readChr.size(); i++) 
+							if (readChr.elementAt(i).equals(chrID)) {
 								System.err.println("Chromosome "+chrID+" already read! ("+lineCtr+")");
 								return null;
 							}
-						chrRead.add(chrID);
+						readChr.add(chrID);
 					} else
 						break;
 				}
@@ -2763,6 +3360,7 @@ public class GTFChrReader extends GTFWrapper {
 		filtSomeIDs= null;
 		filtTrptIDs= null;
 		readFeatures= null;
+		noIDs= null;
 	}
 	
 	public String[] getFiltSomeIDsNotFound() {
@@ -2834,4 +3432,14 @@ public class GTFChrReader extends GTFWrapper {
 	public void setReadFeatures(String[] readFeatures) {
 		this.readFeatures = readFeatures;
 	}
+	
+	public void addReadFeature(String newFeature) {
+		String[] r= new String[readFeatures.length+ 1];
+		for (int i = 0; i < readFeatures.length; i++) {
+			r[i]= readFeatures[i];
+		}
+		r[r.length- 1]= newFeature;
+		readFeatures= r;
+	}
+
 }

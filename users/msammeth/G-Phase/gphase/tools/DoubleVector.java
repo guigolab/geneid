@@ -21,6 +21,12 @@ public class DoubleVector {
 		length= 0;
 	}
 	
+	public double getValue(int pos) {
+		if (pos< length)
+			return vector[pos];
+		return 0;
+	}
+	
 	public void add(double x) {
 		if (length== vector.length)
 			extendVector();

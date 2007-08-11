@@ -3,8 +3,10 @@ package gphase.io;
 import gphase.tools.Arrays;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
@@ -17,7 +19,27 @@ public class TabDelimitedFormatWrapper extends DefaultIOWrapper {
 	}
 	
 	public void write() throws Exception {
-		System.err.println("implement..");
+		if (table== null)
+			return;
+		try {
+			BufferedWriter writer= new BufferedWriter(new FileWriter(fPath+
+					File.separator+ fName));
+			for (int i = 0; i < table.length; i++) {
+				if (table[i]== null)
+					continue;
+				for (int j = 0; j < table[i].length; j++) {
+					if (table[i][j]== null)
+						continue;
+					writer.write(table[i][j]);
+					if (j< table[i].length- 1)
+						writer.write("\t");
+				}
+				writer.write("\n");
+			}
+			writer.flush(); writer.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	public boolean isApplicable() throws Exception {

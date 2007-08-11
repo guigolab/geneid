@@ -441,8 +441,8 @@ public class TransSpeciesComparisonExil {
 				if (!vars[i][0].isIntronRetention())
 					continue;
 				for (int j = 0; j < vars[i].length; j++) {
-					if (vars[i][j].is_affecting_5UTR()&& !(vars[i][j].is_contained_in_5UTR())&&
-							!(vars[i][j].is_affecting_CDS()))
+					if (vars[i][j].isAffecting5UTR()&& !(vars[i][j].isContained5UTR())&&
+							!(vars[i][j].isAffectingCDS()))
 						System.out.println(vars[i][j].getSsRegionIDs()+"\t"+vars[i][j].toStringUCSC());
 				}
 			}

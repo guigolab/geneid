@@ -10,20 +10,29 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Graphics;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Vector;
 
+import gphase.io.TabDelimitedFormatWrapper;
+import gphase.model.ASVariation;
+import gphase.model.ASVariationWithRegions;
 import gphase.model.AbstractRegion;
 import gphase.model.AbstractSite;
 import gphase.model.DefaultRegion;
+import gphase.model.DirectedRegion;
 import gphase.model.Exon;
 import gphase.model.Gene;
 import gphase.model.Species;
 import gphase.model.SpliceSite;
 import gphase.model.TSSite;
 import gphase.model.Transcript;
+import gphase.model.ASVariation.SpliceChainComparator;
+import gphase.tools.File;
+
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -36,187 +45,535 @@ import sun.java2d.loops.DrawLine;
  * @author msammeth
  */
 public class SpliceOSigner extends JPanel {
-	
-	static final int SPLICE_ADVANCE= 20;	// x
-	static final int TRANSCRIPT_ADVANCE= 50;	// y
-	static final int LEFT_BORDER= 200;
-	static final Color TSS_TSE_COLOR= Color.black;
-	static final Color DONOR_COLOR= Color.blue;
-	static final Color ACCEPTOR_COLOR= Color.red;
-	static final Color EXON_COLOR= Color.green;
+	static final String DEFAULT_COLOR_MAP= "color.map";
+	static HashMap<String,Color> colorMap= new HashMap<String,Color>();
+	static {
+		readInDomainColorMap(new File(DEFAULT_COLOR_MAP));
+	}
+	static int delme= 0;
+	static final int BORDER= 5;
+	static final int VBORDER= 2;
+	static final int SPLICE_HEIGHT= 15;
+	static final Dimension INTRON_DIMENSION= new Dimension(15, 3);
+	static final Dimension EXON_DIMENSION= new Dimension(30, 10);
+	static final Color EXON_COLOR= Color.green.darker().darker();
+	static final Color[] DOMAIN_COLORS= new Color[] {
+		Color.red, Color.cyan, Color.pink, Color.yellow, Color.orange, Color.blue, Color.magenta,
+		Color.red.darker(), Color.cyan.darker(), Color.pink.darker(), Color.yellow.darker(), Color.orange.darker(), Color.blue.darker(), Color.magenta.darker(),
+		Color.red.brighter(), Color.cyan.brighter(), Color.pink.brighter(), Color.yellow.brighter(), Color.orange.brighter(), Color.blue.brighter(), Color.magenta.brighter()
+	};
 	AbstractRegion[] highlightRegions= null;
 	
-	Gene gene= null;
+	ASVariation variation;
 
-	static Gene getAGene() {
-		Gene newGene= new Gene(new Species("homo_sapiens"), "ENSG00001000001");
-		Transcript trans1= new Transcript(newGene, "ENST00000100001");
-		newGene.addTranscript(trans1);
-		Transcript trans2= new Transcript(newGene, "ENST00000100002");
-		newGene.addTranscript(trans2);
-		Exon e= new Exon(trans1, "ENSE00000100001", 50,100);
-		trans1.addExon(e);
-		trans2.addExon(e);
-		e= new Exon(trans1, "ENSE00000100002", 150,200);
-		trans1.addExon(e);
-		e= new Exon(trans1, "ENSE00000100003", 250,350);
-		trans1.addExon(e);
-		e= new Exon(trans2, "ENSE00000100004", 300,350);
-		trans2.addExon(e);
-		
-		return newGene;
+	public static HashMap<String,Color> readInDomainColorMap(File inFile) {
+		if (!inFile.exists()) {
+			System.out.println("No color configuration found for domains.");
+			return colorMap;
+		}
+		try {
+			TabDelimitedFormatWrapper reader= new TabDelimitedFormatWrapper(inFile.getAbsolutePath());
+			reader.read();
+			String[][] tab= reader.getTable();
+			for (int i = 0; tab!= null&& i < tab.length; i++) {
+				if (tab[i].length!= 4)
+					continue;
+				Color c= new Color(Integer.parseInt(tab[i][1]), 
+						Integer.parseInt(tab[i][2]), Integer.parseInt(tab[i][3]));
+				colorMap.put(tab[i][0], c);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return colorMap;
 	}
 	
+	public static void writeOutDomainColorMap() {
+		writeOutDomainColorMap(colorMap, new File(DEFAULT_COLOR_MAP));
+	}
+	public static void writeOutDomainColorMap(HashMap<String,Color> map, File outFile) {
+		try {
+			String[][] tab= new String[map.size()][];
+			Object[] keys= map.keySet().toArray();
+			for (int i = 0; i < keys.length; i++) {
+				Color c= map.get(keys[i]);
+				tab[i]= new String[4];
+				tab[i][0]= (String) keys[i];
+				tab[i][1]= Integer.toString(c.getRed());
+				tab[i][2]= Integer.toString(c.getGreen());
+				tab[i][3]= Integer.toString(c.getBlue());
+			}
+			TabDelimitedFormatWrapper writer= new TabDelimitedFormatWrapper(outFile.getAbsolutePath());
+			writer.setTable(tab);
+			writer.write();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 	
 	public static void main(String[] args) {
 		
-		SpliceOSigner mySplicOSigner= new SpliceOSigner(getAGene());
-		AbstractRegion[] regions= new AbstractRegion[] {
-			new DefaultRegion(170,180)	
-		};
-		mySplicOSigner.setHighlightRegions(regions);
-		JFrame myFrame= new JFrame();
-		myFrame.getContentPane().add(mySplicOSigner);
-		myFrame.pack();
-		myFrame.setVisible(true);
 	}
 	
-	public SpliceOSigner(Gene g) {
-		gene= g;
+	public static Color getNewColor(Color[] cols) {
+		// http://www.compuphase.com/cmetric.htm
+		//System.out.println("cols used: "+(delme+1));
+		return DOMAIN_COLORS[delme++%DOMAIN_COLORS.length];
 	}
 	
-	protected void paintHighlights(Graphics g) {
-
-		if (highlightRegions== null)
-			return;
-		
-		AbstractSite[] sUniverse= gene.getSites();
-		for (int i = 0; i < highlightRegions.length; i++) {
-			
-			int start= -1, end= -1;	// highlight region starts before the start-ths splice site 
-									// (and ends before the end-ths splice site)
-			
-			for (int j = 0; j < sUniverse.length; j++) {
-				if (start< 0&& highlightRegions[i].getStart()< sUniverse[j].getPos()) 
-					start= j;
-				if (highlightRegions[i].getEnd()< sUniverse[j].getPos()) { 
-					end= j;
-					break;
-				}
-			}
-			
-			if (start< 0)
-				start= sUniverse.length;
-			if (end< 0)
-				end= sUniverse.length;
-			
-			g.setColor(new Color(255,255,255,200));
-			Rectangle r= null;
-			if (end== start)
-				r= new Rectangle(
-						LEFT_BORDER+ SPLICE_ADVANCE* start+ SPLICE_ADVANCE/ 4, 
-						TRANSCRIPT_ADVANCE- TRANSCRIPT_ADVANCE/ 4, 
-						SPLICE_ADVANCE/ 2, 
-						TRANSCRIPT_ADVANCE* gene.getTranscripts().length+ TRANSCRIPT_ADVANCE/ 2
-				);
-			else
-				r= new Rectangle(
-						LEFT_BORDER+ SPLICE_ADVANCE* (start+1)- SPLICE_ADVANCE/ 2, 
-						TRANSCRIPT_ADVANCE- TRANSCRIPT_ADVANCE/ 4, 
-						SPLICE_ADVANCE* (end-start), 
-						TRANSCRIPT_ADVANCE* gene.getTranscripts().length+ TRANSCRIPT_ADVANCE/ 2
-				);
-			
-			g.fillRect(r.x, r.y, r.width, r.height);
+	public SpliceOSigner(ASVariation var) {
+		variation= var;
+		setOpaque(false);
+	}
+	
+	private Color getDomainColor(int counter) {
+		return DOMAIN_COLORS[counter% DOMAIN_COLORS.length];
+	}
+	
+	public static Color getDomainColor(String domID) {
+		String id= ASVariationWithRegions.stripOrderSuffix(domID);
+		Color col= colorMap.get(id);
+		if (col== null) {
+			col= getNewColor((Color[]) gphase.tools.Arrays.toField(colorMap.values()));
+			colorMap.put(id, col);
 		}
+		return col;
+	}
+	
+	public static Color[] getDomainColors(String[] domIDs) {
+		Color[] cols= new Color[domIDs.length];
+		for (int i = 0; i < domIDs.length; i++) 
+			cols[i]= getDomainColor(domIDs[i]);
+		return cols;
+	}
+	
+	private int paintDomain(Graphics g, int xPos, int delta, int height, boolean up, int i, int domCtr1, int[] dom1Starts, int[] dom1Ends, DirectedRegion[] dom1) {
+		
+		for (int j = 0; j < dom1.length; j++) {
+			for (int k = (j+1); k < dom1.length; k++) {
+				if (dom1[j].overlaps(dom1[k]))
+					System.currentTimeMillis();
+			}
+		}
+		
+			// countSegments
+		int segCnt= 0, domCnt= 0;
+		if (dom1Starts[domCtr1]== i)	// starts with spacer
+			++segCnt;
+		for (int j = domCtr1; j < dom1.length; j++) {
+			if (dom1Starts[j]> i)
+				break;
+			if (j> 0&& dom1Ends[j-1]== i&& dom1Starts[j]== i) // adjacent in exon
+				++segCnt;
+			if (dom1Starts[j]== i&& dom1Ends[j]== i)	// starts and ends in exon
+				segCnt+= 2;
+			else //if (dom1Starts[j]== i^ dom1Ends[j]== i)	// starts or ends
+				segCnt+= 1;
+			// starts and ends outside of exon
+			if (dom1Ends[j]== i)	// close domain
+				++domCnt;
+		}
+		if (domCnt> 0&& (dom1Ends[domCtr1+ domCnt- 1]== i&& 
+				(domCtr1+ domCnt== dom1.length|| dom1Starts[domCtr1+ domCnt]> i)))	// last domain needs spacer
+			++segCnt;
+		int xDom= xPos, deltaSeg= delta/ segCnt;
+		boolean rest= (delta% segCnt)!= 0;
+		if (dom1Starts[domCtr1]== i) {	// starts with spacer
+			xDom+= deltaSeg;
+			if (rest)
+				++xDom;
+		}
+		
+		int yPos= height/ 2;
+		if (up)
+			yPos-= EXON_DIMENSION.height/ 2;
+		for (int j = domCtr1; j < dom1.length; j++) {
+			if (dom1Starts[j]> i)
+				break;
+			int deltaDom= deltaSeg;
+			if (dom1Starts[j]== i&& dom1Ends[j]== i)	// starts and ends in exon
+				deltaDom+= deltaSeg;
+			g.setColor(getDomainColor(dom1[j].getID()));
+			g.fillRect(
+					xDom, yPos,
+					deltaDom, EXON_DIMENSION.height/ 2
+			);
+			if (dom1Ends[j]> i) {
+				xDom+= deltaDom;
+				break;
+			}
+			xDom+= deltaDom+ deltaSeg;
+			if (rest)
+				++xDom;
+		}
+		if (xDom< xPos+ delta&& domCtr1+ domCnt< dom1.length&& 
+				dom1Starts[domCtr1+ domCnt]<= i&&
+				dom1Ends[domCtr1+ domCnt]> i) {
+			g.setColor(getDomainColor(dom1[domCtr1+ domCnt].getID()));
+			g.fillRect(
+					xDom, yPos,
+					xPos+ delta- xDom, EXON_DIMENSION.height/ 2
+			);
+		}
+			
+		domCtr1+= domCnt;
+		return domCtr1;
+	}
+
+	private int paintDomain_save(Graphics g, int xPos, int delta, int height, boolean up, int i, int domCtr1, int[] dom1Starts, int[] dom1Ends, DirectedRegion[] dom1) {
+			// countSegments
+		int segCnt= 0, domCnt= 0;
+		if (dom1Starts[domCtr1]== i)	// starts with spacer
+			++segCnt;
+		for (int j = domCtr1; j < dom1.length; j++) {
+			if (dom1Starts[j]> i)
+				break;
+			if (j> 0&& dom1Ends[j-1]== i&& dom1Starts[j]== i) // adjacent in exon
+				++segCnt;
+			if (dom1Starts[j]== i&& dom1Ends[j]== i)	// starts and ends in exon
+				segCnt+= 2;
+			else //if (dom1Starts[j]== i^ dom1Ends[j]== i)	// starts or ends
+				segCnt+= 1;
+			// starts and ends outside of exon
+			if (dom1Ends[j]== i)	// close domain
+				++domCnt;
+		}
+		if (domCnt> 0&& (dom1Ends[domCtr1+ domCnt- 1]== i&& 
+				(domCtr1+ domCnt== dom1.length|| dom1Starts[domCtr1+ domCnt]> i)))	// last domain needs spacer
+			++segCnt;
+		int xDom= xPos, deltaSeg= delta/ segCnt;
+		boolean rest= (delta% segCnt)!= 0;
+		if (dom1Starts[domCtr1]== i) {	// starts with spacer
+			xDom+= deltaSeg;
+			if (rest)
+				++xDom;
+		}
+		
+		int yPos= height/ 2;
+		if (up)
+			yPos-= EXON_DIMENSION.height/ 2;
+		for (int j = domCtr1; j < dom1.length; j++) {
+			if (dom1Starts[j]> i)
+				break;
+			int deltaDom= deltaSeg;
+			if (dom1Starts[j]== i&& dom1Ends[j]== i)	// starts and ends in exon
+				deltaDom+= deltaSeg;
+			g.setColor(getDomainColor(dom1[j].getID()));
+			g.fillRect(
+					xDom, yPos,
+					deltaDom, EXON_DIMENSION.height/ 2
+			);
+			if (dom1Ends[j]> i) {
+				xDom+= deltaDom;
+				break;
+			}
+			xDom+= deltaDom+ deltaSeg;
+			if (rest)
+				++xDom;
+		}
+		if (xDom< xPos+ delta&& domCtr1+ domCnt< dom1.length&& 
+				dom1Starts[domCtr1+ domCnt]<= i&&
+				dom1Ends[domCtr1+ domCnt]> i) {
+			g.setColor(getDomainColor(dom1[domCtr1+ domCnt].getID()));
+			g.fillRect(
+					xDom, yPos,
+					xPos+ delta- xDom, EXON_DIMENSION.height/ 2
+			);
+		}
+			
+		domCtr1+= domCnt;
+		return domCtr1;
 	}
 	
 	protected void paintComponent(Graphics g) {
-
-		super.paintComponent(g);
-		AbstractSite[] sUniverse= gene.getSites();
-		
-			// paint gene with splice sites
-		g.setColor(Color.black);
-		g.drawString(gene.getStableID(), 0, TRANSCRIPT_ADVANCE);
-		g.drawLine(LEFT_BORDER, TRANSCRIPT_ADVANCE, LEFT_BORDER+ (sUniverse.length+ 1)* SPLICE_ADVANCE, TRANSCRIPT_ADVANCE);
-		for (int i = 0; i < sUniverse.length; i++) {
-			// dotted line
-			g.setColor(Color.lightGray);
-			g.drawLine(LEFT_BORDER+ SPLICE_ADVANCE* (i+1), TRANSCRIPT_ADVANCE, 
-					LEFT_BORDER+ SPLICE_ADVANCE* (i+1), TRANSCRIPT_ADVANCE* (gene.getTranscripts().length+ 1));
-			
-			if (sUniverse[i] instanceof TSSite) {	// tss/tse
-				g.setColor(TSS_TSE_COLOR);
-				g.drawLine(LEFT_BORDER+ SPLICE_ADVANCE* (i+1), 
-						TRANSCRIPT_ADVANCE- TRANSCRIPT_ADVANCE/ 10,
-						LEFT_BORDER+ SPLICE_ADVANCE* (i+1),
-						TRANSCRIPT_ADVANCE+ TRANSCRIPT_ADVANCE/ 10);
-						
-			} else if (sUniverse[i] instanceof SpliceSite&& ((SpliceSite) sUniverse[i]).isDonor()) {
-				g.setColor(DONOR_COLOR);
-				g.fillPolygon(
-						new int[] {LEFT_BORDER+ SPLICE_ADVANCE* (i+1), 
-								LEFT_BORDER+ SPLICE_ADVANCE* (i+1), 
-								LEFT_BORDER+ SPLICE_ADVANCE* (i+1)+ SPLICE_ADVANCE/ 4},
-						new int[] {TRANSCRIPT_ADVANCE- TRANSCRIPT_ADVANCE/ 10, 
-								TRANSCRIPT_ADVANCE+ TRANSCRIPT_ADVANCE/ 10, 
-								TRANSCRIPT_ADVANCE},
-						3);
-
-			} else  {		// acceptor
-				g.setColor(ACCEPTOR_COLOR);
-				g.fillPolygon(
-						new int[] {LEFT_BORDER+ SPLICE_ADVANCE* (i+1), 
-								LEFT_BORDER+ SPLICE_ADVANCE* (i+1), 
-								LEFT_BORDER+ SPLICE_ADVANCE* (i+1)- SPLICE_ADVANCE/ 4},
-						new int[] {TRANSCRIPT_ADVANCE- TRANSCRIPT_ADVANCE/ 10, 
-								TRANSCRIPT_ADVANCE+ TRANSCRIPT_ADVANCE/ 10, 
-								TRANSCRIPT_ADVANCE},
-						3);
-			}
-		}
-		
-			// transcripts and exons
-		for (int i = 0; i < gene.getTranscripts().length; i++) {
-			g.setColor(Color.black);
-			g.drawString(gene.getTranscripts()[i].getStableID(), 0, TRANSCRIPT_ADVANCE* (i+2));
-			g.drawLine(LEFT_BORDER, TRANSCRIPT_ADVANCE* (i+2), LEFT_BORDER+ (sUniverse.length+ 1)* SPLICE_ADVANCE, TRANSCRIPT_ADVANCE* (i+2));
-			Exon[] exons= gene.getTranscripts()[i].getExons();
-			Comparator compi= new SpliceSite.PositionComparator();
-			for (int j = 0; j < exons.length; j++) {
-				int dPos= Arrays.binarySearch(sUniverse, exons[j].getStartSite(), compi);
-				int aPos= Arrays.binarySearch(sUniverse, exons[j].getEndSite(), compi);
-				g.setColor(EXON_COLOR);
-				Rectangle r= new Rectangle(LEFT_BORDER+ (dPos+ 1)* SPLICE_ADVANCE,
-						TRANSCRIPT_ADVANCE* (i+ 2)- TRANSCRIPT_ADVANCE/ 8,
-						(aPos- dPos)* SPLICE_ADVANCE,
-						TRANSCRIPT_ADVANCE/ 4);
-				g.fillRect(r.x, r.y, r.width, r.height);
-				g.setColor(Color.black);
-				g.drawRect(r.x, r.y, r.width, r.height);
-			}
-		}
-		paintHighlights(g);
-		
-			// draw footer
-		g.setColor(Color.lightGray);
-		String sign= "SpliceOSigner 1.0";
-		int signWidth= g.getFontMetrics().stringWidth(sign);
-		g.drawString(sign,
-				getPreferredSize().width- signWidth, getPreferredSize().height- g.getFontMetrics().getHeight());
-	}
 	
+			setBackground(Color.white);
+			super.paintComponent(g);
+			
+			Transcript trpt1= variation.getTranscript1();
+//			if (variation.getSpliceChain2().length== 0|| 
+//					(variation.getSpliceChain1().length> 0&& variation.getSpliceChain1()[0].getPos()< variation.getSpliceChain2()[0].getPos()))
+//				trpt1= variation.getTranscript1();
+//			else
+//				trpt1= variation.getTranscript2();
+			
+			//super.paintComponent(g);
+			SpliceSite[] su= variation.getSpliceUniverse();
+			DirectedRegion[] dom1= new DirectedRegion[0], dom2= new DirectedRegion[0];
+			int[] dom1Starts= new int[0];
+			int[] dom1Ends= new int[0];
+			int[] dom2Starts= new int[0];
+			int[] dom2Ends= new int[0];
+			int domCtr1= 0, domCtr2= 0;
+			if (variation instanceof ASVariationWithRegions) {
+				dom1= ((ASVariationWithRegions) variation).getReg1(); dom2= ((ASVariationWithRegions) variation).getReg2();
+				dom1Starts= ((ASVariationWithRegions) variation).getReg1Starts();
+				dom1Ends= ((ASVariationWithRegions) variation).getReg1Ends();
+				dom2Starts= ((ASVariationWithRegions) variation).getReg2Starts();
+				dom2Ends= ((ASVariationWithRegions) variation).getReg2Ends();
+			}
+	
+			
+				// left border
+			int height= 2* SPLICE_HEIGHT+ EXON_DIMENSION.height;
+			g.setColor(EXON_COLOR);
+			g.fillRect(
+					0, height/ 2- EXON_DIMENSION.height/ 2,
+					BORDER, EXON_DIMENSION.height
+			);
+			if (domCtr1< dom1Starts.length&& dom1Starts[domCtr1]== 0) {	// domain starts before variable area
+				g.setColor(getDomainColor(dom1[domCtr1].getID()));
+				g.fillRect(
+						0, height/ 2- EXON_DIMENSION.height/ 2,
+						BORDER, EXON_DIMENSION.height/ 2
+				);
+			}
+			if (domCtr2< dom2Starts.length&& dom2Starts[domCtr2]== 0) {
+				g.setColor(getDomainColor(dom2[domCtr2].getID()));
+				g.fillRect(
+						0, height/ 2,
+						BORDER, EXON_DIMENSION.height/ 2
+				);
+			}
+			
+			g.setColor(Color.black);
+	//		g.drawRect(
+	//				0, height/ 2- EXON_DIMENSION.height/ 2,
+	//				BORDER, EXON_DIMENSION.height
+	//		);
+			g.drawLine(0, height/ 2- EXON_DIMENSION.height/ 2,
+					BORDER, height/ 2- EXON_DIMENSION.height/ 2);
+			g.drawLine(BORDER, height/ 2- EXON_DIMENSION.height/ 2,
+					BORDER, height/ 2+ EXON_DIMENSION.height/ 2);
+			g.drawLine(0, height/ 2+ EXON_DIMENSION.height/ 2,
+					BORDER, height/ 2+ EXON_DIMENSION.height/ 2);
+			
+	
+				// paint all
+			int lastX1= -1;
+			int lastX2= -1;
+			boolean exonic1, exonic2;
+			if (su[0].isDonor()) {
+				exonic1= true; exonic2= true;
+			} else {
+				exonic1= false; exonic2= false;
+				lastX1= BORDER; lastX2= BORDER;
+			}
+			int xPos= BORDER;
+			for (int i = 0; i < su.length; i++) {
+				if (i== 0&& su[i].isDonor()) {
+					if (trpt1.containsSS(su[i])) {
+						exonic1= false;
+						lastX1= xPos;
+					} else {
+						exonic2= false;
+						lastX2= xPos;
+					}
+					continue;
+				}
+				int delta;
+				if (exonic1|| exonic2) {	// exonic: i is the end of the end of the exonic range
+					delta= EXON_DIMENSION.width;
+					g.setColor(EXON_COLOR);
+					g.fillRect(
+							xPos, height/ 2- EXON_DIMENSION.height/ 2,
+							delta, EXON_DIMENSION.height
+					);
+					int i1= variation.getSplicePos1(variation.getSpliceUniverse()[i]);
+					if (exonic1&& domCtr1< dom1Starts.length&& dom1Starts[domCtr1]<= i) {	// domain starts before end of exon
+
+						domCtr1= paintDomain(g, xPos, delta, height, true, i, domCtr1, dom1Starts, dom1Ends, dom1);
+					}
+					int i2= variation.getSplicePos2(variation.getSpliceUniverse()[i]);
+					if (exonic2&& domCtr2< dom2Starts.length&& dom2Starts[domCtr2]<= i) {	// domain starts before end of exonic
+						domCtr2= paintDomain(g, xPos, delta, height, false, i, domCtr2, dom2Starts, dom2Ends, dom2);
+					}
+					
+					g.setColor(Color.black);
+					g.drawRect(
+							xPos, height/ 2- EXON_DIMENSION.height/ 2,
+							delta, EXON_DIMENSION.height
+					);
+				} else {
+					delta= INTRON_DIMENSION.width;
+					g.setColor(Color.black);
+					g.fillRect(
+							xPos, height/ 2- INTRON_DIMENSION.height/ 2,
+							delta, INTRON_DIMENSION.height
+					);
+				}
+				
+				xPos+= delta;
+				if (trpt1.containsSS(su[i])) {
+					if (su[i].isDonor()) {
+						exonic1= false;
+						lastX1= xPos;
+					} else {
+						exonic1= true;
+						int diff= xPos- lastX1;
+						g.setColor(Color.black);
+						g.drawLine(lastX1, height/2- EXON_DIMENSION.height/ 2,
+								lastX1+ diff/2, VBORDER);
+						g.drawLine(lastX1+ diff/2, VBORDER, 
+								xPos, height/2- EXON_DIMENSION.height/ 2);
+					}
+				} else {
+					if (su[i].isDonor()) {
+						exonic2= false;
+						lastX2= xPos;
+					} else {
+						exonic2= true;
+						int diff= xPos- lastX2;
+						g.setColor(Color.black);
+						g.drawLine(lastX2, height/2+ EXON_DIMENSION.height/ 2,
+								lastX2+ diff/2, height- VBORDER);
+						g.drawLine(lastX2+ diff/2, height- VBORDER, 
+								xPos, height/2+ EXON_DIMENSION.height/ 2);
+					}
+				}
+	
+			}
+					
+				// paint last one
+			if (su[su.length- 1].isAcceptor()) {	// following is a donor
+				int delta= EXON_DIMENSION.width;
+				g.setColor(EXON_COLOR);
+				g.fillRect(
+						xPos, height/ 2- EXON_DIMENSION.height/ 2,
+						BORDER, EXON_DIMENSION.height
+				);
+				if (domCtr1< dom1Starts.length) {	// domain left
+					g.setColor(getDomainColor(dom1[domCtr1].getID()));
+					g.fillRect(
+							xPos, height/ 2- EXON_DIMENSION.height/ 2,
+							BORDER, EXON_DIMENSION.height/ 2
+					);
+				}			
+				if (domCtr2< dom2Starts.length) {	// domain left
+					g.setColor(getDomainColor(dom2[domCtr2].getID()));
+					g.fillRect(
+							xPos, height/ 2,
+							BORDER, EXON_DIMENSION.height/ 2
+					);
+				}
+				
+				g.setColor(Color.black);
+				g.drawRect(
+						xPos, height/ 2- EXON_DIMENSION.height/ 2,
+						BORDER, EXON_DIMENSION.height
+				);
+				
+			} else {
+				int delta= INTRON_DIMENSION.width;
+				g.setColor(Color.black);
+				g.fillRect(
+						xPos, height/ 2- INTRON_DIMENSION.height/ 2,
+						delta, INTRON_DIMENSION.height
+				);
+	
+				xPos+= delta;
+				if (!exonic1) {
+					exonic1= true;
+					int diff= xPos- lastX1;
+					g.setColor(Color.black);
+					g.drawLine(lastX1, height/2- EXON_DIMENSION.height/ 2,
+							lastX1+ diff/2, VBORDER);
+					g.drawLine(lastX1+ diff/2, VBORDER, 
+							xPos, height/2- EXON_DIMENSION.height/ 2);
+				} 
+				if (!exonic2) {
+					exonic2= true;
+					int diff= xPos- lastX2;
+					g.setColor(Color.black);
+					g.drawLine(lastX2, height/2+ EXON_DIMENSION.height/ 2,
+							lastX2+ diff/2, height- VBORDER);
+					g.drawLine(lastX2+ diff/2, height- VBORDER, 
+							xPos, height/2+ EXON_DIMENSION.height/ 2);
+				}
+	
+				g.setColor(EXON_COLOR);
+				g.fillRect(
+						xPos, height/ 2- EXON_DIMENSION.height/ 2,
+						BORDER, EXON_DIMENSION.height
+				);
+				if (domCtr1< dom1Starts.length) {	// domain left
+					g.setColor(getDomainColor(dom1[domCtr1].getID()));
+					g.fillRect(
+							xPos, height/ 2- EXON_DIMENSION.height/ 2,
+							BORDER, EXON_DIMENSION.height/ 2
+					);
+				}			
+				if (domCtr2< dom2Starts.length) {	// domain left
+					g.setColor(getDomainColor(dom2[domCtr2].getID()));
+					g.fillRect(
+							xPos, height/ 2,
+							BORDER, EXON_DIMENSION.height/ 2
+					);
+				}			
+	
+				
+				g.setColor(Color.black);
+				g.drawRect(
+						xPos, height/ 2- EXON_DIMENSION.height/ 2,
+						BORDER, EXON_DIMENSION.height
+				);
+			}
+		}
+
 	/* (non-Javadoc)
 	 * @see javax.swing.JComponent#getPreferredSize()
 	 */
 	public Dimension getPreferredSize() {
-		return new Dimension(LEFT_BORDER+ SPLICE_ADVANCE* (gene.getSites().length+ 2), TRANSCRIPT_ADVANCE* (gene.getTranscripts().length+ 2));
+		
+		SpliceSite[] su= variation.getSpliceUniverse();
+		int w= 0;
+		boolean exonic1, exonic2;
+		if (su[0].isDonor()) {
+			exonic1= true; exonic2= true;
+		} else {
+			exonic1= false; exonic2= false;
+		}
+		for (int i = 0; i < su.length; i++) {
+			if (i== 0&& su[i].isDonor()) 
+				w+= 0;
+			else {
+				if (exonic1|| exonic2) 
+					w+= EXON_DIMENSION.width;
+				else
+					w+= INTRON_DIMENSION.width;
+			}
+			
+			if (variation.getTranscript1().containsSS(su[i])) {
+				if (su[i].isDonor()) 
+					exonic1= false;
+				else 
+					exonic1= true;
+			} else {
+				if (su[i].isDonor()) 
+					exonic2= false;
+				else
+					exonic2= true;
+			}
+
+		}
+				
+			// last one
+		if (su[su.length- 1].isAcceptor()) 	// following is a donor
+			w+= 0;
+		else
+			w+= INTRON_DIMENSION.width;
+		
+		return new Dimension(
+				2* BORDER+ w,
+				2* SPLICE_HEIGHT+ EXON_DIMENSION.height
+		);
 	}
-	public AbstractRegion[] getHighlightRegions() {
-		return highlightRegions;
+
+	public static HashMap<String, Color> getColorMap() {
+		return colorMap;
 	}
-	public void setHighlightRegions(AbstractRegion[] highlightRegions) {
-		this.highlightRegions = highlightRegions;
+
+	public static void setColorMap(HashMap<String, Color> colorMap) {
+		SpliceOSigner.colorMap = colorMap;
 	}
 }

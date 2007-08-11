@@ -460,10 +460,10 @@ public class Graph implements Serializable {
 		Vector v2= new Vector();
 		getASVariations(ASMultiVariation.FILTER_NONE);	// init AS marks
 		for (int i = 0; i < spe.length; i++) {
-			SpliceSite[] ssites= spe[i].getSpliceSites(regionType, SpliceSite.ALTERNATE_SS);
+			SpliceSite[] ssites= spe[i].getSpliceSites(regionType, SpliceSite.ALTERNATIVE);
 		for (int j = 0; ssites!= null&& j < ssites.length; j++) 
 				v1.add(ssites[j]);
-			ssites= spe[i].getSpliceSites(regionType, SpliceSite.CONSTITUTIVE_SS);
+			ssites= spe[i].getSpliceSites(regionType, SpliceSite.CONSTITUTIVE);
 			for (int j = 0; ssites!= null&& j < ssites.length; j++) 
 				v2.add(ssites[j]);
 		}
@@ -512,12 +512,21 @@ public class Graph implements Serializable {
 	}
 	
 	public static String readSequence(SpliceSite s, int flank5, int flank3) {
+		int posStart= s.getPos();
+		int posEnd= s.getPos();
+		if (s.isDonor()) {
+			++posStart;
+			posEnd+= 2;
+		} else if (s.isAcceptor()) {
+			posStart-= 2;
+			--posEnd;
+		}
 		String seq= readSequence(
 				s.getGene().getSpecies(),
 				s.getGene().getChromosome(),
 				s.getGene().isForward(),
-				s.getPos()- flank5,
-				s.getPos()+ flank3
+				posStart - flank5,
+				posEnd + flank3
 		);
 		return seq;
 	}
@@ -678,7 +687,7 @@ public class Graph implements Serializable {
 				try {
 					raf.readFully(seq,pos,rest);	// read start of last line
 				} catch (Exception e) {	//EOFException, IndexOutOfBoundsException
-					System.err.println("Problems reading "+chromosome+": "+(p+pos)+", "+rest+"> "+f.length()+" into "+seq.length);
+					System.err.println("Problems reading "+chromosome+": "+(p+pos)+", "+rest+"> "+f.length()+" into "+seq.length+": "+e.getMessage());
 					return s;
 				}
 				raf.close();

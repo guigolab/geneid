@@ -226,7 +226,7 @@ public class StopCodons {
 			ASVariation[] as= ge[i].getASVariations(ASMultiVariation.FILTER_STRUCTURALLY);
 			int cnt= 0;
 			for (int j = 0; as!= null&& j < as.length; j++) 
-				if (as[j].is_contained_in_5UTR())
+				if (as[j].isContained5UTR())
 					++cnt;
 			if (cnt> 0)
 				System.out.println(cnt+"\t"+ge[i].getTranscripts()[0]);

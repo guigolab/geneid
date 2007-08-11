@@ -51,6 +51,170 @@ public class Exon extends DirectedRegion {
 	int cds5Prime= 0;
 	int cds3Prime= 0;
 	
+	public static class EqualComparator implements Comparator {
+		public int compare(Object o1, Object o2) {
+			Exon ex1= (Exon) o1;
+			Exon ex2= (Exon) o2;
+
+			int start1= ex1.getStart();
+			int end1= ex1.getEnd();
+			String chr1= ex1.getChromosome();
+			SpliceSite don1= ex1.getDonor();
+			SpliceSite acc1= ex1.getAcceptor();
+			int start2= ex2.getStart();
+			int end2= ex2.getEnd();
+			String chr2= ex2.getChromosome();
+			SpliceSite don2= ex2.getDonor();
+			SpliceSite acc2= ex1.getAcceptor();
+			
+			if (start1< start2)
+				return -1;
+			if (start2< start1)
+				return 1;
+			if (end1< end2)
+				return -1;
+			if (end2< end1)
+				return 1;
+			if (acc1.getType()< acc2.getType())
+				return -1;
+			if (acc2.getType()< acc1.getType())
+				return 1;
+			if (don1.getType()< don2.getType())
+				return -1;
+			if (don2.getType()< don1.getType())
+				return 1;
+			return 0;
+		}
+	}
+	public static class IdentityComparator implements Comparator {
+
+		/**
+		 * checks chr, pos (start, end), types (don, acc)
+		 */
+		public int compare(Object o1, Object o2) {
+		
+				Exon ex1= (Exon) o1;
+				Exon ex2= (Exon) o2;
+
+				int start1= ex1.getStart();
+				int end1= ex1.getEnd();
+				String chr1= ex1.getChromosome();
+				SpliceSite don1= ex1.getDonor();
+				SpliceSite acc1= ex1.getAcceptor();
+				int start2= ex2.getStart();
+				int end2= ex2.getEnd();
+				String chr2= ex2.getChromosome();
+				SpliceSite don2= ex2.getDonor();
+				SpliceSite acc2= ex1.getAcceptor();
+				
+				if (chr1.equals(chr2)&& start1== start2&& end1== end2&&
+						don1== don2&& acc1== acc2)	// no object identity
+					return 0;
+				
+					// non-overlapping, one before the other
+				// cancelled, not working for neg. strand (clustering, sort array asc with start, end pos)
+	//			if (end1< start2)
+	//				return -1;		// one stops before the other
+	//			if (end2< start1)
+	//				return 1;
+				
+				if (!chr1.equals(chr2))
+					return chr1.compareTo(chr2);
+				
+					// overlapping: none stops before the other
+				if (start1< start2)
+					return -1;
+				if (start2< start1)
+					return 1;
+				
+					// overlapping and same start position
+				if (start1< end2)
+					return -1;
+				if (end2< start1)
+					return 1;
+				
+				if (don1== null) {
+					if (don2!= null)
+						return -1; 	// abstract sites before real SSs
+				} else {
+					if (don2== null)
+						return 1;
+					else {
+						if (don1.getPos()< don2.getPos())
+							return -1;
+						else if (don2.getPos()< don1.getPos())
+							return 1;
+					}
+				}
+				if (acc1== null) {
+					if (acc2!= null)
+						return 1; 	// abstract sites after real SSs
+				} else {
+					if (acc2== null)
+						return -1;
+					else {
+						if (acc1.getPos()< acc2.getPos())
+							return -1;
+						else if (acc2.getPos()< acc1.getPos())
+							return 1;
+					}
+				}
+				
+				//System.err.println("assertion in abstractregion.positioncomparator failed");
+				return 0;	// identical positions --> never reached
+					
+				}
+		
+	}
+	
+	
+	public static class PositionSSComparator extends AbstractRegion.PositionComparator {
+	
+		/**
+		 * checks chr, pos (start, end), types (don, acc)
+		 */
+		public int compare(Object o1, Object o2) {
+				
+				int res= super.compare(o1, o2);
+				if (res!= 0)
+					return res;
+			
+				Exon ex1= (Exon) o1;
+				Exon ex2= (Exon) o2;
+	
+				SpliceSite don1= ex1.getDonor();
+				SpliceSite acc1= ex1.getAcceptor();
+				SpliceSite don2= ex2.getDonor();
+				SpliceSite acc2= ex1.getAcceptor();
+				
+				if (don1== null&& don2!= null)	// no object identity
+					return -1;
+				if (don1!= null&& don2== null)
+					return 1;
+				if (acc1== null&& acc2!= null)
+					return -1;
+				if (acc1!= null&& acc2== null)
+					return 1;
+				
+				if (don1!= null&& don2!= null) {
+					if (don1.getPos()< don2.getPos())
+						return -1;
+					if (don1.getPos()> don2.getPos())
+						return 1;
+				}
+				if (acc1!= null&& acc2!= null) {
+					if (acc1.getPos()< acc2.getPos())
+						return -1;
+					if (acc1.getPos()> acc2.getPos())
+						return 1;
+				}
+				return 0;
+					
+			}
+		
+	}
+
+
 	public boolean isCodingCompletely() {
 		if (get5PrimeCDS()!= 0&& get3PrimeCDS()!= 0)
 			return true;
@@ -122,6 +286,19 @@ public class Exon extends DirectedRegion {
 		return false;
 	}
 	
+	/**
+	 * 
+	 * @return <true> if some transcript shows this exon as internal exon
+	 */
+	public boolean isInternal() {
+		for (int i = 0; i < getTranscripts().length; i++) {
+			if (getTranscripts()[i].isInternalExon(this))
+				return true;
+		}
+		return false;
+	}
+	
+	
 	public boolean isConstitutive(int codingCode) {
 		getGene().getASVariations(codingCode);
 		if (getDonor()!= null&& (!getDonor().isConstitutive()))			
@@ -143,10 +320,10 @@ public class Exon extends DirectedRegion {
 //		return true;	 
 	}
 	
-	public boolean hasVariation(String varCode, int codingCode) {
+	public boolean hasVariation(String varCode, int filterCode) {
 		if (getDonor()== null|| getAcceptor()== null)
-			return false;
-		ASVariation[] vars= getGene().getASVariations(codingCode);
+			return false;	// TODO: change for other applications
+		ASVariation[] vars= getGene().getASVariations(filterCode);
 		for (int i = 0; vars!= null&& i < vars.length; i++) {
 			if (!vars[i].toString().equals(varCode))
 				continue;
@@ -179,7 +356,18 @@ public class Exon extends DirectedRegion {
 		}
 		return false;	 
 	}
+	public boolean isUpstreamRegion(DirectedRegion reg) {
+		if (reg.get3PrimeEdge()+ 1== get5PrimeEdge())
+			return true;
+		return false;
+	}
 	
+	public boolean isDownstreamRegion(DirectedRegion reg) {
+		if (get3PrimeEdge()+1== reg.get5PrimeEdge())
+			return true;
+		return false;
+	}
+
 	public boolean overlapsCDS() {
 		for (int i = 0; i < getTranscripts().length; i++) {
 			if (!getTranscripts()[i].isCoding())
@@ -407,22 +595,28 @@ public class Exon extends DirectedRegion {
 	Transcript[] transcripts= null;
 	
 	String exonID= null;	
+	protected Exon() {
+		// for subclasses
+	}
 	public Exon(Transcript newTranscript, String stableExonID, int start, int end) {
 
 		this.strand= newTranscript.getStrand();
-		
-			// check for duplicate
-		addTranscript(newTranscript);		
-					
+		this.chromosome= newTranscript.getChromosome();
 		setStart(start);
 		setEnd(end);
-		for (int i = 0; i < getTranscripts().length; i++) 
-			getTranscripts()[i].updateBoundaries(this);
-		
 		
 			// decompose ID
-		this.exonID= stableExonID;
+		//this.exonID= stableExonID;
 		setID("exon");
+		if (stableExonID!= null)
+			exonID= stableExonID;
+		
+		// check for duplicate
+		addTranscript(newTranscript);
+		newTranscript.addExon(this);
+					
+		for (int i = 0; i < getTranscripts().length; i++) 
+			getTranscripts()[i].updateBoundaries(this);
 	}	
 	/**
 	 * @return
@@ -465,7 +659,19 @@ public class Exon extends DirectedRegion {
 	}
 	
 	public String toString() {
-		return getExonID();
+		// return getExonID();
+		String res= "";
+		if (getAcceptor()!= null)
+			res+= getAcceptor();
+		else
+			res+=0;
+		res+="==";
+		if (getDonor()!= null)
+			res+= getDonor();
+		else
+			res+=0;
+		
+		return res;
 	}
 
 	public String toPosString() {
@@ -510,13 +716,28 @@ public class Exon extends DirectedRegion {
 		return acceptor;
 	}
 	public void setAcceptor(SpliceSite acceptor) {
+		acceptor.addExon(this);
 		this.acceptor = acceptor;
 	}
 	public SpliceSite getDonor() {
+		donor.addExon(this);
 		return donor;
 	}
 	public void setDonor(SpliceSite donor) {
 		this.donor = donor;
+	}
+	
+	public boolean replaceSite(SpliceSite oldSite, SpliceSite newSite) {
+		if (oldSite== this.acceptor) {
+			this.acceptor= newSite;
+			return true;
+		}
+		if (oldSite== this.donor) {
+			this.donor= newSite;
+			return true;
+		}
+		
+		return false;
 	}
 	
 	public AbstractSite getEndSite() {

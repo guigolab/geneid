@@ -16,6 +16,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Vector;
 
 
@@ -39,6 +40,22 @@ public class Arrays {
 		for (int i = 0; a!= null&& i < a.length; i++) 
 			addUnique(v, a[i], compi);
 		return v;
+	}
+	
+	public static Object[] convertTo(Class c, Object[] o) {
+		if (o== null)
+			return null;
+		Object[] p= (Object[]) Array.newInstance(c, o.length);		
+		for (int i = 0; i < p.length; i++) {
+			if (c.isAssignableFrom(o[i].getClass()))
+				p[i]= o[i];
+			else {
+				System.out.println("Class cast error: "+c+" not assignable from "+o[i].getClass());
+				return o;
+			}
+				
+		}
+		return p;
 	}
 	
 	/**
@@ -97,8 +114,8 @@ public class Arrays {
 	}
 	
 	public static String complement(String in){
-		String normal= "ACGTN-acgtnMmKkXx";	// M spotted in refseq intron annotation of human
-		String reverse= "TGCAN-tgcanKkMmXx";
+		String normal= "ACGTN-acgtnMmKkXxRr";	// M spotted in refseq intron annotation of human
+		String reverse= "TGCAN-tgcanKkMmXxYy";
 		StringBuffer buffy= new StringBuffer(in.length());
 		for (int i = 0; i < in.length(); i++) {
 			int p= normal.indexOf(in.charAt(i));
@@ -207,8 +224,169 @@ public class Arrays {
 		return oo;
 	}
 	
+	public static Object[] sortNDField(Object o) {
+		
+		Object[] oo;
+		if (o instanceof Collection)
+			oo= (Object[]) ((Collection) o).toArray();
+		else
+			oo= (Object[]) o;
+		
+		java.util.Arrays.sort(oo, new Arrays.FieldSizeComparator());
+		return oo;
+	} 
+	
+	public static void sortRev(Comparable[] field) {
+		java.util.Arrays.sort(field);
+		inverse(field);
+	}
+	
+	public static void inverse(Object[] a) {
+		if (a== null|| a.length== 0)
+			return;
+		Object[] h= new Object[a.length];
+		for (int i = 0; i < h.length; i++) 
+			h[i]= a[i];
+		for (int i = 0; i < h.length; i++) 
+			a[a.length- i- 1]= h[i];
+		
+	}
+	
+	public static int[] duplicate(int[] a) {
+		if (a== null)
+			return null;
+		int[] d= new int[a.length];
+		for (int i = 0; i < d.length; i++) 
+			d[i]= a[i];
+		return d;
+	}
+	
+	public static Object[] duplicate(Object[] a) {
+		if (a== null)
+			return null;
+		if (a.length== 0)
+			return new Object[0];
+		Object[] d= (Object[]) Array.newInstance(a[0].getClass(), a.length);
+		for (int i = 0; i < d.length; i++) 
+			d[i]= a[i];
+		return d;
+	}
+
+	public static double[] duplicate(double[] a) {
+		if (a== null)
+			return null;
+		double[] d= new double[a.length];
+		for (int i = 0; i < d.length; i++) 
+			d[i]= a[i];
+		return d;
+	}
+	
+	public static void synchroneousSort(Object primSort, Vector restSort) {
+		Object[] primO= primitiveToWrapperFieldDistinguishable(primSort);
+		if (primO== null|| primO.length< 2)
+			return;
+		
+		HashMap<Object,Integer> refMap= new HashMap<Object,Integer>(primO.length);
+		for (int i = 0; i < primO.length; i++) 
+			refMap.put(primO[i], new Integer(i));
+		
+		java.util.Arrays.sort(primO);
+
+			// sort others
+		for (int j = 0; j < restSort.size(); j++) {
+			if (restSort.elementAt(j) instanceof int[]) {
+				int[] array= (int[]) restSort.elementAt(j);
+				int[] arrayOld= gphase.tools.Arrays.duplicate(array);
+				for (int i = 0; i < arrayOld.length; i++) 
+					array[i]= arrayOld[refMap.get(primO[i]).intValue()];
+			} else if (restSort.elementAt(j) instanceof double[]) {
+				double[] array= (double[]) restSort.elementAt(j);
+				double[] arrayOld= gphase.tools.Arrays.duplicate(array);
+				for (int i = 0; i < arrayOld.length; i++) 
+					array[i]= arrayOld[refMap.get(primO[i]).intValue()];
+			} else {
+				Object[] array= (Object[]) restSort.elementAt(j);
+				Object[] arrayOld= gphase.tools.Arrays.duplicate(array);
+				for (int i = 0; i < arrayOld.length; i++) 
+					array[i]= arrayOld[refMap.get(primO[i]).intValue()];
+			}
+		}
+		
+			// convert prim sort
+		if (primSort instanceof int[]) {
+			try {
+				Method m= primO[0].getClass().getMethod("intValue", null);
+				int[] out= (int[]) primSort;
+				for (int i = 0; i < out.length; i++) 
+					out[i]= ((java.lang.Integer) m.invoke(primO[i], null)).intValue();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		} else if (primSort instanceof double[]) {
+			try {
+				Method m= primO[0].getClass().getMethod("doubleValue", null);
+				double[] out= (double[]) primSort;
+				for (int i = 0; i < out.length; i++) 
+					out[i]= ((java.lang.Double) m.invoke(primO[i], null)).doubleValue();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	public static void synchroneousSort(int[] primSort, int[] restSort) {
+		Vector v= new Vector();
+		v.add(restSort);
+		synchroneousSort(primSort, v);
+	}
+	
+	public static Object[] primitiveToWrapperField(Object inA) {
+		if (inA instanceof int[]) {
+			int[] in= (int[]) inA;
+			java.lang.Integer[] out= new java.lang.Integer[in.length];
+			for (int i = 0; i < out.length; i++) 
+				out[i]= new java.lang.Integer(in[i]);
+			return out;
+		} else if (inA instanceof double[]) {
+			double[] in= (double[]) inA;
+			java.lang.Double[] out= new java.lang.Double[in.length];
+			for (int i = 0; i < out.length; i++) 
+				out[i]= new java.lang.Double(in[i]);
+			return out;
+		} 
+		return (Object[]) inA;
+	}
+	public static Object[] primitiveToWrapperFieldDistinguishable(Object inA) {
+		if (inA instanceof int[]) {
+			int[] in= (int[]) inA;
+			gphase.tools.Integer[] out= new gphase.tools.Integer[in.length];
+			for (int i = 0; i < out.length; i++) 
+				out[i]= new gphase.tools.Integer(in[i]);
+			return out;
+		} else if (inA instanceof double[]) {
+			double[] in= (double[]) inA;
+			gphase.tools.Double[] out= new gphase.tools.Double[in.length];
+			for (int i = 0; i < out.length; i++) 
+				out[i]= new gphase.tools.Double(in[i]);
+			return out;
+		} 
+		return (Object[]) inA;
+	}
 	
 	public static Object[] sort2DFieldRev(Object o) {
+		
+		if (o== null)
+			return null;
+		
+		Object[] oo;
+		if (o instanceof Collection)
+			oo= (Object[]) ((Collection) o).toArray();
+		else  
+			oo= (Object[]) o;
+		
+		java.util.Arrays.sort(oo, new Arrays.FieldSizeRevComparator());
+		return oo;
+	}
+	public static Object[] sortNDFieldRev(Object o) {
 		
 		if (o== null)
 			return null;
@@ -224,6 +402,8 @@ public class Arrays {
 	}	
 	
 	public static int[] add(int[] a, int o) {
+		if (a== null)
+			return new int[] {o};
 		int[] newA= new int[a.length+ 1];
 		for (int i = 0; i < a.length; i++) 
 			newA[i]= a[i];
@@ -303,6 +483,22 @@ public class Arrays {
 		return insert(a, o, p);	
 	}
 	
+	public static int convertInsertionPoint(int p) {
+		if (p< 0)
+			p= (p+1)* (-1);
+		return p;
+	}
+	
+	public static int search(Object[] o, Object q) {
+		if (o== null)
+			return -1;	// not found
+		for (int i = 0; i < o.length; i++) {
+			if (o[i]== q)
+				return i;
+		}
+		return -1;
+	}
+	
 	/**
 	 * Assuming that a and o share the same class and some other things, this
 	 * inserts an object in an array at the specified position. Automatically 
@@ -325,7 +521,17 @@ public class Arrays {
 		if (p< 0)
 			p= (p+1)* (-1);
 		
-		Object[] newA= (Object[]) Array.newInstance(o.getClass(), a.length+ 1);
+		Class c= o.getClass();
+		for (int i = 0; i < a.length; i++) {
+			if (!a[i].getClass().equals(o.getClass())) {
+				if (a[i].getClass().isAssignableFrom(c))
+					c= a[i].getClass();	// get the superclass
+				else if (!c.isAssignableFrom(a[i].getClass()))
+					System.out.println("WARNING: incompatible classes in Array, "+c+", "+a[i].getClass());
+			}
+		}
+		
+		Object[] newA= (Object[]) Array.newInstance(c, a.length+ 1);
 		for (int i = 0; i < p; i++) 
 			newA[i]= a[i];
 		newA[p]= o;
@@ -336,7 +542,7 @@ public class Arrays {
 	}
 	
 	public static Object[] remove(Object[] a, Object o) {
-		if (a== null|| a.length< 1|| o.getClass().isAssignableFrom(a[0].getClass()))
+		if (a== null|| a.length< 1|| (!o.getClass().isAssignableFrom(a[0].getClass())))
 			return null;
 		
 		Object[] b= (Object[]) Array.newInstance(o.getClass(), a.length- 1);
@@ -377,6 +583,35 @@ public class Arrays {
 		Object oh= o[0];
 		o[0]= o[1];
 		o[1]= oh;
+	}
+	
+	/**
+	 * counts a n-dimensional field until dimension <code>lastLevel</code>
+	 * @param nField
+	 * @param currLevel
+	 * @param count
+	 * @param lastLevel
+	 * @return
+	 */
+	public static int countFieldsRek(Object nField, int currLevel, int count, int lastLevel) {
+		if (nField== null|| currLevel> lastLevel)
+			return count;
+		
+		Object[] o= null;
+		if (nField instanceof Collection) 
+			o= ((Collection) nField).toArray();
+		else if (nField instanceof Object[]) 
+			o= ((Object[]) nField);
+		else 
+			return count;
+
+		if (currLevel== lastLevel)
+			return count+ o.length;
+		
+		for (int i = 0; i < o.length; i++)
+			count= countFieldsRek(o[i], currLevel+1, count, lastLevel);
+		
+		return count;
 	}
 	
 	/**

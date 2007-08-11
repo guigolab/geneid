@@ -41,7 +41,7 @@ public class VariantGroup {
 	
 	@Override
 	public boolean equals(Object obj) {
-		Comparator compi= new ASVariation.StructureComparator();
+		Comparator compi= new ASVariation.IdentityComparator();
 		return (compi.compare(this, obj)== 0);
 	}
 	

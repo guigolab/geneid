@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.Vector;
 
 import gphase.algo.ASAnalyzer;
-import gphase.algo.Analyzer;
 import gphase.db.MapTable;
 import gphase.io.TabDelimitedFormatWrapper;
 import gphase.io.gtf.EncodeWrapper;
@@ -250,7 +249,7 @@ public class Elza {
 			ASVariation[][] vars = sp
 					.getASVariations(ASMultiVariation.FILTER_HIERARCHICALLY);
 			gphase.tools.Arrays.sort2DFieldRev(vars);
-			Structurator.writeHTML(vars, dir.getAbsolutePath());
+			AStaLaVista.writeHTML(vars, dir.getAbsolutePath());
 			System.out.println("done");
 
 			Vector geneV = new Vector(ge.length / 2);
@@ -278,7 +277,7 @@ public class Elza {
 
 			vars = sp.getASVariations(ASMultiVariation.FILTER_HIERARCHICALLY);
 			gphase.tools.Arrays.sort2DFieldRev(vars);
-			Structurator.writeHTML(vars, dir.getAbsolutePath());
+			AStaLaVista.writeHTML(vars, dir.getAbsolutePath());
 		}
 
 	}

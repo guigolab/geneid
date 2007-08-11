@@ -14,6 +14,7 @@ import gphase.model.SpliceSite;
 import gphase.model.Transcript;
 import gphase.tools.Arrays;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Vector;
@@ -26,7 +27,37 @@ import java.util.Vector;
  * Window - Preferences - Java - Code Style - Code Templates
  */
 public class GTFObject {
+	public final static String FEATURE_BP= "branch_point", FEATURE_BP_U12= "U12_branch_point", FEATURE_PP= "pp_tract", FEATURE_PP_U12= "U12_pp_tract",FEATURE_SS= "splice_site", FEATURE_SS_U12GTAG= "U12gtag_splice_site", FEATURE_SS_U12CTAC= "U12ctac_splice_site";
 
+	public static class PositionComparator implements Comparator {
+		public int compare(Object o1, Object o2) {
+			GTFObject gtf1= (GTFObject) o1;
+			GTFObject gtf2= (GTFObject) o2;
+			
+			int res= gtf1.getSeqname().compareTo(gtf2.getSeqname());
+			if (res!= 0)
+				return res;
+			
+			if (gtf1.getStrand()< gtf2.getStrand())
+				return -1;
+			else if (gtf1.getStrand()> gtf2.getStrand())
+				return 1;
+			
+			if (gtf1.getStart()< gtf2.getStart())
+				return -1;
+			else if (gtf1.getStart()> gtf2.getStart())
+				return 1;
+			
+			if (gtf1.getEnd()< gtf2.getEnd())
+				return -1;
+			else if (gtf1.getEnd()> gtf2.getEnd())
+				return 1;
+			
+			
+			return 0;
+		}
+	}
+	
 	public static String ID_ATTRIBUTE_SEQUENCE= "seq";
 	
 	boolean gff= false;
@@ -46,22 +77,36 @@ public class GTFObject {
 		x+= (frame> 0)?Integer.toString(frame):".";
 		
 		if (attributes!= null) {
-			Iterator iter= attributes.values().iterator();
-			Iterator iter2= attributes.keySet().iterator();
-			while (iter.hasNext())
-				x+= "\t"+ iter2.next()+ "\t\""+ iter.next()+"\";";
+			x+= "\t";
+			if (attributes.get(GTFObject.TRANSCRIPT_ID_TAG)!= null)
+				x+= GTFObject.TRANSCRIPT_ID_TAG+" \""+attributes.get(GTFObject.TRANSCRIPT_ID_TAG)+"\";";
+			
+			Iterator iter= attributes.keySet().iterator();
+			while (iter.hasNext()) {
+				Object k= iter.next();
+				if (k.equals(GTFObject.TRANSCRIPT_ID_TAG))
+					continue;
+				x+= " "+ k+ " \""+ attributes.get(k)+"\";";
+			}
 		}
 		if (comments!= null)
 			x+= "\t"+ comments;
 		return x;	
 	}
+
+	public static final String SOURCE_RefSeq= "refGene";
+	public static final String SOURCE_MRNA= "mrna";
+	public static final String SOURCE_EST= "Est";
 	
+
 	public final static String[] FEATURE_VALID= {"ATG", "CDS", "start_codon", "stop_codon", "exon", "intron", "splice_site", "gene", "mRNA", "5UTR", "3UTR", "CDS"};
 	public final static String GENE_ID_TAG= "gene_id";	
 	public final static String TRANSCRIPT_ID_TAG= "transcript_id";
 	public final static String EXON_ID_TAG= "exon_id";
 	public final static String GENE_ALIAS_TAG= "gene_alias";
 	public final static String INTRON_ID_TAG= "intron_id";
+	public final static String EXON_FEATURE_TAG= "exon";
+	public final static String CDS_FEATURE_TAG= "CDS";
 	public static int parseStrand(String strandStr) {
 		
 		int strand= 0;
@@ -73,20 +118,127 @@ public class GTFObject {
 		return strand;
 	}
 	
-	public static GTFObject createGTFObject(AbstractSite site) {
-//		<seqname> <source> <feature> <start> <end> <score> <strand> <frame> [attributes] [comments] 
-		GTFObject gtf= new GTFObject();
-		gtf.setSeqname(site.getGene().getChromosome());
-		gtf.setStart(Math.abs(site.getPos()));
-		gtf.setEnd(Math.abs(site.getPos()));
+	public static void parseGTF(String line, GTFObject obj) {
+		String[] tokens= line.split("\t");
+		if (tokens.length< 8) 
+			System.out.println("WARNING: invalid GTF line "+line);
+
+		obj.setStart( Integer.parseInt(tokens[3]));
+		obj.setEnd(Integer.parseInt(tokens[4]));
 		try {
-			gtf.setFeature("site");
-			gtf.setStrand(site.getGene().getStrand());
+			obj.setStrand(tokens[6]);
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+		obj.setFeature(tokens[2]);
+		obj.setSource(tokens[1]);
+		obj.setSeqname(tokens[0]);
+		obj.setScore(tokens[5]);
+		try {
+			obj.setFrame(tokens[7]);
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+		String h= line.substring(line.indexOf(tokens[8]), line.length()).trim();	// attributes, comments
+		String[] attrTokens= h.split(";");
+		for (int i = 0; i < attrTokens.length; i++) {
+			h= attrTokens[i].trim();
+			h= h.replaceAll("\\s+", " ");
+			int sep= Math.max(h.indexOf(' '), h.indexOf('='));	// = in ASD gff
+			if (sep < 0) 						// comments
+				break;
+			if (sep>= 0) {
+				String id= h.substring(0, sep);
+				String val= h.substring(sep+ 1, h.length());
+				if (val.charAt(0)== '\"')
+					val= val.substring(1, val.length()- 1);
+				obj.addAttribute(id, val);
+			}
+		}
+		
+	}
+	
+	public static GTFObject createGTFObject(AbstractSite site) {
+	//		<seqname> <source> <feature> <start> <end> <score> <strand> <frame> [attributes] [comments] 
+			GTFObject gtf= new GTFObject();
+			gtf.setSeqname(site.getGene().getChromosome());
+			gtf.setStart(Math.abs(site.getPos()));
+			gtf.setEnd(Math.abs(site.getPos()));
+			try {
+				gtf.setFeature("site");
+				gtf.setStrand(site.getGene().getStrand());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			return gtf;
+		}
+
+	public static GTFObject[] createGTFObjects(AbstractSite site, Transcript trpt) {
+	//		<seqname> <source> <feature> <start> <end> <score> <strand> <frame> [attributes] [comments] 
+			GTFObject gtf= new GTFObject();
+			gtf.setSeqname(trpt.getChromosome());
+			gtf.setStart(Math.abs(site.getPos()));
+			gtf.setEnd(Math.abs(site.getPos()));
+			gtf.addAttribute(TRANSCRIPT_ID_TAG, trpt.getTranscriptID());
+			gtf.setSource(trpt.getSource());
+			gtf.setScore((float) site.getScore());
+			try {
+				gtf.setFeature(site.getID());
+				gtf.setStrand(trpt.getStrand());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			Vector gtfV= new Vector();
+			gtfV.add(gtf);
+			createGTFObjectsAddAttributes(site.getAttributes(), gtf, gtfV, trpt);
+			
+			return (GTFObject[]) Arrays.toField(gtfV);
+		}
+
+	public static GTFObject[] createGTFObjects(SpliceSite site, Transcript trpt) {
+//		<seqname> <source> <feature> <start> <end> <score> <strand> <frame> [attributes] [comments]
+		GTFObject gtf= new GTFObject();
+		gtf.setSeqname(trpt.getChromosome());
+		int start= Math.abs((site.isDonor())?site.getPos():site.getPos()-1); 
+		int end= Math.abs((site.isDonor())?site.getPos()+1:site.getPos()); 
+		gtf.setStart(start);
+		gtf.setEnd(end);
+		gtf.setSource(trpt.getSource());
+		gtf.setScore((float) site.getScore());
+		try {
+			gtf.setFeature(site.getID());
+			gtf.setStrand(trpt.getStrand());
+			gtf.addAttribute(TRANSCRIPT_ID_TAG, trpt.getTranscriptID());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return gtf;
+		Vector gtfV= new Vector();
+		
+		createGTFObjectsAddAttributes(site.getAttributes(), gtf, gtfV, trpt);
+		gtfV.add(gtf);
+		
+		return (GTFObject[]) Arrays.toField(gtfV);
 	}
+	
+	public static void createGTFObjectsAddAttributes(HashMap map, GTFObject baseObj, Vector v, Transcript trpt) {
+		if (map== null) 
+			return;
+		
+		Object[] keys= map.keySet().toArray();
+		java.util.Arrays.sort(keys);
+		for (int i = 0; i < keys.length; i++) {
+			if (map.get(keys[i]) instanceof AbstractSite)
+				Arrays.addAll(v, createGTFObjects((AbstractSite) map.get(keys[i]), trpt));
+			if (map.get(keys[i]) instanceof DirectedRegion)
+				Arrays.addAll(v, createGTFObjects((DirectedRegion) map.get(keys[i]), trpt));
+			else if (map.get(keys[i]) instanceof String&& keys[i] instanceof String)
+				baseObj.addAttribute((String) keys[i], (String) map.get(keys[i]));
+		}
+
+	}
+	
+	
 	
 	public final static String INTRON_STATUS_TAG = "intron_status";
 
@@ -131,15 +283,44 @@ public class GTFObject {
 		try {
 			if (site.isDonor())
 				gtf.setFeature("donor");
-			else
+			else if (site.isAcceptor())
 				gtf.setFeature("acceptor");
+			else if (site.isTSS())
+				gtf.setFeature("tss");
+			else if (site.isTES())
+				gtf.setFeature("tes");
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
 		if (site.isConstitutive()) 
 			gtf.addAttribute("modality", "constitutive");
 		else
 			gtf.addAttribute("modality", "alternative");
+		
+		Transcript[] t= site.getTranscripts();
+		StringBuffer parents= new StringBuffer();
+		String source= null;
+		for (int i = 0; i < t.length; i++) { 
+			parents.append(t[i].getTranscriptID());
+			parents.append(',');
+			
+			if (source== null)
+				source= t[i].getSource();
+			else if (!source.equals(t[i].getSource())) {
+				String srcUp= source.toUpperCase();
+				String nSrcUp= t[i].getSource().toUpperCase();
+				if ((srcUp.contains("MRNA")&& nSrcUp.contains("GENE"))|| 
+						(srcUp.contains("EST")&& (!nSrcUp.contains("EST"))))
+					source= t[i].getSource();
+			}
+		}
+		gtf.setSource(source);
+		parents.deleteCharAt(parents.length()-1);
+		gtf.addAttribute("parent", parents.toString());
+		gtf.addAttribute("location", site.getGenicLocation());
+		
 		return gtf;
 	}
 
@@ -190,6 +371,30 @@ public class GTFObject {
 			return (GTFObject[]) Arrays.toField(addObjV);
 	}
 
+	public static GTFObject[] createGTFObjects(DirectedRegion reg, Transcript trpt) {
+		GTFObject obj= new GTFObject();
+		obj.setSeqname(trpt.getChromosome());
+		obj.setStart(reg.getStart());
+		obj.setEnd(reg.getEnd());
+		obj.addAttribute(TRANSCRIPT_ID_TAG, trpt.getTranscriptID());
+		obj.setSource(trpt.getSource());
+		obj.setScore((float) reg.getScore());
+		try {
+			obj.setStrand(reg.getStrand());
+			obj.setFeature(reg.getID());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		Vector gtfV= new Vector();
+		gtfV.add(obj);
+		
+		createGTFObjectsAddAttributes(reg.getAttributes(), obj, gtfV, trpt);
+		return (GTFObject[]) Arrays.toField(gtfV);
+	}
+
+	public static GTFObject createGTFObject(Exon exon, Transcript trpt) {
+		return createGTFObjects(exon, trpt)[0];
+	}
 	public static GTFObject[] createGTFObjects(Exon exon, Transcript trpt) {
 		GTFObject obj= new GTFObject();
 		obj.setSeqname(exon.getChromosome());
@@ -204,21 +409,24 @@ public class GTFObject {
 
 		Vector addObjV= new Vector();
 		GTFObject ex= (GTFObject) obj.clone();
-		ex.addAttribute(GENE_ID_TAG, exon.getGene().getGeneID());
-		ex.addAttribute(EXON_ID_TAG, exon.getExonID());
-		ex.setSource(trpt.getSource());
-		
 		ex.addAttribute(TRANSCRIPT_ID_TAG, trpt.getTranscriptID());
+		ex.addAttribute(GENE_ID_TAG, exon.getGene().getGeneID());
+		if (exon.getExonID()!= null)
+			ex.addAttribute(EXON_ID_TAG, exon.getExonID());
+		ex.setSource(trpt.getSource());
 		addObjV.add(ex);
 		
 		if (trpt.getTranslations()!= null) {
 			GTFObject cds= (GTFObject) ex.clone();
 			cds.setFeature("CDS");
-			cds.setStart(exon.getStartCDS());
-			cds.setEnd(exon.getEndCDS());
-			cds.setFrame(trpt.getTranslations()[0].getFrame(exon));
-			if (exon.getStartCDS()!= 0&& exon.getEndCDS()!= 0)
+			DirectedRegion[] cdsRegs= 
+				DirectedRegion.intersect(new DirectedRegion[] {exon}, new DirectedRegion[] {trpt.getTranslations()[0]});
+			if (cdsRegs!= null) {
+				cds.setStart(cdsRegs[0].getStart());
+				cds.setEnd(cdsRegs[0].getEnd());
+				cds.setFrame(trpt.getTranslations()[0].getFrame(exon));
 				addObjV.add(cds);
+			}
 		}
 
 		return (GTFObject[]) Arrays.toField(addObjV);
@@ -333,6 +541,10 @@ public class GTFObject {
 	
 	
 	String comments= null; // GTF2, not described
+
+	public final static String FEATURE_ID_ACCEPTOR= "acceptor";
+
+	public final static String FEATURE_ID_DONOR= "donor";
 	
 	public boolean isExon() {
 		return getFeature().equals("exon"); 
@@ -352,6 +564,14 @@ public class GTFObject {
 	public boolean isStopCodon() {
 		return getFeature().equals("stop_codon"); 
 	}
+	public GTFObject(String line) {
+		this();
+		parseGTF(line, this);
+	}
+	
+	public GTFObject() {
+	}
+	
 	public void addAttribute(String name, String value) {
 		
 		if (value== null) 
@@ -535,8 +755,16 @@ public void setFeature(String feature) {
 		
 		if (scoreStr.trim().equals(".")) 
 			return;
-
+	
 		score= Float.parseFloat(scoreStr);
+	}
+
+	/**
+	 * @param score The score to set.
+	 */
+	public void setScore(float sc) {
+		
+		score= sc;
 	}
 /**
  * @return Returns the seqname.

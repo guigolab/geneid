@@ -1,11 +1,12 @@
 package gphase.io;
 
+import gphase.Analyzer;
 import gphase.Constants;
 import gphase.algo.ASAnalyzer;
 import gphase.algo.AlgoHandler;
-import gphase.algo.Analyzer;
 import gphase.db.MapTable;
 import gphase.io.gtf.GTFChrReader;
+import gphase.io.gtf.GTFObject;
 import gphase.model.ASMultiVariation;
 import gphase.model.ASVariation;
 import gphase.model.DefaultRegion;
@@ -13,16 +14,20 @@ import gphase.model.DirectedRegion;
 import gphase.model.Gene;
 import gphase.model.Transcript;
 import gphase.tools.Arrays;
+import gphase.tools.Distribution;
+import gphase.tools.DoubleVector;
 import gphase.tools.Formatter;
 import gphase.tools.IntVector;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.PrintStream;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Vector;
-
-import com.sun.java_cup.internal.version;
 
 public class DomainWrapper extends DefaultIOWrapper {
 	
@@ -30,6 +35,20 @@ public class DomainWrapper extends DefaultIOWrapper {
 	final static String ID_NO_HITS= "No hits above threshold.";
 	
 	public static void main(String[] args) {
+		
+		DomainWrapper myDomainWrapper= new DomainWrapper("douglas"+File.separator+"H.sapiens.All.mRNAs.with.CDS.pfam.parsed");
+		PrintStream p= System.out;
+		try {
+			p= new PrintStream("."+File.separator+"ovlDomains.txt");
+			myDomainWrapper.checkOverlappingDomains(p);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		if (1== 1)
+			System.exit(0);
+		
+		
+		
 		System.out.print("Loading domains..");
 		System.out.flush();
 		DouglasDomainWrapper wrapper= new DouglasDomainWrapper(
@@ -181,7 +200,7 @@ public class DomainWrapper extends DefaultIOWrapper {
 			int oldCntASEvents= cntASEvents;
 			for (int x = 0; vars!= null&& x < vars.length; x++) {
 				for (int xx = 0; xx < vars[x].length; xx++) {
-					if (!vars[x][xx].is_contained_in_CDS())
+					if (!vars[x][xx].isContainedCDS())
 						continue;
 					++cntASEvents;
 					DirectedRegion asReg= vars[x][xx].getRegion();
@@ -291,7 +310,7 @@ public class DomainWrapper extends DefaultIOWrapper {
 		super(absFName);
 	}
 	
-	HashMap map;
+	HashMap map, mapConflict; 
 	
 	public boolean isApplicable() throws Exception {
 		// TODO Auto-generated method stub
@@ -306,6 +325,108 @@ public class DomainWrapper extends DefaultIOWrapper {
 		String line= buffy.readLine();
 		while (buffy.ready()&& !line.startsWith(ID_START_PROTEIN))
 			line= buffy.readLine();
+		DoubleVector remScoreV= new DoubleVector();
+		HashMap mapNames= new HashMap();
+		File ovlFile= new File("domains_overlap.txt");
+		if (ovlFile.exists())
+			ovlFile.delete();
+		int cntTrpts= 0, cntDomains= 0, cntDomLeft= 0;
+		while (buffy.ready()) {
+			++cntTrpts;
+			String protID= line.substring(ID_START_PROTEIN.length());
+			Vector v= new Vector();
+			line= buffy.readLine();
+			mapConflict= new HashMap();
+			while (buffy.ready()&& !line.startsWith(ID_START_PROTEIN)) {
+				if (line.startsWith(ID_NO_HITS)) {
+					DirectedRegion dummy= new DirectedRegion();
+					dummy.addAttribute(DomainToGenomeMapper.DOMAIN_ANNOTATION_ATTRIBUTE_ID, DomainToGenomeMapper.DOMAIN_ANNOTATION_DOM_NONE);
+					v.add(dummy);
+				} else {
+					++cntDomains;
+					String[] tokens= line.split("\t");
+					int start= Integer.parseInt(tokens[1]);
+					int end= Integer.parseInt(tokens[2]);
+					double score= Double.parseDouble(tokens[3]);
+					DefaultRegion reg= new DefaultRegion(start, end);
+					reg.setID(tokens[0]);
+					if (mapNames.get(tokens[0])== null)
+						mapNames.put(tokens[0], tokens[0]);
+					reg.setScore(score);
+					reg.addAttribute(GTFObject.TRANSCRIPT_ID_TAG, protID);
+					reg.addAttribute(DomainToGenomeMapper.DOMAIN_ANNOTATION_ATTRIBUTE_ID, DomainToGenomeMapper.DOMAIN_ANNOTATION_DOM_ANNOTATED);
+					boolean add= true;	// greedily add
+					for (int i = 0; i < v.size(); i++) {
+						DefaultRegion reg2= (DefaultRegion) v.elementAt(i);
+						if (reg.overlaps(reg2)) {
+							Vector vConfl= (Vector) mapConflict.remove(reg);	// collect conflicting ones
+							Vector vConfl2= (Vector) mapConflict.remove(reg2);	// collect conflicting ones
+							if (vConfl== null)
+								vConfl= new Vector();
+							for (int j = 0; vConfl2!= null&& j < vConfl2.size(); j++) 	// joing
+								vConfl= Arrays.addUnique(vConfl, vConfl2.elementAt(j));
+							vConfl= Arrays.addUnique(vConfl, reg);
+							mapConflict.put(reg, vConfl);
+							mapConflict.put(reg2, vConfl);
+							if (reg.getScore()< reg2.getScore())
+								add= true;
+							else
+								add= false;
+						}
+					}
+					if (true) {	// always add
+						for (int i = 0; i < v.size(); i++) {
+							DefaultRegion reg2= (DefaultRegion) v.elementAt(i);
+							if (reg.overlaps(reg2)) {
+								remScoreV.add(reg2.getScore());
+								//v.remove(i--);	// always add
+							}
+						}
+						v.add(reg);
+					} else {
+						remScoreV.add(reg.getScore());
+					}
+				}
+				line= buffy.readLine();
+			}
+			if (line.startsWith(ID_NO_HITS)&& buffy.ready())
+				line= buffy.readLine();
+			if (v.size()> 0) 
+				map.put(protID, v);
+			cntDomLeft+= v.size();
+			
+			BufferedWriter writerOvl= new BufferedWriter(new FileWriter(ovlFile.getAbsolutePath()));
+			Iterator iter= mapConflict.values().iterator();
+			while (iter.hasNext()) {
+				Vector vv= (Vector) iter.next();
+				for (int i = 0;vv!= null&& i < vv.size(); i++) {
+					DefaultRegion reg2= (DefaultRegion) vv.elementAt(i);
+					writerOvl.write(protID+"\t"+reg2.getID()+"\t"+reg2.getStart()+"\t"+reg2.getEnd()+"\t"+reg2.getScore()+"\n");
+				}
+			}
+			writerOvl.flush(); writerOvl.close();
+
+		}
+	
+		Distribution dist= new Distribution(remScoreV.toDoubleArray());
+		System.out.println("Read "+(cntDomains)+" domains ("+
+				mapNames.size()+" different types, "+cntTrpts+" transcripts), of which I kept "+
+				remScoreV.size()+" domains although they overlap (med score "+Formatter.fprint(dist.getMedian(), 5)+
+				", details in "+ovlFile.getAbsolutePath()+"), left "+
+				map.size()+" domains.");
+		
+	
+	}
+
+	public void checkOverlappingDomains(PrintStream outP) throws Exception {
+		
+		map= new HashMap();
+		BufferedReader buffy= new BufferedReader(new FileReader(fPath+ 
+				File.separator+ fName));
+		String line= buffy.readLine();
+		while (buffy.ready()&& !line.startsWith(ID_START_PROTEIN))
+			line= buffy.readLine();
+		DoubleVector remScoreV= new DoubleVector();
 		while (buffy.ready()) {
 			String protID= line.substring(ID_START_PROTEIN.length());
 			Vector v= new Vector();
@@ -324,9 +445,43 @@ public class DomainWrapper extends DefaultIOWrapper {
 			}
 			if (line.startsWith(ID_NO_HITS)&& buffy.ready())
 				line= buffy.readLine();
-			if (v.size()> 0)
-				map.put(protID, v);
+			if (v.size()> 0) {
+				Vector allOvlV= new Vector();
+				for (int i = 0; i < v.size(); i++) {
+					Vector ovlV= new Vector();
+					for (int j = i+1; j < v.size(); j++) {
+						DefaultRegion reg1= (DefaultRegion) v.elementAt(j-1);	// assuming order on the domains
+						DefaultRegion reg2= (DefaultRegion) v.elementAt(j);
+						if (reg1.overlaps(reg2))
+							ovlV.add(reg2);
+						else
+							break;
+					}
+					if (ovlV.size()> 0) {
+						ovlV.insertElementAt(v.elementAt(i), 0);	// 1st overlapping
+						allOvlV.add(ovlV);
+						i+= v.size()- 1;
+					} 
+				}
+				if (allOvlV.size()> 0)
+					map.put(protID, allOvlV);
+			}
 		}
+
+		outP.println("Overlapping domains:");
+		Object[] keys= map.keySet().toArray();
+		for (int i = 0; i < keys.length; i++) {
+			Vector allOvlV= (Vector) map.get(keys[i]);
+			outP.println("\n"+keys[i]+":");
+			for (int j = 0; j < allOvlV.size(); j++) {
+				Vector v= (Vector) allOvlV.elementAt(j);
+				for (int k = 0; k < v.size(); k++) {
+					outP.println(v.elementAt(k));
+				}
+				outP.println();
+			}
+		}
+		outP.flush(); outP.close();
 	}
 
 	public void write() throws Exception {
@@ -336,6 +491,25 @@ public class DomainWrapper extends DefaultIOWrapper {
 
 	public HashMap getMap() {
 		return map;
+	}
+	
+	public HashMap getMapConflict() {
+		if (mapConflict== null)
+			return null;
+		Object[] values= mapConflict.values().toArray();
+		HashMap mp= new HashMap();
+		for (int i = 0; i < values.length; i++)	// make non-redundant 
+			if (mp.get(values[i])== null)
+				mp.put(values[i], null);
+		values= mp.keySet().toArray();
+		mapConflict= new HashMap();
+		for (int i = 0; i < values.length; i++) {
+			Vector regV= (Vector) values[i];
+			mapConflict.put(
+					((DefaultRegion) regV.elementAt(0)).getAttribute(GTFObject.TRANSCRIPT_ID_TAG),
+					regV);
+		}
+		return mapConflict;
 	}
 
 }
