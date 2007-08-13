@@ -56,6 +56,28 @@ public class ASEvent implements Serializable {
 			spliceChains[i]= map2.get(firsts[i]);
 		}
 	}
+	
+	public boolean isASevent() {
+		int x;
+		for (x = 0; x < spliceChains.length; x++) 
+			if (spliceChains[x].length> 0)
+				break;
+		for (int i = 0; i < spliceChains[x].length; i++) {
+			if (!spliceChains[x][i].isSpliceSite())
+				continue;
+			int j;
+			for (j = 0; j < trpts.length; j++) {
+				if (j== x)
+					continue;
+				if (!trpts[j][0].contains(spliceChains[x][i].getPos()))
+					break;
+			}
+			if (j== trpts.length)	// one ss common to all found
+				return true;
+		}
+		
+		return false;
+	}
 
 	/**
 	 * One line schematical representation of the splicing variation.

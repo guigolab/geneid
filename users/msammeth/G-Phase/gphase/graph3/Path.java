@@ -1,4 +1,4 @@
-package gphase.sgraph;
+package gphase.graph3;
 
 import gphase.model.SpliceSite;
 import gphase.tools.IntVector;
@@ -12,9 +12,6 @@ import java.util.Vector;
 public class Path {
 	long[] transcripts= null;
 	Vector nodesAndEdges= new Vector(2,1);	// 2,2
-	HashMap<Node,Path> superPathes= new HashMap<Node, Path>(2,1f);	//2,1f
-	IntVector bubbleIDs= new IntVector();
-	int hc= 0;
 	boolean hasSpliceSite= false, lastSpliceSite= false;
 	PartitionSet part;
 	
@@ -101,7 +98,6 @@ public class Path {
 		newPath.transcripts= new long[transcripts.length];
 		for (int i = 0; i < transcripts.length; i++) 
 			newPath.transcripts[i]= transcripts[i];
-		newPath.bubbleIDs= this.bubbleIDs.cloneIntVector();
 		newPath.hasSpliceSite= hasSpliceSite;
 		newPath.lastSpliceSite= lastSpliceSite;
 		newPath.part= this.part;
@@ -140,18 +136,6 @@ public class Path {
 //		return true;
 	}
 	
-	public Collection<Path> getSuperPathes() {
-		return superPathes.values();
-	}
-	
-	public void addSuperPath(Path p) {
-		superPathes.put(p.getSource(),p);
-	}
-	
-	public void removeSuperPath(Path p) {
-		superPathes.remove(p.getSource());
-	}
-	
 	public void removeSource() {
 		assert(nodesAndEdges.elementAt(0) instanceof Node);
 		nodesAndEdges.remove(0);
@@ -160,22 +144,6 @@ public class Path {
 	public void removeSink() {
 		assert(nodesAndEdges.elementAt(nodesAndEdges.size()-1) instanceof Node);
 		nodesAndEdges.remove(nodesAndEdges.size()-1);
-	}
-	
-	public void replaceSuperPath(Path p1, Path p2) {
-		superPathes.remove(p1.getSource());
-		superPathes.put(p2.getSource(), p2);
-	}
-
-	public int[] getBubbleIDs() {
-		return bubbleIDs.toIntArray();
-	}
-
-	public void addBubbleID(int newBid) {
-		this.bubbleIDs.add(newBid);
-		Iterator<Path> iter= getSuperPathes().iterator();
-		while (iter.hasNext())
-			iter.next().addBubbleID(newBid);
 	}
 
 	public Vector getNodesAndEdges() {

@@ -280,6 +280,25 @@ public class Transcript extends DirectedRegion {
 		return spliceSites;
 	}
 	
+	public SpliceSite[] getSpliceSitesBetween(SpliceSite ss1, SpliceSite ss2) {
+		int p1= Arrays.binarySearch(getSpliceSitesAll(), ss1, SpliceSite.getDefaultPositionTypeComparator());
+		int p2= Arrays.binarySearch(getSpliceSitesAll(), ss2, SpliceSite.getDefaultPositionTypeComparator());
+		if (p1<0) // root
+			p1= -1;
+		if (p2<0)
+			p2= getSpliceSitesAll().length;
+		
+		++p1; --p2;
+		if (p1> p2)
+			return new SpliceSite[0];
+		
+		SpliceSite[] ss= new SpliceSite[p2-p1+1];
+		for (int i = 0; i < ss.length; i++) {
+			ss[i]= getSpliceSitesAll()[i+p1];
+		}
+		return ss;
+	}
+	
 	public DirectedRegion[] get5UTRRegion(boolean beforeSplicing) {
 		Translation[] trans= getTranslations();
 		if (trans== null|| trans.length< 1)

@@ -1,5 +1,6 @@
-package gphase.sgraph;
+package gphase.graph4;
 
+import java.io.FileWriter;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,6 +12,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
+import com.sun.org.apache.xml.internal.utils.NodeVector;
+
 import sun.reflect.ReflectionFactory.GetReflectionFactoryAction;
 
 import gphase.io.gtf.GTFChrReader;
@@ -20,6 +23,7 @@ import gphase.model.Gene;
 import gphase.model.Species;
 import gphase.model.SpliceSite;
 import gphase.model.Transcript;
+import gphase.sgraph.Bubble;
 import gphase.tools.DoubleVector;
 
 public class Graph {
@@ -30,20 +34,23 @@ public class Graph {
 	static void _070808_test() {
 		// 
 		// /home/msammeth/annotations/human_hg18_RefSeqGenes_fromUCSC070716.gtf
-		// /home/msammeth/annotations/human_hg18_RefSeqGenes_fromUCSC070716_mRNAs_fromUCSC070716_splicedESTs_from_UCSC0703.gtf
 		// /home/msammeth/annotations/human_hg18_RefSeqGenes_fromUCSC070716_mRNAs_fromUCSC070716_CDS.gtf		
+		// /home/msammeth/annotations/human_hg18_RefSeqGenes_fromUCSC070716_mRNAs_fromUCSC070716_splicedESTs_from_UCSC0703.gtf
 		gphase.tools.File file= new gphase.tools.File("/home/msammeth/annotations/human_hg18_RefSeqGenes_fromUCSC070716.gtf");
 		Species species= new Species("human");
 		species.setGenomeVersion("hg18");
-		boolean output= false;
+		boolean output= false; 
 		
 		long t0= System.currentTimeMillis();
 		GTFChrReader reader= new GTFChrReader(file.getAbsolutePath());
 		try {
 			reader.read();
-		} catch (Exception e1) {
+		} catch (Exception e1) { 
 			e1.printStackTrace();
 		}
+		if (output)
+			System.out.println("read: "+((System.currentTimeMillis()- t0)/ 1000)+" sec.");
+		
 		Gene[] g= reader.getGenes();
 		int cnt= 0;
 		HashMap<String, Integer> evMap= new HashMap<String, Integer>();
@@ -51,6 +58,10 @@ public class Graph {
 		while (g!= null) {
 			
 			for (int i = 0; i < g.length; i++) {
+				
+				if (g[i].getTranscriptCount()== 1)
+					continue;
+				
 				Graph gr= new Graph(g[i]);
 				if (output) {
 					System.out.print(">  t= "+g[i].getTranscriptCount());
@@ -65,7 +76,7 @@ public class Graph {
 					System.out.flush();
 				}
 				int oldSize= evMap.size();
-				gr.extractASevents(2, evMap);
+				gr.getEventsByPathes(2, evMap);
 				cnt+= evMap.size()- oldSize;
 				long dB= (System.currentTimeMillis()- t2);
 				cumulEV+= dB;
@@ -79,12 +90,16 @@ public class Graph {
 //				Vector ev2= g2.extractASevents(2);			
 //				System.currentTimeMillis();
 			}
-			
+
+			System.gc();
+			long tx= System.currentTimeMillis();
 			try {
 				reader.read();
 			} catch (Exception e1) {
 				e1.printStackTrace();
 			}
+			if (output)
+				System.out.println("read: "+((System.currentTimeMillis()- tx)/ 1000)+" sec.");
 			g= reader.getGenes();
 			System.gc();
 			Thread.currentThread().yield();
@@ -136,8 +151,120 @@ public class Graph {
 		return reSig;
 	}
 	
+	public static long[] unite(long[] sig1, long[] sig2) {
+		assert(sig1.length== sig2.length);
+		long[] reSig= new long[sig1.length];
+		for (int i = 0; i < sig2.length; i++) 
+			reSig[i]= sig1[i]| sig2[i];
+		return reSig;
+	}
+	
+	public static long[] without(long[] a, long[] b) {
+		long[] c= new long[a.length];
+		for (int i = 0; i < c.length; i++) 
+			c[i]= a[i]^ b[i];
+		return c;
+	}
+	
+	
+	public static long[] unite(Vector<long[]> a) {
+		if (a.size()== 1)
+			return a.elementAt(0);
+		long[] inter= unite(a.elementAt(0), a.elementAt(1));
+		for (int i = 2; i < a.size(); i++) 
+			inter= unite(inter, a.elementAt(i));
+		return inter;
+	}
+	
+	public static int intersect(Vector<long[]> ps1, Vector<long[]> ps2, Vector<long[]> interSet, boolean onlyFullIntersect) {
+		int cntFullIntersect= 0;
+		for (int k = 0; k < ps1.size(); k++) {
+			for (int h = 0; h < ps2.size(); h++) {
+				long[] sect= intersect(ps1.elementAt(k), ps2.elementAt(h));
+				if (isNull(sect))
+					continue;
+				int fis= 0;
+				if (equalSet(sect,ps1.elementAt(k)))
+					fis= 1;
+				if (interSet!= null) {
+					if  (!onlyFullIntersect)
+						interSet.add(sect);
+					else if (fis== 1)
+						interSet.add(ps1.elementAt(k));
+				}
+				cntFullIntersect+= fis;
+				if (onlyFullIntersect&& fis== 1)
+					break;
+			}
+		}
+		return cntFullIntersect;
+	}
+	
+	public static boolean equalSet(long[] a, long[] b) {
+		for (int i = 0; i < b.length; i++) {
+			if (a[i]!= b[i])
+				return false;
+		}
+		return true;
+	}
+	
 	
 	Vector<Path[]> generateTuples(int k, Vector<Vector<Path>> buckets) {
+	
+			int[] idx= new int[k];
+			for (int i = 0; i < idx.length; i++) 
+				idx[i]= i;
+			
+			int[] combi= new int[k];
+	//		int permutNb= 1;
+	//		for (int i = 0; i < combi.length; i++) 
+	//			;
+			Vector<Path[]> tuples= new Vector<Path[]>();
+			while (idx[0]< (buckets.size()-k+ 1)) {
+				
+					// now all combinations
+				for (int j = 0; j < combi.length; j++) 
+					combi[j]= 0;
+				while (true) {
+					
+					Path[] p= new Path[k];
+					for (int j = 0; j < combi.length; j++) 
+						p[j]= buckets.elementAt(idx[j]).elementAt(combi[j]);
+					tuples.add(p);
+					
+					int negPtr= combi.length-1;
+					while (negPtr>= 0) {
+						if (combi[negPtr]< (buckets.elementAt(idx[negPtr]).size()-1)) {
+							++combi[negPtr];
+							break;
+						} 
+							// else
+						combi[negPtr]= 0;
+						--negPtr;
+					}
+					if (negPtr< 0)
+						break;
+				}
+				
+				//
+				
+				int negPtr= idx.length-1;
+				while (negPtr>= 0) {
+					if (idx[negPtr]< (buckets.size()-1)) {
+						int c= ++idx[negPtr];
+						for (int i = negPtr+1; i < idx.length; i++) 
+							idx[negPtr]= ++c;
+						break;
+					} 
+						// else
+					--negPtr;
+				}
+			}
+	
+			return tuples;
+		}
+
+	Vector<long[][]> generateTuples(int k, long[][][] buckets) {	//Vector<Vector<Path>> buckets
 
 		int[] idx= new int[k];
 		for (int i = 0; i < idx.length; i++) 
@@ -147,22 +274,22 @@ public class Graph {
 //		int permutNb= 1;
 //		for (int i = 0; i < combi.length; i++) 
 //			;
-		Vector<Path[]> tuples= new Vector<Path[]>();
-		while (idx[0]< (buckets.size()-k)) {
+		Vector<long[][]> tuples= new Vector<long[][]>();
+		while (idx[0]< (buckets.length-k+1)) {
 			
 				// now all combinations
 			for (int j = 0; j < combi.length; j++) 
 				combi[j]= 0;
 			while (true) {
 				
-				Path[] p= new Path[k];
+				long[][] p= new long[k][];
 				for (int j = 0; j < combi.length; j++) 
-					p[j]= buckets.elementAt(idx[j]).elementAt(combi[j]);
+					p[j]= buckets[idx[j]][combi[j]];
 				tuples.add(p);
 				
 				int negPtr= combi.length-1;
 				while (negPtr>= 0) {
-					if (combi[negPtr]< (buckets.elementAt(idx[negPtr]).size()-1)) {
+					if (combi[negPtr]< (buckets[idx[negPtr]].length-1)) {
 						++combi[negPtr];
 						break;
 					} 
@@ -178,7 +305,7 @@ public class Graph {
 			
 			int negPtr= idx.length-1;
 			while (negPtr>= 0) {
-				if (idx[negPtr]< (buckets.size()-1)) {
+				if (idx[negPtr]< (buckets.length-1)) {
 					int c= ++idx[negPtr];
 					for (int i = negPtr+1; i < idx.length; i++) 
 						idx[negPtr]= ++c;
@@ -282,7 +409,7 @@ public class Graph {
 			int p= Arrays.binarySearch(trpts, t[i], defaultTranscriptByNameComparator);
 			assert(p>= 0);
 			int cnt= 0;
-			while(p> 64) {
+			while(p>= 64) {
 				p-= 64;
 				++cnt;
 			}
@@ -290,6 +417,8 @@ public class Graph {
 		}
 		return taVector;
 	}
+	
+	
 	
 	public static int getTranscriptNb(long[] c) {
 		int cnt= 0;
@@ -329,12 +458,21 @@ public class Graph {
 		return n;
 	}
 	
-	public Edge createEdge(Node v, Node w) {
+	public Edge createEdge(Node v, Node w, long[] newTset) {
 		Edge e= getEdge(v,w);
 		if (e== null) {
 			e= new Edge(v,w);
+			e.setTranscripts(newTset);
 			edgeHash.put(new Integer(e.getTail().getSite().getPos()+e.getHead().getSite().getPos()),e);
-		}
+		} else 
+			e.setTranscripts(unite(e.getTranscripts(),newTset));
+		return e;
+	}
+
+	public Edge addEdge(Node v, Node w, long[] newTset) {
+		Edge e= new Edge(v,w);
+		e.setTranscripts(newTset);
+		edgeHash.put(new Integer(e.getTail().getSite().getPos()+e.getHead().getSite().getPos()),e);
 		return e;
 	}
 	
@@ -355,7 +493,7 @@ public class Graph {
 				Node w= createNode(ss[j]);
 				if (j== ss.length- 1&& leafHash.get(v)== null)
 					leafHash.put(w,w);
-				createEdge(v,w);
+				createEdge(v,w,encodeTset(new Transcript[] {t[i]}));
 			}
 		}
 		
@@ -363,19 +501,39 @@ public class Graph {
 		ss.setTranscripts(trpts);
 		root= createNode(ss);
 		Object[] o= rootHash.keySet().toArray();
-		for (int i = 0; i < o.length; i++) 
-			createEdge(root, (Node) o[i]);
+		
+			// collect transcripts where o[i] is first ss
+		for (int i = 0; i < o.length; i++) { 
+			Vector<Transcript> v= new Vector<Transcript>();
+			for (int j = 0; j < trpts.length; j++) {
+				if (trpts[j].getSpliceSitesAll()[0]== ((Node) o[i]).getSite())
+					v.add(trpts[j]);
+			}
+			Transcript[]  tt= new Transcript[v.size()];
+			for (int j = 0; j < tt.length; j++) 
+				tt[j]= v.elementAt(j);
+			createEdge(root, (Node) o[i], encodeTset(tt));
+		}
 		
 		ss= new SpliceSite(Integer.MAX_VALUE, SpliceSite.TYPE_NOT_INITED);
 		ss.setTranscripts(trpts);
 		leaf= createNode(ss);
 		o= leafHash.keySet().toArray();
-		for (int i = 0; i < o.length; i++) 
-			createEdge((Node) o[i], leaf);
+		for (int i = 0; i < o.length; i++) { 
+			Vector<Transcript> v= new Vector<Transcript>();
+			for (int j = 0; j < trpts.length; j++) {
+				if (trpts[j].getSpliceSitesAll()[trpts[j].getSpliceSitesAll().length-1]== ((Node) o[i]).getSite())
+					v.add(trpts[j]);
+			}
+			Transcript[]  tt= new Transcript[v.size()];
+			for (int j = 0; j < tt.length; j++) 
+				tt[j]= v.elementAt(j);
+			createEdge((Node) o[i], leaf, encodeTset(tt));
+		}
 	}
 	
 	//DFS
-	void contractGraph(Node n) {
+	void contractGraph_new_notWork(Node n) {
 		if (n.isProcessed())
 			return;
 		n.setProcessed(true);
@@ -399,45 +557,316 @@ public class Graph {
 		if (p!= null&& edgeV.size()> 1) {
 			p.addNode(edgeV.elementAt(edgeV.size()- 1).getHead());	// complete
 			Vector ns= p.getNodesAndEdges();
-			for (int i = 1; i < ns.size()- 1; i++) 
-				removeNode((Node) ns.elementAt(i));
 			
 			for (int i = 0; i < edgeV.size(); i++) 
 				removeEdge(edgeV.elementAt(i));
 			
-			Edge e= createEdge(p.getSource(), p.getSink());
-			p.removeSource();
+			Edge e= null;
+			if (p.getSource().getInEdges().size()!= 1) {
+				for (int i = 1; i < ns.size()- 1; i++) 
+					removeNode((Node) ns.elementAt(i));
+				e= createEdge(p.getSource(), p.getSink());
+				p.removeSource();
+			} else { 
+				e= createEdge(((Edge) p.getSource().getInEdges().toArray()[0]).getTail(), p.getSink());
+				for (int i = 0; i < ns.size()- 1; i++) 
+					removeNode((Node) ns.elementAt(i));
+			}
 			p.removeSink();
 			e.setPath(p);
 		}
 		
 		if (outV.size()> 1) {
-			Iterator<Edge> iter= outV.iterator();
-			while (iter.hasNext())
-				contractGraph(iter.next().getHead());
+			Object[] o= outV.toArray();
+			for (int i = 0; i < o.length; i++) {
+				contractGraph(((Edge) o[i]).getHead());
+			}
 		} else 
 			contractGraph(n);
 	}
+
+	//DFS
+	void contractGraph(Node n) {
+		if (n.isProcessed())
+			return;
+		n.setProcessed(true);
+		
+		Vector<Edge> outV= n.getOutEdges();
+		Vector<Edge> inV= n.getInEdges();
+		Path p= null;
+		Vector<Edge> edgeV= new Vector<Edge>();
+		Vector<Node> nodeV= new Vector<Node>();
+		while (outV.size()== 1&& inV.size()< 2) {
+			Edge f= null;
+			Iterator<Edge> it= inV.iterator();
+			Edge e= outV.iterator().next();
+			if (it.hasNext())
+				f= it.next();
+			if (p== null) {
+				if (f!= null) {
+					edgeV.add(f);
+					nodeV.add(f.getTail());
+				}
+				p= new Path();
+				if (f== null)
+					p.setSourceEdge(e);
+				else 
+					p.setSourceEdge(f);
+				p.setSinkEdge(e);
+				p.setTranscripts(e.getTranscripts());
+			} else
+				p.setSinkEdge(e);
+			
+			edgeV.add(e);
+			nodeV.add(n);
+			n= e.getHead();
+			outV= n.getOutEdges();
+			inV= n.getInEdges();			
+		}
+		
+			// contract
+		if (edgeV.size()> 1) {
+			for (int i = 1; i < nodeV.size(); i++) 
+				removeNode((Node) nodeV.elementAt(i));	// not the first one
+			
+			for (int i = 0; i < edgeV.size(); i++)  {
+				removeEdge(edgeV.elementAt(i));
+			}
+			
+			Edge e= addEdge(p.getSourceNode(), p.getSinkNode(), p.getTranscripts());	// cannot use create, will return same edge for alt. ways
+			e.setPath(p);
+		}
+
+		
+		Object[] o= outV.toArray();
+		for (int i = 0; i < o.length; i++) {
+			contractGraph(((Edge) o[i]).getHead());
+		}
+	}
 	
-	void initPartitions(int n) {
+	void initPartitions(int n, HashMap<String, Integer> evMap) {		
+			Node[] nodes= getNodesInGenomicOrder();
+			Vector<Node> nodesWithOutPSS= new Vector<Node>(nodes.length/ 2);
+			for (int i = 0; i < nodes.length; i++) {
+				Set<Edge> inEdges= nodes[i].getInEdges();
+				Set<Edge> outEdges= nodes[i].getOutEdges();
+				if (inEdges.size()>= n) {
+					PartitionSet inPartition= nodes[i].getInPartitionSet();
+					for (int j = nodesWithOutPSS.size()- 1; j >= 0; --j) {
+						PartitionSet outPartition= nodesWithOutPSS.elementAt(j).getOutPartitionSet();
+						Vector<long[]> interPartVec= new Vector<long[]>(Math.max(outPartition.getPartitions().size(), inPartition.getPartitions().size()));
+						int cntFullIS= intersect(outPartition.getPartitions(), inPartition.getPartitions(), interPartVec, false);
+	
+						// bubble:: and here will be the problem of all !!!
+						if (interPartVec.size()>= n) {
+								// retrieve event
+							long[][][] splitPart= outPartition.getSplitPartitions();
+							Vector<long[][]> tuples= generateTuples(n, splitPart);
+							for (int k = 0; k < tuples.size(); k++) {
+								
+									// check AS event
+								SpliceSite[][] ss= new SpliceSite[n][];
+								Transcript[][] tt= new Transcript[n][];
+								for (int h = 0; h < tt.length; h++) {
+									tt[h]= decodeTset(tuples.elementAt(k)[h]);
+									ss[h]= tt[h][0].getSpliceSitesBetween(nodesWithOutPSS.elementAt(j).getSite(),nodes[i].getSite());
+								}
+								for (int h = 0; h < tt.length; h++) {
+									tt[h]= decodeTset(tuples.elementAt(k)[h]);
+									ss[h]= tt[h][0].getSpliceSitesBetween(nodesWithOutPSS.elementAt(j).getSite(),nodes[i].getSite());
+								}
+								ASEvent ev= new ASEvent(tt,ss);
+								boolean event= true;
+								if (isRoot(nodesWithOutPSS.elementAt(j))|| isLeaf(nodes[i]))
+									event= ev.isASevent();
+								if (event) {
+									Integer nr= evMap.get(ev.toString());
+									if (nr== null)
+										nr= new Integer(0);
+									evMap.put(ev.toString(),new Integer(nr.intValue()+1));
+	//								try {
+	//									FileWriter writer= new FileWriter("new.asta", true);
+	//									writer.write(ev.toStringASTA()+"\n");
+	//									writer.flush(); writer.close();
+	//								} catch (Exception e) {
+	//									e.printStackTrace();
+	//								}
+								}
+								
+							}
+							
+								// merge partitions for this and aterior outPartitions (outer Bubbles)
+							for (int k = j; k >= 0; --k) {
+								PartitionSet ops= nodesWithOutPSS.elementAt(k).getOutPartitionSet();
+								Vector<long[]> fullISset= new Vector<long[]>(Math.min(ops.getPartitions().size(),inPartition.getPartitions().size()));
+								int cntFIS= intersect(ops.getPartitions(),interPartVec, fullISset, true);
+								// (cntFIS== ops.getPartitions().size())  	// could be removed, but cannot happen
+								if (cntFIS> 1) { 	// have to be merged
+									ops.mergePartitions(fullISset);
+									if (ops.getPartitions().size()< n) {
+										nodesWithOutPSS.remove(k--);
+										--j;
+										continue;
+									}
+								}
+								
+							}
+	
+							// outPartition fully satisfied by Bubble, remove
+							if (cntFullIS== outPartition.getPartitions().size()) {
+								nodesWithOutPSS.remove(j--);
+								break;
+							}
+						} // if bubble
+					} // nodesWithOutPSS
+					
+				}
+				
+				if (outEdges.size()>= n) {
+					nodesWithOutPSS.add(nodes[i]);
+					
+					// split pathes. Not necessary for bubble retrieval, but for collecting pathes without iterating the graph
+					for (int j = 0; j < nodesWithOutPSS.size(); j++) {
+						nodesWithOutPSS.elementAt(j).getOutPartitionSet().splitPathes(nodes[i].getInPartitionSet());
+					}
+				}
+			}
+		}
+
+	public void getEventsByPathes(int n, HashMap<String, Integer> evMap) {		
 		Node[] nodes= getNodesInGenomicOrder();
 		Vector<Node> nodesWithOutPSS= new Vector<Node>(nodes.length/ 2);
 		for (int i = 0; i < nodes.length; i++) {
-			Set<Edge> inEdges= nodes[i].getInEdges();
-			Set<Edge> outEdges= nodes[i].getOutEdges();
-			if (inEdges.size()> n) {
+			Vector<Edge> inEdges= nodes[i].getInEdges();
+			Vector<Edge> outEdges= nodes[i].getOutEdges();
+			if (inEdges.size()>= n) {
+				
+				Object[] fNodes= nodes[i].getFromNodes().toArray();
+				Arrays.sort(fNodes,defaultNodeByPositionTypeComparator);
+				for (int j = fNodes.length- 1; j >= 0; --j) {
+					Node fromNode= (Node) fNodes[j];
+					HashMap<Edge, Vector<Path>> fromPmap= nodes[i].getFromNodeMap().get(fNodes[j]);
+					// bubble
+					if (fromPmap.size()>= n) {
+
+							// retrieve event
+						Vector<Vector<Path>> splitPart= new Vector(nodes[i].getFromNodeMap().get(fNodes[j]).values());
+						Vector<Path[]> tuples= generateTuples(n, splitPart);
+						for (int k = 0; k < tuples.size(); k++) {
+							
+								// check AS event
+							SpliceSite[][] ss= new SpliceSite[n][];
+							Transcript[][] tt= new Transcript[n][];
+							for (int h = 0; h < tt.length; h++) {
+								tt[h]= decodeTset(tuples.elementAt(k)[h].getTranscripts());
+								ss[h]= tt[h][0].getSpliceSitesBetween(
+										tuples.elementAt(k)[h].getSourceNode().getSite(),nodes[i].getSite());
+							}
+							
+							ASEvent ev= new ASEvent(tt,ss);
+							boolean event= true;
+							if (isRoot(((Node) fNodes[j]))|| isLeaf(nodes[i]))
+								event= ev.isASevent();
+							if (event) {
+								Integer nr= evMap.get(ev.toString());
+								if (nr== null)
+									nr= new Integer(0);
+								evMap.put(ev.toString(),new Integer(nr.intValue()+1));
+//								try {
+//									FileWriter writer= new FileWriter("new.asta", true);
+//									writer.write(ev.toStringASTA()+"\n");
+//									writer.flush(); writer.close();
+//								} catch (Exception e) {
+//									e.printStackTrace();
+//								}
+							}
+						}	// for all tuples
+						
+						// kill pathes
+						nodes[i].getFromNodeMap().remove(fNodes[j]);
+						if (((Node) fNodes[j]).getOutEdges().size()!= splitPart.size()) {
+							Vector<Path> newPartition= new Vector<Path>();
+							for (int k = 0; k < splitPart.size(); k++) 
+								for (int m = 0; m < splitPart.elementAt(k).size(); m++) 
+									newPartition.add(splitPart.elementAt(k).elementAt(m));
+							HashMap<Edge, Vector<Path>> map = new HashMap<Edge, Vector<Path>>(1,1f);
+							map.put(null,newPartition);
+							nodes[i].getFromNodeMap().put((Node) fNodes[j],map);
+						}
+						
+
+						
+
+					} // if bubble
+				} // nodesWithOutPSS
 				
 			}
+
 			
-			if (outEdges.size()> n) {
-				Vector<long[]> psVec= new Vector<long[]>(outEdges.size());
-				Iterator<Edge> iter= outEdges.iterator();
-				while (iter.hasNext()) {
-					Edge e= iter.next();
-					
+			Object[] o= outEdges.toArray();
+			// add possible new source
+			if (outEdges.size()>= n) {
+					// generate new pathes
+				for (int j = 0; j < o.length; j++) {
+					Edge e= (Edge) o[j];
+					Path newP= new Path();
+					newP.setSourceEdge(e);
+					newP.setSinkEdge(e);
+					newP.setTranscripts(e.getTranscripts());					
+					HashMap<Edge, Vector<Path>> map= e.getHead().getFromNodeMap().remove(nodes[i]);
+					if (map== null)
+						map= new HashMap<Edge, Vector<Path>>(2,1f);
+					Vector<Path> v= map.remove(e);
+					if (v== null)
+						v= new Vector<Path>(2);
+					v.add(newP);
+					map.put(e,v);
+					e.getHead().getFromNodeMap().put(nodes[i], map);
 				}
-				PartitionSet ps= new PartitionSet(psVec);
 			}
+							
+			Iterator<Node> iterSrc= nodes[i].getFromNodes().iterator();
+			while (iterSrc.hasNext()) {
+				Node src= iterSrc.next();
+				Iterator<Path> iterPath= nodes[i].getPathesFrom(src).iterator();	// not only one per source per inedge!
+				// extend all pathes
+				while (iterPath.hasNext()) {
+					Path p= iterPath.next();
+					Vector<Path> split= new Vector<Path>(o.length);
+					for (int j = 0; j < o.length; j++) {
+						Edge e= (Edge) o[j];
+						long[] newTsup= intersect(p.getTranscripts(), e.getTranscripts());
+						if (isNull(newTsup))
+							continue;
+						Path newP= new Path();
+						newP.setSourceEdge(p.getSourceEdge());
+						newP.setTranscripts(newTsup);
+						newP.setSinkEdge(e);
+						HashMap<Edge, Vector<Path>> epMap= e.getHead().getFromNodeMap().get(p.getSourceNode());
+						if (epMap== null) {
+							epMap= new HashMap<Edge,Vector<Path>>(e.getHead().getInEdges().size(),1f);
+							e.getHead().getFromNodeMap().put(p.getSourceNode(),epMap);
+						}
+						Vector<Path> v= epMap.get(e);
+						if (v== null) {
+							v= new Vector<Path>(1);
+							epMap.put(e,v);
+						}
+						v.add(newP);
+						split.add(newP);
+					}
+					
+						// split partitions if path separates
+//					if (split.size()> 1) {
+//						HashMap<Path,Path> partition= p.getSourceNode().getOutPartitionSet().getPartition(p.getSourceEdge());
+//						partition.remove(p);	// need hashmap
+//						for (int j = 0; j < split.size(); j++) 
+//							partition.put(split.elementAt(j),split.elementAt(j));
+//					}
+				}
+			}
+			
+
 		}
 	}
 	
