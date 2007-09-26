@@ -6,6 +6,7 @@
  */
 package gphase.model;
 
+import gphase.io.gtf.GTFChrReader;
 import gphase.io.gtf.GTFObject;
 import gphase.model.ASMultiVariation.SpliceChainComparator;
 
@@ -39,17 +40,44 @@ import prefuse.util.UpdateListener;
  */
 public class Exon extends DirectedRegion {
 
-	transient HashMap hitparade= null;	// do not serialize
-	HashMap homologs= null;	// maps genes to exon homologs
-							// also captures the alternatively spliced exon
-							// in same gene for: a3, a5, me
+	public static int MIN_INTRON_LENGTH_HUMAN= 33;
+	public static boolean checkAcceptableIntron(SpliceSite donor, SpliceSite acceptor) {
+//		   if (($seq1 =~ /^GT/i && $seq2 =~ /AG$/i)
+//		   ||($seq1 =~ /^GC/i && $seq2 =~ /AG$/i)
+//		   ||($seq1 =~ /^ATATC/i && $seq2 =~ /AG$/i)
+//		   ||($seq1 =~ /^ATATC/i && $seq2 =~ /AC$/i)
+//		   ||($seq1 =~ /^ATATC/i && $seq2 =~ /AT$/i)
+//		   ||($seq1 =~ /^GTATC/i && $seq2 =~ /AT$/i)
+//		   ||($seq1 =~ /^ATATC/i && $seq2 =~ /AA$/i) 
+
+		String donSeq= Graph.readSequence(donor, 0, 3).toUpperCase();
+		String donSeq2= donSeq.substring(0,2);
+		String accSeq= Graph.readSequence(acceptor, 0, 0).toUpperCase();
+		if (!((donSeq.startsWith("G")|| donSeq.startsWith("A"))&& accSeq.startsWith("A")))
+			return false;
+		if (accSeq.equals("AG")) {
+			if (donSeq2.equals("GT")|| donSeq2.equals("GC")|| donSeq.equals("GTATC"))
+				return true;
+			return false;
+		} else {
+			if (donSeq.equals("ATATC"))
+				return true;
+			if (donSeq.equals("GTATC")&& accSeq.equals("AT"))
+				return true;
+			return false;
+		}
+			
+	}
 	
-	SuperExon superExon= null;
-	SpliceSite donor= null;
-	SpliceSite acceptor= null;
+	Integer donor= null;
+	Integer acceptor= null;
 	int frame= -1;
 	int cds5Prime= 0;
 	int cds3Prime= 0;
+	EqualComparator defaultEqualComparator= new EqualComparator();
+	Gene gene= null;
+	
+	
 	
 	public static class EqualComparator implements Comparator {
 		public int compare(Object o1, Object o2) {
@@ -241,10 +269,10 @@ public class Exon extends DirectedRegion {
 	
 	public int get5PrimeCDS() {
 		if (cds5Prime == 0) {
-			for (int i = 0; i < transcripts.length; i++) {
-				if (!transcripts[i].isCoding())
+			for (int i = 0; i < getTranscripts().length; i++) {
+				if (!getTranscripts()[i].isCoding())
 					continue;
-				Translation trans= transcripts[i].getTranslations()[0];
+				Translation trans= getTranscripts()[i].getTranslations()[0];
 				if (this.overlaps(trans)) {
 					int p5= Math.max(this.get5PrimeEdge(), trans.get5PrimeEdge());
 					if (cds5Prime== 0)
@@ -261,10 +289,10 @@ public class Exon extends DirectedRegion {
 	
 	public int get3PrimeCDS() {
 		if (cds3Prime == 0) {
-			for (int i = 0; i < transcripts.length; i++) {
-				if (!transcripts[i].isCoding())
+			for (int i = 0; i < getTranscripts().length; i++) {
+				if (!getTranscripts()[i].isCoding())
 					continue;
-				Translation trans= transcripts[i].getTranslations()[0];
+				Translation trans= getTranscripts()[i].getTranslations()[0];
 				if (this.overlaps(trans)) {
 					int p3= Math.min(this.get3PrimeEdge(), trans.get3PrimeEdge());
 					if (cds3Prime== 0)
@@ -298,53 +326,6 @@ public class Exon extends DirectedRegion {
 		return false;
 	}
 	
-	
-	public boolean isConstitutive(int codingCode) {
-		getGene().getASVariations(codingCode);
-		if (getDonor()!= null&& (!getDonor().isConstitutive()))			
-			return false;
-		if (getAcceptor()!= null&& (!getAcceptor().isConstitutive()))			
-			return false;
-		return true;
-		
-//		for (int i = 0; i < getTranscripts().length; i++) {
-//			Exon[] ex= getTranscripts()[i].getExons();
-//			int j;
-//			for (j = 0; j < ex.length; j++) {
-//				if (this.equals(ex[j]))  	// o ident?!
-//					break;
-//			}
-//			if (j== ex.length)
-//				return false;
-//		}
-//		return true;	 
-	}
-	
-	public boolean hasVariation(String varCode, int filterCode) {
-		if (getDonor()== null|| getAcceptor()== null)
-			return false;	// TODO: change for other applications
-		ASVariation[] vars= getGene().getASVariations(filterCode);
-		for (int i = 0; vars!= null&& i < vars.length; i++) {
-			if (!vars[i].toString().equals(varCode))
-				continue;
-			Comparator compi= new SpliceSite.PositionComparator();
-			SpliceSite[] sc1= vars[i].getSpliceChain1();
-			if (sc1!= null) {
-				int p1= Arrays.binarySearch(sc1, getAcceptor(), compi);
-				int p2= Arrays.binarySearch(sc1, getDonor(), compi);
-				if (p1>= 0&& p2>= 0&& p2==p1+1)
-					return true;
-			}
-			SpliceSite[] sc2= vars[i].getSpliceChain2();
-			if (sc2!= null) {
-				int p1= Arrays.binarySearch(sc2, getAcceptor(), compi);
-				int p2= Arrays.binarySearch(sc2, getDonor(), compi);
-				if (p1>= 0&& p2>= 0&& p2==p1+1)
-					return true;
-			}
-		}
-		return false;
-	}
 	
 	public boolean isCodingSomewhere5Prime() {
 		for (int i = 0; i < getTranscripts().length; i++) {
@@ -410,171 +391,6 @@ public class Exon extends DirectedRegion {
 	}
 	
 	/**
-	 * returns hits to exons of all homolog genes
-	 * @return
-	 */
-	public PWHit[] getHits() {
-		
-			// count values
-		Object[] oa= hitparade.values().toArray();
-		int size= 0;
-		for (int i = 0; i < oa.length; i++) 
-			size+= ((Vector) oa[i]).size();
-		
-		PWHit[] result= new PWHit[size];
-		int x= 0;
-		for (int i = 0; i < oa.length; i++) {
-			Vector v= (Vector) oa[i];
-			for (int j = 0; j < v.size(); j++) 
-				result[x++]= (PWHit) v.elementAt(j);
-		}
-		
-		return result;
-	}
-	
-	public PWHit[] getHits(Gene g) {
-		
-		if (superExon!= null)
-			return superExon.getHits(g);
-		
-		if (hitparade== null|| hitparade.get(g)== null)
-			return null;
-		
-		Vector v= (Vector) hitparade.get(g);
-		PWHit[] result= new PWHit[v.size()];
-		for (int i = 0; i < result.length; i++) 
-			result[i]= (PWHit) v.elementAt(i);
-		
-		return result;
-	}
-	
-	public boolean removeHit(Gene g, PWHit h) {
-	
-		Vector v;
-		if (hitparade== null|| (v= (Vector) hitparade.get(g))== null)
-			return false;
-
-		return v.remove(h);
-	}
-	
-	public boolean removeTranscript(Transcript trans) {
-		Transcript[] newTranscripts= new Transcript[transcripts.length- 1];
-		int pos= 0;
-		boolean flag= false;
-		for (int i = 0; i < transcripts.length; i++) 
-			if (transcripts[i]!= trans)
-				newTranscripts[pos++]= transcripts[i];
-			else
-				flag= true;
-		if (flag)
-			transcripts= newTranscripts;
-		return flag;
-	}
-	
-	// assuming just one homolog
-	public boolean addHomolog(Gene g, Exon e) {
-
-		if (homologs== null)	// create new
-			homologs= new HashMap();
-
-		if (homologs.get(g)!= null) {
-			if (homologs.get(g)!= e)
-				System.err.println("Multiple exon homology: "+ e+ ", "+homologs.get(g));	
-			return false;
-		}
-	
-		homologs.put(g, e);
-		return true;
-	}
-	
-	// assuming just one homolog
-	public Exon getHomolog(Gene g) {
-		
-		if (homologs== null)
-			return null;
-		return (Exon) homologs.get(g);
-	}
-	
-	public boolean addHit(Gene g, PWHit h) {
-		
-		if (superExon!= null)
-			superExon.addHit(g, h);	// delegate to super-exon if there is some
-		
-		Vector v= null;
-		if (hitparade== null)	// create new
-			hitparade= new HashMap();
-		else 
-			v= (Vector) hitparade.get(g);	// lookup existing
-		
-		if (v== null)
-			v= new Vector();
-		else 
-			for (int i = 0; i < v.size(); i++) {	// check for already added hit
-				PWHit hit= (PWHit) v.elementAt(i);
-				if (hit.getOtherObject(this)== h.getOtherObject(this))
-					return false;
-			}
-		
-			// keep sorted with ascending costs
-//		int i= 0;
-//		for (i = 0; i < v.size(); i++) 
-//			if (((PWHit) v.elementAt(i)).getCost()> h.getCost())
-//				break;
-//		v.insertElementAt(h, i);	// add
-		v.add(h);
-		hitparade.put(g, v);
-		return true;
-	}
-	
-	public PWHit[] getBestHits(Gene g) {
-		
-		if (hitparade== null|| hitparade.get(g)== null)
-			return null;
-		
-		Vector v= (Vector) hitparade.get(g);
-		Vector bestHits= new Vector();
-		int bestScore= (-1);
-		for (Iterator iter = v.iterator(); iter.hasNext();) {
-			PWHit tmpHit = (PWHit) iter.next();
-			if (tmpHit.getScore()== bestScore) 			// more hits
-				bestHits.add(tmpHit);
-			else if (tmpHit.getScore()> bestScore) {	// new best score
-				bestHits.removeAllElements();
-				bestHits.add(tmpHit);
-				bestScore= tmpHit.getScore();
-			}
-		}
-		
-		PWHit[] result= new PWHit[bestHits.size()];
-		for (int i = 0; i < result.length; i++) 
-			result[i]= (PWHit) bestHits.elementAt(i);
-		return result;
-	}
-	
-	public boolean addTranscript(Transcript trans) {
-		
-			// new transcipt array
-		if (transcripts== null) {
-			transcripts= new Transcript[] {trans};
-			return true;
-		}
-		
-			// search transcript
-		for (int i = 0; i < transcripts.length; i++) 
-			if (transcripts[i].getStableID().equalsIgnoreCase(trans.getStableID()))
-				return false;
-		
-			// add transcript
-		Transcript[] nTranscripts= new Transcript[transcripts.length+ 1];
-		for (int i= 0; i < transcripts.length; i++) 
-			nTranscripts[i]= transcripts[i];
-		nTranscripts[nTranscripts.length- 1]= trans;
-		transcripts= nTranscripts;
-		return true;
-	}
-
-
-	/**
 	 * @param b
 	 */
 	public boolean checkStrand(boolean b) {
@@ -592,8 +408,6 @@ public class Exon extends DirectedRegion {
 		return false; // error			
 	}
 	
-	Transcript[] transcripts= null;
-	
 	String exonID= null;	
 	protected Exon() {
 		// for subclasses
@@ -602,21 +416,13 @@ public class Exon extends DirectedRegion {
 
 		this.strand= newTranscript.getStrand();
 		this.chromosome= newTranscript.getChromosome();
+		this.gene= newTranscript.getGene();
 		setStart(start);
-		setEnd(end);
-		
-			// decompose ID
-		//this.exonID= stableExonID;
+		setEnd(end);		
 		setID("exon");
-		if (stableExonID!= null)
-			exonID= stableExonID;
-		
-		// check for duplicate
-		addTranscript(newTranscript);
+		acceptor= new Integer(get5PrimeEdge());
+		donor= new Integer(get3PrimeEdge());
 		newTranscript.addExon(this);
-					
-		for (int i = 0; i < getTranscripts().length; i++) 
-			getTranscripts()[i].updateBoundaries(this);
 	}	
 	/**
 	 * @return
@@ -629,33 +435,20 @@ public class Exon extends DirectedRegion {
 	 * @return
 	 */
 	public Gene getGene() {
-		return transcripts[0].getGene();
+		return this.gene;
 	}
 	
-	/**
-	 * @return
-	 */
 	public Transcript[] getTranscripts() {
-		return transcripts;
+		return getGene().getTranscripts(this);
 	}
+	
 
 	public int getStrand() {
 		if (strand!= 0)
 			return strand;
-		if (getTranscripts()!= null&& transcripts[0]!= null) {
-			if (transcripts[0].getStrand()!= 0)
-				return transcripts[0].getStrand();
-			if (transcripts[0].getGene()!= null)
-				return transcripts[0].getGene().getStrand();
-		}
+		if (getGene()!= null)
+			return getGene().getStrand();
 		return 0;
-	}
-	
-	/**
-	 * @param transcripts
-	 */
-	public void setTranscripts(Transcript[] transcripts) {
-		this.transcripts = transcripts;
 	}
 	
 	public String toString() {
@@ -688,66 +481,33 @@ public class Exon extends DirectedRegion {
 	}
 	
 	public Species getSpecies() {
-		if (species!= null) {
+		if (species!= null) 
 			return species;
-		} else if (transcripts!= null&& transcripts[0].getSpecies()!= null) {
-			return transcripts[0].getSpecies();
-		} else if (getGene()!= null&& getGene().getSpecies()!= null)
+		if (getGene()!= null)
 			return getGene().getSpecies();
 		
 		return null;
 	}
 
 	static final long serialVersionUID = 8914674126313232057L;
-	/**
-	 * @return Returns the homologs.
-	 */
-	public HashMap getHomologs() {
-		return homologs;
-	}
-	
-	public SuperExon getSuperExon() {
-		return superExon;
-	}
-	public void setSuperExon(SuperExon superExon) {
-		this.superExon = superExon;
-	}
 	public SpliceSite getAcceptor() {
-		return acceptor;
-	}
-	public void setAcceptor(SpliceSite acceptor) {
-		acceptor.addExon(this);
-		this.acceptor = acceptor;
+		Vector<SpliceSite> v= getGene().getSpliceSites(acceptor);
+		for (int i = 0; i < v.size(); i++) {
+			if (v.elementAt(i).isLeftFlank())
+				return v.elementAt(i);
+		}
+		return null;
 	}
 	public SpliceSite getDonor() {
-		donor.addExon(this);
-		return donor;
-	}
-	public void setDonor(SpliceSite donor) {
-		this.donor = donor;
+		Vector<SpliceSite> v= getGene().getSpliceSites(donor);
+		for (int i = 0; i < v.size(); i++) {
+			if (v.elementAt(i).isRightFlank())
+				return v.elementAt(i);
+		}
+		return null;
 	}
 	
-	public boolean replaceSite(SpliceSite oldSite, SpliceSite newSite) {
-		if (oldSite== this.acceptor) {
-			this.acceptor= newSite;
-			return true;
-		}
-		if (oldSite== this.donor) {
-			this.donor= newSite;
-			return true;
-		}
-		
-		return false;
-	}
-	
-	public AbstractSite getEndSite() {
-		return getGene().getSite(getEnd());
-	}
 
-	public AbstractSite getStartSite() {
-		return getGene().getSite(getStart());
-	}
-	
 	public int get3PrimeFrame() {
 		int fr= getFrame();
 		int len= get3PrimeCDS()- get5PrimeCDS()+ 1;
@@ -763,10 +523,10 @@ public class Exon extends DirectedRegion {
 	public int getFrame() {
 		if (frame== -1) {
 			
-			for (int i = 0; i < transcripts.length; i++) {
-				if ((!transcripts[i].isCoding())|| (!transcripts[i].getTranslations()[0].contains(get5PrimeCDS())))
+			for (int i = 0; i < getTranscripts().length; i++) {
+				if ((!getTranscripts()[i].isCoding())|| (!getTranscripts()[i].getTranslations()[0].contains(get5PrimeCDS())))
 					continue;
-				int pos= transcripts[i].getTranslations()[0].getTranslatedPosition(get5PrimeCDS());
+				int pos= getTranscripts()[i].getTranslations()[0].getTranslatedPosition(get5PrimeCDS());
 				int f= pos% 3;
 				if (frame== -1)
 					frame= f;
@@ -812,6 +572,14 @@ public class Exon extends DirectedRegion {
 	public void extendEndCDS(int nuEndCDS) {
 		if ((this.getEndCDS()== 0)|| (Math.abs(nuEndCDS)> Math.abs(this.getEndCDS()))) 
 			setEndCDS(nuEndCDS);
+	}
+
+	public EqualComparator getDefaultEqualComparator() {
+		return defaultEqualComparator;
+	}
+
+	public void setGene(Gene gene) {
+		this.gene = gene;
 	}
 
 }

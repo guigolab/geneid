@@ -21,8 +21,6 @@ import java.util.HashMap;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import com.mysql.jdbc.UpdatableResultSet;
 import com.sun.corba.se.spi.legacy.connection.GetEndPointInfoAgainException;
 import com.sun.org.apache.xerces.internal.impl.xs.opti.DefaultDocument;
 import com.sun.org.apache.xml.internal.utils.IntVector;
@@ -43,50 +41,40 @@ public class Transcript extends DirectedRegion {
 		"AACAAA", "TTTAAA"	// F. Lopez and D. Gautheret, unpubl.
 	};
 	
+	public static final byte ID_SRC_UNDEFINED= -1, iD_SRC_REFSEQ= 0, ID_SRC_MRNA= 1, ID_SRC_EST= 2;
+	
 	public static class SpliceChainComparator implements Comparator {
 		public int compare(Object o1, Object o2) {
-			SpliceSite[] sc1= ((Transcript) o1).getSpliceChain();
-			SpliceSite[] sc2= ((Transcript) o2).getSpliceChain();
-			
-			if (sc1== null|| sc1.length< sc2.length)
-				return -1;
-			if (sc2== null|| sc2.length< sc1.length)
-				return 1;
-			
-			for (int i = 0; i < sc2.length; i++) {
-				if (sc1[i].getPos()!= sc2[i].getPos())
-					return -1;
-			}
+//			SpliceSite[] sc1= ((Transcript) o1).getSpliceChain();
+//			SpliceSite[] sc2= ((Transcript) o2).getSpliceChain();
+//			
+//			if (sc1== null|| sc1.length< sc2.length)
+//				return -1;
+//			if (sc2== null|| sc2.length< sc1.length)
+//				return 1;
+//			
+//			for (int i = 0; i < sc2.length; i++) {
+//				if (sc1[i].getPos()!= sc2[i].getPos())
+//					return -1;
+//			}
 			return 0;
 		}
 	}
 	
 	
 	static final long serialVersionUID = 2863324463934791891L;
-	int type = Constants.NOINIT;
-	int confidence = Constants.NOINIT;
-	TU[] tu= null;
 	byte nmd= 0;
-	Translation predORF= null;
+	byte srcType= ID_SRC_UNDEFINED;
 	String source= null; 
 	Intron[] introns= null;
-	
-	String HUGO= null;
 	
 	public static int REGION_5UTR= 1;
 	public static int REGION_3UTR= 2;
 	public static int REGION_CDS= 3;
 	public static int REGION_COMPLETE_TRANSCRIPT= 4;
+	public static String[] TYPE_TO_ID= new String[] {"RefSeq", "mRNA", "EST"};
 	
 	
-	public boolean containsSS(SpliceSite ss) {
-		for (int i = 0; i < getSpliceChain().length; i++) {
-			if (ss.getPos()== spliceChain[i].getPos()&&
-					ss.isDonor()== spliceChain[i].isDonor())
-				return true;
-		}
-		return false;
-	}
 	/**
 	 * returns genomic position of 
 	 * @param pos genomic position, positive or negative
@@ -114,16 +102,6 @@ public class Transcript extends DirectedRegion {
 		return dist+ (pos- exons[x].get5PrimeEdge());	// dunno understand why not +1
 	}
 
-	public void addTU(TU newTU) {
-			// break multiple TUs by #SSs?
-		tu= (TU[]) gphase.tools.Arrays.add(tu, newTU);
-		//System.currentTimeMillis();
-	}
-	
-	public void removeTU(TU newTU) {
-		tu= (TU[]) gphase.tools.Arrays.remove(tu, newTU);
-	}
-	
 	public int getGenomicPosition(int exonPos) {
 		
 			// find containing exon
@@ -140,42 +118,23 @@ public class Transcript extends DirectedRegion {
 		return genPos;
 	}
 	
-	/**
-	 * 
-	 * @param newType type descriptor
-	 * @return <code>false</code> if the type is already set or the type
-	 * descriptor is not valid, <code>true</code> otherwise.  
-	 */
-	public boolean setType(String newType) {
-		
-		if (newType== null|| type!= Constants.NOINIT) 
-			return false;
-		
-		int i= Constants.findIgnoreCase(newType, Constants.TYPES);
-		if (i< 0) {
-			System.err.println("Unknown type "+ newType);
-			return false;
-		}
-		type= i;
-		return true;
-	}
-	
 	public String toString() {
 		return getTranscriptID();
 	}
 	
 	public String toStringNMD() {
-		String s= transcriptID+ "\t";
-		if ((translations!= null)&& (!translations[0].isOpenEnded()))
-			s+= translations[0].getStart()+ "\t"+ translations[0].getEnd()+ "\t";
-		else
-			s+= ".\t.\t";
-		if (predORF!= null)
-			s+= predORF.getStart()+ "\t"+ predORF.getEnd()+ "\t";
-		else
-			s+= ".\t.\t";
-		s+= "NMD"+ nmd;
-		return s;
+//		String s= transcriptID+ "\t";
+//		if ((translations!= null)&& (!translations[0].isOpenEnded()))
+//			s+= translations[0].getStart()+ "\t"+ translations[0].getEnd()+ "\t";
+//		else
+//			s+= ".\t.\t";
+//		if (predORF!= null)
+//			s+= predORF.getStart()+ "\t"+ predORF.getEnd()+ "\t";
+//		else
+//			s+= ".\t.\t";
+//		s+= "NMD"+ nmd;
+//		return s;
+		return null;
 	}
 	
 	public static String toStringSChain(SpliceSite[] spliceChain) {
@@ -188,29 +147,8 @@ public class Transcript extends DirectedRegion {
 		return s;
 	}
 
-	/**
-	 * 
-	 * @param newConfidence confidence descriptor
-	 * @return <code>false</code> if confidence is already set or the confidence
-	 * descriptor is not valid, <code>true</code> otherwise.  
-	 */
-	public boolean setConfidence(String newConfd) {
-		
-		if (newConfd== null|| type!= Constants.NOINIT)
-			return false;
-		
-		int i= Constants.findIgnoreCase(newConfd, Constants.CONFIDENCES);
-	
-		if (i< 0) {
-			System.err.println("Unknown confidence "+ newConfd);
-			return false;
-		}
-	
-		confidence= i;
-		return true;
-	}
 	Translation[] translations= null;
-	SpliceSite[] spliceChain= null, spliceSites= null;	// sorted!!
+	SpliceSite[] spliceSites= null;	// sorted!!
 	public final static Transcript[] toTranscriptArray(Vector v) {
 		if (v== null)
 			return null;
@@ -231,43 +169,6 @@ public class Transcript extends DirectedRegion {
 		return translations[0];
 	}
 	
-	/**
-	 * 
-	 * @return complete splice chain, incl. TSS/TES
-	 */
-	public SpliceSite[] getSpliceChainComplete(){
-		 
-		SpliceSite[] schain= getSpliceChain();
-		SpliceSite[]  as= new SpliceSite[schain.length+2];
-		as[0]= getTSS();
-		as[as.length- 1]= getTES();
-		for (int i = 0; i < schain.length; i++) 
-			as[i+1]= schain[i];
-		
-		return as;
-		
-	}
-	public SpliceSite[] getSpliceChain(){
-		
-		//spliceChain= null;
-		if (spliceChain== null) {
-			if (exons== null)
-				return null;
-			
-			spliceChain= new SpliceSite[exons.length* 2- 2];
-			int pos= 0;
-			for (int i = 0; i < exons.length; i++) {
-				if(i> 0)
-					spliceChain[pos++]= exons[i].getAcceptor();
-				if(i< exons.length- 1)
-					spliceChain[pos++]= exons[i].getDonor();
-			}
-			
-			Arrays.sort(spliceChain, new SpliceSite.PositionComparator());	// has to be SS comparator, for 1-length introns, correct order acc< don
-		}
-		return spliceChain;
-	}
-	
 	public SpliceSite[] getSpliceSitesAll() {
 		if (spliceSites== null) {
 			spliceSites= new SpliceSite[exons.length* 2];
@@ -280,11 +181,33 @@ public class Transcript extends DirectedRegion {
 		return spliceSites;
 	}
 	
+	public SpliceSite getSpliceSite(SpliceSite ss) {
+		int low = 0;
+		int high = exons.length- 1;
+
+		while (low <= high) {
+		    int mid = (low + high) >>> 1;
+		    Exon midVal = exons[mid];
+
+		    if (midVal.get3PrimeEdge() < ss.getPos())
+		    	low = mid + 1;
+		    else if (midVal.get5PrimeEdge() > ss.getPos())
+		    	high = mid - 1;
+		    else {
+		    	if (ss== midVal.getDonor()|| ss== midVal.getAcceptor())
+		    		return ss; // key found
+		    	else
+		    		break;
+		    }
+		}
+		return null;
+	}
+	
 	public SpliceSite[] getSpliceSitesBetween(SpliceSite ss1, SpliceSite ss2) {
 		int p1= Arrays.binarySearch(getSpliceSitesAll(), ss1, SpliceSite.getDefaultPositionTypeComparator());
 		int p2= Arrays.binarySearch(getSpliceSitesAll(), ss2, SpliceSite.getDefaultPositionTypeComparator());
 		if (p1<0) // root
-			p1= -1;
+			p1= -(p1+2);	// limit outside
 		if (p2<0)
 			p2= getSpliceSitesAll().length;
 		
@@ -554,28 +477,6 @@ public class Transcript extends DirectedRegion {
 	
 
 	
-	public SpliceSite getPredSpliceSite(AbstractSite s) {
-		
-		SpliceSite[] ss= getSpliceChain();
-		int p= Arrays.binarySearch(ss, s, new SpliceSite.PositionComparator());
-		if (p<= 0) 
-			return null;
-		return ss[p-1];
-	}
-	
-	public SpliceSite getSuccSpliceSite(AbstractSite s) {
-		
-		SpliceSite[] ss= getSpliceChain();
-		int p= Arrays.binarySearch(ss, s, new SpliceSite.PositionComparator());
-		if ((p< 0)|| (p> (ss.length-2))) 
-			return null;
-		return ss[p+1];
-	}
-	
-	public SpliceSite getSuccSpliceSite(int pos) {
-		SpliceSite[] ss= getSpliceChain();
-		return getSuccSpliceSite(ss, pos);
-	}
 	public static SpliceSite getSuccSpliceSite(SpliceSite[] ss, int pos) {
 		int p= Arrays.binarySearch(ss, new Integer(pos+1), new AbstractSite.PositionToSpliceSiteComparator());	// abstract site for only comparing pos
 		if(p>= 0) {	// found ?!
@@ -598,11 +499,6 @@ public class Transcript extends DirectedRegion {
 			return ss[p];
 		else
 			return 0;
-	}
-	
-	public SpliceSite getPredSpliceSite(int pos) {
-		SpliceSite[] ss= getSpliceChain();
-		return getPredSpliceSite(ss, pos);
 	}
 	
 	public static SpliceSite getPredSpliceSite(SpliceSite[] ss, int pos) {
@@ -1029,7 +925,7 @@ public class Transcript extends DirectedRegion {
 	Gene gene= null;
 
 	String transcriptID= null;
-	Exon[] exons= null;	// sorted !!
+	Exon[] exons= new Exon[0];	// sorted !!
 	public Transcript(Gene newGene, String stableTranscriptID) {
 
 		this.strand= newGene.getStrand();
@@ -1184,113 +1080,6 @@ public class Transcript extends DirectedRegion {
 	}
 	
 	/**
-		 * Inserts the exons in an array sorted according to ascending order
-		 * of their start/stop position. <b>IMPORTANT</b>: add exons AFTER adding 
-		 * transcripts to ensure the correct init of AS types.
-		 * 
-		 * @param newExon
-		 * @return the exon already contained or <code>newExon</code> case of the exon was added successfully
-		 */
-		public boolean addExon_new(Exon newExon) {
-	
-				// new exon array
-			if (exons== null) 
-				exons= new Exon[] {newExon};
-			else {
-				
-					// search for identical exon (HERE necessary)
-				int p= Arrays.binarySearch(
-						exons,
-						newExon,
-						new AbstractRegion.PositionComparator()	
-					);
-		
-				if (p>= 0) 
-					return false;	// already contained, not added
-				
-					// new Exon: search for overlapping exons 
-					// and accordingly construct SuperExon
-	//			Exon[] exs= getGene().getExons();		// in ALL transcripts
-	//			for (int i = 0; i < exons.length; i++) {
-	//				if ((exs[i].getStart()>= newExon.getStart()&& exs[i].getStart()< newExon.getEnd())||
-	//						newExon.getStart()>= exs[i].getStart()&& newExon.getStart()< exs[i].getEnd()) { // intersecting
-	//					if (exs[i].getSuperExon()!= null)
-	//						if (newExon.getSuperExon()!= null)
-	//							newExon.getSuperExon().merge(exs[i].getSuperExon()); 	// merge two super-exs
-	//						else
-	//							exs[i].getSuperExon().add(newExon);	// add to super-exon of the other
-	//					else {
-	//						SuperExon superEx= newExon.getSuperExon();
-	//						if (superEx== null) {
-	//							superEx= new SuperExon();
-	//							superEx.add(newExon);
-	//						}
-	//						superEx.add(exs[i]);
-	//					}
-	//				}
-	//			}
-				
-					// add exon
-				exons= (Exon[]) gphase.tools.Arrays.insert(this.exons, newExon, p);
-			}
-	
-				// init splice sites 
-			int p= Arrays.binarySearch(
-					this.exons,
-					newExon,
-					new AbstractRegion.PositionComparator()	
-			);
-			
-			if ((p== 0)&& exons.length>1) {	// ex-first exon now has an acceptor
-				Exon ex= this.exons[1];
-				int posAcceptor= isForward()?ex.getStart()-2:ex.getEnd()+1;
-				SpliceSite acceptor= new SpliceSite(getGene(), posAcceptor, false);
-				SpliceSite ss= getGene().checkSpliceSite(acceptor);
-				if (ss== null) 
-					getGene().addSpliceSite(acceptor);
-				else
-					acceptor= ss;
-				ex.setAcceptor(acceptor);
-			}
-			
-			if (p> 0) {										// has acceptor
-				int posAcceptor= isForward()?newExon.getStart()-2:newExon.getEnd()+1;
-				SpliceSite acceptor= new SpliceSite(getGene(), posAcceptor, false);
-				SpliceSite ss= getGene().checkSpliceSite(acceptor);
-				if (ss== null) 
-					getGene().addSpliceSite(acceptor);
-				else
-					acceptor= ss;
-				exons[p].setAcceptor(acceptor);
-			}
-			
-			if (p< this.exons.length- 1) {					// has donor
-				int posDonor= isForward()?newExon.getEnd()+1:newExon.getStart()-2;
-				SpliceSite donor= new SpliceSite(getGene(), posDonor, true);
-				SpliceSite ss= getGene().checkSpliceSite(donor);
-				if (ss== null) 
-					getGene().addSpliceSite(donor);
-				else
-					donor= ss;
-				exons[p].setDonor(donor);
-			}
-	
-			if ((p== this.exons.length- 1)&& exons.length>1) {	// ex-last exon now has an donor
-				Exon ex= this.exons[exons.length- 2];
-				int posDonor= isForward()?ex.getEnd()+1:ex.getStart()-2;
-				SpliceSite donor= new SpliceSite(getGene(), posDonor, true);
-				SpliceSite ss= getGene().checkSpliceSite(donor);
-				if (ss== null) 
-					getGene().addSpliceSite(donor);
-				else
-					donor= ss;
-				ex.setDonor(donor);
-			}
-			
-			return true;
-		}
-
-			/**
 			 * Inserts the exons in an array sorted according to ascending order
 			 * of their start/stop position. <b>IMPORTANT</b>: add exons AFTER adding 
 			 * transcripts to ensure the correct init of AS types.
@@ -1300,48 +1089,29 @@ public class Transcript extends DirectedRegion {
 			 */
 			public boolean addExon(Exon newExon) {
 		
-				if (exons== null|| exons.length== 0) {
-					newExon.setAcceptor(new SpliceSite(newExon.get5PrimeEdge(), SpliceSite.TYPE_TSS));
-					newExon.setDonor(new SpliceSite(newExon.get3PrimeEdge(), SpliceSite.TYPE_TES));
-					exons= new Exon[] {newExon};
-					getGene().addExon(newExon);
-					return true;
-				}
 					// generate splice sites, but do not yet insert into transcript
-				Comparator compi= new AbstractRegion.PositionComparator();	// search for identical exon (HERE necessary)
-				int p= Arrays.binarySearch(exons, newExon, compi);
+				int p= Arrays.binarySearch(exons, newExon, AbstractRegion.getDefaultPositionComparator());	// search for identical exon (HERE necessary)
 				if (p>= 0) 
 					return false;	// already contained, not added - also no need to check gene
 				p= -(p+1);	// insertion point
+				Vector<Transcript> trptV= new Vector<Transcript>(1,1);
+				trptV.add(this);
 				if (p== 0) {	// new first exon: ex-first exon now has an acceptor, newExon has tss and donor
-					// exons[0].getAcceptor()== null
-					Exon ex= this.exons[0];
-					int posAcceptor= ex.get5PrimeEdge();
-					SpliceSite acceptor= new SpliceSite(posAcceptor, SpliceSite.TYPE_ACCEPTOR, ex);
-					getGene().replaceSite(ex.getAcceptor(), acceptor);
-					ex.setAcceptor(acceptor);
-					newExon.setAcceptor(new SpliceSite(newExon.get5PrimeEdge(), SpliceSite.TYPE_TSS));
+					getGene().addSpliceSite(new SpliceSite(newExon.get5PrimeEdge(), SpliceSite.TYPE_TSS, getGene()), trptV);
+					if (exons.length> 0)
+						getGene().addSpliceSite(new SpliceSite(exons[0].get5PrimeEdge(), SpliceSite.TYPE_ACCEPTOR, getGene()), trptV);
 				}
 				
-				if (p> 0&& newExon.getAcceptor()== null) {	// has acceptor
-					int posAcceptor= newExon.get5PrimeEdge();
-					SpliceSite acceptor= new SpliceSite(posAcceptor, SpliceSite.TYPE_ACCEPTOR, newExon);
-					newExon.setAcceptor(acceptor);
-				}
+				if (p> 0) 	// has acceptor
+					getGene().addSpliceSite(new SpliceSite(newExon.get5PrimeEdge(), SpliceSite.TYPE_ACCEPTOR, getGene()), trptV);
 				
-				if (p< this.exons.length) {					// has donor
-					int posDonor= newExon.get3PrimeEdge();
-					SpliceSite donor= new SpliceSite(posDonor, SpliceSite.TYPE_DONOR, newExon);
-					newExon.setDonor(donor);
-				}
+				if (p< this.exons.length) 			// has donor
+					getGene().addSpliceSite(new SpliceSite(newExon.get3PrimeEdge(), SpliceSite.TYPE_DONOR, getGene()), trptV);
 		
 				if (p== exons.length) {	// ex-last exon now has an donor
-					Exon ex= exons[exons.length- 1];
-					int posDonor= ex.get3PrimeEdge();
-					SpliceSite donor= new SpliceSite(posDonor, SpliceSite.TYPE_DONOR, ex);
-					getGene().replaceSite(ex.getDonor(), donor);
-					ex.setDonor(donor);
-					newExon.setDonor(new SpliceSite(newExon.get3PrimeEdge(), SpliceSite.TYPE_TES));
+					getGene().addSpliceSite(new SpliceSite(newExon.get3PrimeEdge(), SpliceSite.TYPE_TES, getGene()), trptV);
+					if (exons.length> 0)
+						getGene().addSpliceSite(new SpliceSite(exons[p-1].get3PrimeEdge(), SpliceSite.TYPE_DONOR, getGene()), trptV);
 				}
 
 				// NOW insert
@@ -1359,7 +1129,6 @@ public class Transcript extends DirectedRegion {
 				for (int i = 0; exons!= null&& i < exons.length; i++) {
 					if (exons[i]== exOld) {
 						exons[i]= exNew;
-						exNew.addTranscript(this);
 						exNew.getAcceptor().addTranscript(this);
 						exNew.getDonor().addTranscript(this);
 						return true;
@@ -1560,72 +1329,73 @@ public class Transcript extends DirectedRegion {
 	}
 	
 	public Translation[] findORFs(String seq, int frame, boolean openEnded) {
-			if (seq== null|| seq.length()< 1)
-				return null;
-			final int minORFlen= NMDSimulator.MIN_ORF_LENGTH_AA* 3;
-			seq= seq.substring(frame).toUpperCase();
-			Vector startV= new Vector(), stopV= new Vector();
-			int pos= 0;
-			for (int i = 0; (i+3) < seq.length(); i+= 3) {
-				String codon= seq.substring(i, i+3);
-				if (codon.equals(Translation.START_CODON))
-					startV.add(new Integer(i));
-				else if (codon.equals(Translation.STOP_CODONS[0])||
-						codon.equals(Translation.STOP_CODONS[1])||
-						codon.equals(Translation.STOP_CODONS[2]))
-					stopV.add(new Integer(i));
-			}
-			int[] startPos= gphase.tools.Arrays.toPrimitive((Integer[]) gphase.tools.Arrays.toField(startV));
-			int[] stopPos= gphase.tools.Arrays.toPrimitive((Integer[]) gphase.tools.Arrays.toField(stopV));
-	
-				// determine ORFs
-			Vector v= new Vector();
-			Translation reg;
-			for (int i = 0; startPos!= null&& stopPos!= null&& i < startPos.length; i++) {
-				int j= Arrays.binarySearch(stopPos, startPos[i]);
-				if (j>= 0)
-					System.err.println("Assertion failed: start/stop at same pos!");
-				j= -j- 1;
-				if (j== stopPos.length) {
-					reg= new Translation(this, getGenomicPosition(frame+ startPos[i]), get3PrimeEdge(), getStrand());
-					reg.setSplicedLength(seq.length()- startPos[i]+ 1);
-				} else {
-					reg= new Translation(this, getGenomicPosition(frame+ startPos[i]), getGenomicPosition(frame+ stopPos[j]+ 2), getStrand());
-					reg.setSplicedLength(stopPos[j]+ 2- startPos[i]+ 1);
-				}
-				reg.setChromosome(getChromosome());
-				reg.setSpecies(getSpecies());
-				//if (reg.getLength()> minORFlen)
-					v.add(reg);
-			}
-			
-			if (!openEnded)
-				return (Translation[]) gphase.tools.Arrays.toField(v);
-
-				// 3'OpenEnded
-			if (stopPos!= null&& stopPos.length> 0) {	// ORF starting outside transcript
-				reg= new Translation(this, get5PrimeEdge(), getGenomicPosition(frame+ stopPos[0]+ 2), getStrand());	// +2 to include stop_codon
-				reg.setSplicedLength(stopPos[0]+ 2+ frame+ 1);	// here, q si frame ... goes outside transcript..
-				reg.setChromosome(getChromosome());
-				reg.setSpecies(getSpecies());
-				v.add(reg);
-			} else {	// bi-OpenEnded
-				reg= new Translation(this, get5PrimeEdge(), get3PrimeEdge(), getStrand());	// +2 to include stop_codon
-				reg.setSplicedLength(seq.length());	// here, q si frame ... goes outside transcript..
-				reg.setChromosome(getChromosome());
-				reg.setSpecies(getSpecies());
-				v.add(reg);
-			}
-				// 5'OpenEnded
-			if (startPos!= null&& startPos.length> 0){	
-				reg= new Translation(this, getGenomicPosition(frame+ startPos[0]), get3PrimeEdge(), getStrand());
-				reg.setSplicedLength(seq.length()- startPos[0]+ 1);
-				reg.setChromosome(getChromosome());
-				reg.setSpecies(getSpecies());
-				v.add(reg);
-			} 
-			
-			return (Translation[]) gphase.tools.Arrays.toField(v);
+//			if (seq== null|| seq.length()< 1)
+//				return null;
+//			final int minORFlen= NMDSimulator.MIN_ORF_LENGTH_AA* 3;
+//			seq= seq.substring(frame).toUpperCase();
+//			Vector startV= new Vector(), stopV= new Vector();
+//			int pos= 0;
+//			for (int i = 0; (i+3) < seq.length(); i+= 3) {
+//				String codon= seq.substring(i, i+3);
+//				if (codon.equals(Translation.START_CODON))
+//					startV.add(new Integer(i));
+//				else if (codon.equals(Translation.STOP_CODONS[0])||
+//						codon.equals(Translation.STOP_CODONS[1])||
+//						codon.equals(Translation.STOP_CODONS[2]))
+//					stopV.add(new Integer(i));
+//			}
+//			int[] startPos= gphase.tools.Arrays.toPrimitive((Integer[]) gphase.tools.Arrays.toField(startV));
+//			int[] stopPos= gphase.tools.Arrays.toPrimitive((Integer[]) gphase.tools.Arrays.toField(stopV));
+//	
+//				// determine ORFs
+//			Vector v= new Vector();
+//			Translation reg;
+//			for (int i = 0; startPos!= null&& stopPos!= null&& i < startPos.length; i++) {
+//				int j= Arrays.binarySearch(stopPos, startPos[i]);
+//				if (j>= 0)
+//					System.err.println("Assertion failed: start/stop at same pos!");
+//				j= -j- 1;
+//				if (j== stopPos.length) {
+//					reg= new Translation(this, getGenomicPosition(frame+ startPos[i]), get3PrimeEdge(), getStrand());
+//					reg.setSplicedLength(seq.length()- startPos[i]+ 1);
+//				} else {
+//					reg= new Translation(this, getGenomicPosition(frame+ startPos[i]), getGenomicPosition(frame+ stopPos[j]+ 2), getStrand());
+//					reg.setSplicedLength(stopPos[j]+ 2- startPos[i]+ 1);
+//				}
+//				reg.setChromosome(getChromosome());
+//				reg.setSpecies(getSpecies());
+//				//if (reg.getLength()> minORFlen)
+//					v.add(reg);
+//			}
+//			
+//			if (!openEnded)
+//				return (Translation[]) gphase.tools.Arrays.toField(v);
+//
+//				// 3'OpenEnded
+//			if (stopPos!= null&& stopPos.length> 0) {	// ORF starting outside transcript
+//				reg= new Translation(this, get5PrimeEdge(), getGenomicPosition(frame+ stopPos[0]+ 2), getStrand());	// +2 to include stop_codon
+//				reg.setSplicedLength(stopPos[0]+ 2+ frame+ 1);	// here, q si frame ... goes outside transcript..
+//				reg.setChromosome(getChromosome());
+//				reg.setSpecies(getSpecies());
+//				v.add(reg);
+//			} else {	// bi-OpenEnded
+//				reg= new Translation(this, get5PrimeEdge(), get3PrimeEdge(), getStrand());	// +2 to include stop_codon
+//				reg.setSplicedLength(seq.length());	// here, q si frame ... goes outside transcript..
+//				reg.setChromosome(getChromosome());
+//				reg.setSpecies(getSpecies());
+//				v.add(reg);
+//			}
+//				// 5'OpenEnded
+//			if (startPos!= null&& startPos.length> 0){	
+//				reg= new Translation(this, getGenomicPosition(frame+ startPos[0]), get3PrimeEdge(), getStrand());
+//				reg.setSplicedLength(seq.length()- startPos[0]+ 1);
+//				reg.setChromosome(getChromosome());
+//				reg.setSpecies(getSpecies());
+//				v.add(reg);
+//			} 
+//			
+//			return (Translation[]) gphase.tools.Arrays.toField(v);
+		return null;
 		}
 	
 	/**
@@ -1636,69 +1406,46 @@ public class Transcript extends DirectedRegion {
 	 * @return
 	 */
 	public Translation[] forceORFs(String seq, int frame) {
-		seq= seq.substring(frame).toUpperCase();
-		Vector startV= new Vector(), stopV= new Vector();
-		for (int i = 0; (i+3) < seq.length(); i+= 3) {
-			String codon= seq.substring(i, i+3);
-			if (codon.equals(Translation.START_CODON))
-				startV.add(new Integer(i));
-			else if (codon.equals(Translation.STOP_CODONS[0])||
-					codon.equals(Translation.STOP_CODONS[1])||
-					codon.equals(Translation.STOP_CODONS[2]))
-				stopV.add(new Integer(i));
-		}
-		int[] startPos= gphase.tools.Arrays.toPrimitive((Integer[]) gphase.tools.Arrays.toField(startV));
-		int[] stopPos= gphase.tools.Arrays.toPrimitive((Integer[]) gphase.tools.Arrays.toField(stopV));
-
-			// determine ORFs
-		Vector v= new Vector();
-		Translation reg;
-		if (stopPos!= null&& stopPos.length> 0) {	// ORF starting outside transcript
-			reg= new Translation(this, get5PrimeEdge(), getGenomicPosition(frame+ stopPos[0]+ 2), getStrand());	// +2 to include stop_codon
-			reg.setSplicedLength(stopPos[0]+ 2+ frame+ 1);	// here, q si frame ... goes outside transcript..
-			reg.setChromosome(getChromosome());
-			reg.setSpecies(getSpecies());
-			
-			v.add(reg);
-		} 
-		
-		if (startPos!= null&& startPos.length> 0){	
-			reg= new Translation(this, getGenomicPosition(frame+ startPos[0]), get3PrimeEdge(), getStrand());
-				// TODO check for no inframe stop
-			reg.setSplicedLength(seq.length()- startPos[0]+ 1);
-			reg.setChromosome(getChromosome());
-			reg.setSpecies(getSpecies());
-			v.add(reg);
-		}
-		
-		return (Translation[]) gphase.tools.Arrays.toField(v);
+//		seq= seq.substring(frame).toUpperCase();
+//		Vector startV= new Vector(), stopV= new Vector();
+//		for (int i = 0; (i+3) < seq.length(); i+= 3) {
+//			String codon= seq.substring(i, i+3);
+//			if (codon.equals(Translation.START_CODON))
+//				startV.add(new Integer(i));
+//			else if (codon.equals(Translation.STOP_CODONS[0])||
+//					codon.equals(Translation.STOP_CODONS[1])||
+//					codon.equals(Translation.STOP_CODONS[2]))
+//				stopV.add(new Integer(i));
+//		}
+//		int[] startPos= gphase.tools.Arrays.toPrimitive((Integer[]) gphase.tools.Arrays.toField(startV));
+//		int[] stopPos= gphase.tools.Arrays.toPrimitive((Integer[]) gphase.tools.Arrays.toField(stopV));
+//
+//			// determine ORFs
+//		Vector v= new Vector();
+//		Translation reg;
+//		if (stopPos!= null&& stopPos.length> 0) {	// ORF starting outside transcript
+//			reg= new Translation(this, get5PrimeEdge(), getGenomicPosition(frame+ stopPos[0]+ 2), getStrand());	// +2 to include stop_codon
+//			reg.setSplicedLength(stopPos[0]+ 2+ frame+ 1);	// here, q si frame ... goes outside transcript..
+//			reg.setChromosome(getChromosome());
+//			reg.setSpecies(getSpecies());
+//			
+//			v.add(reg);
+//		} 
+//		
+//		if (startPos!= null&& startPos.length> 0){	
+//			reg= new Translation(this, getGenomicPosition(frame+ startPos[0]), get3PrimeEdge(), getStrand());
+//				// TODO check for no inframe stop
+//			reg.setSplicedLength(seq.length()- startPos[0]+ 1);
+//			reg.setChromosome(getChromosome());
+//			reg.setSpecies(getSpecies());
+//			v.add(reg);
+//		}
+//		
+//		return (Translation[]) gphase.tools.Arrays.toField(v);
+		return null;
 	}
 	
 
-	
-	public int getTSSPos() {
-		return exons[0].get5PrimeEdge();
-	}
-
-	public SpliceSite getTSS() {
-
-		SpliceSite as= new SpliceSite(getTSSPos(), SpliceSite.TYPE_TSS);
-		as.addTranscripts(new Transcript[] {this});
-		as= getGene().getSite(as);
-		return as;
-
-	}
-	
-	public SpliceSite getTES() {
-		SpliceSite as= new SpliceSite(getTESPos(), SpliceSite.TYPE_TES);
-		as.addTranscripts(new Transcript[] {this});
-		as= getGene().getSite(as);
-		return as;
-	}
-	
-	public int getTESPos() {
-		return exons[exons.length- 1].get3PrimeEdge();
-	}
 	
 	public Exon getExon(String stableID) {
 		
@@ -1717,16 +1464,6 @@ public class Transcript extends DirectedRegion {
 		if (exons== null|| exons.length< 1)
 			return null;
 		return exons[exons.length- 1];
-	}
-
-	public SpliceSite getSpliceSite(int pos) {
-		
-		Comparator compi= new SpliceSite.PositionComparator();
-		SpliceSite ss= new SpliceSite(pos, SpliceSite.TYPE_DONOR);
-		int p= Arrays.binarySearch(spliceChain, ss, compi);
-		if (p>= 0)
-			return spliceChain[p];
-		return null; 
 	}
 
 	public int getDistFromATG(int gPos) {
@@ -1766,10 +1503,6 @@ public class Transcript extends DirectedRegion {
 
 		return dist;
 	}
-	public TU[] getTu() {
-		return tu;
-	}
-
 	/**
 	 * working with cds in exons
 	 * @return
@@ -1807,20 +1540,19 @@ public class Transcript extends DirectedRegion {
 	public void setNmd(byte nmd) {
 		this.nmd = nmd;
 	}
-	public Translation getPredORF() {
-		return predORF;
-	}
-	public void setPredORF(Translation predORF) {
-		this.predORF = predORF;
-	}
-	public String getHUGO() {
-		return HUGO;
-	}
-	public void setHUGO(String hugo) {
-		HUGO = hugo;
-	}
 	public String getSource() {
 		return source;
+	}
+	public byte getSourceType() {
+		if (srcType== ID_SRC_UNDEFINED) {
+			if (getSource().contains("Est"))
+				srcType= ID_SRC_EST;
+			else if (getSource().contains("mrna"))
+				srcType= ID_SRC_MRNA;
+			else if (getSource().contains("refGene"))
+				srcType= iD_SRC_REFSEQ;
+		}
+		return srcType;
 	}
 	public void setSource(String source) {
 		this.source = source;

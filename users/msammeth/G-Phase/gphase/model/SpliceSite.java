@@ -6,15 +6,15 @@
  */
 package gphase.model;
 
+import gphase.io.gtf.GTFChrReader;
 import gphase.io.gtf.GTFObject;
 import gphase.tools.Arrays;
 
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Vector;
-
-import org.freehep.graphicsio.swf.SWFAction.RemoveSprite;
 
 import com.sun.net.ssl.SSLContext;
 
@@ -64,6 +64,7 @@ public class SpliceSite extends AbstractSite {
 
 
 	static PositionTypeComparator defaultPositionTypeComparator= null;
+	static PositionComparator defaultPositionComparator= null;
 
 	public static char CHAR_ACCEPTOR = '-';
 
@@ -74,27 +75,50 @@ public class SpliceSite extends AbstractSite {
 	public static char CHAR_TSS = '*';
 	public static char CHAR_UNDEFINED = '?';
 	
+	public static final SpliceChainComparator defaultSpliceChainComparator= new SpliceChainComparator();
+	
+	public static class SpliceChainComparator implements Comparator<SpliceSite[]> {
+		public int compare(SpliceSite[] o1, SpliceSite[] o2) {
+			if (o1.length< o2.length)
+				return -1;
+			if (o1.length> o2.length)
+				return 1;
+			for (int i = 0; i < o2.length; i++) {
+				if (o1[i].getPos()< o2[i].getPos())
+					return -1;
+				if (o1[i].getPos()> o2[i].getPos())
+					return 1;
+			}
+			return 0;
+		}
+	}
+	
 	public static PositionTypeComparator getDefaultPositionTypeComparator() {
 		if (defaultPositionTypeComparator == null) {
 			defaultPositionTypeComparator = new PositionTypeComparator();			
 		}
-
+	
 		return defaultPositionTypeComparator;
+	}
+
+	public static PositionComparator getDefaultPositionComparator() {
+		if (defaultPositionComparator == null) {
+			defaultPositionComparator = new PositionComparator();			
+		}
+
+		return defaultPositionComparator;
 	}
 	
 	
 	float scoreU12= Float.NaN;
 	
-	HashMap hitparade= null;
-	HashMap homologs= null;	// maps genes to exon homologs
+
 	
-	Exon[] exons= null;
+	Gene gene= null;
 	byte type= TYPE_NOT_INITED;
 	byte modality= NOTYPE_SS;
 	boolean constitutive= true;
 	String dinucleotide= null, stringRep= null;
-
-	
 	ASVariation[] asVars = null;
 	
 	public static class PositionComparator implements Comparator {
@@ -246,50 +270,19 @@ public class SpliceSite extends AbstractSite {
 		return pos;
 	}
 	
-	public SpliceSite(int pos, byte newType) {
-
+	public SpliceSite(int pos, byte newType, Gene newGene) {
+	
 		super(pos);
 		setType(newType);		
+		this.gene= newGene;
+	}
+
+	public SpliceSite(int pos, byte newType, Gene newGene, Transcript newTrpt) {
+
+		this(pos,newType,newGene);
+		trptMap.put(newTrpt,newTrpt);
 	}
 	
-	public SpliceSite(int pos, byte newType, Exon exon) {
-		this(pos,newType);
-		addExon(exon);
-	}
-	
-	public void removeExon(Exon ex) {
-		if (ex== null)
-			return;
-		
-			// remove exon
-		Exon[] newExons= new Exon[exons.length- 1];
-		int p= 0;
-		for (int i = 0; i < exons.length; i++) {
-			if (exons[i]!= ex)
-				newExons[p++]= exons[i];
-		}
-		exons= newExons;
-	}
-	
-	public boolean addExon(Exon newExon) {
-		addTranscripts(newExon.getTranscripts());
-		if (exons== null) {
-			exons= new Exon[] {newExon};
-			return true;
-		}
-		
-		Comparator compi= new AbstractRegion.PositionComparator();
-		int i;
-		for (i = 0; i < exons.length; i++) 
-			//if (compi.compare(newExon, exons[i])== 0)
-			if (newExon== exons[i])	// have to hold redundantly ALL exons, for SpliceSite.remove(Exon)
-				break;
-		if (i== exons.length) {
-			exons= (Exon[]) Arrays.add(exons, newExon);
-			return true;
-		}
-		return false;
-	}
 	
 	/**
 	 * checks for identity, not for homology
@@ -371,6 +364,20 @@ public class SpliceSite extends AbstractSite {
 		return (type== TYPE_ACCEPTOR);
 	}
 	
+	public boolean isRealSpliceSite() {
+		return (isDonor()|| isAcceptor());
+	}
+	
+	public boolean isLeftFlank() {
+		return ((isTSS()|| isAcceptor())&& (type!= TYPE_NOT_INITED));
+	}
+	
+	public boolean isRightFlank() {
+		return ((isTES()|| isDonor())&& (type!= TYPE_NOT_INITED));
+	}
+	
+	
+	
 	public boolean isCanonical() {
 		if ((!this.isDonor())&& (!this.isAcceptor()))
 			System.err.println("Not canonical() called for non-splicesite");
@@ -397,12 +404,6 @@ public class SpliceSite extends AbstractSite {
 		else if (isAcceptor())
 			setID(GTFObject.FEATURE_ID_ACCEPTOR);
 	}
-	public Exon[] getExons() {
-		return exons;
-	}
-	public void setExons(Exon[] exons) {
-		this.exons = exons;
-	}
 	public String toString() {
 		if (stringRep == null) {	// || stringRep.charAt(stringRep.length()- 1)== '?'
 			if (isDonor())
@@ -423,6 +424,45 @@ public class SpliceSite extends AbstractSite {
 	public String toOutString() {
 		String result= getGene().getChromosome()+ " "+ Math.abs(getPos())+ " "+ getGene().getStrand();
 		return result;
+	}
+	
+	public Transcript[] getTranscripts() {
+		if (transcripts== null) {
+			Vector<Transcript> v= getGene().ssTrptHash.get(this);
+			transcripts= new Transcript[v.size()];
+			for (int i = 0; i < transcripts.length; i++) 
+				transcripts[i]= v.elementAt(i);
+		}
+		return transcripts;
+	}
+	
+	public Transcript[] getTranscripts_inefficient() {
+		if (transcripts== null) {
+			Vector<Transcript> v= new Vector<Transcript>(getGene().getTranscriptCount());
+			for (int i = 0; i < getGene().getTranscripts().length; i++) {
+				SpliceSite ss= getGene().getTranscripts()[i].getSpliceSite(this);
+				if (ss!= null)
+					v.add(getGene().getTranscripts()[i]);
+			}
+			transcripts= new Transcript[v.size()];
+			for (int i = 0; i < transcripts.length; i++) 
+				transcripts[i]= v.elementAt(i);
+			if (getGene().isConstruct()) 
+				System.err.println("Do not call SpliceSite.getTranscripts() during buildup!");
+		}
+		return transcripts;
+	}
+	
+	public Transcript[] getTranscripts_memoryExplodes() {
+		if (transcripts== null) {
+			transcripts= new Transcript[trptMap.size()];
+			Iterator<Transcript> iter= trptMap.values().iterator();
+			int cnt= 0;
+			while(iter.hasNext()) 
+				transcripts[cnt++]= iter.next();
+			trptMap= null;
+		}
+		return transcripts;
 	}
 
 	public boolean isCDSRealTranscript() {
@@ -528,57 +568,6 @@ public class SpliceSite extends AbstractSite {
 		this.constitutive = constitutive;
 	}
 	
-	public boolean addHit(Gene g, PWHit h) {
-			
-			Vector v= null;
-			if (hitparade== null)	// create new
-				hitparade= new HashMap();
-			else 
-				v= (Vector) hitparade.get(g);	// lookup existing
-			
-			if (v== null)
-				v= new Vector();
-			else 
-				for (int i = 0; i < v.size(); i++) {	// check for already added hit
-					PWHit hit= (PWHit) v.elementAt(i);
-					if (hit.getOtherObject(this)== h.getOtherObject(this))
-						return false;
-				}
-			
-				// keep sorted with ascending costs
-	//		int i= 0;
-	//		for (i = 0; i < v.size(); i++) 
-	//			if (((PWHit) v.elementAt(i)).getCost()> h.getCost())
-	//				break;
-	//		v.insertElementAt(h, i);	// add
-			v.add(h);
-			hitparade.put(g, v);
-			return true;
-		}
-
-	/**
-	 * returns hits to exons of all homolog genes
-	 * @return
-	 */
-	public PWHit[] getHits() {
-		
-			// count values
-		Object[] oa= hitparade.values().toArray();
-		int size= 0;
-		for (int i = 0; i < oa.length; i++) 
-			size+= ((Vector) oa[i]).size();
-		
-		PWHit[] result= new PWHit[size];
-		int x= 0;
-		for (int i = 0; i < oa.length; i++) {
-			Vector v= (Vector) oa[i];
-			for (int j = 0; j < v.size(); j++) 
-				result[x++]= (PWHit) v.elementAt(j);
-		}
-		
-		return result;
-	}
-	
 	/**
 	 * from (-x to + y) number of exonic/intronic positions to
 	 * number of positions before and after ss
@@ -644,35 +633,6 @@ public class SpliceSite extends AbstractSite {
 		reg.setChromosome(getTranscripts()[0].getChromosome());
 		reg.setSpecies(getTranscripts()[0].getSpecies());
 		return reg;
-	}
-
-	public PWHit[] getHits(Gene g) {
-		
-		if (hitparade== null|| hitparade.get(g)== null)
-			return null;
-		
-		Vector v= (Vector) hitparade.get(g);
-		PWHit[] result= new PWHit[v.size()];
-		for (int i = 0; i < result.length; i++) 
-			result[i]= (PWHit) v.elementAt(i);
-		
-		return result;
-	}
-
-	// assuming just one homolog
-	public boolean addHomolog(Gene g, SpliceSite e) {
-	
-		if (homologs== null)	// create new
-			homologs= new HashMap();
-	
-		if (homologs.get(g)!= null) {
-			if (homologs.get(g)!= e)
-				System.err.println("Multiple exon homology: "+ e+ ", "+homologs.get(g));	
-			return false;
-		}
-	
-		homologs.put(g, e);
-		return true;
 	}
 
 	public float getScoreU12() {
@@ -744,5 +704,17 @@ public class SpliceSite extends AbstractSite {
 
 	public void setModality(byte modality) {
 		this.modality = modality;
+	}
+
+	public Gene getGene() {
+		return gene;
+	}
+
+	public void setGene(Gene gene) {
+		this.gene = gene;
+	}
+
+	public static SpliceChainComparator getDefaultSpliceChainComparator() {
+		return defaultSpliceChainComparator;
 	}
 }

@@ -48,7 +48,7 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.collections.BidiMap;
+//import org.apache.commons.collections.BidiMap;
 
 
 import com.sun.org.apache.xalan.internal.xsltc.compiler.util.FilterGenerator;
@@ -62,7 +62,6 @@ public class GTFChrReader extends GTFWrapper {
 		"where options may be\n" +
 		"-sort\t sort according to chr, transcriptID, start\n\n" +
 		"micha, 2007";
-	
 	public static final String NORMED_FILE_TAG= "norman";
 	public static final int MAX_GTF_LINE_LENGTH= 1000;
 	public static final String[] DEFAULT_CHROMOSOME_FILTER= new String[] {	
@@ -125,6 +124,8 @@ public class GTFChrReader extends GTFWrapper {
 	 */
 	boolean readGene= true;
 	Gene[] genes= null;
+	
+	boolean clustered= false;
 	
 	// !!! doesnt find the following mutex introns
 	// AC051649.8-006	AC051649.8-010	1974632 1975281 1975281 1975505 	1^2- , 3^4-
@@ -590,6 +591,12 @@ public class GTFChrReader extends GTFWrapper {
 //		}
 		
 		return spe;
+	}
+	
+	public String getLastReadChr() {
+		if (readChr== null)
+			return null;
+		return (String) readChr.elementAt(readChr.size()- 1);
 	}
 
 	/**
@@ -1831,9 +1838,9 @@ public class GTFChrReader extends GTFWrapper {
 				 */
 				public void read() throws Exception { 
 								
-				
 						BufferedReader buffy= null;
 						long size= 0l;
+						clustered= false;
 						
 						if (fPath!= null&& fName!= null) {
 							try {
@@ -2041,8 +2048,8 @@ public class GTFChrReader extends GTFWrapper {
 										
 										
 									} else {
-										
-										geneV.add(trpt.getGene());
+										if (readGene)
+											geneV.add(trpt.getGene());
 										if (readChr== null)
 											readChr= new Vector();
 										readChr.add(lastChrID);
@@ -2233,16 +2240,17 @@ public class GTFChrReader extends GTFWrapper {
 						}
 					
 						
+						if (readGene) {
+							this.genes= (Gene[]) Arrays.toField(geneV);	// doesnt matter which sorting, no?!
+							clustered= false;
+						}
+						System.gc();
+						if (readGTF)
+							this.gtfObj= (GTFObject[]) Arrays.toField(gtfV);
+						
 						if (bytesRead== size&& !silent)
 							System.out.println();
 						
-						if (readGene)
-							this.genes= clusterLoci((Gene[]) Arrays.toField(geneV));	// doesnt matter which sorting, no?!
-						System.gc();
-						if (genes!= null)
-							readGenes+= this.genes.length;
-						if (readGTF)
-							this.gtfObj= (GTFObject[]) Arrays.toField(gtfV);
 					}
 
 	private Gene[] clusterLoci(Gene[] g) {
@@ -3394,6 +3402,16 @@ public class GTFChrReader extends GTFWrapper {
 	}
 
 	public Gene[] getGenes() {
+		if (genes== null)
+			return null;
+		if (!clustered) {
+			for (int i = 0; i < genes.length; i++) 
+				genes[i].setConstruct(false);
+			genes= clusterLoci(genes);
+			clustered= true;
+			readGenes+= this.genes.length;
+		}
+		
 		return genes;
 	}
 
@@ -3440,6 +3458,20 @@ public class GTFChrReader extends GTFWrapper {
 		}
 		r[r.length- 1]= newFeature;
 		readFeatures= r;
+	}
+
+	public int getReadGenes() {
+		return readGenes;
+	}
+
+	public long getBytesRead() {
+		return bytesRead;
+	}
+	
+	public int getUnclusteredGeneNb() {
+		if (this.genes== null)
+			return 0;
+		return this.genes.length;
 	}
 
 }

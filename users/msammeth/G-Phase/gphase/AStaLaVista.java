@@ -34,19 +34,20 @@ import gphase.gui.CopyOfSpliceOSigner;
 import gphase.gui.SpliceOSigner;
 import gphase.gui.pie.Pie;
 import gphase.io.TabDelimitedFormatWrapper;
+import gphase.io.gtf.CopyOfGTFChrReader;
 import gphase.io.gtf.EncodeWrapper;
 import gphase.io.gtf.GTFChrReader;
 import gphase.io.gtf.GTFObject;
 import gphase.io.gtf.GTFWrapper;
 import gphase.model.ASMultiVariation;
-import gphase.model.ASVariation;
-import gphase.model.ASVariationWithRegions;
-import gphase.model.DirectedRegion;
-import gphase.model.Gene;
-import gphase.model.Graph;
-import gphase.model.Species;
-import gphase.model.SpliceSite;
-import gphase.model.Transcript;
+import gphase.model_heavy.ASVariation;
+import gphase.model_heavy.ASVariationWithRegions;
+import gphase.model_heavy.DirectedRegion;
+import gphase.model_heavy.Gene;
+import gphase.model_heavy.Graph;
+import gphase.model_heavy.Species;
+import gphase.model_heavy.SpliceSite;
+import gphase.model_heavy.Transcript;
 import gphase.tools.Arrays;
 
 
@@ -210,6 +211,11 @@ public class AStaLaVista {
 		"--filter <className> <methodName>[_<method2Name>_..]\nfilter class with given method, e.g. gphase.model.Transcript isCoding or gphase.model.ASVariation hasOnlyGTAGintrons_isASevent_isContained5UTR or isAffectingCDS...\n\n";
 		
 	static protected void parseArguments(String[] args, AStaLaVista asta) {
+		boolean rusc= false;
+		if (args.length> 1&& args[args.length- 1].equalsIgnoreCase("rusc"))
+			rusc= true;
+		if (rusc)
+			gphase.Constants.DATA_DIR= "/home/ug/msammeth";	// ugrusc, but for the nodes ug
 		for (int i = 0; i < args.length; i++) {
 			if (args[i].equals("-i")|| args[i].equals("--input")) {
 				gphase.tools.File inFile= new gphase.tools.File(args[i+1]);
@@ -419,7 +425,7 @@ public class AStaLaVista {
 //			nmd= false;
 //		}
 		
-		GTFChrReader reader= new GTFChrReader(inFile.getAbsolutePath());
+		CopyOfGTFChrReader reader= new CopyOfGTFChrReader(inFile.getAbsolutePath());
 		if (!reader.isApplicable()) {
 			System.err.println("no strict GTF file");
 			reader.reformatFile();
@@ -671,10 +677,10 @@ public class AStaLaVista {
 		
 		long t1= System.currentTimeMillis();
 		System.out.println("time: "+ (t1-t0)+"[msec]");
-	}
+	} 
 	
 	public void writeASTA(ASVariation[][][] vars) {
-		PrintStream p= null;
+		PrintStream p= null; 
 		try {
 			p= new PrintStream(outDir+File.separator+ "landscape.asta");
 		} catch (FileNotFoundException e) {
@@ -939,7 +945,7 @@ public class AStaLaVista {
 			      if (f.exists())
 			    	  continue;
 				  ExportFileType t= (ExportFileType) ExportFileType.getExportFileTypes("gif").get(0);
-			      Component component= new SpliceOSigner(vars[i][0][0]);
+			      Component component= new CopyOfSpliceOSigner(vars[i][0][0]);
 			      component.setSize(component.getPreferredSize());
 			      t.exportToFile(f,component,component.getParent(),null,null);
 			} catch (Exception e) {
@@ -962,7 +968,7 @@ public class AStaLaVista {
 			      if (f.exists())
 			    	  continue;
 				  ExportFileType t= (ExportFileType) ExportFileType.getExportFileTypes("gif").get(0);
-			      Component component= new SpliceOSigner(vars[i][j][k]);
+			      Component component= new CopyOfSpliceOSigner(vars[i][j][k]);
 			      component.setSize(component.getPreferredSize());
 			      t.exportToFile(f,component,component.getParent(),null,null);
 			} catch (Exception e) {

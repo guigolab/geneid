@@ -82,8 +82,8 @@ public class ASTAcomparator {
 		p.println("\n=======================\n\n");
 		
 		if (outputNotFound) {
-			String[] nFound1= getNotFoundStructs(foundMap, getF1(), true);
-			String[] nFound2= getNotFoundStructs(foundMap, getF2(), false);
+			String[] nFound1= getNotFoundStructs2(foundMap, getF1(), true);
+			String[] nFound2= getNotFoundStructs2(foundMap, getF2(), false);
 			
 			if (diffInRef) {
 				p.println("NOT found from REFERENCE file "+getF1());
@@ -160,61 +160,102 @@ public class ASTAcomparator {
 	}
 
 	private String[] getNotFoundStructs(HashMap foundMap, File f, boolean searchKeys) {
-		
-		HashMap<String,Vector> structMap= new HashMap<String,Vector>();
-		Object[] keys= foundMap.keySet().toArray();
-		for (int i = 0; i < keys.length; i++) {
-			String[] line= null;
-			if (searchKeys) 
-				line= new String[] {(String) keys[i]};
-			else {
-				Vector v= (Vector) foundMap.get(keys[i]);
-				// doesnt help
-//				String baseStruct= ((String) keys[i]).split("\t")[0];
-//				for (int j = 0; j < v.size(); j++) {	// exact hits preferred
-//					String s= (String) v.elementAt(j);
-//					if (s.split("\t").equals(baseStruct)) {
-//						v= new Vector();
-//						v.add(s);
-//						break;
-//					}
-//				}
-				line= (String[]) Arrays.toField(v);
-			}
-			for (int j = 0; j < line.length; j++) {
-				String[] tokens= line[j].split("\t");
-				Vector v= structMap.get(tokens[0]);
-				if (v== null)
-					v= new Vector();
-				v.add(line[j]);
-				structMap.put(tokens[0],v);
+			
+			HashMap<String,Vector> structMap= new HashMap<String,Vector>();
+			Object[] keys= foundMap.keySet().toArray();
+			for (int i = 0; i < keys.length; i++) {
+				String[] line= null;
+				if (searchKeys) 
+					line= new String[] {(String) keys[i]};
+				else {
+					Vector v= (Vector) foundMap.get(keys[i]);
+					// doesnt help
+	//				String baseStruct= ((String) keys[i]).split("\t")[0];
+	//				for (int j = 0; j < v.size(); j++) {	// exact hits preferred
+	//					String s= (String) v.elementAt(j);
+	//					if (s.split("\t").equals(baseStruct)) {
+	//						v= new Vector();
+	//						v.add(s);
+	//						break;
+	//					}
+	//				}
+					line= (String[]) Arrays.toField(v);
+				}
+				for (int j = 0; j < line.length; j++) {
+					String[] tokens= line[j].split("\t");
+					Vector v= structMap.get(tokens[0]);
+					if (v== null)
+						v= new Vector();
+					v.add(line[j]);
+					structMap.put(tokens[0],v);
+				}
+				
 			}
 			
-		}
-		
-		Vector v= new Vector();
-		try {
-			BufferedReader buffy= new BufferedReader(new FileReader(f));
-			while (buffy.ready()) {
-				String line= buffy.readLine();
-				String[] tokens= line.split("\t");
-				if (structMap.get(tokens[0])== null)
-					continue;
-				Vector foundV= (Vector) structMap.get(tokens[0]);
-				int i;
-				for (i = 0; i < foundV.size(); i++) {
-					if (line.equalsIgnoreCase((String) foundV.elementAt(i)))
-						break;
+			Vector v= new Vector();
+			try {
+				BufferedReader buffy= new BufferedReader(new FileReader(f));
+				while (buffy.ready()) {
+					String line= buffy.readLine();
+					String[] tokens= line.split("\t");
+					if (structMap.get(tokens[0])== null)
+						continue;
+					Vector foundV= (Vector) structMap.get(tokens[0]);
+					int i;
+					for (i = 0; i < foundV.size(); i++) {
+						if (line.equalsIgnoreCase((String) foundV.elementAt(i)))
+							break;
+					}
+					if (i== foundV.size())
+						v.add(line);
 				}
-				if (i== foundV.size())
-					v.add(line);
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
+			
+			return (String[]) Arrays.toField(v);
 		}
-		
-		return (String[]) Arrays.toField(v);
-	}
+
+	private String[] getNotFoundStructs2(HashMap foundMap, File f, boolean searchKeys) {
+			
+			HashMap<String,Vector> structMap= new HashMap<String,Vector>();
+			Object[] keys= foundMap.keySet().toArray();
+			Vector v= new Vector();
+			
+			try {
+				BufferedReader buffy= new BufferedReader(new FileReader(f));
+				while (buffy.ready()) {
+					String line= buffy.readLine();
+					boolean found= false;
+					for (int i = 0; i < keys.length; i++) {
+						String[] token= null;
+						if (searchKeys) 
+							token= new String[] {(String) keys[i]};
+						else {
+							Vector vv= (Vector) foundMap.get(keys[i]);
+							token= (String[]) Arrays.toField(vv);
+						}
+						for (int j = 0; j < token.length; j++) {
+							if (token[j].equalsIgnoreCase(line)) {
+								found= true;
+								break;
+							}
+						}
+						if (found)
+							break;
+						
+					}
+					if (!found) {
+						if ((!strictChk)|| (strictChk&& line.startsWith(struct[0])))
+							v.add(line);
+					}
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			return (String[]) Arrays.toField(v);
+		}
 
 	private HashMap findStructures(String[] structs, File f) {
 		

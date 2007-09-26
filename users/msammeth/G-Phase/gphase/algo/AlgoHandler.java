@@ -1,9 +1,10 @@
 package gphase.algo;
 
 import gphase.Constants;
+import gphase.io.gtf.CopyOfGTFChrReader;
 import gphase.io.gtf.GTFChrReader;
-import gphase.model.Gene;
-import gphase.model.Species;
+import gphase.model_heavy.Gene;
+import gphase.model_heavy.Species;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -40,7 +41,7 @@ public class AlgoHandler {
 	
 	public static void _00_mainLoopChromosomes(String fName, Method[] m) {
 		try {			
-			GTFChrReader reader= new GTFChrReader(fName);
+			CopyOfGTFChrReader reader= new CopyOfGTFChrReader(fName);
 			reader.setChromosomeWise(true);
 			reader.setReadGene(true);
 			reader.read();
@@ -76,10 +77,11 @@ public class AlgoHandler {
 			
 			System.out.println(files[i]);
 			try {
-				GTFChrReader wrapper= new GTFChrReader(files[i].getAbsolutePath());
+				CopyOfGTFChrReader wrapper= new CopyOfGTFChrReader(files[i].getAbsolutePath());
 				if ((!files[i].getName().contains("_norman_"))&& (!wrapper.isApplicable()))
 					wrapper.reformatFile();
-				Gene[] ge= wrapper.read();
+				wrapper.read();
+				Gene[] ge= wrapper.getGenes(); 
 				HashMap localHash= new HashMap();
 				while (ge!= null) {
 					for (int j = 0; j < ge.length; j++) {
@@ -91,7 +93,8 @@ public class AlgoHandler {
 							}
 						}
 					}
-					ge= wrapper.read();
+					wrapper.read();
+					ge= wrapper.getGenes();
 				} 
 				for (int k = 0; k < target.length; k++) {
 					try {
@@ -129,8 +132,8 @@ public class AlgoHandler {
 	 * @param target
 	 */
 	public static void _00_mainLoopEnsemblChrom(String[] speNames, String startSpe, Method[] target) {
-		
-		String[] fList= new File("annotation"+ File.separator+ "ensembl").list();
+		String baseDir= "/home/msammeth/annotations";
+		String[] fList= new File(baseDir+ File.separator+ "ensembl").list();
 		boolean skip= false;
 		if (startSpe!= null)
 			skip= true;
@@ -141,20 +144,28 @@ public class AlgoHandler {
 			skip= false;
 			
 			System.out.println(Species.SP_NAMES_METAZOA[i]);
+			Species spe= new Species(Species.SP_NAMES_METAZOA[i]);
+			if (Species.SP_NAMES_METAZOA[i].contains("honeybee"))
+				spe.setGenomeVersion("Ameli20");
+			else if (Species.SP_NAMES_METAZOA[i].contains("cow"))
+				spe.setGenomeVersion("btau31");
+			else
+				spe.setGenomeVersion("ENSEMBL42");
+
 			try {
 				String iname= null;
 				for (int x = 0; x < fList.length; x++) {
 					if (fList[x].startsWith(Species.SP_NAMES_METAZOA[i])&&
 							fList[x].endsWith(".gff")&&
 							fList[x].contains("_norman_")) {
-						iname= "annotation"+ File.separator+ "ensembl"+ File.separator+ fList[x];
+						iname= baseDir+ File.separator+ "ensembl"+ File.separator+ fList[x];
 						break;
 					}
 				}
 				for (int x = 0; iname== null&& x < fList.length; x++) {
 					if (fList[x].startsWith(Species.SP_NAMES_METAZOA[i])&&
 							fList[x].endsWith(".gff")) {
-						iname= "annotation"+ File.separator+ "ensembl"+ File.separator+ fList[x];
+						iname= baseDir+ File.separator+ "ensembl"+ File.separator+ fList[x];
 						break;
 					}
 				}
@@ -164,13 +175,15 @@ public class AlgoHandler {
 				}
 					
 				
-				GTFChrReader wrapper= new GTFChrReader(iname);
+				CopyOfGTFChrReader wrapper= new CopyOfGTFChrReader(iname);
 				if ((!iname.contains("_norman_"))&& (!wrapper.isApplicable()))
 					wrapper.reformatFile();
-				Gene[] ge= wrapper.read();
+				wrapper.read();
+				Gene[] ge= wrapper.getGenes();
 				HashMap localHash= new HashMap();
 				while (ge!= null) {
 					for (int j = 0; j < ge.length; j++) {
+						ge[j].setSpecies(spe);
 						for (int k = 0; k < target.length; k++) {
 							try {
 								target[k].invoke(null, new Object[] {ge[j], null, localHash});
@@ -179,7 +192,8 @@ public class AlgoHandler {
 							}
 						}
 					}
-					ge= wrapper.read();
+					wrapper.read();
+					ge= wrapper.getGenes();
 				} 
 				for (int k = 0; k < target.length; k++) {
 					try {

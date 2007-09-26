@@ -16,17 +16,17 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Vector;
 
-import gphase.model.ASVariation;
-import gphase.model.AbstractRegion;
-import gphase.model.AbstractSite;
-import gphase.model.DefaultRegion;
-import gphase.model.Exon;
-import gphase.model.Gene;
-import gphase.model.Species;
-import gphase.model.SpliceSite;
-import gphase.model.TSSite;
-import gphase.model.Transcript;
-import gphase.model.ASVariation.SpliceChainComparator;
+import gphase.model_heavy.ASVariation;
+import gphase.model_heavy.AbstractRegion;
+import gphase.model_heavy.AbstractSite;
+import gphase.model_heavy.DefaultRegion;
+import gphase.model_heavy.Exon;
+import gphase.model_heavy.Gene;
+import gphase.model_heavy.Species;
+import gphase.model_heavy.SpliceSite;
+import gphase.model_heavy.TSSite;
+import gphase.model_heavy.Transcript;
+import gphase.model_heavy.ASVariation.SpliceChainComparator;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;

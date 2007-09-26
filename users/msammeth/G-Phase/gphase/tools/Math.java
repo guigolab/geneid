@@ -1,7 +1,5 @@
 package gphase.tools;
 
-import com.sun.mail.iap.Argument;
-
 public class Math {	
 	
 	public static long pow(int a, int b) {

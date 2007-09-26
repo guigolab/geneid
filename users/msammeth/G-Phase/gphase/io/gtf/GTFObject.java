@@ -28,6 +28,10 @@ import java.util.Vector;
  */
 public class GTFObject {
 	public final static String FEATURE_BP= "branch_point", FEATURE_BP_U12= "U12_branch_point", FEATURE_PP= "pp_tract", FEATURE_PP_U12= "U12_pp_tract",FEATURE_SS= "splice_site", FEATURE_SS_U12GTAG= "U12gtag_splice_site", FEATURE_SS_U12CTAC= "U12ctac_splice_site";
+	public final static String FEATURE_ASEVENT= "asEvent";
+	public final static String FEATURE_TAG= "tag";
+
+	public final static String ATTRIBUTE_EVENT_STRUCTURE= "structure";
 
 	public static class PositionComparator implements Comparator {
 		public int compare(Object o1, Object o2) {
@@ -57,6 +61,8 @@ public class GTFObject {
 			return 0;
 		}
 	}
+	
+	static PositionComparator defaultPositionComparator= new PositionComparator();
 	
 	public static String ID_ATTRIBUTE_SEQUENCE= "seq";
 	
@@ -637,6 +643,16 @@ public class GTFObject {
 		
 		return (String) attributes.get(id);
 	}
+	public boolean overlaps(GTFObject anotherObject) {
+		if ((!getChromosome().equals(anotherObject.getChromosome()))||
+				getStrand()!= anotherObject.getStrand())
+				return false;
+		if ((getStart()>= anotherObject.getStart()&& getStart()<= anotherObject.getEnd())||
+				(anotherObject.getStart()>= getStart()&& anotherObject.getStart()<= getEnd()))
+			return true;
+		return false;
+	}
+	
 	public String removeAttribute(String id) {
 		
 		if (attributes== null)
@@ -912,5 +928,9 @@ public void setStrand(int strandInt) {
 	}
 	public void setGff(boolean gff) {
 		this.gff = gff;
+	}
+
+	public static PositionComparator getDefaultPositionComparator() {
+		return defaultPositionComparator;
 	}
 }

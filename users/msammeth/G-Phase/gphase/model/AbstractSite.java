@@ -6,6 +6,7 @@
  */
 package gphase.model;
 
+import gphase.io.gtf.GTFChrReader;
 import gphase.tools.Arrays;
 
 import java.io.Serializable;
@@ -26,7 +27,6 @@ public class AbstractSite implements Serializable {
 	String id = null;
 	float score= Float.NaN;
 	static final long serialVersionUID = 3169139368723074072L;
-	
 	public static class PositionToSpliceSiteComparator implements Comparator {
 
 		public int compare(Object arg0, Object arg1) {
@@ -141,51 +141,9 @@ public class AbstractSite implements Serializable {
 		return false;
 	}
 	
-	public Gene getGene() {
-		if (transcripts== null|| transcripts.length< 1)
-			return null;
-		return transcripts[0].getGene();
-	}
-	public Transcript[] getTranscripts() {
-		return transcripts;
-	}
 	public void setTranscripts(Transcript[] transcripts) {
 		this.transcripts = transcripts;
 	}
-	public void removeTranscript(Transcript aTrpt)  {
-		if (transcripts== null)
-			return;
-		transcripts= (Transcript[]) Arrays.remove(transcripts, aTrpt);
-	}
-
-	public void addTranscripts(Transcript[] newTrans) {
-		Vector v= new Vector(newTrans.length);
-		if (transcripts== null) {
-			transcripts= newTrans;
-		} else 
-			for (int i = 0; i < newTrans.length; i++) {
-				int j;
-				for (j = 0; j < transcripts.length; j++) 
-					if (transcripts[j]== newTrans[i])
-						break;
-				if (j>= transcripts.length)
-					v.add(newTrans[i]);
-			}
-		
-		for (int i = 0; i < v.size(); i++) 
-			transcripts= (Transcript[]) Arrays.add(transcripts, v.elementAt(i));		
-	}
-	
-	public boolean addTranscript(Transcript newTrans) {
-	
-		for (int i = 0; transcripts!= null&& i < transcripts.length; i++) 
-			if (transcripts[i].getTranscriptID().equalsIgnoreCase(newTrans.getTranscriptID()))
-				return false;
-		
-		transcripts= (Transcript[]) Arrays.add(transcripts, newTrans);
-		return true;
-	}
-
 	public void addAttribute(Object id, Object val) {
 		if (attributes== null)
 			attributes= new HashMap();

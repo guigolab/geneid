@@ -772,13 +772,13 @@ public class Graph {
 								if (nr== null)
 									nr= new Integer(0);
 								evMap.put(ev.toString(),new Integer(nr.intValue()+1));
-//								try {
-//									FileWriter writer= new FileWriter("new.asta", true);
-//									writer.write(ev.toStringASTA()+"\n");
-//									writer.flush(); writer.close();
-//								} catch (Exception e) {
-//									e.printStackTrace();
-//								}
+								try {
+									FileWriter writer= new FileWriter("new.asta", true);
+									writer.write(ev.toStringASTA()+"\n");
+									writer.flush(); writer.close();
+								} catch (Exception e) {
+									e.printStackTrace();
+								}
 							}
 						}	// for all tuples
 						
@@ -794,9 +794,6 @@ public class Graph {
 							nodes[i].getFromNodeMap().put((Node) fNodes[j],map);
 						}
 						
-
-						
-
 					} // if bubble
 				} // nodesWithOutPSS
 				
@@ -832,7 +829,7 @@ public class Graph {
 				// extend all pathes
 				while (iterPath.hasNext()) {
 					Path p= iterPath.next();
-					Vector<Path> split= new Vector<Path>(o.length);
+//					Vector<Path> split= new Vector<Path>(o.length);
 					for (int j = 0; j < o.length; j++) {
 						Edge e= (Edge) o[j];
 						long[] newTsup= intersect(p.getTranscripts(), e.getTranscripts());
@@ -853,7 +850,7 @@ public class Graph {
 							epMap.put(e,v);
 						}
 						v.add(newP);
-						split.add(newP);
+//						split.add(newP);
 					}
 					
 						// split partitions if path separates

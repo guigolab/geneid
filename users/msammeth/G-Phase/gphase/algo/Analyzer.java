@@ -16,23 +16,21 @@ import org.apache.commons.collections.BidiMap;
 import org.apache.commons.collections.bidimap.DualHashBidiMap;
 import org.freehep.graphicsio.swf.SWFAction.StopSounds;
 
-import sun.security.krb5.internal.crypto.c;
-
 import gphase.Constants;
 import gphase.io.gtf.EncodeWrapper;
 import gphase.io.gtf.GTFChrReader;
-import gphase.model.ASMultiVariation;
-import gphase.model.ASVariation;
-import gphase.model.AbstractRegion;
-import gphase.model.DirectedRegion;
-import gphase.model.Exon;
-import gphase.model.Gene;
-import gphase.model.Graph;
-import gphase.model.GraphHandler;
-import gphase.model.Species;
-import gphase.model.SpliceSite;
-import gphase.model.Transcript;
-import gphase.model.Translation;
+import gphase.model_heavy.ASMultiVariation;
+import gphase.model_heavy.ASVariation;
+import gphase.model_heavy.AbstractRegion;
+import gphase.model_heavy.DirectedRegion;
+import gphase.model_heavy.Exon;
+import gphase.model_heavy.Gene;
+import gphase.model_heavy.Graph;
+import gphase.model_heavy.GraphHandler;
+import gphase.model_heavy.Species;
+import gphase.model_heavy.SpliceSite;
+import gphase.model_heavy.Transcript;
+import gphase.model_heavy.Translation;
 import gphase.tools.Arrays;
 import gphase.tools.Distribution;
 import gphase.tools.DoubleVector;
@@ -67,17 +65,16 @@ public class Analyzer {
 				startSpe= args[i+1];
 		}
 		
-		startSpe= "frog";
+		//startSpe= "cow";
 		
 			// get method things
 		//_00_checkConsistency();
-		String mName= "_04_codonExtendTruncation";
+		String mName= "_070804_exonNumber";
 		String outDir= "ASanalysis";
 		Class[] sig= new Class[] {Gene.class, PrintStream.class, HashMap.class};
 		Method[] m= null;
 		try {
 			m= new Method[] {
-					Analyzer.class.getMethod("_01_generalStatistics", sig),
 					Analyzer.class.getMethod(mName, sig)};
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -1110,6 +1107,32 @@ public class Analyzer {
 
 		}
 
+	public static void _070804_exonNumber(Gene ge, PrintStream p, HashMap map) {
+		final String ID_EXON_NUMBER= "ID_EXON_NUMBER"; 
+		IntVector exNumberV= (IntVector) map.get(ID_EXON_NUMBER);
+		if (exNumberV== null) {
+			exNumberV= new IntVector();
+			map.put(ID_EXON_NUMBER, exNumberV);
+		}
+		
+		if (ge!= null) {
+			Exon[] ex= ge.getExons();
+			int cnt= 0;
+			for (int i = 0; i < ex.length; i++) {
+				if (ex[i].getAcceptor().isAcceptor()&& !ex[i].getAcceptor().isCanonical())
+					continue;
+				if (ex[i].getDonor().isDonor()&& !ex[i].getDonor().isCanonical())
+					continue;
+				++cnt;
+			}
+			exNumberV.add(cnt);
+		}
+		
+		if (p!= null) {
+			Distribution dist= new Distribution(exNumberV.toIntArray());
+			System.out.println("median "+dist.getMedian()+", mean "+dist.getMean()+", stdev "+Formatter.fprint(dist.getStandardDeviation(), 2));
+		}
+	}
 	/**
 	 * based on exons
 	 * @param g

@@ -103,9 +103,9 @@ public abstract class AbstractRegion implements Region {
 					return 1;
 				
 					// overlapping and same start position
-				if (start1< end2)
+				if (end1< end2)
 					return -1;
-				if (end2< start1)
+				if (end2< end1)
 					return 1;
 				
 				//System.err.println("assertion in abstractregion.positioncomparator failed");
@@ -159,6 +159,10 @@ public abstract class AbstractRegion implements Region {
 
 	int end = 0;	// Integer.MAX ???? removed
 	int start = 0;
+	static PositionComparator defaultPositionComparator= new PositionComparator();
+	
+	
+	
 	/**
 	 * @return Returns the end.
 	 */
@@ -206,6 +210,10 @@ public abstract class AbstractRegion implements Region {
 
 	public HashMap getAttributes() {
 		return attributes;
+	}
+
+	public static PositionComparator getDefaultPositionComparator() {
+		return defaultPositionComparator;
 	}
 	
 }

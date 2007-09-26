@@ -9,17 +9,19 @@ import java.util.Vector;
 
 import gphase.NMDSimulator2;
 import gphase.io.gtf.GTFObject;
-import gphase.model.ASMultiVariation;
-import gphase.model.ASVariation;
-import gphase.model.ASVariationWithRegions;
-import gphase.model.DirectedRegion;
-import gphase.model.Gene;
-import gphase.model.Transcript;
-import gphase.model.Translation;
+import gphase.model_heavy.ASMultiVariation;
+import gphase.model_heavy.ASVariation;
+import gphase.model_heavy.ASVariationWithRegions;
+import gphase.model_heavy.DirectedRegion;
+import gphase.model_heavy.Gene;
+import gphase.model_heavy.Transcript;
+import gphase.model_heavy.Translation;
 import gphase.tools.Arrays;
 import gphase.tools.Formatter;
 
 public class ASManager {
+	
+	public static int maxTranscripts= 500;
 	
 	static public class AbundancyComparator implements Comparator {
 		public int compare(Object o1, Object o2) {
@@ -178,7 +180,7 @@ public class ASManager {
 
 	static public ASVariation[][][] getASVariations(Transcript[] t, HashMap refTrptIDs) {
 		
-		if (t.length> 1000) {
+		if (t.length> maxTranscripts) {
 			System.out.println("WARNING: skipped gene with "+t.length+" transcripts: "+DirectedRegion.getUnion(t));
 			return null;
 		}
@@ -205,7 +207,7 @@ public class ASManager {
 		
 		HashMap mapStructures= new HashMap();
 		for (int i = 0; i < g.length; i++) {
-			if (g[i].getTranscriptCount()> 1000) {
+			if (g[i].getTranscriptCount()> maxTranscripts) {
 				System.out.println("WARNING: skipped gene with "+g[i].getTranscriptCount()+" transcripts: "+g[i].getNameTranscript());
 				continue;
 			}

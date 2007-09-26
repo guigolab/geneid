@@ -852,7 +852,7 @@ public class Species implements Serializable {
 	}
 
 	public String toString() {
-		return getCommonName();
+		return getCommonName()+" "+getGenomeVersion();
 	}
 	public EncodeRegion[] getEncodeRegions() {
 		return encodeRegions;

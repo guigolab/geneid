@@ -173,7 +173,7 @@ public class Distribution {
 			}
 			
 			sum/= (arrayD.length- 1);
-			return Math.sqrt(sum);
+			return java.lang.Math.sqrt(sum);
 			
 			
 		} else if (arrayI!= null) {
@@ -188,7 +188,7 @@ public class Distribution {
 			}
 			
 			sum/= (arrayI.length- 1);
-			return Math.sqrt(sum);
+			return java.lang.Math.sqrt(sum);
 		}
 		
 		return 0d;
