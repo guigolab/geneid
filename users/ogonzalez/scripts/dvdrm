@@ -1,7 +1,0 @@
-#!/bin/bash
-
-cdrw="0,0,0"
-
-/home/ug/ogonzalez/no_backup/soft/CD-R/cdrecord-proDVD/cdrecord-wrapper.sh \
-    -v blank=fast speed=2 dev=$cdrw
-

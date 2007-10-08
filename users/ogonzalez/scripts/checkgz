@@ -1,3 +1,0 @@
-#!/bin/bash
-
-exec ./checkgz2 | tee ./checkgz.txt

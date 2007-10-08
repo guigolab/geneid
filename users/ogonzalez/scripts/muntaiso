@@ -1,5 +1,0 @@
-#!/bin/bash
-
-# te el mateix format que mount: "muntaiso <que munto> <a on ho munto>"
-
-mount -t iso9660 -o ro,loop=/dev/loop0 $1 $2

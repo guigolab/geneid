@@ -1,2 +1,0 @@
-cvs2cl.pl Human_Chromosome_22.nw 
-cvs2html -o ./cvshtml/index.html -f -a -b -v -n 6

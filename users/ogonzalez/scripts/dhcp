@@ -1,6 +1,0 @@
-#!/bin/bash
-
-# aixo hauria d'agafar les darreres "leases" de /var/lib/dhcp/dhcpd.leases
-# encara actives i mirar a qui pertanyen a /etc/dhcpd.conf
-
-

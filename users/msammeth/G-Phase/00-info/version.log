@@ -1,7 +1,0 @@
-* 051108:
-=========
-
-- add ENSEMBL_COMPARA loop in EnsemblDBAdaptor
-- change Gene to accept more than 1 homolog / species |v
-- add GeneEnsembl class (Mart and Ensembl data)
-- add Homology class (Compara data)

@@ -1,9 +1,0 @@
-# Optimal Gene Structure. Score = 5.353100
-S72043 sgp First 481 511 0.702900 + 0	gene1:1
-S72043 sgp Internal 759 824 1.625000 + 2	gene1:2
-S72043 sgp Internal 1730 1835 3.025200 + 2	gene1:3
-# Optimal Gene Structure. Score = 5.472600
-S72046 sgp First 496 526 0.400600 + 0	gene1:1
-S72046 sgp Internal 721 786 1.699900 + 2	gene1:2
-S72046 sgp Internal 1601 1706 3.372100 + 2	gene1:3
-

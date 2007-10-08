@@ -1,9 +1,0 @@
-#
-# $Id: figure1_left_final.README,v 1.1 2003-06-05 18:14:40 jabril Exp $
-#
-echo "#  -> Aplot paper: latexing left panel" ;
-#
-( latex figure1_left_final.tex ;
-  dvips figure1_left_final.dvi -o figure1_left_final.ps
-  ) > figure1_left_final.log 2>&1 ;
-#
