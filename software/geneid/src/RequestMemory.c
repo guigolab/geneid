@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: RequestMemory.c,v 1.16 2007-04-25 17:20:01 talioto Exp $  */
+/*  $Id: RequestMemory.c,v 1.17 2007-10-08 13:53:58 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -139,6 +139,12 @@ packExons* RequestMemoryExons()
 		   (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
         printError("Not enough memory: Open Reading Frames");
     }
+  allExons->nInitialExons = 0;
+  allExons->nInternalExons = 0;
+  allExons->nZeroLengthExons = 0;
+  allExons->nTerminalExons = 0;
+  allExons->nSingles = 0;
+  allExons->nORFs = 0;
 
   return(allExons);
 }
