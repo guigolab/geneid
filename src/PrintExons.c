@@ -25,12 +25,16 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: PrintExons.c,v 1.19 2007-08-01 13:45:06 talioto Exp $  */
+/*  $Id: PrintExons.c,v 1.20 2007-10-19 13:26:50 talioto Exp $  */
 
 #include "geneid.h"
 
 extern int GFF;
 extern int GFF3;
+extern int BP;
+extern int PPT;
+extern int U12;
+extern int SRP;
 
 /* Print a predicted exon from a list of exons */
 void PrintExon(exonGFF *e, char Name[], char* s, dict* dAA, char* GenePrefix)
@@ -39,6 +43,8 @@ void PrintExon(exonGFF *e, char Name[], char* s, dict* dAA, char* GenePrefix)
   char* rs;
   long p1, p2;
   int nAA = 0;
+  char attribute[MAXSTRING] = "";
+  char tmpstr[MAXSTRING] = "";
 /*   char saux[MAXTYPE]; */
 /*   char saux2[MAXTYPE]; */
   
@@ -73,42 +79,121 @@ void PrintExon(exonGFF *e, char Name[], char* s, dict* dAA, char* GenePrefix)
       }
   }
   /* According to selected options formatted output */
-  if (GFF)
+
+  if (GFF3)
     {
-      /* GFF format */
-      printf ("%s\t%s\t%s\t%ld\t%ld\t%1.2f\t%c\t%hd\t%s_%s_%ld_%ld\n",
-			  /* correct stop codon position, Terminal- & Terminal+ */ 
-			  Name,
-			  (e->evidence)? EVIDENCE : EXONS,
-			  e->Type,
-			  (e->evidence)? e->Acceptor->Position : e->Acceptor->Position + e->offset1,
-			  (e->evidence)? e->Donor->Position : e->Donor->Position + e->offset2,
-			  (e->Score==MAXSCORE)? 0.0: e->Score,
-			  e->Strand,
-			  e->Frame,
-			  Name,e->Type,(e->evidence)? e->Acceptor->Position : e->Acceptor->Position + e->offset1,
-			  (e->evidence)? e->Donor->Position : e->Donor->Position + e->offset2 );
+      if (! e->evidence){
+	if (e->Strand == cFORWARD){
+	  if (!strcmp(e->Type,sFIRST)){
+	    sprintf(tmpstr,";start_score=%1.2f;donor_score=%1.2f",e->Acceptor->Score,e->Donor->Score);strcat(attribute,tmpstr);
+	  }
+	  if (!strcmp(e->Type,sINTERNAL)){
+	    sprintf(tmpstr,";acceptor_score=%1.2f;donor_score=%1.2f",e->Acceptor->Score,e->Donor->Score);strcat(attribute,tmpstr);
+	    if (PPT){
+	      sprintf(tmpstr,";ppt_score=%1.2f;ppt_pos=%i",e->Acceptor->ScorePPT,e->Acceptor->PositionPPT);strcat(attribute,tmpstr);
+	    }
+	    if ((BP && e->Donor->class == U2)||(e->Acceptor->class != U2)){
+	      sprintf(tmpstr,";bp_score=%1.2f;bp_pos=%i",e->Acceptor->ScoreBP,e->Acceptor->PositionBP);strcat(attribute,tmpstr);
+	    }
+	  }
+	  if (!strcmp(e->Type,sTERMINAL)){
+	    sprintf(tmpstr,";acceptor_score=%1.2f",e->Acceptor->Score);strcat(attribute,tmpstr);
+	    if (PPT){
+	      sprintf(tmpstr,";ppt_score=%1.2f;ppt_pos=%i",e->Acceptor->ScorePPT,e->Acceptor->PositionPPT);strcat(attribute,tmpstr);
+	    }
+	    if ((BP && e->Donor->class == U2)||(e->Acceptor->class != U2)){
+	      sprintf(tmpstr,";bp_score=%1.2f;bp_pos=%i",e->Acceptor->ScoreBP,e->Acceptor->PositionBP);strcat(attribute,tmpstr);
+	    }
+	  }
+	  if (!strcmp(e->Type,sSINGLE)){
+	    sprintf(tmpstr,";start_score=%1.2f",e->Acceptor->Score);strcat(attribute,tmpstr);
+	  }
+	  
+	}else{
+	  if (!strcmp(e->Type,sFIRST)){
+	    sprintf(tmpstr,";start_score=%1.2f;donor_score=%1.2f",e->Donor->Score,e->Acceptor->Score);strcat(attribute,tmpstr);
+	  }
+	  if (!strcmp(e->Type,sINTERNAL)){
+	    sprintf(tmpstr,";acceptor_score=%1.2f;donor_score=%1.2f",e->Donor->Score,e->Acceptor->Score);strcat(attribute,tmpstr);
+	    if (PPT){
+	      sprintf(tmpstr,";ppt_score=%1.2f;ppt_pos=%i",e->Donor->ScorePPT,e->Donor->PositionPPT);strcat(attribute,tmpstr);
+	    }
+	    if ((BP && e->Donor->class == U2)||(e->Donor->class != U2)){
+	      sprintf(tmpstr,";bp_score=%1.2f;bp_pos=%i",e->Donor->ScoreBP,e->Donor->PositionBP);strcat(attribute,tmpstr);
+	    }
+	  }
+	  if (!strcmp(e->Type,sTERMINAL)){
+	    sprintf(tmpstr,";acceptor_score=%1.2f",e->Donor->Score);strcat(attribute,tmpstr);
+	    if (PPT){
+	      sprintf(tmpstr,";ppt_score=%1.2f;ppt_pos=%i",e->Donor->ScorePPT,e->Donor->PositionPPT);strcat(attribute,tmpstr);
+	    }
+	    if ((BP && e->Donor->class == U2)||(e->Donor->class != U2)){
+	      sprintf(tmpstr,";bp_score=%1.2f;bp_pos=%i",e->Donor->ScoreBP,e->Donor->PositionBP);strcat(attribute,tmpstr);
+	    }
+	  }
+	  if (!strcmp(e->Type,sSINGLE)){
+	    sprintf(tmpstr,";start_score=%1.2f",e->Donor->Score);strcat(attribute,tmpstr);
+	  }
+	  
+	}
+	sprintf(tmpstr,";coding_potential=%1.2f",e->PartialScore);strcat(attribute,tmpstr);
+	if (SRP){sprintf(tmpstr,";start_score=%1.2f",e->HSPScore);strcat(attribute,tmpstr);}
+      }
+      printf ("%s\t%s\t%s\t%ld\t%ld\t%1.2f\t%c\t%hd\t%s_%s_%ld_%ld%s\n",
+	      /* correct stop codon position, Terminal- & Terminal+ */ 
+	      Name,
+	      (e->evidence)? EVIDENCE : EXONS,
+	      e->Type,
+	      (e->evidence)? e->Acceptor->Position : e->Acceptor->Position + e->offset1,
+	      (e->evidence)? e->Donor->Position : e->Donor->Position + e->offset2,
+	      (e->Score==MAXSCORE)? 0.0: e->Score,
+	      e->Strand,
+	      e->Frame,
+	      Name,
+	      e->Type,
+	      (e->evidence)? e->Acceptor->Position : e->Acceptor->Position + e->offset1,
+	      (e->evidence)? e->Donor->Position : e->Donor->Position + e->offset2,
+	      attribute);
     }
   else
     {
-      /* Default format */
-      printf ("%8s %8ld %8ld\t%5.2f\t%c %hd %hd\t%5.2f\t%5.2f\t%5.2f\t%5.2f\t%d\t%s\n",
-			  /* correct stop codon position, Terminal- & Terminal+ */ 
-			  /* saux2,  */
-	      e->Type,
-			  (e->evidence)? e->Acceptor->Position: e->Acceptor->Position + e->offset1,
-			  (e->evidence)? e->Donor->Position : e->Donor->Position + e->offset2,
-			  (e->Score==MAXSCORE)? 0.0:e->Score,
-			  e->Strand,
-			  e->Frame,
-			  (3 - e->Remainder)%3,
-			  e->Acceptor->Score,
-			  e->Donor->Score,
-			  e->PartialScore,
-			  e->HSPScore,
-			  nAA,
-			  sAux);
-    }
+    if (GFF)
+      {
+	/* GFF format */
+	printf ("%s\t%s\t%s\t%ld\t%ld\t%1.2f\t%c\t%hd\t%s_%s_%ld_%ld\n",
+		/* correct stop codon position, Terminal- & Terminal+ */ 
+		Name,
+		(e->evidence)? EVIDENCE : EXONS,
+		e->Type,
+		(e->evidence)? e->Acceptor->Position : e->Acceptor->Position + e->offset1,
+		(e->evidence)? e->Donor->Position : e->Donor->Position + e->offset2,
+		(e->Score==MAXSCORE)? 0.0: e->Score,
+		e->Strand,
+		e->Frame,
+		Name,e->Type,(e->evidence)? e->Acceptor->Position : e->Acceptor->Position + e->offset1,
+		(e->evidence)? e->Donor->Position : e->Donor->Position + e->offset2 );
+      }
+    else
+      {
+	/* Default format */
+	printf ("%8s %8ld %8ld\t%5.2f\t%c %hd %hd\t%5.2f\t%5.2f\t%5.2f\t%5.2f\t%d\t%s\n",
+		/* correct stop codon position, Terminal- & Terminal+ */ 
+		/* saux2,  */
+		e->Type,
+		(e->evidence)? e->Acceptor->Position: e->Acceptor->Position + e->offset1,
+		(e->evidence)? e->Donor->Position : e->Donor->Position + e->offset2,
+		(e->Score==MAXSCORE)? 0.0:e->Score,
+		e->Strand,
+		e->Frame,
+		(3 - e->Remainder)%3,
+		e->Acceptor->Score,
+		e->Donor->Score,
+		e->PartialScore,
+		e->HSPScore,
+		nAA,
+		sAux);
+      }
+  }
 }
 
 /* Print a list of exons of the same type */
@@ -173,12 +258,47 @@ void PrintGExon(exonGFF *e,
 {
   if (e->Donor->Position == e->Acceptor->Position - 1){return;}
   char attribute[MAXSTRING] = "";
+  char tmpstr[MAXSTRING] = "";
   if (GFF3)
     {
       /* GFF3 format 5_prime_partial=true ???*/
       if (e->five_prime_partial) { strcpy(attribute,";5_prime_partial=true");}
-      if (e->three_prime_partial) { strcpy(attribute,";3_prime_partial=true");}
-
+      if (e->three_prime_partial) { strcat(attribute,";3_prime_partial=true");}
+      if (! e->evidence){
+	if (e->Strand == cFORWARD){
+	  if (!strcmp(e->Type,sFIRST)){
+	    sprintf(tmpstr,";start_score=%1.2f;donor_score=%1.2f",e->Acceptor->Score,e->Donor->Score);strcat(attribute,tmpstr);
+	  }
+	  if (!strcmp(e->Type,sINTERNAL)){
+	    sprintf(tmpstr,";acceptor_score=%1.2f;donor_score=%1.2f",e->Acceptor->Score,e->Donor->Score);strcat(attribute,tmpstr);
+	    
+	  }
+	  if (!strcmp(e->Type,sTERMINAL)){
+	    sprintf(tmpstr,";acceptor_score=%1.2f",e->Acceptor->Score);strcat(attribute,tmpstr);
+	  }
+	  if (!strcmp(e->Type,sSINGLE)){
+	    sprintf(tmpstr,";start_score=%1.2f",e->Acceptor->Score);strcat(attribute,tmpstr);
+	  }
+	  
+	}else{
+	  if (!strcmp(e->Type,sFIRST)){
+	    sprintf(tmpstr,";start_score=%1.2f;donor_score=%1.2f",e->Donor->Score,e->Acceptor->Score);strcat(attribute,tmpstr);
+	  }
+	  if (!strcmp(e->Type,sINTERNAL)){
+	    sprintf(tmpstr,";acceptor_score=%1.2f;donor_score=%1.2f",e->Donor->Score,e->Acceptor->Score);strcat(attribute,tmpstr);
+	    
+	  }
+	  if (!strcmp(e->Type,sTERMINAL)){
+	    sprintf(tmpstr,";acceptor_score=%1.2f",e->Donor->Score);strcat(attribute,tmpstr);
+	  }
+	  if (!strcmp(e->Type,sSINGLE)){
+	    sprintf(tmpstr,";start_score=%1.2f",e->Donor->Score);strcat(attribute,tmpstr);
+	  }
+	  
+	}
+	sprintf(tmpstr,";coding_potential=%1.2f",e->PartialScore);strcat(attribute,tmpstr);
+	if (SRP){sprintf(tmpstr,";start_score=%1.2f",e->HSPScore);strcat(attribute,tmpstr);}
+      }
       /* It's really not necessary to print out exons unless we can predict UTR exons (leave this commented for now) */
 /*       printf ("%s\t%s\t%s\t%ld\t%ld\t%1.2f\t%c\t%hd\tID=exon_%s%s_%ld.%i;Parent=mRNA_%s%s_%ld;type=%s\n", */
 /* 	      /\* correct stop codon position, Terminal- & Terminal+ *\/  */
@@ -363,6 +483,8 @@ void PrintGIntron(exonGFF *d,
 		  char* GenePrefix,
 		  int evidence)
 {
+  char attribute[MAXSTRING] = "";
+  char tmpstr[MAXSTRING] = "";
   float score = 0.0;
   char intronType[MAXTYPE]; 
   strcpy(intronType,"U2");
@@ -391,7 +513,29 @@ void PrintGIntron(exonGFF *d,
   }
   if (GFF3) {
     /* GFF3 format */
-    printf ("%s\t%s\tintron\t%ld\t%ld\t%1.2f\t%c\t%hd\tID=intron_%s%s_%ld.%i;Parent=%s%s_%ld;type=%s;subtype=%s\n",
+      if (! d->evidence){
+	if (d->Strand == cFORWARD){
+	  sprintf(tmpstr,";donor_score=%1.2f;acceptor_score=%1.2f",d->Donor->Score,a->Acceptor->Score);strcat(attribute,tmpstr);
+	    
+	  if (PPT){
+	    sprintf(tmpstr,";ppt_score=%1.2f;ppt_pos=%i",a->Acceptor->ScorePPT,a->Acceptor->PositionPPT);strcat(attribute,tmpstr);
+	    }
+	  if ((BP && a->Acceptor->class == U2)||(d->Acceptor->class != U2)){
+	    sprintf(tmpstr,";bp_score=%1.2f;bp_pos=%i",a->Acceptor->ScoreBP,a->Acceptor->PositionBP);strcat(attribute,tmpstr);
+	  } 
+	}else{
+	  sprintf(tmpstr,";donor_score=%1.2f;acceptor_score=%1.2f",a->Acceptor->Score,d->Donor->Score);strcat(attribute,tmpstr);
+	    
+	  if (PPT){
+	    sprintf(tmpstr,";ppt_score=%1.2f;ppt_pos=%i",d->Donor->ScorePPT,d->Donor->PositionPPT);strcat(attribute,tmpstr);
+	    }
+	  if ((BP && d->Donor->class == U2)||(d->Donor->class != U2)){
+	    sprintf(tmpstr,";bp_score=%1.2f;bp_pos=%i",d->Donor->ScoreBP,d->Donor->PositionBP);strcat(attribute,tmpstr);
+	  }
+	}
+      }
+    
+    printf ("%s\t%s\tintron\t%ld\t%ld\t%1.2f\t%c\t%hd\tID=intron_%s%s_%ld.%i;Parent=%s%s_%ld;type=%s;subtype=%s%s\n",
 	    /* correct stop codon position, Terminal- & Terminal+ */ 
 	    Name,
 	    (a->evidence)? EVIDENCE : VERSION,     
@@ -408,7 +552,8 @@ void PrintGIntron(exonGFF *d,
 	    Name,
 	    ngen,
 	    intronType,
-	    intronSubtype
+	    intronSubtype,
+	    attribute
 	    );
   } else {
     if (GFF){		 

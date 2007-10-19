@@ -25,11 +25,15 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: PrintSites.c,v 1.10 2006-12-11 09:50:48 talioto Exp $  */
+/*  $Id: PrintSites.c,v 1.11 2007-10-19 13:26:50 talioto Exp $  */
 
 #include "geneid.h"
 
 extern int GFF;
+extern int GFF3;
+extern int BP;
+extern int PPT;
+extern int U12;
 
 /* Print a individual signal according to the selected format */
 void PrintSite(site* s, int type,
@@ -41,6 +45,8 @@ void PrintSite(site* s, int type,
   char strand;
   int offset;
   char sAux[MAXSTRING];
+  char attribute[MAXSTRING] = "";
+  char tmpstr[MAXSTRING] = "";
   int i;
   int acc_context;
   acc_context = 0;
@@ -108,66 +114,99 @@ void PrintSite(site* s, int type,
     }
   
   /* Effective output for this signal */
-  if (GFF)
+  if (GFF3)
+    {
+      if(type == ACC){
+	    if (PPT){
+	      sprintf(tmpstr,";ppt_score=%1.2f;ppt_pos=%i",s->ScorePPT,s->PositionPPT);strcat(attribute,tmpstr);
+	    }
+	    if ((BP && s->class == U2)||(s->class != U2)){
+	      sprintf(tmpstr,";bp_score=%1.2f;bp_pos=%i",s->ScoreBP,s->PositionBP);strcat(attribute,tmpstr);
+	    }
+	}
+	sprintf(tmpstr,";type=%s;subtype=%s",s->type,s->subtype);strcat(attribute,tmpstr);
+      
+      /* Print site: gff format */
+      printf("%s\t%s\t%s\t%ld\t%ld\t%5.2f\t%c\t.\tseq=%s%s\n",
+	     Name,
+	     SITES,
+	     Type,
+	     (offset>0)? 
+	     s->Position+k+COFFSET : 
+	     s->Position+k+offset+COFFSET,
+			 
+	     (offset>0)? 
+	     s->Position+k+offset+COFFSET : 
+	     s->Position+k+COFFSET,
+			 
+	     s->Score,
+	     strand,
+	     sAux,
+	     attribute);
+    }
+  else
+    {
+      if (GFF)
 	{
 	  /* Print site: gff format */
 	  printf("%s\t%s\t%s:%s\t%ld\t%ld\t%5.2f\t%c\t.\t# %s\n",
-			 Name,
-			 SITES,
-			 Type,
-			 s->subtype,
-			 (offset>0)? 
-			 s->Position+k+COFFSET : 
-			 s->Position+k+offset+COFFSET,
+		 Name,
+		 SITES,
+		 Type,
+		 s->subtype,
+		 (offset>0)? 
+		 s->Position+k+COFFSET : 
+		 s->Position+k+offset+COFFSET,
 			 
-			 (offset>0)? 
-			 s->Position+k+offset+COFFSET : 
-			 s->Position+k+COFFSET,
+		 (offset>0)? 
+		 s->Position+k+offset+COFFSET : 
+		 s->Position+k+COFFSET,
 			 
-			 s->Score,
-			 strand,
-			 sAux);
+		 s->Score,
+		 strand,
+		 sAux);
 	}
-  else
+      else
 	{
 	  if (type != ACC)
-		/* Print site: default format */
-		printf("%8s:%13s %8ld %8ld\t%5.2f\t%c\t%s\n",
-			   Type,
-			   s->subtype,
-			   (offset>0)? 
-			   s->Position+k+COFFSET : 
-			   s->Position+k+offset+COFFSET,
+	    /* Print site: default format */
+	    printf("%8s:%13s %8ld %8ld\t%5.2f\t%c\t%s\n",
+		   Type,
+		   s->subtype,
+		   (offset>0)? 
+		   s->Position+k+COFFSET : 
+		   s->Position+k+offset+COFFSET,
 			   
-			   (offset>0)? 
-			   s->Position+k+offset+COFFSET : 
-			   s->Position+k+COFFSET,
+		   (offset>0)? 
+		   s->Position+k+offset+COFFSET : 
+		   s->Position+k+COFFSET,
 			   
-			   s->Score,
-			   strand,
-			   sAux);
+		   s->Score,
+		   strand,
+		   sAux);
 			   
 	  else
-		/* Print site: default format */
-		printf("%8s:%13s %8ld %8ld\t%5.2f\t%5.2f\t%3d\t%5.2f\t%3d\t%c\t%s\n",
-			   Type,
-			   s->subtype,
-			   (offset>0)? 
-			   s->Position+k+COFFSET : 
-			   s->Position+k+offset+COFFSET,
+	    /* Print site: default format */
+	    printf("%8s:%13s %8ld %8ld\t%5.2f\t%5.2f\t%3d\t%5.2f\t%3d\t%c\t%s\n",
+		   Type,
+		   s->subtype,
+		   (offset>0)? 
+		   s->Position+k+COFFSET : 
+		   s->Position+k+offset+COFFSET,
 			   
-			   (offset>0)? 
-			   s->Position+k+offset+COFFSET : 
-			   s->Position+k+COFFSET,
+		   (offset>0)? 
+		   s->Position+k+offset+COFFSET : 
+		   s->Position+k+COFFSET,
 			   
-			   s->Score,
-			   s->ScorePPT,
-			   s->PositionPPT,
-			   s->ScoreBP,
-			   s->PositionBP,
-			   strand,
-			   sAux);
+		   s->Score,
+		   s->ScorePPT,
+		   s->PositionPPT,
+		   s->ScoreBP,
+		   s->PositionBP,
+		   strand,
+		   sAux);
 	}
+    }
 }
 
 /* Print a list of signals according to the selected format */
