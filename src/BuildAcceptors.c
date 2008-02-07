@@ -53,6 +53,7 @@ float ComputeU2BranchProfile(char* s,
   /*      char mess[MAXSTRING];  */
   i = MAX(p->order,positionAcc - p->acc_context);
   end = MIN(positionAcc - p->dist + p->dimension - p->offset,limitRight);
+  end = MIN(end,positionAcc);
   Opt = MAX(0,positionAcc - p->opt_dist);
   for (;
        i + p->dimension <= end;
@@ -74,6 +75,7 @@ float ComputeU2BranchProfile(char* s,
 	   
       score = score - p->penalty_factor * (((float)(abs(i + p->offset -Opt))/((float)(p->acc_context - p->offset - p->opt_dist)))*((float)(abs(i + p->offset
 																			     -Opt))/((float)(p->acc_context - p->offset - p->opt_dist)))); 
+      score = p->afactor + (p->bfactor * score);
       if ((score >= maxScore)&&(score > p->cutoff)){
 	maxScore = score;
 	splicesite->PositionBP = i + p->offset - positionAcc;
@@ -199,6 +201,7 @@ long  BuildAcceptors(char* s,
 	    
 	    /* For the time being, we will not use the BP or PPT scores */
 	    /* if (scoreBP > 0){score = score + scoreBP;} */ /* + scorePPT */
+	    score = score + scoreBP;
 	    score = p->afactor + (p->bfactor * score); 
 	    /* Acceptor core is used as a global cutoff */
 	    if (score >= p->cutoff) 
@@ -249,8 +252,8 @@ long  BuildAcceptors(char* s,
 	    if (BP)
 	      scoreBP = ComputeU2BranchProfile(sOriginal,left + is + p->offset,l2,bp,&st[ns]);
 		  
-	    if (scoreBP > 0){score = score + scoreBP;} /* + scorePPT */
-
+	    /* if (scoreBP > 0){score = score + scoreBP;} */ /* + scorePPT */
+	    score = score + scoreBP;
 	    score = p->afactor + (p->bfactor * score); 
 
 	    if (score >= p->cutoff) 
@@ -297,7 +300,8 @@ long  BuildAcceptors(char* s,
 	    if (BP)
 	      scoreBP = ComputeU2BranchProfile(sOriginal,left + is + p->offset,l2,bp,&st[ns]);
 		  
-	    if (scoreBP > 0){score = score + scoreBP;} /* + scorePPT */
+	    /* if (scoreBP > 0){score = score + scoreBP;} */ /* + scorePPT */
+	    score = score + scoreBP;
 	    score = p->afactor + (p->bfactor * score); 
 
 	    if (score >= p->cutoff) 
@@ -346,7 +350,8 @@ long  BuildAcceptors(char* s,
 	    if (BP)
 	      scoreBP = ComputeU2BranchProfile(sOriginal,left + is + p->offset,l2,bp,&st[ns]);
 		  
-	    if (scoreBP > 0){score = score + scoreBP;} /* + scorePPT */
+	    /* if (scoreBP > 0){score = score + scoreBP;} */ /* + scorePPT */
+	    score = score + scoreBP;
 	    score = p->afactor + (p->bfactor * score); 
 
 	    if (score >= p->cutoff) 

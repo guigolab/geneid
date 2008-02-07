@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: ReadExonsGFF.c,v 1.10 2007-03-30 15:09:29 talioto Exp $  */
+/*  $Id: ReadExonsGFF.c,v 1.11 2008-02-07 13:30:20 talioto Exp $  */
 
 #include "geneid.h"
 extern float EvidenceEW;
@@ -360,11 +360,16 @@ long ReadExonsGFF (char *FileName,
 			  
 		    /* (E). Doing the same for the original exon: */
 		    /* Computing remainder from frame value */
+		    if (!strcmp((external->evidence[a]->vExons + external->evidence[a]->nvExons)->Type,sINTRON)){
+		      (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Remainder = (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Frame;
+		      (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Frame = 
+			(3 - (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Remainder)%3;
+		    }else{
 		    (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Remainder = 
 		      ((3 - (((external->evidence[a]->vExons + external->evidence[a]->nvExons)->Donor->Position - 
 			      (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Acceptor->Position - 
 			      (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Frame + 1)%3)) %3);
-			  
+		    }
 		    /* Evidence flag activated */
 		    (external->evidence[a]->vExons + external->evidence[a]->nvExons)->evidence = 1;
 			  

@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: PrintSites.c,v 1.11 2007-10-19 13:26:50 talioto Exp $  */
+/*  $Id: PrintSites.c,v 1.12 2008-02-07 13:30:20 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -170,9 +170,8 @@ void PrintSite(site* s, int type,
 	{
 	  if (type != ACC)
 	    /* Print site: default format */
-	    printf("%8s:%13s %8ld %8ld\t%5.2f\t%c\t%s\n",
+	    printf("%8s %8ld %8ld\t%5.2f\t%c\t%s\t%s\n",
 		   Type,
-		   s->subtype,
 		   (offset>0)? 
 		   s->Position+k+COFFSET : 
 		   s->Position+k+offset+COFFSET,
@@ -183,13 +182,13 @@ void PrintSite(site* s, int type,
 			   
 		   s->Score,
 		   strand,
-		   sAux);
+		   sAux,
+		   s->subtype);
 			   
 	  else
 	    /* Print site: default format */
-	    printf("%8s:%13s %8ld %8ld\t%5.2f\t%5.2f\t%3d\t%5.2f\t%3d\t%c\t%s\n",
+	    printf("%8s %8ld %8ld\t%5.2f\t%5.2f\t%3d\t%5.2f\t%3d\t%c\t%s\t%s\n",
 		   Type,
-		   s->subtype,
 		   (offset>0)? 
 		   s->Position+k+COFFSET : 
 		   s->Position+k+offset+COFFSET,
@@ -204,7 +203,8 @@ void PrintSite(site* s, int type,
 		   s->ScoreBP,
 		   s->PositionBP,
 		   strand,
-		   sAux);
+		   sAux,
+		   s->subtype);
 	}
     }
 }

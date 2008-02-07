@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: PrintExons.c,v 1.20 2007-10-19 13:26:50 talioto Exp $  */
+/*  $Id: PrintExons.c,v 1.21 2008-02-07 13:30:20 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -264,6 +264,7 @@ void PrintGExon(exonGFF *e,
       /* GFF3 format 5_prime_partial=true ???*/
       if (e->five_prime_partial) { strcpy(attribute,";5_prime_partial=true");}
       if (e->three_prime_partial) { strcat(attribute,";3_prime_partial=true");}
+      sprintf(tmpstr,";exon_type=%s",e->Type);strcat(attribute,tmpstr);
       if (! e->evidence){
 	if (e->Strand == cFORWARD){
 	  if (!strcmp(e->Type,sFIRST)){
