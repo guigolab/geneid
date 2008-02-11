@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: PrintExons.c,v 1.21 2008-02-07 13:30:20 talioto Exp $  */
+/*  $Id: PrintExons.c,v 1.22 2008-02-11 17:07:36 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -521,7 +521,7 @@ void PrintGIntron(exonGFF *d,
 	  if (PPT){
 	    sprintf(tmpstr,";ppt_score=%1.2f;ppt_pos=%i",a->Acceptor->ScorePPT,a->Acceptor->PositionPPT);strcat(attribute,tmpstr);
 	    }
-	  if ((BP && a->Acceptor->class == U2)||(d->Acceptor->class != U2)){
+	  if ((BP && a->Acceptor->class == U2)||(a->Acceptor->class != U2)){
 	    sprintf(tmpstr,";bp_score=%1.2f;bp_pos=%i",a->Acceptor->ScoreBP,a->Acceptor->PositionBP);strcat(attribute,tmpstr);
 	  } 
 	}else{
