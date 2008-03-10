@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: ReadExonsGFF.c,v 1.11 2008-02-07 13:30:20 talioto Exp $  */
+/*  $Id: ReadExonsGFF.c,v 1.12 2008-03-10 15:31:39 talioto Exp $  */
 
 #include "geneid.h"
 extern float EvidenceEW;
@@ -100,6 +100,11 @@ long ReadExonsGFF (char *FileName,
   int slen;
   char mess[MAXSTRING];
 
+  int acceptorclass = U2;
+  int donorclass = U2;
+  char groupCopy[MAXLINE];
+  char *k;
+  char *v;
 
   /* 0. Open exons file to read the information */
   if ((file=fopen(FileName, "r"))==NULL)
@@ -246,6 +251,93 @@ long ReadExonsGFF (char *FileName,
 		if (!(strcmp((external->evidence[a]->vExons + external->evidence[a]->nvExons)->Group,"."))){
 		  /* strcpy((external->evidence[a]->vExons + external->evidence[a]->nvExons)->Group, ""); */
 		  strcpy((external->evidence[a]->vExons + external->evidence[a]->nvExons)->Group, NOGROUP);
+		}else{
+		  /* Handle GFF3 format here*/
+		  /* Parse group field into tokens delimited by '=;' */
+		  /* copy the field first so as not to screw it up */
+		  strcpy(groupCopy,line9);
+		  k = (char *) strtok(groupCopy,"=");
+		  if(k != NULL){strcpy((external->evidence[a]->vExons + external->evidence[a]->nvExons)->Group, NOGROUP);}
+		    while (k != NULL)
+		    {
+		    
+		      v = (char *) strtok(NULL,";\n");
+/* 		      sprintf(mess,"Tags\n%s-->%s\n",k,v); */
+/* 		      printMess(mess); */
+		      if (!(strcmp(k,"Parent"))){
+			if (!(strcmp(v,".")) || v == NULL){
+			  strcpy((external->evidence[a]->vExons + external->evidence[a]->nvExons)->Group, NOGROUP);
+			}else{
+			  strcpy((external->evidence[a]->vExons + external->evidence[a]->nvExons)->Group, v);
+			}
+		      }
+		      if(
+			  (((external->evidence[a]->vExons + external->evidence[a]->nvExons)->Strand == '+') && strcmp((external->evidence[a]->vExons + external->evidence[a]->nvExons)->Type,"Intron"))||
+			  (((external->evidence[a]->vExons + external->evidence[a]->nvExons)->Strand == '-') && !strcmp((external->evidence[a]->vExons + external->evidence[a]->nvExons)->Type,"Intron"))
+			 ){
+			if (!(strcmp(k,"donor"))){
+			  if (!(strcmp(v,sU2))){
+			    donorclass = U2;
+			  }
+			  if (!(strcmp(v,sU12gtag))){
+			    donorclass = U12gtag;
+			  }
+			  if (!(strcmp(v,sU12atac))){
+			    donorclass = U12atac;
+			  }
+			}
+			if (!(strcmp(k,"acceptor"))){
+			  if (!(strcmp(v,sU2))){
+			    acceptorclass = U2;
+			  }
+			  if (!(strcmp(v,sU12gtag))){
+			    acceptorclass = U12gtag;
+			  }
+			  if (!(strcmp(v,sU12atac))){
+			    acceptorclass = U12atac;
+			  }
+
+			}
+		      }else{
+			if (!(strcmp(k,"acceptor"))){
+			  if (!(strcmp(v,sU2))){
+			    donorclass = U2;
+			  }
+			  if (!(strcmp(v,sU12gtag))){
+			    donorclass = U12gtag;
+			  }
+			  if (!(strcmp(v,sU12atac))){
+			    donorclass = U12atac;
+			  }
+			}
+			if (!(strcmp(k,"donor"))){
+			  if (!(strcmp(v,sU2))){
+			    acceptorclass = U2;
+			  }
+			  if (!(strcmp(v,sU12gtag))){
+			    acceptorclass = U12gtag;
+			  }
+			  if (!(strcmp(v,sU12atac))){
+			    acceptorclass = U12atac;
+			  }
+
+			}
+		      }
+/* 		      sprintf(mess,"Tags\n%s-->%s\n",k,v); */
+/* 		      printMess(mess); */
+		      
+		      k = strtok (NULL, "=");
+
+		    }
+/* 		  sprintf(mess,"donorclass=%i\tacceptorclass=%i\n",donorclass,acceptorclass); */
+/* 		      printMess(mess); */
+		      
+		
+
+		  /* if only one token, then leave it -- it's the group in GFF1 format */
+		  /* process them in pairs, looking for 'Parent', 'donor', 'acceptor' */
+		  /* valid values for donor and acceptor are 'U2', 'U12gtag', and 'U12atac' */
+		  /* later we can add tags for stop codon values to ensure non-creation of stops across splice junctions */
 		}
 	      }
 	    else
@@ -284,9 +376,10 @@ long ReadExonsGFF (char *FileName,
 		    lastAcceptor[a] = currAcceptor;
 			  
 		    /* (C). Setting evidence splice sites to U2 class */
-		    (external->evidence[a]->vSites + external->evidence[a]->nvSites)->class = U2;
-		    (external->evidence[a]->vSites + external->evidence[a]->nvSites + 1)->class = U2;
-
+		    (external->evidence[a]->vSites + external->evidence[a]->nvSites)->class = acceptorclass;
+		    (external->evidence[a]->vSites + external->evidence[a]->nvSites + 1)->class = donorclass;
+/* 		    sprintf(mess,"donorclass=%i\tacceptorclass=%i\n",(external->evidence[a]->vSites + external->evidence[a]->nvSites + 1)->class,(external->evidence[a]->vSites + external->evidence[a]->nvSites)->class); */
+/* 		      printMess(mess); */
 		    /* (C). Setting dummy sites to this exon */
 		    (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Acceptor 
 		      = (external->evidence[a]->vSites + external->evidence[a]->nvSites);

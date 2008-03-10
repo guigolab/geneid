@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: PrintExons.c,v 1.22 2008-02-11 17:07:36 talioto Exp $  */
+/*  $Id: PrintExons.c,v 1.23 2008-03-10 15:31:39 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -475,18 +475,19 @@ void PrintGmRNA(exonGFF *s,
       }
     }
 }
-/* Print a predicted intron from a assembled gene: gff/geneid format */
+/* Print a predicted intron from an assembled gene: gff/geneid format */
 void PrintGIntron(exonGFF *d,
 		  exonGFF *a,
 		  char Name[],
 		  long ngen,
 		  int numInt,
 		  char* GenePrefix,
-		  int evidence)
+		  int evidence,
+		  float score)
 {
   char attribute[MAXSTRING] = "";
   char tmpstr[MAXSTRING] = "";
-  float score = 0.0;
+  /* float score = 0.0; */
   char intronType[MAXTYPE]; 
   strcpy(intronType,"U2");
   char intronSubtype[MAXTYPE]; 
@@ -495,8 +496,9 @@ void PrintGIntron(exonGFF *d,
   /* short phase = MIN(0, 3 - a->Frame); */
   long start = (a->evidence)? a->Acceptor->Position: d->Donor->Position + 1 + d->offset2;
   long end = (a->evidence)? a->Donor->Position: a->Acceptor->Position -1 + a->offset1;
+
   if (evidence){
-    score = a->Score;
+    /* score = a->Score; */
   }else{
     score = (d->Donor->Score + a->Acceptor->Score)/2;
   }
@@ -539,7 +541,7 @@ void PrintGIntron(exonGFF *d,
     printf ("%s\t%s\tintron\t%ld\t%ld\t%1.2f\t%c\t%hd\tID=intron_%s%s_%ld.%i;Parent=%s%s_%ld;type=%s;subtype=%s%s\n",
 	    /* correct stop codon position, Terminal- & Terminal+ */ 
 	    Name,
-	    (a->evidence)? EVIDENCE : VERSION,     
+	    evidence? EVIDENCE : VERSION,     
 	    start,
 	    end,
 	    (score==MAXSCORE)? 0.0:score,
@@ -562,7 +564,7 @@ void PrintGIntron(exonGFF *d,
       printf ("%s\t%s\t%s_intron\t%ld\t%ld\t%1.2f\t%c\t%hd\t%s%s_%ld\n",
 	      /* correct stop codon position, Terminal- & Terminal+ */ 
 	      Name,
-	      (a->evidence)? EVIDENCE : VERSION,     
+	      evidence? EVIDENCE : VERSION,     
 	      intronType,
 	      start,
 	      end,

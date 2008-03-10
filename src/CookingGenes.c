@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: CookingGenes.c,v 1.27 2007-08-01 13:45:06 talioto Exp $  */
+/*  $Id: CookingGenes.c,v 1.28 2008-03-10 15:31:39 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -415,6 +415,7 @@ long CookingInfo(exonGFF* eorig,
 /* taa[exon][0] means first amino acid id. and taa[exon][1] means last one */
 void PrintGene(exonGFF* start,
                exonGFF* end,
+               exonGFF* last,
                char Name[],
                char* s,
                gparam* gp,
@@ -449,7 +450,7 @@ void PrintGene(exonGFF* start,
       }
       eaux = start -> PreviousExon;
       /* a.1. Recursive call to print before the rest of the gene */
-      PrintGene(eaux,end,Name,s,gp,dAA,igen,nAA,tAA,nExon+1,nPrintExon,nExons,GenePrefix);
+      PrintGene(eaux,end,start,Name,s,gp,dAA,igen,nAA,tAA,nExon+1,nPrintExon,nExons,GenePrefix);
       
       if (strcmp(start->Type,sINTRON)){
 	/* a.2. printing this exon: XML, extend, gff or geneid format */      
@@ -470,12 +471,12 @@ void PrintGene(exonGFF* start,
 	      PrintSite(start->Donor,type2,Name,strand,s,p2);
 	    }
 	  else {
-	    if (PRINTINT && strcmp(eaux->Type,sINTRON)) { PrintGIntron(eaux,start,Name,igen,nint,GenePrefix,0); }
+	    if (PRINTINT && strcmp(eaux->Type,sINTRON)) { PrintGIntron(eaux,start,Name,igen,nint,GenePrefix,0,0.0); }
 	    PrintGExon(start,Name,s,dAA,igen,tAA[nExon][0],tAA[nExon][1],nAA,nint,GenePrefix);
 	  }
       }else{
 	if (PRINTINT){
-	  PrintGIntron(eaux,start,Name,igen,nint,GenePrefix,1);	  
+	  PrintGIntron(eaux,last,Name,igen,nint,GenePrefix,1,start->Score);	  
 	}
       }
     }
@@ -629,7 +630,7 @@ void CookingGenes(exonGFF* e,
 				 (info[igen].start->Strand == '+')? sFORWARD : sREVERSE,
 				 nAA*3);
 	  	}
-      PrintGene(info[igen].start, info[igen].end, Name, s, gp, dAA, ngen-igen,
+      PrintGene(info[igen].start, info[igen].end, info[igen].end, Name, s, gp, dAA, ngen-igen,
 		nAA,tAA,0,0,info[igen].nexons,GenePrefix);
 	  if (GFF3)
     	printf ("###\n");

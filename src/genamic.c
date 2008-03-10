@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: genamic.c,v 1.17 2007-04-25 17:20:01 talioto Exp $  */
+/*  $Id: genamic.c,v 1.18 2008-03-10 15:31:39 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -96,10 +96,6 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 	(E+i)->PreviousExon = pg->Ghost;
 	(E+i)->GeneScore = (E+i)->Score;
 	current_exon_is_u12 = 0;
-	if (!strcmp((E+i)->Type,"Intron")){
-	  (E+i)->Donor->class = U2;
-	  (E+i)->Acceptor->class = U2;	
-	}
 	spliceclass = (E+i)->Acceptor->class;
 	if (!strcmp((E+i)->Type,sEND) || !strcmp((E+i)->Type,sBEGIN)|| !strcmp((E+i)->Type,sSINGLE)){
 	  current_exon_is_u12 = 0;
@@ -197,9 +193,14 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 		/* Verify group rules if there are evidence exons (annotations) */
 		if (current_exon_is_u12){
 		  if (pg->Ga[etype][frame][spliceclass]->Donor->class != U2){				  
-		    if(((pg->Ga[etype][frame][spliceclass]->Donor->Score + (E+i)->Acceptor->Score) > U12_SPLICE_SCORE_THRESH)
-		       &&
-		       ((pg->Ga[etype][frame][spliceclass]->Score + (E+i)->Score) > U12_EXON_SCORE_THRESH)
+		    if((((pg->Ga[etype][frame][spliceclass]->Donor->Score + (E+i)->Acceptor->Score) > U12_SPLICE_SCORE_THRESH)
+			&&
+			((pg->Ga[etype][frame][spliceclass]->Score + (E+i)->Score) > U12_EXON_SCORE_THRESH)
+			)
+		       ||
+		       (
+			(E+i)->evidence || pg->Ga[etype][frame][spliceclass]->evidence
+			)
 		       ){
 		      thresholdmet = 1;
 		    } else {
@@ -213,6 +214,7 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 		    thresholdmet = 0;
 		  }
 		}
+
 		if ((!(strcmp(pg->Ga[etype][frame][spliceclass]->Group,(E+i)->Group))
 		     || gp->block[etype] == NONBLOCK)
 		    &&

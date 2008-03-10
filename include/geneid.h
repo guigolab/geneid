@@ -28,7 +28,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/     
 
-/* $Id: geneid.h,v 1.41 2007-08-07 17:01:54 talioto Exp $ */
+/* $Id: geneid.h,v 1.42 2008-03-10 15:31:39 talioto Exp $ */
 
 /* Required libraries */
 #include <stdlib.h>
@@ -51,7 +51,7 @@ A. DEFINITIONS
 #define OVERLAP 10000            
 
 /* One signal per L / RSITES bp             */
-#define RSITES 4
+#define RSITES 0.1
 
 /* /\* One U12 signal per L / RU12SITES bp             *\/ */
 /* #define RU12SITES 6   */               
@@ -851,7 +851,7 @@ void PrintGExon(exonGFF *e, char Name[], char* s, dict* dAA,
 		int numInt, char* GenePrefix);
 			   
 void PrintGIntron(exonGFF *d, exonGFF *a, char Name[],long ngen,
-		  int numInt, char* GenePrefix, int evidence);
+		  int numInt, char* GenePrefix, int evidence, float score);
 
 void PrintGGene(exonGFF *s, exonGFF *e, char Name[],
 		long ngen, float score, char* GenePrefix);

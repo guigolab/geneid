@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: SortExons.c,v 1.15 2007-04-25 17:20:01 talioto Exp $  */
+/*  $Id: SortExons.c,v 1.16 2008-03-10 15:31:39 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -417,8 +417,8 @@ void SortExons(packExons* allExons,
   if (EVD && pv != NULL)
     for (i = external->i1vExons; i < external->i2vExons ; i++) 
       {  
-	(pv->vExons + i)->Acceptor->class = U2;
-	(pv->vExons + i)->Donor->class = U2;
+/* 	(pv->vExons + i)->Acceptor->class = U2; */
+/* 	(pv->vExons + i)->Donor->class = U2; */
 		acceptor=(pv->vExons + i)->Acceptor->Position - left;
 		/* donor=(pv->vExons + i)->Donor->Position - left; */
 		offset = (pv->vExons + i)->offset1;
