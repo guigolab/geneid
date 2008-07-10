@@ -28,7 +28,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/     
 
-/* $Id: geneid.h,v 1.43 2008-07-10 08:45:12 talioto Exp $ */
+/* $Id: geneid.h,v 1.44 2008-07-10 15:25:16 talioto Exp $ */
 
 /* Required libraries */
 #include <stdlib.h>
@@ -312,7 +312,7 @@ A. DEFINITIONS
 #define sENDRVS   "End-"
 
 /* Infinity: positions in sequence          */
-#define INFI 999999999           
+#define INFI 3999999999           
 
 /* Infinity: word in Gene model             */
 #define SINFI "Infinity"         
