@@ -28,7 +28,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/     
 
-/* $Id: geneid.h,v 1.42 2008-03-10 15:31:39 talioto Exp $ */
+/* $Id: geneid.h,v 1.43 2008-07-10 08:45:12 talioto Exp $ */
 
 /* Required libraries */
 #include <stdlib.h>
@@ -88,7 +88,7 @@ A. DEFINITIONS
 #define BASEVALUEEXONS_LARGE 300000
 
 /* Max number of annotations per locus      */
-#define MAXEVIDENCES 300000       
+#define MAXEVIDENCES 12000000       
 #define MAXSITESEVIDENCES 3*MAXEVIDENCES
 
 /* Max number of HSP per locus/frame/strand */
@@ -192,7 +192,7 @@ A. DEFINITIONS
 #define HASHFACTOR 3             
 
 /* maximum length of filenames              */
-#define FILENAMELENGTH 200       
+#define FILENAMELENGTH 500       
 
 /* Name of default parameter file           */
 #define PARAMETERFILE  "param.default"   

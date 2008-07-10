@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: PrintExons.c,v 1.23 2008-03-10 15:31:39 talioto Exp $  */
+/*  $Id: PrintExons.c,v 1.24 2008-07-10 08:45:12 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -85,10 +85,10 @@ void PrintExon(exonGFF *e, char Name[], char* s, dict* dAA, char* GenePrefix)
       if (! e->evidence){
 	if (e->Strand == cFORWARD){
 	  if (!strcmp(e->Type,sFIRST)){
-	    sprintf(tmpstr,";start_score=%1.2f;donor_score=%1.2f",e->Acceptor->Score,e->Donor->Score);strcat(attribute,tmpstr);
+	    sprintf(tmpstr,";start_score=%1.2f;donor_score=%1.2f;donor=%s",e->Acceptor->Score,e->Donor->Score,e->Donor->subtype);strcat(attribute,tmpstr);
 	  }
 	  if (!strcmp(e->Type,sINTERNAL)){
-	    sprintf(tmpstr,";acceptor_score=%1.2f;donor_score=%1.2f",e->Acceptor->Score,e->Donor->Score);strcat(attribute,tmpstr);
+	    sprintf(tmpstr,";acceptor_score=%1.2f;acceptor=%s;donor_score=%1.2f;donor=%s",e->Acceptor->Score,e->Acceptor->subtype,e->Donor->Score,e->Donor->subtype);strcat(attribute,tmpstr);
 	    if (PPT){
 	      sprintf(tmpstr,";ppt_score=%1.2f;ppt_pos=%i",e->Acceptor->ScorePPT,e->Acceptor->PositionPPT);strcat(attribute,tmpstr);
 	    }
@@ -97,7 +97,7 @@ void PrintExon(exonGFF *e, char Name[], char* s, dict* dAA, char* GenePrefix)
 	    }
 	  }
 	  if (!strcmp(e->Type,sTERMINAL)){
-	    sprintf(tmpstr,";acceptor_score=%1.2f",e->Acceptor->Score);strcat(attribute,tmpstr);
+	    sprintf(tmpstr,";acceptor_score=%1.2f;acceptor=%s",e->Acceptor->Score,e->Acceptor->subtype);strcat(attribute,tmpstr);
 	    if (PPT){
 	      sprintf(tmpstr,";ppt_score=%1.2f;ppt_pos=%i",e->Acceptor->ScorePPT,e->Acceptor->PositionPPT);strcat(attribute,tmpstr);
 	    }
@@ -111,10 +111,10 @@ void PrintExon(exonGFF *e, char Name[], char* s, dict* dAA, char* GenePrefix)
 	  
 	}else{
 	  if (!strcmp(e->Type,sFIRST)){
-	    sprintf(tmpstr,";start_score=%1.2f;donor_score=%1.2f",e->Donor->Score,e->Acceptor->Score);strcat(attribute,tmpstr);
+	    sprintf(tmpstr,";start_score=%1.2f;donor_score=%1.2f;donor=%s",e->Donor->Score,e->Acceptor->Score,e->Acceptor->subtype);strcat(attribute,tmpstr);
 	  }
 	  if (!strcmp(e->Type,sINTERNAL)){
-	    sprintf(tmpstr,";acceptor_score=%1.2f;donor_score=%1.2f",e->Donor->Score,e->Acceptor->Score);strcat(attribute,tmpstr);
+	    sprintf(tmpstr,";acceptor_score=%1.2f;acceptor=%s;donor_score=%1.2f;donor=%s",e->Donor->Score,e->Donor->subtype,e->Acceptor->Score,e->Acceptor->subtype);strcat(attribute,tmpstr);
 	    if (PPT){
 	      sprintf(tmpstr,";ppt_score=%1.2f;ppt_pos=%i",e->Donor->ScorePPT,e->Donor->PositionPPT);strcat(attribute,tmpstr);
 	    }
@@ -123,7 +123,7 @@ void PrintExon(exonGFF *e, char Name[], char* s, dict* dAA, char* GenePrefix)
 	    }
 	  }
 	  if (!strcmp(e->Type,sTERMINAL)){
-	    sprintf(tmpstr,";acceptor_score=%1.2f",e->Donor->Score);strcat(attribute,tmpstr);
+	    sprintf(tmpstr,";acceptor_score=%1.2f;acceptor=%s",e->Donor->Score,e->Donor->subtype);strcat(attribute,tmpstr);
 	    if (PPT){
 	      sprintf(tmpstr,";ppt_score=%1.2f;ppt_pos=%i",e->Donor->ScorePPT,e->Donor->PositionPPT);strcat(attribute,tmpstr);
 	    }
@@ -137,9 +137,9 @@ void PrintExon(exonGFF *e, char Name[], char* s, dict* dAA, char* GenePrefix)
 	  
 	}
 	sprintf(tmpstr,";coding_potential=%1.2f",e->PartialScore);strcat(attribute,tmpstr);
-	if (SRP){sprintf(tmpstr,";start_score=%1.2f",e->HSPScore);strcat(attribute,tmpstr);}
+	if (SRP){sprintf(tmpstr,";homology_score=%1.2f",e->HSPScore);strcat(attribute,tmpstr);}
       }
-      printf ("%s\t%s\t%s\t%ld\t%ld\t%1.2f\t%c\t%hd\t%s_%s_%ld_%ld%s\n",
+      printf ("%s\t%s\t%s\t%ld\t%ld\t%1.2f\t%c\t%hd\tID=%s_%s_%ld_%ld%s\n",
 	      /* correct stop codon position, Terminal- & Terminal+ */ 
 	      Name,
 	      (e->evidence)? EVIDENCE : EXONS,
@@ -149,8 +149,8 @@ void PrintExon(exonGFF *e, char Name[], char* s, dict* dAA, char* GenePrefix)
 	      (e->Score==MAXSCORE)? 0.0: e->Score,
 	      e->Strand,
 	      e->Frame,
-	      Name,
 	      e->Type,
+	      Name,
 	      (e->evidence)? e->Acceptor->Position : e->Acceptor->Position + e->offset1,
 	      (e->evidence)? e->Donor->Position : e->Donor->Position + e->offset2,
 	      attribute);
@@ -170,7 +170,9 @@ void PrintExon(exonGFF *e, char Name[], char* s, dict* dAA, char* GenePrefix)
 		(e->Score==MAXSCORE)? 0.0: e->Score,
 		e->Strand,
 		e->Frame,
-		Name,e->Type,(e->evidence)? e->Acceptor->Position : e->Acceptor->Position + e->offset1,
+		e->Type,
+		Name,
+		(e->evidence)? e->Acceptor->Position : e->Acceptor->Position + e->offset1,
 		(e->evidence)? e->Donor->Position : e->Donor->Position + e->offset2 );
       }
     else
