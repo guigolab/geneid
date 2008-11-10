@@ -28,7 +28,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/     
 
-/* $Id: geneid.h,v 1.45 2008-07-17 09:47:03 talioto Exp $ */
+/* $Id: geneid.h,v 1.46 2008-11-10 14:51:52 talioto Exp $ */
 
 /* Required libraries */
 #include <stdlib.h>
@@ -98,7 +98,7 @@ A. DEFINITIONS
 #define MAXNSEQUENCES 50         
 
 /* Maximum number of predicted genes  orig:15000      */
-#define MAXGENE 40000            
+#define MAXGENE 1000000            
 
 /* Maximum number of exons in a gene        */
 #define MAXEXONGENE 1000         
@@ -192,7 +192,7 @@ A. DEFINITIONS
 #define HASHFACTOR 3             
 
 /* maximum length of filenames              */
-#define FILENAMELENGTH 500       
+#define FILENAMELENGTH 5000       
 
 /* Name of default parameter file           */
 #define PARAMETERFILE  "param.default"   
