@@ -14,7 +14,7 @@ PROGRAM= geneid
 PRODUCT= $(BIN)/$(PROGRAM)
 CC=gcc
 OPTS=-I$(INCLUDE) -Wall -O3
-#OPTS=-I$(INCLUDE) -Wall -g
+### OPTS=-I$(INCLUDE) -Wall -O3 -g
 #######
 
 OBJECTS = $(OBJ)/BackupGenes.o $(OBJ)/BuildAcceptors.o $(OBJ)/BuildU12Acceptors.o $(OBJ)/BuildDonors.o \
