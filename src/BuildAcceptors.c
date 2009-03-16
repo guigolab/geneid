@@ -83,8 +83,8 @@ float ComputeU2BranchProfile(char* s,
     }
   
   /* Cutoff for BranchPoint and PPtracts are useless */
-  /* if (maxScore < p->cutoff) */
-  	/* maxScore = 0.0; */
+/*   if (maxScore < p->cutoff) */
+/*   	maxScore = 0.0; */
 
   return maxScore;
 }
@@ -132,8 +132,8 @@ float ComputeU2PPTProfile(char* s,
     }
   
   /* Cutoff for BranchPoint and PPtracts are useless */
-  if (maxScore < p->cutoff)
-  	maxScore = 0.0;
+/*   if (maxScore < p->cutoff) */
+/*   	maxScore = 0.0; */
 
   return maxScore;
 }

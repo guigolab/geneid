@@ -28,7 +28,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/     
 
-/* $Id: geneid.h,v 1.46 2008-11-10 14:51:52 talioto Exp $ */
+/* $Id: geneid.h,v 1.47 2009-03-16 13:40:25 talioto Exp $ */
 
 /* Required libraries */
 #include <stdlib.h>
@@ -97,8 +97,8 @@ A. DEFINITIONS
 /* Max number of locus in multi-fasta files */
 #define MAXNSEQUENCES 50         
 
-/* Maximum number of predicted genes  orig:15000      */
-#define MAXGENE 1000000            
+/* Maximum number of predicted genes        */
+#define MAXGENE 15000            
 
 /* Maximum number of exons in a gene        */
 #define MAXEXONGENE 1000         
@@ -192,7 +192,7 @@ A. DEFINITIONS
 #define HASHFACTOR 3             
 
 /* maximum length of filenames              */
-#define FILENAMELENGTH 5000       
+#define FILENAMELENGTH 500       
 
 /* Name of default parameter file           */
 #define PARAMETERFILE  "param.default"   
@@ -312,7 +312,7 @@ A. DEFINITIONS
 #define sENDRVS   "End-"
 
 /* Infinity: positions in sequence          */
-#define INFI 3999999999           
+#define INFI 999999999           
 
 /* Infinity: word in Gene model             */
 #define SINFI "Infinity"         
