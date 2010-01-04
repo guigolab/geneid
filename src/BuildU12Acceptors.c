@@ -151,6 +151,7 @@ long  BuildU12Acceptors(char* s,
   float score;
   float scoreBP;
   float scorePPT;
+  float scoreAcc;		
   /*   long ns,is; */
   long is;
   long left,right;
@@ -173,6 +174,7 @@ long  BuildU12Acceptors(char* s,
 		  	  
 	    scorePPT = 0.0;
 	    scoreBP = 0.0;
+	    scoreAcc = 0.0;
 	    score=0.0;
 	    /* Applying part of the profile */
 	    for (i=u12_p->offset-is, j=0; i < u12_p->dimension; i++,j++) 
@@ -193,7 +195,7 @@ long  BuildU12Acceptors(char* s,
 		if (scoreBP >=u12bp->cutoff) {
 		if (PPT)
 		  scorePPT = ComputePPTProfile(sOriginal,u12_p->offset-is,l2,ppt,&st[ns]);
-				
+		scoreAcc = score;		
 		score = score + scoreBP;
 		score = u12_p->afactor + (u12_p->bfactor * score); 
 
@@ -202,6 +204,7 @@ long  BuildU12Acceptors(char* s,
 		    st[ns].Position = is + u12_p->order;
 		    st[ns].ScoreBP = scoreBP;
 		    st[ns].ScorePPT = scorePPT;
+		    st[ns].ScoreAccProfile = scoreAcc;
 		    st[ns].Score=score;
 		    st[ns].class= class;
 		    /* st[ns].PositionBP= 5; */
@@ -233,6 +236,7 @@ long  BuildU12Acceptors(char* s,
 
 	    scorePPT = 0.0;
 	    scoreBP = 0.0;
+	    scoreAcc = 0.0;
 	    /* is = 0..right */
 	    score=0.0;
 	    for (i=0;i<u12_p->dimension;i++)
@@ -251,7 +255,7 @@ long  BuildU12Acceptors(char* s,
 		if (scoreBP >=u12bp->cutoff) {	  
 		if (PPT)
 		  scorePPT = ComputePPTProfile(sOriginal,left + is + u12_p->offset,l2,ppt,&st[ns]);
-				
+		scoreAcc = score;		
 		score = score + scoreBP;
 		score = u12_p->afactor + (u12_p->bfactor * score);
  
@@ -260,6 +264,7 @@ long  BuildU12Acceptors(char* s,
 		    st[ns].Position = left + is + u12_p->offset;
 		    st[ns].ScoreBP = scoreBP;
 		    st[ns].ScorePPT = scorePPT;
+		    st[ns].ScoreAccProfile = scoreAcc;
 		    st[ns].Score=score;
 		    st[ns].class= class;
 		    /* st[ns].PositionBP= 5; */
@@ -287,6 +292,7 @@ long  BuildU12Acceptors(char* s,
 			  
 	    scorePPT = 0.0;
 	    scoreBP = 0.0;
+	    scoreAcc = 0.0;
 	    /* is = 0..right */
 	    score=0.0;
 	    for (i=0;i<u12_p->dimension;i++)
@@ -306,7 +312,7 @@ long  BuildU12Acceptors(char* s,
 		if (scoreBP >=u12bp->cutoff) {	  
 		if (PPT)
 		  scorePPT = ComputePPTProfile(sOriginal,left + is + u12_p->offset,l2,ppt,&st[ns]);
-				
+		scoreAcc = score;		
 		score = score + scoreBP;
 		score = u12_p->afactor + (u12_p->bfactor * score); 
 
@@ -315,6 +321,7 @@ long  BuildU12Acceptors(char* s,
 		    st[ns].Position = left + is + u12_p->offset;
 		    st[ns].ScoreBP = scoreBP;
 		    st[ns].ScorePPT = scorePPT;
+		    st[ns].ScoreAccProfile = scoreAcc;
 		    st[ns].Score=score;
 		    st[ns].class= class;
 		    /* st[ns].PositionBP= 5; */
@@ -339,6 +346,7 @@ long  BuildU12Acceptors(char* s,
 			  
 	    scorePPT = 0.0;
 	    scoreBP = 0.0;
+	    scoreAcc = 0.0;
 	    /* is = 0..right */
 	    score=0.0;
 	    for (i=0;i<u12_p->dimension;i++)
@@ -358,7 +366,7 @@ long  BuildU12Acceptors(char* s,
 		if (scoreBP >=u12bp->cutoff) {
 		if (PPT)
 		  scorePPT = ComputePPTProfile(sOriginal,left + is + u12_p->offset,l2,ppt,&st[ns]);
-				
+		scoreAcc = score;		
 		score = score + scoreBP;
 		score = u12_p->afactor + (u12_p->bfactor * score); 
 
@@ -367,6 +375,7 @@ long  BuildU12Acceptors(char* s,
 		    st[ns].Position = left + is + u12_p->offset;
 		    st[ns].ScoreBP = scoreBP;
 		    st[ns].ScorePPT = scorePPT;
+		    st[ns].ScoreAccProfile = scoreAcc;
 		    st[ns].Score=score;
 		    st[ns].class= class;
 		    strcpy(st[ns].type,type);

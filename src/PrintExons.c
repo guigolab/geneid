@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: PrintExons.c,v 1.24 2008-07-10 08:45:12 talioto Exp $  */
+/*  $Id: PrintExons.c,v 1.25 2010-01-04 15:17:58 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -88,7 +88,7 @@ void PrintExon(exonGFF *e, char Name[], char* s, dict* dAA, char* GenePrefix)
 	    sprintf(tmpstr,";start_score=%1.2f;donor_score=%1.2f;donor=%s",e->Acceptor->Score,e->Donor->Score,e->Donor->subtype);strcat(attribute,tmpstr);
 	  }
 	  if (!strcmp(e->Type,sINTERNAL)){
-	    sprintf(tmpstr,";acceptor_score=%1.2f;acceptor=%s;donor_score=%1.2f;donor=%s",e->Acceptor->Score,e->Acceptor->subtype,e->Donor->Score,e->Donor->subtype);strcat(attribute,tmpstr);
+	    sprintf(tmpstr,";acceptor_score=%1.2f;acceptor_profile_score=%1.2f;acceptor=%s;donor_score=%1.2f;donor=%s",e->Acceptor->Score,e->Acceptor->ScoreAccProfile,e->Acceptor->subtype,e->Donor->Score,e->Donor->subtype);strcat(attribute,tmpstr);
 	    if (PPT){
 	      sprintf(tmpstr,";ppt_score=%1.2f;ppt_pos=%i",e->Acceptor->ScorePPT,e->Acceptor->PositionPPT);strcat(attribute,tmpstr);
 	    }
@@ -97,7 +97,7 @@ void PrintExon(exonGFF *e, char Name[], char* s, dict* dAA, char* GenePrefix)
 	    }
 	  }
 	  if (!strcmp(e->Type,sTERMINAL)){
-	    sprintf(tmpstr,";acceptor_score=%1.2f;acceptor=%s",e->Acceptor->Score,e->Acceptor->subtype);strcat(attribute,tmpstr);
+	    sprintf(tmpstr,";acceptor_score=%1.2f;acceptor_profile_score=%1.2f;acceptor=%s",e->Acceptor->Score,e->Acceptor->ScoreAccProfile,e->Acceptor->subtype);strcat(attribute,tmpstr);
 	    if (PPT){
 	      sprintf(tmpstr,";ppt_score=%1.2f;ppt_pos=%i",e->Acceptor->ScorePPT,e->Acceptor->PositionPPT);strcat(attribute,tmpstr);
 	    }
@@ -114,7 +114,7 @@ void PrintExon(exonGFF *e, char Name[], char* s, dict* dAA, char* GenePrefix)
 	    sprintf(tmpstr,";start_score=%1.2f;donor_score=%1.2f;donor=%s",e->Donor->Score,e->Acceptor->Score,e->Acceptor->subtype);strcat(attribute,tmpstr);
 	  }
 	  if (!strcmp(e->Type,sINTERNAL)){
-	    sprintf(tmpstr,";acceptor_score=%1.2f;acceptor=%s;donor_score=%1.2f;donor=%s",e->Donor->Score,e->Donor->subtype,e->Acceptor->Score,e->Acceptor->subtype);strcat(attribute,tmpstr);
+	    sprintf(tmpstr,";acceptor_score=%1.2f;acceptor_profile_score=%1.2f;acceptor=%s;donor_score=%1.2f;donor=%s",e->Donor->Score,e->Donor->ScoreAccProfile,e->Donor->subtype,e->Acceptor->Score,e->Acceptor->subtype);strcat(attribute,tmpstr);
 	    if (PPT){
 	      sprintf(tmpstr,";ppt_score=%1.2f;ppt_pos=%i",e->Donor->ScorePPT,e->Donor->PositionPPT);strcat(attribute,tmpstr);
 	    }
@@ -123,7 +123,7 @@ void PrintExon(exonGFF *e, char Name[], char* s, dict* dAA, char* GenePrefix)
 	    }
 	  }
 	  if (!strcmp(e->Type,sTERMINAL)){
-	    sprintf(tmpstr,";acceptor_score=%1.2f;acceptor=%s",e->Donor->Score,e->Donor->subtype);strcat(attribute,tmpstr);
+	    sprintf(tmpstr,";acceptor_score=%1.2f;acceptor_profile_score=%1.2f;acceptor=%s",e->Donor->Score,e->Donor->ScoreAccProfile,e->Donor->subtype);strcat(attribute,tmpstr);
 	    if (PPT){
 	      sprintf(tmpstr,";ppt_score=%1.2f;ppt_pos=%i",e->Donor->ScorePPT,e->Donor->PositionPPT);strcat(attribute,tmpstr);
 	    }
@@ -520,7 +520,7 @@ void PrintGIntron(exonGFF *d,
     /* GFF3 format */
       if (! d->evidence){
 	if (d->Strand == cFORWARD){
-	  sprintf(tmpstr,";donor_score=%1.2f;acceptor_score=%1.2f",d->Donor->Score,a->Acceptor->Score);strcat(attribute,tmpstr);
+	  sprintf(tmpstr,";donor_score=%1.2f;acceptor_score=%1.2f;acceptor_profile_score=%1.2f",d->Donor->Score,a->Acceptor->Score,a->Acceptor->ScoreAccProfile);strcat(attribute,tmpstr);
 	    
 	  if (PPT){
 	    sprintf(tmpstr,";ppt_score=%1.2f;ppt_pos=%i",a->Acceptor->ScorePPT,a->Acceptor->PositionPPT);strcat(attribute,tmpstr);
@@ -529,7 +529,7 @@ void PrintGIntron(exonGFF *d,
 	    sprintf(tmpstr,";bp_score=%1.2f;bp_pos=%i",a->Acceptor->ScoreBP,a->Acceptor->PositionBP);strcat(attribute,tmpstr);
 	  } 
 	}else{
-	  sprintf(tmpstr,";donor_score=%1.2f;acceptor_score=%1.2f",a->Acceptor->Score,d->Donor->Score);strcat(attribute,tmpstr);
+	  sprintf(tmpstr,";donor_score=%1.2f;acceptor_score=%1.2f;acceptor_profile_score=%1.2f",a->Acceptor->Score,d->Donor->Score,d->Donor->ScoreAccProfile);strcat(attribute,tmpstr);
 	    
 	  if (PPT){
 	    sprintf(tmpstr,";ppt_score=%1.2f;ppt_pos=%i",d->Donor->ScorePPT,d->Donor->PositionPPT);strcat(attribute,tmpstr);

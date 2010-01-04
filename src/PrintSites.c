@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: PrintSites.c,v 1.12 2008-02-07 13:30:20 talioto Exp $  */
+/*  $Id: PrintSites.c,v 1.13 2010-01-04 15:17:58 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -117,6 +117,7 @@ void PrintSite(site* s, int type,
   if (GFF3)
     {
       if(type == ACC){
+	sprintf(tmpstr,";acceptor_profile_score=%1.2f",s->ScoreAccProfile);strcat(attribute,tmpstr);
 	    if (PPT){
 	      sprintf(tmpstr,";ppt_score=%1.2f;ppt_pos=%i",s->ScorePPT,s->PositionPPT);strcat(attribute,tmpstr);
 	    }
@@ -187,7 +188,7 @@ void PrintSite(site* s, int type,
 			   
 	  else
 	    /* Print site: default format */
-	    printf("%8s %8ld %8ld\t%5.2f\t%5.2f\t%3d\t%5.2f\t%3d\t%c\t%s\t%s\n",
+	    printf("%8s %8ld %8ld\t%5.2f\t%5.2f\t%5.2f\t%3d\t%5.2f\t%3d\t%c\t%s\t%s\n",
 		   Type,
 		   (offset>0)? 
 		   s->Position+k+COFFSET : 
@@ -198,6 +199,7 @@ void PrintSite(site* s, int type,
 		   s->Position+k+COFFSET,
 			   
 		   s->Score,
+		   s->ScoreAccProfile,
 		   s->ScorePPT,
 		   s->PositionPPT,
 		   s->ScoreBP,

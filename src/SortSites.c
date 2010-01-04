@@ -123,6 +123,7 @@ void SortSites(site* Sites, long numSites,  site* sortedSites,
 
 		  sortedSites[n].Position = q->Site->Position;
 		  sortedSites[n].Score = q->Site->Score;
+		  sortedSites[n].ScoreAccProfile = q->Site->ScoreAccProfile;
 		  sortedSites[n].ScoreBP = q->Site->ScoreBP;
 		  sortedSites[n].ScorePPT = q->Site->ScorePPT;
 		  sortedSites[n].PositionBP = q->Site->PositionBP;
@@ -147,6 +148,7 @@ void SortSites(site* Sites, long numSites,  site* sortedSites,
     {  
       Sites[i].Position = sortedSites[i].Position;
       Sites[i].Score = sortedSites[i].Score ;
+      Sites[i].ScoreAccProfile = sortedSites[i].ScoreAccProfile ;
       Sites[i].ScoreBP = sortedSites[i].ScoreBP ;
       Sites[i].ScorePPT = sortedSites[i].ScorePPT ;
       Sites[i].PositionBP = sortedSites[i].PositionBP ;

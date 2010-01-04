@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: BackupGenes.c,v 1.8 2006-12-18 12:02:38 talioto Exp $  */
+/*  $Id: BackupGenes.c,v 1.9 2010-01-04 15:17:58 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -52,6 +52,7 @@ exonGFF* backupExon(exonGFF* E, exonGFF* Prev, packDump* d)
   /* back-up acceptor */
   d->dumpSites[d->ndumpSites].Position = E->Acceptor->Position;
   d->dumpSites[d->ndumpSites].Score = E->Acceptor->Score;
+  d->dumpSites[d->ndumpSites].ScoreAccProfile = E->Acceptor->ScoreAccProfile;
   d->dumpSites[d->ndumpSites].ScorePPT = E->Acceptor->ScorePPT;
   d->dumpSites[d->ndumpSites].ScoreBP = E->Acceptor->ScoreBP;
   d->dumpSites[d->ndumpSites].PositionBP = E->Acceptor->PositionBP;
@@ -65,6 +66,7 @@ exonGFF* backupExon(exonGFF* E, exonGFF* Prev, packDump* d)
   /* back-up donor */
   d->dumpSites[d->ndumpSites].Position = E->Donor->Position;
   d->dumpSites[d->ndumpSites].Score = E->Donor->Score;
+  d->dumpSites[d->ndumpSites].ScoreAccProfile = E->Donor->ScoreAccProfile;
   d->dumpSites[d->ndumpSites].ScorePPT = E->Donor->ScorePPT;
   d->dumpSites[d->ndumpSites].ScoreBP = E->Donor->ScoreBP;
   d->dumpSites[d->ndumpSites].PositionBP = E->Donor->PositionBP;

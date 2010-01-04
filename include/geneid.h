@@ -28,7 +28,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/     
 
-/* $Id: geneid.h,v 1.48 2009-03-16 13:51:13 talioto Exp $ */
+/* $Id: geneid.h,v 1.49 2010-01-04 15:17:58 talioto Exp $ */
 
 /* Required libraries */
 #include <stdlib.h>
@@ -382,6 +382,7 @@ typedef struct s_site
   float Score;                        
   float ScoreBP;
   float ScorePPT;
+  float ScoreAccProfile;
   int PositionBP;
   int PositionPPT;
   char type[MAXSPLICETYPE];

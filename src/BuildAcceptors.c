@@ -157,6 +157,7 @@ long  BuildAcceptors(char* s,
   float score;
   float scoreBP;
   float scorePPT;
+  float scoreAcc;
   /*   long ns,is; */
   long is;
   long left,right;
@@ -191,6 +192,7 @@ long  BuildAcceptors(char* s,
 
 	  scorePPT = 0.0;
 	  scoreBP = 0.0;
+	  scoreAcc = 0.0;
 	  if (score >= cutoff){
 	    /* Using additional profiles */
 	    if (PPT)
@@ -201,6 +203,7 @@ long  BuildAcceptors(char* s,
 	    
 	    /* For the time being, we will not use the BP or PPT scores */
 	    /* if (scoreBP > 0){score = score + scoreBP;} */ /* + scorePPT */
+	    scoreAcc = score;
 	    score = score + scoreBP;
 	    score = p->afactor + (p->bfactor * score); 
 	    /* Acceptor core is used as a global cutoff */
@@ -209,6 +212,7 @@ long  BuildAcceptors(char* s,
 		st[ns].Position = is + p->order;
 		st[ns].ScoreBP = scoreBP;
 		st[ns].ScorePPT = scorePPT;
+		st[ns].ScoreAccProfile = scoreAcc;
 		st[ns].Score = score;
 		st[ns].class= class;
 		strcpy(st[ns].type,type);
@@ -245,6 +249,7 @@ long  BuildAcceptors(char* s,
 		  
 	  scorePPT = 0.0;
 	  scoreBP = 0.0;
+	  scoreAcc = 0.0;
 	  if (score >= cutoff){
 	    /* Using additional profiles */
 	    if (PPT)
@@ -253,6 +258,7 @@ long  BuildAcceptors(char* s,
 	      scoreBP = ComputeU2BranchProfile(sOriginal,left + is + p->offset,l2,bp,&st[ns]);
 		  
 	    /* if (scoreBP > 0){score = score + scoreBP;} */ /* + scorePPT */
+	    scoreAcc = score;
 	    score = score + scoreBP;
 	    score = p->afactor + (p->bfactor * score); 
 
@@ -261,6 +267,7 @@ long  BuildAcceptors(char* s,
 		st[ns].Position = left + is + p->offset;
 		st[ns].ScoreBP = scoreBP;
 		st[ns].ScorePPT = scorePPT;
+		st[ns].ScoreAccProfile = scoreAcc;
 		st[ns].class= class;
 		st[ns].Score = score;
 		strcpy(st[ns].type,type);
@@ -292,6 +299,7 @@ long  BuildAcceptors(char* s,
 		  
 	  scorePPT = 0.0;
 	  scoreBP = 0.0;
+	  scoreAcc = 0.0;
 	  if (score >= cutoff){
 	    /* Using additional profiles */
 	    if (PPT)
@@ -301,6 +309,7 @@ long  BuildAcceptors(char* s,
 	      scoreBP = ComputeU2BranchProfile(sOriginal,left + is + p->offset,l2,bp,&st[ns]);
 		  
 	    /* if (scoreBP > 0){score = score + scoreBP;} */ /* + scorePPT */
+	    scoreAcc = score;
 	    score = score + scoreBP;
 	    score = p->afactor + (p->bfactor * score); 
 
@@ -309,6 +318,7 @@ long  BuildAcceptors(char* s,
 		st[ns].Position = left + is + p->offset;
 		st[ns].ScoreBP = scoreBP;
 		st[ns].ScorePPT = scorePPT;
+		st[ns].ScoreAccProfile = scoreAcc;
 		st[ns].Score = score;
 		st[ns].class= class;
 		strcpy(st[ns].type,type);
@@ -342,6 +352,7 @@ long  BuildAcceptors(char* s,
 		  
 	  scorePPT = 0.0;
 	  scoreBP = 0.0;
+	  scoreAcc = 0.0;
 	  if (score >= cutoff){
 	    /* Using additional profiles */
 	    if (PPT)
@@ -351,6 +362,7 @@ long  BuildAcceptors(char* s,
 	      scoreBP = ComputeU2BranchProfile(sOriginal,left + is + p->offset,l2,bp,&st[ns]);
 		  
 	    /* if (scoreBP > 0){score = score + scoreBP;} */ /* + scorePPT */
+	    scoreAcc = score;
 	    score = score + scoreBP;
 	    score = p->afactor + (p->bfactor * score); 
 
@@ -359,6 +371,7 @@ long  BuildAcceptors(char* s,
 		st[ns].Position = left + is + p->offset;
 		st[ns].ScoreBP = scoreBP;
 		st[ns].ScorePPT = scorePPT;
+		st[ns].ScoreAccProfile = scoreAcc;
 		st[ns].Score = score;
 		st[ns].class= class;
 		strcpy(st[ns].type,type);
