@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: beggar.c,v 1.5 2006-12-11 09:50:48 talioto Exp $  */
+/*  $Id: beggar.c,v 1.6 2010-04-16 10:08:40 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -55,7 +55,7 @@ void beggar(long L)
   /* packExons: +/- */
   memExons = STRANDS * (sizeof(struct s_packExons) +
 						((NUMEXONS/RFIRST + NUMEXONS/RINTER +
-						  NUMEXONS/RTERMI + NUMEXONS/RSINGL) *
+						  NUMEXONS/RTERMI + NUMEXONS/RSINGL + NUMEXONS/RUTR) *
 						 sizeof(exonGFF))
 			);
   /* Sort exons */

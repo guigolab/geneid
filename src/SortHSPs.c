@@ -36,8 +36,8 @@ int Split(HSP** hsps,int i, int j)
   HSP* tmp;
   
   /* Choosing the random pivot: always the first one */
+/*   k = hsps[(i+j)/2]->Pos1; */
   k = hsps[i]->Pos1;
-
   /* How many elements have less value than pivot (value "k") */
   for(m = 0, x=i+1; x <=j; x++)
     if (hsps[x]->Pos1 <= k)
@@ -92,8 +92,8 @@ int RSplit(HSP** hsps,int i, int j)
   HSP* tmp;
   
   /* Choosing the random pivot: always the first one */
+/*   k = hsps[(i+j)/2]->Pos1; */
   k = hsps[i]->Pos1;
-
   /* How many elements have a higher value than pivot (value "k") */
   for(m = 0, x=i+1; x <=j; x++)
     if (hsps[x]->Pos1 >= k)

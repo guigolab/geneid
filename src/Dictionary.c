@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: Dictionary.c,v 1.7 2006-12-11 09:50:48 talioto Exp $  */
+/*  $Id: Dictionary.c,v 1.8 2010-04-16 10:08:40 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -90,6 +90,30 @@ int setkeyDict(dict* d, char s[])
   return(key);
 }
 
+
+/* Shows the dictionary */
+void showDict(dict* d)
+{
+  int i;
+  node *p;
+  
+  printf("Dictionary: \n\n");
+  for(i=0 ; i < MAXENTRY ; i++)
+    {
+      if(d->T[i]!=NULL)     
+		{
+		  /* There are more nodes in this position */
+		  p = d->T[i];
+		  /* Searching the first position free */
+		  while( p!= NULL )
+			{
+			  printf("%-20s | \t\t\t %d\n",p->s,p->key);
+			  p = p->next;
+			  
+			}
+		}
+    }    
+}
 /* Returns the key for the word request; NOTFOUND is Not found */ 
 int getkeyDict(dict* d, char s[])
 {
@@ -97,7 +121,7 @@ int getkeyDict(dict* d, char s[])
   int found=0;
   int key;
   node *p;
-  
+  /* showDict(d); */
   key = NOTFOUND;
 
   /* Computing hash function */
@@ -125,30 +149,6 @@ int getkeyDict(dict* d, char s[])
 		key = NOTFOUND;
     }
   return(key);
-}
-
-/* Shows the dictionary */
-void showDict(dict* d)
-{
-  int i;
-  node *p;
-  
-  printf("Dictionary: \n\n");
-  for(i=0 ; i < MAXENTRY ; i++)
-    {
-      if(d->T[i]!=NULL)     
-		{
-		  /* There are more nodes in this position */
-		  p = d->T[i];
-		  /* Searching the first position free */
-		  while( p!= NULL )
-			{
-			  printf("%-20s | \t\t\t %d\n",p->s,p->key);
-			  p = p->next;
-			  
-			}
-		}
-    }    
 }
 
 /* Free memory of hash nodes (sinonimous) */

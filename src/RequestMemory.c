@@ -25,14 +25,14 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: RequestMemory.c,v 1.17 2007-10-08 13:53:58 talioto Exp $  */
+/*  $Id: RequestMemory.c,v 1.18 2010-04-16 10:08:40 talioto Exp $  */
 
 #include "geneid.h"
 
 /* Predicted amount of sites and exons found in one split */
 extern long NUMSITES, NUMU12SITES, NUMU12EXONS, NUMU12U12EXONS, NUMEXONS, MAXBACKUPSITES, MAXBACKUPEXONS;
 extern int scanORF;
-extern int SRP,EVD,GENEID, U12GTAG, U12ATAC;
+extern int SRP,EVD,UTR,GENEID, U12GTAG, U12ATAC;
 extern short SPLICECLASSES;
 
 /* Allocating accounting data structure in memory */
@@ -87,6 +87,17 @@ packSites* RequestMemorySites()
        (struct s_site *) calloc(NUMSITES, sizeof(struct s_site))) == NULL)
     printError("Not enough memory: stop codons");
 
+  if (UTR){
+    /* TSS */
+    if ((allSites->TS = 
+	 (struct s_site *) calloc(NUMSITES, sizeof(struct s_site))) == NULL)
+      printError("Not enough memory: TSS");
+    
+    /* TES */
+    if ((allSites->TE = 
+	 (struct s_site *) calloc(NUMSITES, sizeof(struct s_site))) == NULL)
+      printError("Not enough memory: TES");
+  }
   return(allSites);
 }
 
@@ -130,6 +141,45 @@ packExons* RequestMemoryExons()
   if ((allExons->Singles = 
        (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
     printError("Not enough memory: single genes");
+  
+  if (UTR){
+    /* UTR Exons */
+    HowMany = (long)(NUMEXONS/RUTR);
+    if ((allExons->UtrInitialExons = 
+	 (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
+      printError("Not enough memory: UtrInitialExons");
+
+    HowMany = (long)(NUMEXONS/RUTR);
+    if ((allExons->UtrInitialHalfExons = 
+	 (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
+      printError("Not enough memory: UtrInitialhalfExons");
+
+    HowMany = (long)(NUMEXONS/RUTR);
+    if ((allExons->UtrInternalExons = 
+	 (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
+      printError("Not enough memory: UtrInternalExons");
+
+    HowMany = (long)(NUMEXONS/RUTR);
+    if ((allExons->Utr5InternalHalfExons = 
+	 (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
+      printError("Not enough memory: Utr5InternalHalfExons");
+
+    HowMany = (long)(NUMEXONS/RUTR);
+    if ((allExons->Utr3InternalHalfExons = 
+	 (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
+      printError("Not enough memory: Utr3InternalHalfExons");
+
+    HowMany = (long)(NUMEXONS/RUTR);
+    if ((allExons->UtrTerminalHalfExons = 
+	 (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
+      printError("Not enough memory: UtrTerminalHalfExons");
+
+    HowMany = (long)(NUMEXONS/RUTR);
+    if ((allExons->UtrTerminalExons = 
+	 (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
+      printError("Not enough memory: UtrTerminalExons");
+  }
+ 
 
   /* IF Scan ORF is switched on... */
   if (scanORF)
@@ -145,6 +195,13 @@ packExons* RequestMemoryExons()
   allExons->nTerminalExons = 0;
   allExons->nSingles = 0;
   allExons->nORFs = 0;
+  allExons->nUtrInitialExons = 0;
+  allExons->nUtrInitialHalfExons = 0;
+  allExons->nUtrInternalExons = 0;
+  allExons->nUtr5InternalHalfExons = 0;
+  allExons->nUtr3InternalHalfExons = 0;
+  allExons->nUtrTerminalHalfExons = 0;
+  allExons->nUtrTerminalExons = 0;
 
   return(allExons);
 }
@@ -330,6 +387,18 @@ packExternalInformation* RequestMemoryExternalInformation()
 		if ((p->sr[i] = 
 			 (float *) calloc(LENGTHSi, sizeof(float))) == NULL)
 		  printError("Not enough space: individual preprocessing array of HSPs"); 
+	  if (UTR)
+	    {
+	      /* Pre-processing array (accurate read counts)*/
+	      if ((p->readcount = 
+		   (float **) calloc(HowMany, sizeof(float*))) == NULL)
+		printError("Not enough memory: general preprocessing array of read counts");
+	  
+	      for(i=0; i<HowMany; i++)
+		if ((p->readcount[i] = 
+		     (float *) calloc(LENGTHSi, sizeof(float))) == NULL)
+		  printError("Not enough space: individual preprocessing array of read counts");
+	    }
 	}
 
   return(p);
@@ -368,6 +437,9 @@ gparam* RequestMemoryParams()
     printError("Not enough memory: isochore model");
 
   /* 1. Profiles for signals */
+  if ((gp->PolyASignalProfile = (profile *) malloc(sizeof(profile))) == NULL)  
+    printError("Not enough memory: polyA profile");
+
   if ((gp->StartProfile = (profile *) malloc(sizeof(profile))) == NULL)  
     printError("Not enough memory: start profile");
 
@@ -474,6 +546,9 @@ gparam* RequestMemoryParams()
 
   if ((gp->Single = (paramexons *)malloc(sizeof(paramexons))) == NULL)  
     printError("Not enough memory: exons scoring parameters (single)");
+  
+  if ((gp->utr = (paramexons *)malloc(sizeof(paramexons))) == NULL)  
+    printError("Not enough memory: exons scoring parameters (utr)");
 
   return(gp);
 }

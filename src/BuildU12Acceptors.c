@@ -37,6 +37,7 @@ extern long NUMSITES;
 /* Additional profiles */
 extern int BP;
 extern int PPT;
+extern int UTR;
 
 float ComputeU12BranchProfile(char* s,
 			      long positionAcc,
@@ -144,14 +145,16 @@ long  BuildU12Acceptors(char* s,
 			long l1, 
 			long l2,
 			long ns,
-			long nsites) 
+			long nsites,
+			int Strand,
+			packExternalInformation* external) 
 { 
   int i,j;
   char* sOriginal;
   float score;
   float scoreBP;
   float scorePPT;
-  float scoreAcc;		
+  float scoreAcc;
   /*   long ns,is; */
   long is;
   long left,right;
@@ -195,10 +198,14 @@ long  BuildU12Acceptors(char* s,
 		if (scoreBP >=u12bp->cutoff) {
 		if (PPT)
 		  scorePPT = ComputePPTProfile(sOriginal,u12_p->offset-is,l2,ppt,&st[ns]);
-		scoreAcc = score;		
+				
+		scoreAcc = score;
 		score = score + scoreBP;
 		score = u12_p->afactor + (u12_p->bfactor * score); 
-
+		 
+		if(UTR){
+		  score = score + PeakEdgeScore(is + u12_p->order,Strand,external,l1,l2,6);
+		}
 		if (score >=  u12_p->cutoff) 
 		  {
 		    st[ns].Position = is + u12_p->order;
@@ -255,10 +262,13 @@ long  BuildU12Acceptors(char* s,
 		if (scoreBP >=u12bp->cutoff) {	  
 		if (PPT)
 		  scorePPT = ComputePPTProfile(sOriginal,left + is + u12_p->offset,l2,ppt,&st[ns]);
-		scoreAcc = score;		
+				
+		scoreAcc = score;
 		score = score + scoreBP;
 		score = u12_p->afactor + (u12_p->bfactor * score);
- 
+		if(UTR){
+		  score = score + PeakEdgeScore(left + is + u12_p->offset,Strand,external,l1,l2,6);
+		}
 		if (score >= u12_p->cutoff) 
 		  {
 		    st[ns].Position = left + is + u12_p->offset;
@@ -312,9 +322,13 @@ long  BuildU12Acceptors(char* s,
 		if (scoreBP >=u12bp->cutoff) {	  
 		if (PPT)
 		  scorePPT = ComputePPTProfile(sOriginal,left + is + u12_p->offset,l2,ppt,&st[ns]);
-		scoreAcc = score;		
+				
+		scoreAcc = score;
 		score = score + scoreBP;
 		score = u12_p->afactor + (u12_p->bfactor * score); 
+		if(UTR){
+		  score = score + PeakEdgeScore(left + is + u12_p->offset,Strand,external,l1,l2,6);
+		}
 
 		if (score >= u12_p->cutoff) 
 		  {
@@ -366,9 +380,13 @@ long  BuildU12Acceptors(char* s,
 		if (scoreBP >=u12bp->cutoff) {
 		if (PPT)
 		  scorePPT = ComputePPTProfile(sOriginal,left + is + u12_p->offset,l2,ppt,&st[ns]);
-		scoreAcc = score;		
+				
+		scoreAcc = score;
 		score = score + scoreBP;
 		score = u12_p->afactor + (u12_p->bfactor * score); 
+		if(UTR){
+		  score = score + PeakEdgeScore(left + is + u12_p->offset,Strand,external,l1,l2,6);
+		}
 
 		if (score >= u12_p->cutoff) 
 		  {

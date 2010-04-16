@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: ReadGeneModel.c,v 1.7 2006-12-11 09:50:48 talioto Exp $  */
+/*  $Id: ReadGeneModel.c,v 1.8 2010-04-16 10:08:40 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -93,7 +93,7 @@ long ReadGeneModel (FILE* file, dict* d,
   char *t1;
   
   /* Format for gene model rules: 
-	 F1:F2:(...):Fn   F1:F2:(...):Fm dmin:dMax  [block] */
+     F1:F2:(...):Fn   F1:F2:(...):Fm dmin:dMax  [block] */
   
   /* Input lines from parameter file */
   nlines=0;
@@ -102,80 +102,81 @@ long ReadGeneModel (FILE* file, dict* d,
       /* For every line extracting features (upstream/downstream), */
       /* the minMax distances and the (optional) block */
       /* line number is the class/rule identifier */
-      if (line[0] !='#')
-		{
-		  /* 0. Backup the line to display errors */
-		  strcpy(lineCopy,line);
+      if (line[0] !='#' && line[0] !='\n')
+	{
+	  /* 0. Backup the line to display errors */
+	  strcpy(lineCopy,line);
 		  
-		  /* 1. Splitting line into 4 parts: UC DE Dist block */
-		  line1 = (char *) strtok(line," ");
-		  line2 = (char *) strtok(NULL," ");
-		  line3 = (char *) strtok(NULL," "); 
-		  line4 = (char *) strtok(NULL," ");
+	  /* 1. Splitting line into 4 parts: UC DE Dist block */
+	  line1 = (char *) strtok(line," ");
+	  line2 = (char *) strtok(NULL," ");
+	  line3 = (char *) strtok(NULL," "); 
+	  line4 = (char *) strtok(NULL," ");
+	  	  
+	    /* Three first columns are mandatory, last one is optional */
+	    if (line1 == NULL || line2 == NULL || line3 == NULL)
+	      {
+		sprintf(mess,"Wrong format in gene model rule:\n%s",lineCopy);
+		printError(mess);
+	      }
 		  
-		  /* Three first columns are mandatory, last one is optional */
-		  if (line1 == NULL || line2 == NULL || line3 == NULL)
-			{
-			  sprintf(mess,"Wrong format in gene model rule:\n%s",lineCopy);
-			  printError(mess);
-			}
+	    /* 2. Processing upstream compatible features list */
+	    for ( t1 =(char *) strtok(line1,":");
+		  t1 != NULL;
+		  t1 = (char *) strtok(NULL, ":") )
+	      { 
+		/* Extracting and adding to the dictionary of types */
+		a = setkeyDict(d,t1);
+		/* Save: this feature appeared in the UC list of this rule */
+		UC[a][nc[a]++] = nlines;
+	      }
 		  
-		  /* 2. Processing upstream compatible features list */
-		  for ( t1 =(char *) strtok(line1,":");
-				t1 != NULL;
-				t1 = (char *) strtok(NULL, ":") )
-			{ 
-			  /* Extracting and adding to the dictionary of types */
-			  a = setkeyDict(d,t1);
-			  /* Save: this feature appeared in the UC list of this rule */
-			  UC[a][nc[a]++] = nlines;
-			}
+	    /* 3. Processing downstream equivalent features list */
+	    for ( t1 =(char *) strtok(line2,":");
+		  t1 != NULL;
+		  t1 = (char *) strtok(NULL, ":") )
+	      { 
+		/* Extracting and adding to the dictionary of types */
+		a = setkeyDict(d,t1);
+		/* Save: this feature appeared in the DE list of this rule */
+		DE[a][ne[a]++]=nlines;
+	      } 
 		  
-		  /* 3. Processing downstream equivalent features list */
-		  for ( t1 =(char *) strtok(line2,":");
-				t1 != NULL;
-				t1 = (char *) strtok(NULL, ":") )
-			{ 
-			  /* Extracting and adding to the dictionary of types */
-			  a = setkeyDict(d,t1);
-			  /* Save: this feature appeared in the DE list of this rule */
-			  DE[a][ne[a]++]=nlines;
-			} 
+	    /* 4. Read the distances xx:yy [block] */
+	    /* a) minimum distance */
+	    t1 =(char *) strtok(line3,":");      
+	    if (t1 == NULL)
+	      {
+		sprintf(mess,"Wrong distance range (min) in gene model rule:\n%s",lineCopy);
+		printError(mess);
+	      }     
+	    md[nlines] = atol(t1); 
 		  
-		  /* 4. Read the distances xx:yy [block] */
-		  /* a) minimum distance */
-		  t1 =(char *) strtok(line3,":");      
-		  if (t1 == NULL)
-			{
-			  sprintf(mess,"Wrong distance range (min) in gene model rule:\n%s",lineCopy);
-			  printError(mess);
-			}     
-		  md[nlines] = atol(t1); 
+	    /* b) maximum distance */
+	    t1 = (char *) strtok(NULL, ":");      
+	    if (t1 == NULL)
+	      {
+		sprintf(mess,"Wrong distance range (max) in gene model rule:\n%s",lineCopy);
+		printError(mess);
+	      }          
+	    /* To forget the DMAX requirement use the string SINFI */
+	    /* Extracting \n in case there aren't block word behind */
+	    if (t1[strlen(t1)-1] == '\n') 
+	      t1[strlen(t1)-1] = '\0';      
+	    if (!(strcmp(t1,SINFI)))
+	      Md[nlines] = INFI;
+	    else
+	      Md[nlines] = atol(t1); 
 		  
-		  /* b) maximum distance */
-		  t1 = (char *) strtok(NULL, ":");      
-		  if (t1 == NULL)
-			{
-			  sprintf(mess,"Wrong distance range (max) in gene model rule:\n%s",lineCopy);
-			  printError(mess);
-			}          
-		  /* To forget the DMAX requirement use the string SINFI */
-		  /* Extracting \n in case there aren't block word behind */
-		  if (t1[strlen(t1)-1] == '\n') 
-			t1[strlen(t1)-1] = '\0';      
-		  if (!(strcmp(t1,SINFI)))
-			Md[nlines] = INFI;
-		  else
-			Md[nlines] = atol(t1); 
+	    /* 5. Read the block record (to preserve group)... if exists */
+	    if (line4 != NULL) 
+	      block[nlines] = BLOCK;
+	    else 
+	      block[nlines] = NONBLOCK;
 		  
-		  /* 5. Read the block record (to preserve group)... if exists */
-		  if (line4 != NULL) 
-			block[nlines] = BLOCK;
-		  else 
-			block[nlines] = NONBLOCK;
-		  
-		  nlines++;
-		} /* End of if-comment */
+	    nlines++;
+	  
+	} /* End of if-comment */
     } /* Next rule to read */
   
   return(nlines);

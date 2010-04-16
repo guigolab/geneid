@@ -29,7 +29,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/* $Id: geneid.c,v 1.24 2007-03-30 15:09:30 talioto Exp $ */
+/* $Id: geneid.c,v 1.25 2010-04-16 10:08:40 talioto Exp $ */
 
 #include "geneid.h"
 /* #include <mcheck.h> */
@@ -48,10 +48,10 @@ int
   FWD=1, RVS=1,
   /* switch ORF prediction on */
   scanORF = 0,
-  /* Input annotations or homology to protein information */
-  EVD = 0, SRP = 0,
+  /* Input annotations or homology to protein information/reads to UTR prediction */
+  EVD = 0, SRP = 0, UTR=0,
   /* Output formats */
-  GFF = 0, GFF3 = 0, X10 = 0, XML = 0, cDNA = 0, PSEQ = 0,
+  GFF = 0, GFF3 = 0, X10 = 0, XML = 0, cDNA = 0, PSEQ = 0, tDNA = 0,
   /* Verbose flag (memory/processing information) */
   BEG=0, VRB=0,
   /* Score for regions not-supported by protein homology */
@@ -77,7 +77,10 @@ int
   /* Detection of U2gtg donor sites */
   U2GTG=0,
   /* Detection of U2gty donor sites */
-  U2GTY=0;
+  U2GTY=0,
+  /* Detection of PolyA Signal */
+  PAS=0;
+
 
 short
   /* Splice classes: the number of compatible splice site combinations used in genamic for joining exons */
@@ -89,14 +92,19 @@ long
   /* User defined upper limit */
   HI=0;
 
+float
+  /* Millions of reads mapped */
+MRM=15.0;
+
 /* Optional Predicted Gene Prefix */
-  char  GenePrefix[MAXSTRING]="";
+char  GenePrefix[MAXSTRING]="";
   
 
 /* Increase/decrease exon weight value (exon score) */
 float EW = NOVALUE;
 float U12EW = 0; 
 float EvidenceEW = 0; 
+float EvidenceFactor = 1;
 float U12_SPLICE_SCORE_THRESH = -1000;
 float U12_EXON_SCORE_THRESH = -1000;
 
@@ -138,6 +146,8 @@ int main (int argc, char *argv[])
   /* Structures for sorting sites */
   site* donorsites;
   site* acceptorsites;
+  site* tssites = NULL;
+  site* tesites = NULL;
 
   /* Table to sort predicted exons by acceptor */
   exonGFF* exons; 
@@ -202,7 +212,7 @@ int main (int argc, char *argv[])
   
   /* 0.c. Read setup options */
   readargv(argc,argv,ParamFile,SequenceFile,ExonsFile,HSPFile,GenePrefix);
-  printRes("\n\n\t\t\t** Running geneid 1.3 2003 geneid@imim.es **\n\n");
+  printRes("\n\n\t\t\t** Running geneid 1.3 2003 geneid@crg.es **\n\n");
 
   /* 0.d. Prediction of DNA sequence length to request memory */
   LengthSequence = analizeFile(SequenceFile);
@@ -224,27 +234,41 @@ int main (int argc, char *argv[])
   printMess("Request Memory to Operating System\n");
   
   /* 1.a. Mandatory geneid data structures */
+  printMess("Request Memory Sequence\n");
   Sequence      = (char*)         RequestMemorySequence(LengthSequence);
   RSequence     = (char*)         RequestMemorySequence(LengthSequence);
+  printMess("Request Memory Sites\n");
   allSites      = (packSites*)    RequestMemorySites();
   allSites_r    = (packSites*)    RequestMemorySites();
+  printMess("Request Memory Exons\n");
   allExons      = (packExons*)    RequestMemoryExons();
   allExons_r    = (packExons*)    RequestMemoryExons();
+  printMess("Request Memory Sort Exons\n");
+  
   exons         = (exonGFF*)      RequestMemorySortExons();
+  printMess("Request Memory Sort Sites\n");
   donorsites    = (site*)         RequestMemorySortSites(); /* Temporary structure for sorting donor sites */
   acceptorsites = (site*)         RequestMemorySortSites(); /* Temporary structure for sorting acceptor sites */
+  if (UTR){
+    tssites = (site*)         RequestMemorySortSites(); /* Temporary structure for sorting acceptor sites */
+    tesites = (site*)         RequestMemorySortSites(); /* Temporary structure for sorting acceptor sites */
+  }
+  printMess("Request Memory Isochores, etc.\n");
   isochores     = (gparam**)      RequestMemoryIsochoresParams(); 
   GCInfo        = (packGC*)       RequestMemoryGC();
   GCInfo_r      = (packGC*)       RequestMemoryGC();
   dAA           = (dict*)         RequestMemoryAaDictionary();
-  external      = (packExternalInformation*) RequestMemoryExternalInformation();  
+  printMess("Request Memory External\n");
+  external      = (packExternalInformation*) RequestMemoryExternalInformation();
+  
 
   /* 1.b. Backup information might be necessary between splits */
-  if (LengthSequence > LENGTHSi)
+  if (LengthSequence > LENGTHSi){
+    printMess("Request Memory Dumpster\n");
     dumpster   = (packDump*)     RequestMemoryDumpster();
-  else
+  }else{
     dumpster = NULL;
-
+  }
   /** 2. Reading statistical model parameters file **/
   printMess("Reading parameters..."); 
   nIsochores = readparam(ParamFile, isochores);
@@ -390,7 +414,7 @@ int main (int argc, char *argv[])
 			  FORWARD, 
 			  external, hsp, gp,
 			  isochores,nIsochores,
-			  GCInfo,acceptorsites,donorsites);
+			  GCInfo,acceptorsites,donorsites,tssites,tesites);
 		}      
 	      if (RVS) 
 		{
@@ -407,7 +431,7 @@ int main (int argc, char *argv[])
 			  REVERSE, 
 			  external, hsp, gp,
 			  isochores,nIsochores,
-			  GCInfo_r,acceptorsites,donorsites);
+			  GCInfo_r,acceptorsites,donorsites,tssites,tesites);
 				  				  
 		  /* normalised positions: according to forward sense reading */
 		  RecomputePositions(allSites_r, LengthSequence);
@@ -448,6 +472,10 @@ int main (int argc, char *argv[])
 	      }
 /* 	      sprintf(mess,"l1: %ld   ll:%ld   l2: %ld   ul: %ld\n", l1,lowerlimit,l2,upperlimit); */
 /* 	      printMess(mess); */
+/* 	      /\* B.4. Printing current fragment predictions (sites and exons) *\/ */
+/* 	      Output(allSites, allSites_r, allExons, allExons_r,  */
+/* 		     exons, nExons, Locus, l1, l2, lowerlimit, Sequence, gp, dAA, GenePrefix);  */
+
 	      sprintf(mess,"Sorting %ld exons\n", nExons);  
 	      printMess(mess);
 			  

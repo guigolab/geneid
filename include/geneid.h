@@ -28,7 +28,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/     
 
-/* $Id: geneid.h,v 1.49 2010-01-04 15:17:58 talioto Exp $ */
+/* $Id: geneid.h,v 1.50 2010-04-16 10:08:39 talioto Exp $ */
 
 /* Required libraries */
 #include <stdlib.h>
@@ -51,13 +51,13 @@ A. DEFINITIONS
 #define OVERLAP 10000            
 
 /* One signal per L / RSITES bp             */
-#define RSITES 0.1
+#define RSITES 1
 
 /* /\* One U12 signal per L / RU12SITES bp             *\/ */
 /* #define RU12SITES 6   */               
 
-/* One exon per L / REXONS bp               */
-#define REXONS 3                 
+/* One exon per L / REXONS bp      was 3         */
+#define REXONS 2                
 
 /* /\* One U12 intron-flanking exon per L / RU12EXONS bp               *\/ */
 /* #define RU12EXONS 6  */
@@ -65,37 +65,50 @@ A. DEFINITIONS
 /* Estimated amount of backup signals       */
 #define RBSITES 75               
 
-/* Estimated amount of backup exons         */
+/* Estimated amount of backup exons : was 125        */
 #define RBEXONS 125              
 
 /* Ratios for every exon type               */
-#define RFIRST 1                 
-#define RINTER 0.2
-#define RTERMI 1
-#define RSINGL 3 
-#define RORF   3
+#define RFIRST 3                 
+#define RINTER 1
+#define RTERMI 2
+#define RSINGL 4 
+#define RORF   4
+#define RUTR   0.5
 
-/* Total number of exons/fragment (factor)  */
-#define FSORT 8                  
+/* Total number of exons/fragment (factor) was 8,then 12 */
+#define FSORT 12                  
 
 /* Number of exons to save every fragment   */ 
 #define FDARRAY 5
 
 /* Basic values (in addition to ratios)     */
-#define BASEVALUESITES_SHORT 10000
-#define BASEVALUEEXONS_SHORT 5000
+#define BASEVALUESITES_SHORT 100000
+#define BASEVALUEEXONS_SHORT 6000
 #define BASEVALUESITES_LARGE 600000
-#define BASEVALUEEXONS_LARGE 300000
+#define BASEVALUEEXONS_LARGE 600000
 
 /* Max number of annotations per locus      */
-#define MAXEVIDENCES 12000000       
+#define MAXEVIDENCES 200000       
 #define MAXSITESEVIDENCES 3*MAXEVIDENCES
 
 /* Max number of HSP per locus/frame/strand */
-#define MAXHSP 1000000             
+#define MAXHSP 16000000             
+
+/* UTR prediction parameters */            
+#define MAXUTRDONORS 8
+#define MAX3UTREXONLENGTH 5000
+#define MAXUTREXONLENGTH 1000
+/* UTRMAXGAP used to be 55 */ 
+#define UTRMAXGAP 5
+/* Ratio for reads */
+#define RREADS 1
+#define COV 3
+/* Length of allowed UTR including stop codon before intron: used to be 55 */
+#define MAXNMDLENGTH 1000
 
 /* Max number of locus in multi-fasta files */
-#define MAXNSEQUENCES 50         
+#define MAXNSEQUENCES 1         
 
 /* Maximum number of predicted genes        */
 #define MAXGENE 15000            
@@ -172,7 +185,7 @@ A. DEFINITIONS
 #define FASTALINE 60             
 
 /* Maximum length for strings (mess)        */
-#define MAXSTRING 100            
+#define MAXSTRING 200            
 
 /* Mark rules up as blocking in Gene model  */
 #define BLOCK 1                  
@@ -212,6 +225,7 @@ A. DEFINITIONS
 #define MEGABYTE 1048576
 #define MAXTIMES 100
 #define PROT 0
+#define TDNA 2
 #define DNA  1
 
 /* Strands                                  */
@@ -232,11 +246,17 @@ A. DEFINITIONS
 #define DON 1
 #define STA 2
 #define STO 3
+#define POL 4
+#define TSS 5
+#define TES 6
 
 #define sACC "Acceptor"
 #define sDON "Donor"
 #define sSTA "Start"
 #define sSTO "Stop"
+#define sPOL "PolyA"
+#define sTSS "TSS"
+#define sTES "TES"
 #define sPPT "PolyPyrimidineTract"
 #define sBP  "BranchPoint"
 
@@ -261,6 +281,8 @@ A. DEFINITIONS
 #define sU2gty "U2gty"
 
 /* Header profiles                          */
+#define sMarkov "Markov_order"
+#define sprofilePolyA "PolyA_Signal_profile"
 #define sprofilePPT "Poly_Pyrimidine_Tract_profile"
 #define sprofileBP  "Branch_point_profile"
 #define sprofileACC "Acceptor_profile"
@@ -285,14 +307,28 @@ A. DEFINITIONS
 #define sExon_weights "Exon_weights"
 #define sU12_EXON_WEIGHT "U12_Exon_weight"
 
+/* Header evidence factor and weight */
+#define sEVIDENCEF "Evidence_Factor"
+#define sEVIDENCEW "Evidence_Exon_Weight"
+
 /* Exons                                    */
-#define FIRST      0               
-#define INTERNAL   1
-#define TERMINAL   2
-#define SINGLE     3
-#define ORF        4
-#define ZEROLENGTH 5
-#define INTRON     6
+#define FIRST             0
+#define INTERNAL          1
+#define TERMINAL          2
+#define SINGLE            3
+#define ORF               4
+#define ZEROLENGTH        5
+#define INTRON            6
+#define UTRFIRST          7
+#define UTRFIRSTHALF      8
+#define UTRINTERNAL       9
+#define UTR5INTERNALHALF 10
+#define UTR3INTERNALHALF 11
+#define UTRTERMINALHALF  12
+#define UTRTERMINAL      13
+#define UTRINTRON        14
+#define UTR5INTRON       15
+#define UTR3INTRON       16
 
 #define sFIRST    "First"              
 #define sINTERNAL "Internal"
@@ -303,6 +339,16 @@ A. DEFINITIONS
 #define sORF      "ORF"
 #define sEXON     "Exon"
 #define sPROMOTER "Promoter"              
+#define sUTRFIRST          "UTR_First"
+#define sUTRFIRSTHALF      "UTR_First_Half"
+#define sUTRINTERNAL       "UTR_Internal"
+#define sUTR5INTERNALHALF  "UTR_5prime_Internal_Half"
+#define sUTR3INTERNALHALF  "UTR_3prime_Internal_Half"
+#define sUTRTERMINALHALF   "UTR_Terminal_Half"
+#define sUTRTERMINAL       "UTR_Terminal"
+#define sUTRINTRON         "UTR_Intron"
+#define sUTR5INTRON        "UTR_5prime_Intron"
+#define sUTR3INTRON        "UTR_3prime_Intron"
 
 #define sBEGIN    "Begin"
 #define sBEGINFWD "Begin+"
@@ -379,10 +425,10 @@ typedef struct s_profile
 typedef struct s_site                  
 {
   long Position;                       
-  float Score;                        
+  float Score;
+  float ScoreAccProfile;                        
   float ScoreBP;
   float ScorePPT;
-  float ScoreAccProfile;
   int PositionBP;
   int PositionPPT;
   char type[MAXSPLICETYPE];
@@ -396,11 +442,15 @@ typedef struct s_packSites
   site* AcceptorSites;
   site* DonorSites;
   site* StopCodons;
+  site* TS;
+  site* TE;
 
   long  nStartCodons;                  
   long  nAcceptorSites;
   long  nDonorSites;
   long  nStopCodons;
+  long  nTS;
+  long  nTE;
 
   long nSites;                         
 } packSites;
@@ -416,6 +466,7 @@ typedef struct s_exonGFF
   char Strand;
   float PartialScore;
   float HSPScore;
+  float R;
   float Score;
   pexonGFF PreviousExon;
   double GeneScore;
@@ -438,12 +489,26 @@ typedef struct s_packExons
   exonGFF* TerminalExons;
   exonGFF* Singles;
   exonGFF* ORFs;
+  exonGFF* UtrInitialExons;
+  exonGFF* UtrInitialHalfExons;
+  exonGFF* UtrInternalExons;
+  exonGFF* Utr5InternalHalfExons;
+  exonGFF* Utr3InternalHalfExons;
+  exonGFF* UtrTerminalHalfExons;
+  exonGFF* UtrTerminalExons;
   long nInitialExons;                  
   long nInternalExons;
   long nZeroLengthExons;
   long nTerminalExons;
   long nSingles;
   long nORFs;
+  long nUtrInitialExons;
+  long nUtrInitialHalfExons;
+  long nUtrInternalExons;
+  long nUtr5InternalHalfExons;
+  long nUtr3InternalHalfExons;
+  long nUtrTerminalHalfExons;
+  long nUtrTerminalExons;
   long nExons;                         
 } packExons;
 
@@ -497,6 +562,7 @@ typedef struct s_packExternalInformation
   
   long* iSegments;
   float** sr;
+  float** readcount;
 } packExternalInformation;
 
 typedef struct s_dumpNode *pdumpNode;  
@@ -538,13 +604,15 @@ typedef struct s_account
   long starts, starts_r,
     stops, stops_r,
     acc, acc_r,
-    don, don_r;
+    don, don_r,
+    tss, tss_r,
+    tes, tes_r;
 
   long first, first_r,
     internal, internal_r,
     terminal, terminal_r,
     single, single_r,
-    orf, orf_r;
+    orf, orf_r, zle, zle_r, utr, utr_r;
 
   long totalExons;
   
@@ -580,6 +648,7 @@ typedef struct s_gparam
   int leftValue;
   int rightValue;
 
+  profile* PolyASignalProfile;               
   profile* StartProfile;               
   profile* AcceptorProfile;
   profile* PolyPTractProfile;
@@ -607,6 +676,7 @@ typedef struct s_gparam
   paramexons* Internal;
   paramexons* Terminal;
   paramexons* Single;
+  paramexons* utr;
                                                                             
   float* OligoDistIni[FRAMES]; 
   float* OligoDistTran[FRAMES];
@@ -629,6 +699,8 @@ typedef struct s_gparam
 /*************************************************************************
 C. IMPORTED HEADERS
 *************************************************************************/
+float strtof(const char *nptr, char **endptr);
+
 void PrintExonGFF(exonGFF *e, char* Name, char* Source);
 
 void PrintGeneGFF(exonGFF *e, char* Name, char* Source);
@@ -643,6 +715,29 @@ void printReadingInfo(char* s);
 
 long GetSitesWithProfile(char *s, profile *p, site *st, long l1, long l2); 
 
+long GetTSS(
+	    site* sc,
+	    site* Acceptors, long nAcceptors,
+	    packExternalInformation* external,
+	    packHSP* hsp,
+	    int Strand,
+	    long LengthSequence,
+	    long l1,
+	    long l2
+	    );
+
+long GetTES(
+	    site* sc,
+	    site* Donors, long nDonors,
+	    packExternalInformation* external,
+	    packHSP* hsp,
+	    int Strand,
+	    long LengthSequence,
+	    long l1,
+	    long l2,
+	    long ns
+	    );
+
 long BuildDonors(char* s,short class,char* type,
 		 char* subtype,
 		 profile* p,
@@ -650,8 +745,14 @@ long BuildDonors(char* s,short class,char* type,
 		 long l1, 
 		 long l2,
 		 long ns,
-		 long nsites
+		 long nsites,
+		 int Strand,
+		 packExternalInformation* external
 		 ); 
+float PeakEdgeScore(long Position, 
+		    int Strand, 
+		    packExternalInformation* external, 
+		    long l1, long l2, int win);
 /* long BuildU12Donors(char* s, */
 /* 		    char* type, */
 /* 		    char* subtype, */
@@ -678,6 +779,7 @@ long BuildInternalExons(site *Acceptor, long nAcceptors,
 			char* ExonType,
 			char* Sequence,
                         exonGFF* Exon,long nexons);
+
 long BuildZeroLengthExons(site *Acceptor, long nAcceptors, 
                         site *Donor, long nDonors,
                         site *Stop, long nStops,
@@ -685,6 +787,7 @@ long BuildZeroLengthExons(site *Acceptor, long nAcceptors,
 			char* ExonType,
 			char* Sequence,
                         exonGFF* Exon,long nexons); 
+
 long BuildTerminalExons (site *Acceptor, long nAcceptors, 
                          site *Stop, long nStops,
                          long LengthSequence,
@@ -704,6 +807,14 @@ long BuildORFs(site *Start, long nStarts,
 	       long cutPoint,
 	       char* Sequence,
 	       exonGFF *Exon);
+
+long BuildUTRExons(
+		   site *Start, long nStarts, 
+		   site *Donor, long nDonors,
+		   int MaxDonors,
+		   int MaxExonLength,long cutPoint,
+		   char* ExonType,
+		   exonGFF *Exon,long nexons);
 
 packSites* RequestMemorySites();
 packExons* RequestMemoryExons();
@@ -830,6 +941,8 @@ void ReverseSubSequence(long p1, long p2, char* s, char* r);
 
 void CorrectExon(exonGFF *e);
 
+void CorrectUTR(exonGFF *e);
+
 void CorrectORF(exonGFF *e);
 
 void SwitchFrames(exonGFF* e, long n);
@@ -847,12 +960,18 @@ void BuildSort(dict *D, int nc[], int ne[], int UC[][MAXENTRY],
 void PrintSite(site *s, int type, char Name[], int Strand,
                char* seq, profile *p);
 
-void PrintGExon(exonGFF *e, char Name[], char* s, dict* dAA, 
+void PrintGCDS(exonGFF *e, char Name[], char* s, dict* dAA, 
 		long ngen, int AA1, int AA2, int nAA,
 		int numInt, char* GenePrefix);
+
+void PrintGUTR(exonGFF *e, char Name[], char* s, long ngen,
+		int numInt, char* GenePrefix);
+
+void PrintGExon(exonGFF *a, int nSegments, char Name[],long ngen,
+		  int numInt, char* GenePrefix, int evidence, float score);
 			   
 void PrintGIntron(exonGFF *d, exonGFF *a, char Name[],long ngen,
-		  int numInt, char* GenePrefix, int evidence, float score);
+		  int numInt, char* GenePrefix, int evidence, float score, char* eType);
 
 void PrintGGene(exonGFF *s, exonGFF *e, char Name[],
 		long ngen, float score, char* GenePrefix);
@@ -864,7 +983,7 @@ void PrintGmRNA(exonGFF *s, exonGFF *e, char Name[],
 void PrintXMLExon(exonGFF *e, char Name[], 
 		  long ngen, long nExon, 
 		  int type1, int type2, 
-		  int nExons, char* GenePrefix);
+		  char* GenePrefix);
 
 void TranslateGene(exonGFF* e,
                    char* s,
@@ -899,6 +1018,12 @@ long OligoToInt(char *s, int ls, int cardinal);
 
 char* RequestMemorySequence(long L);
 
+void ProcessHSPs(long l1,
+                long l2,
+                int Strand,
+		packExternalInformation* external,
+                packHSP* hsp);
+
 void ScoreExons(char *Sequence, 
                 packExons* allExons, 
                 long l1,
@@ -911,6 +1036,7 @@ void ScoreExons(char *Sequence,
                 packGC* GCInfo);
 
 void GetcDNA(exonGFF* e, char* s, long nExons, char* cDNA, long* nNN);
+void GetTDNA(exonGFF* e, char* s, long nExons, char* tDNA, long* nTN);
 
 float ComputeGC(packGC* GCInfo, long inigc, long endgc);
 
@@ -942,7 +1068,9 @@ void  manager(char *Sequence, long LengthSequence,
 	      int nIsochores,
 	      packGC* GCInfo,
 	      site* acceptorsites,
-	      site* donorsites
+	      site* donorsites,
+	      site* tssites,
+	      site* tesites
 	      );
 
 void resetEvidenceCounters(packExternalInformation* external);
@@ -971,7 +1099,9 @@ long  BuildU12Acceptors(char* s,
 			long l1, 
 			long l2,
 			long ns,
-			long nsites);
+			long nsites,
+			int Strand,
+			packExternalInformation* external);
 					 
 long  BuildAcceptors(char* s,
 		     short class,
@@ -984,4 +1114,6 @@ long  BuildAcceptors(char* s,
 		     long l1, 
 		     long l2,
 		     long ns,
-		     long nsites);
+		     long nsites,
+		     int Strand,
+		     packExternalInformation* external);

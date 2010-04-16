@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: CorrectExon.c,v 1.6 2006-12-18 12:02:38 talioto Exp $  */
+/*  $Id: CorrectExon.c,v 1.7 2010-04-16 10:08:40 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -43,8 +43,30 @@ void CorrectExon(exonGFF *e)
     ((!strcmp(e->Type,"Terminal") || !strcmp(e->Type,"Single"))
 	 && e->Strand =='+')? 
     LENGTHCODON + COFFSET : +COFFSET;
-}
 
+}
+/* Fixing positions in the input sequence for the input exon */
+void CorrectUTR(exonGFF *e)
+{
+  int startOffset = 0;
+  int donorOffset = 0;
+  if (!strcmp(e->Type,sUTRFIRSTHALF)||!strcmp(e->Type,sUTR5INTERNALHALF)){
+    donorOffset= -1;
+    e->offset1 = (e->Strand =='-') ? -donorOffset + COFFSET : +COFFSET;
+    e->offset2 = (e->Strand =='+')? donorOffset + COFFSET : +COFFSET;
+  }
+  if (!strcmp(e->Type,sUTRTERMINALHALF)||!strcmp(e->Type,sUTR3INTERNALHALF)){
+      startOffset= 1 + LENGTHCODON;
+      e->offset1 = (e->Strand =='+') ? startOffset + COFFSET : +COFFSET;
+      e->offset2 = (e->Strand =='-')? -startOffset + COFFSET : +COFFSET;
+    }
+ 
+  
+  /* Correct positions of begin / end of the exon */
+
+
+ 
+}
 /* Fixing positions in the input sequence for the ORF */
 void CorrectORF(exonGFF* e) 
 {

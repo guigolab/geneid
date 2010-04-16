@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: account.c,v 1.6 2006-12-11 09:50:48 talioto Exp $  */
+/*  $Id: account.c,v 1.7 2010-04-16 10:08:40 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -44,20 +44,28 @@ account* InitAcc()
   m->stops = 0;
   m->acc = 0;
   m->don = 0;
+  m->tss = 0;
+  m->tes = 0;
   m->starts_r = 0;
   m->stops_r = 0;
   m->acc_r = 0;
   m->don_r = 0;
+  m->tss_r = 0;
+  m->tes_r = 0;
   m->first = 0;
   m->internal = 0;
   m->terminal = 0;
   m->single = 0;
   m->orf = 0;
+  m->zle = 0;
+  m->utr = 0;
   m->first_r = 0;
   m->internal_r = 0;
   m->terminal_r = 0;
   m->single_r = 0;
   m->orf_r = 0;
+  m->zle_r = 0;
+  m->utr_r = 0;
 
   m->totalExons = 0;
 
@@ -90,23 +98,43 @@ void updateTotals(account *m,
   m->stops += allSites->nStopCodons;
   m->acc += allSites->nAcceptorSites;
   m->don += allSites->nDonorSites;
+  m->tss += allSites->nTS;
+  m->tes += allSites->nTE;
 
   m->starts_r += allSites_r->nStartCodons;
   m->stops_r += allSites_r->nStopCodons;
   m->acc_r += allSites_r->nAcceptorSites;
   m->don_r += allSites_r->nDonorSites;
-       
+  m->tss_r += allSites_r->nTS;
+  m->tes_r += allSites_r->nTE;
+     
   m->first += allExons->nInitialExons;
   m->internal += allExons->nInternalExons;
   m->terminal += allExons->nTerminalExons;
   m->single += allExons->nSingles;
   m->orf += allExons->nORFs;
+  m->zle += allExons->nZeroLengthExons;
+  m->utr += allExons->nUtrInitialExons;
+  m->utr += allExons->nUtrInitialHalfExons;
+  m->utr += allExons->nUtrInternalExons;
+  m->utr += allExons->nUtr5InternalHalfExons;
+  m->utr += allExons->nUtr3InternalHalfExons;
+  m->utr += allExons->nUtrTerminalHalfExons;
+  m->utr += allExons->nUtrTerminalExons;
 
   m->first_r += allExons_r->nInitialExons;
   m->internal_r += allExons_r->nInternalExons;
   m->terminal_r += allExons_r->nTerminalExons;
   m->single_r += allExons_r->nSingles;  
   m->orf_r += allExons_r->nORFs;  
+  m->zle_r += allExons->nZeroLengthExons;
+  m->utr_r += allExons->nUtrInitialExons;
+  m->utr_r += allExons->nUtrInitialHalfExons;
+  m->utr_r += allExons->nUtrInternalExons;
+  m->utr_r += allExons->nUtr5InternalHalfExons;
+  m->utr_r += allExons->nUtr3InternalHalfExons;
+  m->utr_r += allExons->nUtrTerminalHalfExons;
+  m->utr_r += allExons->nUtrTerminalExons;
 
   m->totalExons = 
     m->first + 
@@ -118,7 +146,11 @@ void updateTotals(account *m,
     m->single +
     m->single_r +
     m->orf +
-    m->orf_r;
+    m->orf_r +
+    m->zle +
+    m->zle_r +
+    m->utr +
+    m->utr_r;
 }
 
 /* Reset acc. counters for the next input sequence */

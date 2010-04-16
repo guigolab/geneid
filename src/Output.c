@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: Output.c,v 1.18 2007-03-30 15:09:29 talioto Exp $  */
+/*  $Id: Output.c,v 1.19 2010-04-16 10:08:40 talioto Exp $  */
 
 #include "geneid.h"
 extern int U12GTAG;
@@ -34,7 +34,7 @@ extern int VRB;
 
 extern int SFP, SDP, SAP, STP,
            EFP, EIP, ETP, EXP, ESP,EOP,
-           FWD, RVS, EVD,
+           FWD, RVS, EVD, UTR,
            GENAMIC, GENEID,
            GFF, GFF3, XML;
 
@@ -130,11 +130,11 @@ void OutputHeader(char* locus, long l)
       s[strlen(s)-1] = '\n';
       if (GFF3){  
 	  	printf("# date %s",s);
-      	printf("# source-version: %s -- geneid@imim.es\n",VERSION);
+      	printf("# source-version: %s -- geneid@crg.es\n",VERSION);
       	printf("##sequence-region %s 1 %ld\n",locus,l);
 	  } else {
 	  	printf("## date %s",s);
-      	printf("## source-version: %s -- geneid@imim.es\n",VERSION);
+      	printf("## source-version: %s -- geneid@crg.es\n",VERSION);
       	printf("# Sequence %s - Length = %ld bps\n",locus,l);
 	  }
     }
@@ -173,10 +173,18 @@ void Output(packSites* allSites,
 		PrintSites(allSites->DonorSites, allSites->nDonorSites,
 				   DON, Locus, FORWARD, l1, l2, lowerlimit, Sequence, gp->DonorProfile);	   
 	  }
-      if (STP)
+      if (STP){
 		PrintSites(allSites->StopCodons, allSites->nStopCodons,
 				   STO, Locus, FORWARD, l1, l2, lowerlimit, Sequence, gp->StopProfile);
-      
+      }
+      if (UTR && SFP){
+		PrintSites(allSites->TS, allSites->nTS,
+				   TSS, Locus, FORWARD, l1, l2, lowerlimit, Sequence, gp->DonorProfile);
+      }
+      if (UTR && STP){
+		PrintSites(allSites->TE, allSites->nTE,
+				   TES, Locus, FORWARD, l1, l2, lowerlimit, Sequence, gp->AcceptorProfile);
+      }
       /* exons */
       if (EFP){
 		PrintExons(allExons->InitialExons,allExons->nInitialExons,
@@ -217,10 +225,18 @@ void Output(packSites* allSites,
 		PrintSites(allSites_r->DonorSites, allSites_r->nDonorSites,
 				   DON, Locus, REVERSE, l1, l2, lowerlimit, Sequence, gp->DonorProfile);
 	  }
-      if (STP)
+      if (STP){
 		PrintSites(allSites_r->StopCodons,allSites_r->nStopCodons,STO,
 				   Locus,REVERSE, l1, l2, lowerlimit, Sequence, gp->StopProfile);
-      
+      }
+      if (UTR && SFP){
+		PrintSites(allSites_r->TS, allSites_r->nTS,
+				   TSS, Locus, REVERSE, l1, l2, lowerlimit, Sequence, gp->StartProfile);
+      }
+      if (UTR && STP){
+		PrintSites(allSites_r->TE, allSites_r->nTE,
+				   TES, Locus, REVERSE, l1, l2, lowerlimit, Sequence, gp->StopProfile);
+      }
       /* exons */
       if (EFP){
 		PrintExons(allExons_r->InitialExons,allExons_r->nInitialExons,
@@ -285,28 +301,32 @@ void OutputStats(char* Locus)
       sprintf(mess,"\n\tStats (Sequence %s)",Locus);
       printRes(mess);
       
-      printRes("__________________________________________________________________________\n");
+      printRes("___________________________________________________________________________________________________________\n");
 	  
-      sprintf(mess,"%8s\t%8s\t%8s\t%8s\t%8s",
-			  sFIRST,sINTERNAL,sTERMINAL,sSINGLE,sORF);
+      sprintf(mess,"%8s\t%8s\t%8s\t%8s\t%8s\t%8s\t%8s",
+	      sFIRST,sINTERNAL,sTERMINAL,sSINGLE,sORF,sZEROLENGTH,"UTR");
       
       printRes(mess);
-      printRes("__________________________________________________________________________\n");
+      printRes("___________________________________________________________________________________________________________\n");
 	  
-      sprintf(mess,"%8ld\t%8ld\t%8ld\t%8ld\t%8ld\n",      
-			  m->first, 
-			  m->internal, 
-			  m->terminal,
-			  m->single,
-			  m->orf); 
+      sprintf(mess,"%8ld\t%8ld\t%8ld\t%8ld\t%8ld\t%8ld\t%8ld\n",      
+	      m->first, 
+	      m->internal, 
+	      m->terminal,
+	      m->single,
+	      m->orf,
+	      m->zle,
+	      m->utr); 
       printRes(mess);
 	  
-      sprintf(mess,"%8ld\t%8ld\t%8ld\t%8ld\t%8ld\n",      
-			  m->first_r, 
-			  m->internal_r, 
-			  m->terminal_r,
-			  m->single_r,
-			  m->orf_r);      
+      sprintf(mess,"%8ld\t%8ld\t%8ld\t%8ld\t%8ld\t%8ld\t%8ld\n",      
+	      m->first_r, 
+	      m->internal_r, 
+	      m->terminal_r,
+	      m->single_r,
+	      m->orf_r,
+	      m->zle_r,
+	      m->utr_r);      
       printRes(mess);
 	  
       sprintf(mess,"TOTAL: %ld predicted exons\n",
@@ -336,7 +356,7 @@ void OutputTime()
   if (t < caux)
     t++;
 
-  printRes("__________________________________________________________________________\n");
+  printRes("___________________________________________________________________________________________________________\n");
   
   sprintf(mess,"CPU time: \t%.3f secs",caux);
   printRes(mess);

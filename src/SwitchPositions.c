@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: SwitchPositions.c,v 1.6 2007-01-11 17:53:01 talioto Exp $  */
+/*  $Id: SwitchPositions.c,v 1.7 2010-04-16 10:08:40 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -83,6 +83,56 @@ void SwitchPositions(packExons* allExons)
 	(allExons->ORFs+i)->Donor;
       (allExons->ORFs+i)->Donor = c;
     }
+  for (i=0;i<allExons->nUtrInitialExons;i++) 
+    {
+      c = (allExons->UtrInitialExons+i)->Acceptor; 
+      (allExons->UtrInitialExons+i)->Acceptor = 
+	(allExons->UtrInitialExons+i)->Donor;
+      (allExons->UtrInitialExons+i)->Donor = c;
+    }
+  for (i=0;i<allExons->nUtrInitialHalfExons;i++) 
+    {
+      c = (allExons->UtrInitialHalfExons+i)->Acceptor; 
+      (allExons->UtrInitialHalfExons+i)->Acceptor = 
+	(allExons->UtrInitialHalfExons+i)->Donor;
+      (allExons->UtrInitialHalfExons+i)->Donor = c;
+    }
+  for (i=0;i<allExons->nUtrInternalExons;i++) 
+    {
+      c = (allExons->UtrInternalExons+i)->Acceptor; 
+      (allExons->UtrInternalExons+i)->Acceptor = 
+	(allExons->UtrInternalExons+i)->Donor;
+      (allExons->UtrInternalExons+i)->Donor = c;
+    }
+  for (i=0;i<allExons->nUtr5InternalHalfExons;i++) 
+    {
+      c = (allExons->Utr5InternalHalfExons+i)->Acceptor; 
+      (allExons->Utr5InternalHalfExons+i)->Acceptor = 
+	(allExons->Utr5InternalHalfExons+i)->Donor;
+      (allExons->Utr5InternalHalfExons+i)->Donor = c;
+    }
+  for (i=0;i<allExons->nUtr3InternalHalfExons;i++) 
+    {
+      c = (allExons->Utr3InternalHalfExons+i)->Acceptor; 
+      (allExons->Utr3InternalHalfExons+i)->Acceptor = 
+	(allExons->Utr3InternalHalfExons+i)->Donor;
+      (allExons->Utr3InternalHalfExons+i)->Donor = c;
+    }
+  for (i=0;i<allExons->nUtrTerminalHalfExons;i++) 
+    {
+      c = (allExons->UtrTerminalHalfExons+i)->Acceptor; 
+      (allExons->UtrTerminalHalfExons+i)->Acceptor = 
+	(allExons->UtrTerminalHalfExons+i)->Donor;
+      (allExons->UtrTerminalHalfExons+i)->Donor = c;
+    }
+  for (i=0;i<allExons->nUtrTerminalExons;i++) 
+    {
+      c = (allExons->UtrTerminalExons+i)->Acceptor; 
+      (allExons->UtrTerminalExons+i)->Acceptor = 
+	(allExons->UtrTerminalExons+i)->Donor;
+      (allExons->UtrTerminalExons+i)->Donor = c;
+    }
+
 }
 
    

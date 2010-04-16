@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: BuildDonors.c,v 1.5 2007-08-07 17:01:54 talioto Exp $  */
+/*  $Id: BuildDonors.c,v 1.6 2010-04-16 10:08:39 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -34,6 +34,9 @@ extern int TRANS[];
 
 /* Maximum allowed number of generic sites */
 extern long NUMSITES;
+extern int UTR;
+
+
 
 long  BuildDonors(char* s,
 		  short class,
@@ -44,7 +47,9 @@ long  BuildDonors(char* s,
 		  long l1, 
 		  long l2,
 		  long ns,
-		  long nsites
+		  long nsites,
+		  int Strand,
+		  packExternalInformation* external
 		  ) 
 {
   int i,j;
@@ -71,7 +76,9 @@ long  BuildDonors(char* s,
 			    score = score + p->transitionValues[i][index];
 			}
 		  score = p->afactor + (p->bfactor * score);
-		 
+		  if(UTR){
+		    score = score - PeakEdgeScore(is + p->order,Strand,external,l1,l2,6);
+		  }
 		  if (score >= p->cutoff) 
 			{
 			  st[ns].Position = is + p->order;
@@ -108,7 +115,9 @@ long  BuildDonors(char* s,
 				score = score + p->transitionValues[i][index];
 			}
 		  score = p->afactor + (p->bfactor * score);
-		 
+		  if(UTR){
+		    score = score - PeakEdgeScore(left + is + p->offset,Strand,external,l1,l2,6);
+		  }
 		  if (score >= p->cutoff) 
 			{
 			  st[ns].Position = left + is + p->offset;
@@ -140,6 +149,9 @@ long  BuildDonors(char* s,
 				score = score + p->transitionValues[i][index];
 			}
 		  score = p->afactor + (p->bfactor * score);
+		  if(UTR){
+		    score = score - PeakEdgeScore(left + is + p->offset,Strand,external,l1,l2,6);
+		  }
 		  if (score >= p->cutoff) 
 			{
 			  st[ns].Position = left + is + p->offset;
@@ -174,7 +186,9 @@ long  BuildDonors(char* s,
 				score = score + p->transitionValues[i][index];
 			}
 		  score = p->afactor + (p->bfactor * score);
-		 
+		  if(UTR){
+		    score = score - PeakEdgeScore(left + is + p->offset,Strand,external,l1,l2,6);
+		  }
 		  if (score >= p->cutoff) 
 			{
 			  st[ns].Position = left + is + p->offset;

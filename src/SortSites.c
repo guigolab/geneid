@@ -102,8 +102,12 @@ void SortSites(site* Sites, long numSites,  site* sortedSites,
   /* Adding predicted sites in the forward sense */
   for (i=0; i<numSites; i++) 
     {
+
+      
       /* Correction between real and relative to fragment position */
       pos=(Sites+i)->Position - left + COFFSET;
+      /* sprintf (mess,"site index: %ld abs pos: %ld rel pos, %ld", i, (Sites+i)->Position, pos); */
+/*       printRes(mess); */
       /* Insert site in the proper list depending on the left position */
       UpdateSiteList(&(SiteList[pos]), Sites+i);
     }

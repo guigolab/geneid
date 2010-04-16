@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: BackupGenes.c,v 1.9 2010-01-04 15:17:58 talioto Exp $  */
+/*  $Id: BackupGenes.c,v 1.10 2010-04-16 10:08:39 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -84,6 +84,7 @@ exonGFF* backupExon(exonGFF* E, exonGFF* Prev, packDump* d)
   d->dumpExons[d->ndumpExons].Score  = E->Score;
   d->dumpExons[d->ndumpExons].PartialScore = E->PartialScore;
   d->dumpExons[d->ndumpExons].HSPScore = E->HSPScore;
+  d->dumpExons[d->ndumpExons].R = E->R;
   d->dumpExons[d->ndumpExons].GeneScore  = E->GeneScore;
   d->dumpExons[d->ndumpExons].Remainder = E->Remainder; 
   strcpy(d->dumpExons[d->ndumpExons].Group,E->Group);

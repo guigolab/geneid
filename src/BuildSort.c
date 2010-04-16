@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: BuildSort.c,v 1.4 2006-12-11 09:50:48 talioto Exp $  */
+/*  $Id: BuildSort.c,v 1.5 2010-04-16 10:08:39 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -46,7 +46,7 @@ void BuildSort(dict *D,
   int type;
   int class;
   char aux[MAXTYPE];
-  
+  char mess[MAXSTRING];
   /* Every exon will be classified into some sorting function (d) */
   /* Input exons are sorted by acceptor (left position) */
   for(i=0; i < nexons; i++)
@@ -54,33 +54,36 @@ void BuildSort(dict *D,
       aux[0]='\0';
       strcpy (aux, (E+i)->Type);
       strcat (aux, &((E+i)->Strand));
-	  
+      
       /* What's the type of exon? "Type+Strand" */
       type = getkeyDict(D,aux);
       
       /* Checking and getting exon type (dictionary) */
       if (type != NOTFOUND)
-		{
-		  /* Exon may belong to some upstream compatible classes (UC) */
-		  for(j=0; j < nc[type]; j++)
-			{
-			  class = UC[type][j];
-			  k = km[class]-1;
+	{
+	  /* Exon may belong to some upstream compatible classes (UC) */
+	  for(j=0; j < nc[type]; j++)
+	    {
+	      class = UC[type][j];
+	      k = km[class]-1;
 			  
-			  /* Screening the exons sorted before: sorting by insertion */
-			  while (k>=0 && (((E+i)->Donor->Position + (E+i)->offset2) 
-							  < 
-							  (d[class][k]->Donor->Position 
-							   + d[class][k]->offset2)))  
-				{
-				  /* Shifting down previous exons */
-				  d[class][k+1] = d[class][k];
-				  k--;
-				}
-			  /* Insert new exon before the previously shifted exons */
-			  d[class][k+1] = (E+i);
-			  km[class]++;
-			}
-		} /* end if type found */
+	      /* Screening the exons sorted before: sorting by insertion */
+	      while (k>=0 && (((E+i)->Donor->Position + (E+i)->offset2) 
+			      < 
+			      (d[class][k]->Donor->Position 
+			       + d[class][k]->offset2)))  
+		{
+		  /* Shifting down previous exons */
+		  d[class][k+1] = d[class][k];
+		  k--;
+		}
+	      /* Insert new exon before the previously shifted exons */
+	      d[class][k+1] = (E+i);
+	      km[class]++;
+	    }
+	}else{ /* end if type found */
+	sprintf(mess,"type %s(%d) not found",aux,type);
+	printMess(mess);
+      }
     } /* end forall exons */
 }

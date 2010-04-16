@@ -25,10 +25,11 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: ReadExonsGFF.c,v 1.12 2008-03-10 15:31:39 talioto Exp $  */
+/*  $Id: ReadExonsGFF.c,v 1.13 2010-04-16 10:08:40 talioto Exp $  */
 
 #include "geneid.h"
 extern float EvidenceEW;
+extern float EvidenceFactor;
 extern int FWD;
 extern int RVS;
 extern long LOW;
@@ -99,13 +100,17 @@ long ReadExonsGFF (char *FileName,
   char c;
   int slen;
   char mess[MAXSTRING];
-
+  
   int acceptorclass = U2;
   int donorclass = U2;
   char groupCopy[MAXLINE];
   char *k;
   char *v;
 
+  char *utrintrontypes[] = {sUTR5INTRON,sUTR3INTRON};
+  int introncopy;
+  int isIntron = 0;
+  exonGFF *original;
   /* 0. Open exons file to read the information */
   if ((file=fopen(FileName, "r"))==NULL)
     printError("The exonsGFF file can not be opened to read");
@@ -194,7 +199,7 @@ long ReadExonsGFF (char *FileName,
 		}
 	      (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Score = MAXSCORE;
 	    }else{
-	    (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Score += EvidenceEW;
+	    (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Score = ((external->evidence[a]->vExons + external->evidence[a]->nvExons)->Score * EvidenceFactor) + EvidenceEW;
 	  }
 	  
 	  /* 7. Strand (reading sense) [+|-] */
@@ -272,8 +277,20 @@ long ReadExonsGFF (char *FileName,
 			}
 		      }
 		      if(
-			  (((external->evidence[a]->vExons + external->evidence[a]->nvExons)->Strand == '+') && strcmp((external->evidence[a]->vExons + external->evidence[a]->nvExons)->Type,"Intron"))||
-			  (((external->evidence[a]->vExons + external->evidence[a]->nvExons)->Strand == '-') && !strcmp((external->evidence[a]->vExons + external->evidence[a]->nvExons)->Type,"Intron"))
+			  (
+			   (
+			    (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Strand == '+') 
+			   && strcmp((external->evidence[a]->vExons + external->evidence[a]->nvExons)->Type,sINTRON)
+			   && strcmp((external->evidence[a]->vExons + external->evidence[a]->nvExons)->Type,sUTRINTRON)
+			   )
+			  ||
+			  (
+			   (
+			    (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Strand == '-') 
+			   && (!strcmp((external->evidence[a]->vExons + external->evidence[a]->nvExons)->Type,sINTRON)
+			       || !strcmp((external->evidence[a]->vExons + external->evidence[a]->nvExons)->Type,sUTRINTRON)
+			       )
+			   )
 			 ){
 			if (!(strcmp(k,"donor"))){
 			  if (!(strcmp(v,sU2))){
@@ -371,10 +388,16 @@ long ReadExonsGFF (char *FileName,
 			    lineCopy);  
 		    printError(mess);  
 		  }
+
 		else
 		  {
 		    lastAcceptor[a] = currAcceptor;
-			  
+		    if (!strcmp((external->evidence[a]->vExons + external->evidence[a]->nvExons)->Type,sINTRON)){
+		      isIntron = 1;
+		    }else{
+		      isIntron = 0;
+		    }
+		    original = external->evidence[a]->vExons + external->evidence[a]->nvExons;
 		    /* (C). Setting evidence splice sites to U2 class */
 		    (external->evidence[a]->vSites + external->evidence[a]->nvSites)->class = acceptorclass;
 		    (external->evidence[a]->vSites + external->evidence[a]->nvSites + 1)->class = donorclass;
@@ -419,39 +442,43 @@ long ReadExonsGFF (char *FileName,
 			       (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Type);
 			strcpy((external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->Type,
 			       (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Type);
-			(external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->Score = 
-			  (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Score;
-			(external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->Score = 
-			  (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Score;
-			(external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->Strand = 
-			  (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Strand;
-			(external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->Strand = 
-			  (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Strand;
+			(external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->Score = original->Score;
+			(external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->Score = original->Score;
+			(external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->Strand = original->Strand;
+			(external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->Strand = original->Strand;
 		      
 			/* Computing remainder from frame value for copies 1,2 */
-			(external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->Remainder = 
-			  ((3 - (((external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->Donor->Position - 
-				  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->Acceptor->Position - 
-				  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->Frame + 1)%3)) %3);
+			if (!strcmp((external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->Type,sINTRON)){
+			  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->Remainder = (external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->Frame;
+			  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->Frame = 
+			    (3 - (external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->Remainder)%3;
+			  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->Remainder = (external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->Frame;
+			  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->Frame = 
+			    (3 - (external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->Remainder)%3;
+			}else{
+			  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->Remainder = 
+			    ((3 - (((external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->Donor->Position - 
+				    (external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->Acceptor->Position - 
+				    (external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->Frame + 1)%3)) %3);
 				  
-			(external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->Remainder = 
-			  ((3 - (((external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->Donor->Position - 
-				  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->Acceptor->Position - 
-				  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->Frame + 1)%3)) %3);
-				  
+			  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->Remainder = 
+			    ((3 - (((external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->Donor->Position - 
+				    (external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->Acceptor->Position - 
+				    (external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->Frame + 1)%3)) %3);
+			}
 			/* The same group */
 			strcpy((external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->Group,
-			       (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Group);
+			       original->Group);
 			strcpy((external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->Group,
-			       (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Group);
+			       original->Group);
 				  
 			/* Evidence flag activated */
 			(external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->evidence = 1;
 			(external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->evidence = 1;
 				  
-		      } /* End of if(three) */      
-			  
+		      } /* End of if(three) */   
 		    /* (E). Doing the same for the original exon: */
+
 		    /* Computing remainder from frame value */
 		    if (!strcmp((external->evidence[a]->vExons + external->evidence[a]->nvExons)->Type,sINTRON)){
 		      (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Remainder = (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Frame;
@@ -470,6 +497,97 @@ long ReadExonsGFF (char *FileName,
 		    external->evidence[a]->nvExons = (three)? 
 		      external->evidence[a]->nvExons+3 : 
 		      external->evidence[a]->nvExons+1;
+		    
+		    /* (D). Making necessary intron types */
+		    if (isIntron)
+		      {
+			/* printMess("Making UTR3 and UTR5 Introns"); */
+			for(introncopy = 0;introncopy<2;introncopy++){
+			if (three){
+			  /* Creating three exons (3 frames): sharing sites */
+			  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->Acceptor = 
+			    (external->evidence[a]->vSites + external->evidence[a]->nvSites);
+			  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->Donor = 
+			    (external->evidence[a]->vSites + external->evidence[a]->nvSites + 1); 
+			  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->Acceptor = 
+			    (external->evidence[a]->vSites + external->evidence[a]->nvSites);
+			  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->Donor = 
+			    (external->evidence[a]->vSites + external->evidence[a]->nvSites + 1);
+				  
+			  /* Updating information about sites to the range 0..L-1 */
+			  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->offset1 = -COFFSET;
+			  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->offset2 = -COFFSET;
+			  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->offset1 = -COFFSET;
+			  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->offset2 = -COFFSET;
+				  
+			  /* Setting frame values */
+			  (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Frame = 0;
+			  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->Frame = 1;
+			  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->Frame = 2;
+				  
+			  /* Copy some exon attributes */
+			  strcpy((external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->Type,utrintrontypes[introncopy]);
+			  strcpy((external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->Type,utrintrontypes[introncopy]);
+			  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->Score = original->Score;
+			  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->Score = original->Score;
+			  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->Strand = original->Strand;
+			  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->Strand = original->Strand;
+		      
+			  /* Computing remainder from frame value for copies 1,2 */
+			  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->Remainder = (external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->Frame;
+			  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->Frame = 
+			    (3 - (external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->Remainder)%3;
+			  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->Remainder = (external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->Frame;
+			  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->Frame = 
+			    (3 - (external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->Remainder)%3;
+						
+			  
+				  
+			  /* The same group */
+			  strcpy((external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->Group,original->Group);
+			  strcpy((external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->Group,original->Group);
+				  
+			  /* Evidence flag activated */
+			  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->evidence = 1;
+			  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->evidence = 1;
+			}
+			/* (E). Doing the same for the original exon: */
+			/* Creating copy exon: sharing sites */
+			(external->evidence[a]->vExons + external->evidence[a]->nvExons)->Acceptor = 
+			    (external->evidence[a]->vSites + external->evidence[a]->nvSites);
+			  (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Donor = 
+			    (external->evidence[a]->vSites + external->evidence[a]->nvSites + 1);
+				  
+			/* Updating information about sites to the range 0..L-1 */
+			(external->evidence[a]->vExons + external->evidence[a]->nvExons)->offset1 = -COFFSET;
+			(external->evidence[a]->vExons + external->evidence[a]->nvExons)->offset2 = -COFFSET;
+				  
+			/* Setting frame values */
+			(external->evidence[a]->vExons + external->evidence[a]->nvExons)->Frame = 0;
+				  
+			/* Copy some exon attributes */
+			strcpy((external->evidence[a]->vExons + external->evidence[a]->nvExons)->Type,utrintrontypes[introncopy]);
+			(external->evidence[a]->vExons + external->evidence[a]->nvExons)->Score = original->Score;
+			(external->evidence[a]->vExons + external->evidence[a]->nvExons)->Strand = original->Strand;		      
+	
+			/* The same group */
+			strcpy((external->evidence[a]->vExons + external->evidence[a]->nvExons)->Group,original->Group);
+
+			/* Computing remainder from frame value */
+			(external->evidence[a]->vExons + external->evidence[a]->nvExons)->Remainder = (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Frame;
+			(external->evidence[a]->vExons + external->evidence[a]->nvExons)->Frame = 
+			    (3 - (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Remainder)%3;
+			
+			/* Evidence flag activated */
+			(external->evidence[a]->vExons + external->evidence[a]->nvExons)->evidence = 1;
+			/* Updating and checking loop counters */
+			external->evidence[a]->nvExons = (three)? 
+			  external->evidence[a]->nvExons+3 : 
+			  external->evidence[a]->nvExons+1;
+			}
+		      } /* End of if(Intron) */      
+				  
+		    
 		    external->evidence[a]->nvSites = external->evidence[a]->nvSites + 2;
 		    three = 0;
 			  
@@ -490,8 +608,10 @@ long ReadExonsGFF (char *FileName,
   external->nSequences = external->locusNames->nextFree;
 
   /* Return the number of created exons (including replications) */
-  for(i=0,j=0; j < external->nSequences; j++) 
+  for(i=0,j=0; j < external->nSequences; j++){ 
+/*     sprintf(mess,"nvExons: %ld",external->evidence[j]->nvExons);printMess(mess); */
     i = i + external->evidence[j]->nvExons;
+  }
 
   return(i);
 }

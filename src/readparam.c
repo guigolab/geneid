@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: readparam.c,v 1.14 2007-04-04 10:25:06 talioto Exp $  */
+/*  $Id: readparam.c,v 1.15 2010-04-16 10:08:40 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -39,6 +39,7 @@ extern int U2GTA;
 extern int U2GTG;
 extern int U2GTY;
 extern int SGE;
+extern int PAS;
 extern short SPLICECLASSES;
 extern float U12_SPLICE_SCORE_THRESH;
 extern float U12_EXON_SCORE_THRESH;
@@ -46,6 +47,8 @@ extern float U12EW;
 extern float RSSMARKOVSCORE;
 extern float RSSDON;
 extern float RSSACC;
+extern float EvidenceEW;
+extern float EvidenceFactor;
 
 /* Numeric values: read one line skipping comments and empty lines */
 void readLine(FILE *File, char* line)
@@ -584,18 +587,20 @@ void ReadIsochore(FILE* RootFile, gparam* gp)
   readHeader(RootFile,line);
   readLine(RootFile,line);
 
-  if ((sscanf(line,"%f %f %f %f\n",
+  if ((sscanf(line,"%f %f %f %f %f\n",
 			  &(gp->Initial->ExonCutoff),
 			  &(gp->Internal->ExonCutoff),
 			  &(gp->Terminal->ExonCutoff),
-			  &(gp->Single->ExonCutoff)))!=4)
+	                  &(gp->Single->ExonCutoff),
+			  &(gp->utr->ExonCutoff)))< 4)
     printError("Wrong format: exon score cutoffs (number/type)");  
 
-  sprintf(mess,"Exon cutoffs: \t%9.3f\t%9.3f\t%9.3f\t%9.3f",
+  sprintf(mess,"Exon cutoffs: \t%9.3f\t%9.3f\t%9.3f\t%9.3f\t%9.3f",
 		  gp->Initial->ExonCutoff,
 		  gp->Internal->ExonCutoff,
 		  gp->Terminal->ExonCutoff,
-		  gp->Single->ExonCutoff);
+	          gp->Single->ExonCutoff,
+	          gp->utr->ExonCutoff);
   printMess(mess); 
 
   /* 3. read cutoff (potential coding score) to accept one predicted exon */
@@ -618,18 +623,20 @@ void ReadIsochore(FILE* RootFile, gparam* gp)
   /* 4. Weight of signals in final exon score */
   readHeader(RootFile,line);
   readLine(RootFile,line);
-  if ((sscanf(line,"%f %f %f %f\n",
+  if ((sscanf(line,"%f %f %f %f %f\n",
 			  &(gp->Initial->siteFactor),
 			  &(gp->Internal->siteFactor),
 			  &(gp->Terminal->siteFactor),
-			  &(gp->Single->siteFactor)))!=4)
+			  &(gp->Single->siteFactor),
+			  &(gp->utr->siteFactor)))<4)
 	printError("Wrong format: weight of signal scores (number/type)");  
   
-  sprintf(mess,"Site factors: \t%9.2f\t%9.2f\t%9.2f\t%9.2f",
+  sprintf(mess,"Site factors: \t%9.2f\t%9.2f\t%9.2f\t%9.2f\t%9.2f",
 		  gp->Initial->siteFactor,
 		  gp->Internal->siteFactor,
 		  gp->Terminal->siteFactor,
-		  gp->Single->siteFactor);
+	          gp->Single->siteFactor,
+	          gp->utr->siteFactor);
   printMess(mess); 
 
   /* 5. Weight of coding potential in final exon score */
@@ -639,7 +646,7 @@ void ReadIsochore(FILE* RootFile, gparam* gp)
 			  &(gp->Initial->exonFactor),
 			  &(gp->Internal->exonFactor),
 			  &(gp->Terminal->exonFactor),
-			  &(gp->Single->exonFactor)))!=4)
+			  &(gp->Single->exonFactor)))<4)
 	printError("Wrong format: weight of coding potential scores (number/type)");  
   
   sprintf(mess,"Exon factors: \t%9.2f\t%9.2f\t%9.2f\t%9.2f",
@@ -652,19 +659,21 @@ void ReadIsochore(FILE* RootFile, gparam* gp)
   /* 6. Weight of homology information in final exon score */
   readHeader(RootFile,line);
   readLine(RootFile,line);
-  if ((sscanf(line,"%f %f %f %f\n",
+  if ((sscanf(line,"%f %f %f %f %f\n",
 			  &(gp->Initial->HSPFactor),
 			  &(gp->Internal->HSPFactor),
 			  &(gp->Terminal->HSPFactor),
-			  &(gp->Single->HSPFactor)))!=4)
+			  &(gp->Single->HSPFactor),
+			  &(gp->utr->HSPFactor)))<4)
 
 	printError("Wrong format: weight of homology scores (number/type)");  
   
-  sprintf(mess,"HSP factors: \t\t%9.2f\t%9.2f\t%9.2f\t%9.2f",
+  sprintf(mess,"HSP factors: \t\t%9.2f\t%9.2f\t%9.2f\t%9.2f\t%9.2f",
 		  gp->Initial->HSPFactor,
 		  gp->Internal->HSPFactor,
 		  gp->Terminal->HSPFactor,
-		  gp->Single->HSPFactor);
+		  gp->Single->HSPFactor,
+		  gp->utr->HSPFactor);
   printMess(mess); 
 
   /* 7. read weights to correct the score of exons after general cutoff */
@@ -683,6 +692,24 @@ void ReadIsochore(FILE* RootFile, gparam* gp)
 			printError("Wrong format: RSSMARKOVSCORE value scores (number/type)");  
 
 		  sprintf(mess,"RSSMARKOVSCORE: \t%9.2f",RSSMARKOVSCORE);
+		  printMess(mess);
+	}
+	 /* 1. Read Evidence Exon Weight */
+	if(!strcasecmp(header,sEVIDENCEW)){
+		  readLine(RootFile,line);
+		  if ((sscanf(line,"%f\n", &(EvidenceEW)))!=1)
+			printError("Wrong format: EvidenceExonWeight value (number/type)");  
+
+		  sprintf(mess,"EvidenceExonWeight: \t%9.2f",EvidenceEW);
+		  printMess(mess);
+	}
+	 /* 1. Read Evidence Exon Factor */
+	if(!strcasecmp(header,sEVIDENCEF)){
+		  readLine(RootFile,line);
+		  if ((sscanf(line,"%f\n", &(EvidenceFactor)))!=1)
+			printError("Wrong format: EvidenceFactor value (number/type)");  
+
+		  sprintf(mess,"EvidenceFactor: \t%9.2f",EvidenceFactor);
 		  printMess(mess);
 	}
 	 /* 1. Read RSS_Donor_Score_Cutoff */
@@ -741,18 +768,20 @@ void ReadIsochore(FILE* RootFile, gparam* gp)
 		}
   }
   readLine(RootFile,line);
-  if ((sscanf(line,"%f %f %f %f\n",
+  if ((sscanf(line,"%f %f %f %f %f\n",
 			  &(gp->Initial->ExonWeight),
 			  &(gp->Internal->ExonWeight),
 			  &(gp->Terminal->ExonWeight),
-			  &(gp->Single->ExonWeight)))!=4)
+			  &(gp->Single->ExonWeight),
+			  &(gp->utr->ExonWeight)))<4)
     printError("Wrong format: exon weight values (number/type)");  
 
-  sprintf(mess,"Exon weights: \t%9.3f\t%9.3f\t%9.3f\t%9.3f",
+  sprintf(mess,"Exon weights: \t%9.3f\t%9.3f\t%9.3f\t%9.3f\t%9.3f",
 		  gp->Initial->ExonWeight,
 		  gp->Internal->ExonWeight,
 		  gp->Terminal->ExonWeight,
-		  gp->Single->ExonWeight);
+		  gp->Single->ExonWeight,
+		  gp->utr->ExonWeight);
   printMess(mess);
 
  
@@ -770,7 +799,39 @@ void ReadIsochore(FILE* RootFile, gparam* gp)
   ReadProfile(RootFile, gp->StopProfile , sSTO,1);
   
   /* 9. read coding potential log-likelihood values (Markov chains) */
-  readHeader(RootFile,line); 
+  readHeader(RootFile,line);   
+  if ((sscanf(line,"%s",header))!=1)
+    {
+      sprintf(mess,"Wrong format: header ");
+      printError(mess);
+      printMess(header);
+    }
+
+
+  while(strcasecmp(header,sMarkov)&&strcasecmp(header,"Markov_oligo_logs_file"))
+    {
+      /* printMess(header); */
+      
+      
+      if (!strcasecmp(header,sprofilePolyA))
+	{
+
+	  PAS++;
+	  printMess("Reading PolyA Signal Profile");
+	  /* Reading the U2gty donor profile */
+	  ReadProfile(RootFile, gp->PolyASignalProfile, sPOL, 0);
+	  
+	}
+      
+      readHeader(RootFile,line);
+      if ((sscanf(line,"%s",header))!=1)
+	{
+	  sprintf(mess,"Wrong format: header ");
+	  printError(mess);
+	  printMess(header);
+	}
+  }      
+  /* Next profile for Markov order */
   readLine(RootFile,line);
 
   if ((sscanf(line,"%d", &(gp->OligoLength)))!=1)

@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: SwitchFrames.c,v 1.7 2007-03-30 15:09:30 talioto Exp $  */
+/*  $Id: SwitchFrames.c,v 1.8 2010-04-16 10:08:40 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -42,7 +42,7 @@ void SwitchFrames(exonGFF* e, long n)
     {      
       if ((e+i)->Strand == '-')
 	{
-	  if (!strcmp((e+i)->Type,sINTRON)){
+	  if (!strcmp((e+i)->Type,sINTRON)||!strcmp((e+i)->Type,sUTR5INTRON)||!strcmp((e+i)->Type,sUTR3INTRON)||!strcmp((e+i)->Type,sUTRINTRON)){
 	    f=(e+i)->Frame;
 	    (e+i)->Remainder=f;
 	    /* (e+i)->Frame = ( 3 - (e+i)->Remainder )%3; */
@@ -58,7 +58,7 @@ void SwitchFrames(exonGFF* e, long n)
 /* 	  (e+i)->Acceptor->Score = score; */
 /* 	  (e+i)->Acceptor->class = class; */
 	}else{
-	if (!strcmp((e+i)->Type,sINTRON)){
+	if (!strcmp((e+i)->Type,sINTRON)||!strcmp((e+i)->Type,sUTR5INTRON)||!strcmp((e+i)->Type,sUTR3INTRON)||!strcmp((e+i)->Type,sUTRINTRON)){
 	    f=(e+i)->Frame;
 	    (e+i)->Remainder=f;
 	  }

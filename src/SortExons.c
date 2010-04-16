@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: SortExons.c,v 1.16 2008-03-10 15:31:39 talioto Exp $  */
+/*  $Id: SortExons.c,v 1.17 2010-04-16 10:08:40 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -33,6 +33,7 @@
 extern long NUMEXONS;
 extern int RSS;
 extern int EVD;
+extern int UTR;
 extern int FWD,RVS;
 extern int scanORF;
 
@@ -75,6 +76,7 @@ void InsertBeginExon(exonGFF* Exons, long lowerlimit)
   Exons[0].Score = MAXSCORE;
   Exons[0].PartialScore = 0.0;
   Exons[0].HSPScore = 0.0;
+  Exons[0].R = 0.0;
   Exons[0].GeneScore = 0.0; 
   Exons[0].Remainder = 0;
   strcpy(Exons[0].Group,NOGROUP);
@@ -117,6 +119,7 @@ void InsertBeginExon(exonGFF* Exons, long lowerlimit)
   Exons[1].Score = MAXSCORE;
   Exons[1].PartialScore = 0.0;
   Exons[1].HSPScore = 0.0;
+  Exons[1].R = 0.0;
   Exons[1].GeneScore = 0.0; 
   Exons[1].Remainder = 0;
   strcpy(Exons[1].Group,NOGROUP);
@@ -168,6 +171,7 @@ void InsertEndExon(exonGFF* Exons, long n, long L)
   Exons[n].Score = MAXSCORE;
   Exons[n].PartialScore = 0.0;
   Exons[n].HSPScore = 0.0;
+  Exons[n].R = 0.0;
   Exons[n].GeneScore = 0.0; 
   Exons[n].Remainder = 0;
   strcpy(Exons[n].Group,NOGROUP);
@@ -211,6 +215,7 @@ void InsertEndExon(exonGFF* Exons, long n, long L)
   Exons[n+1].Score = MAXSCORE;
   Exons[n+1].PartialScore = 0.0;
   Exons[n+1].HSPScore = 0.0;
+  Exons[n+1].R = 0.0;
   Exons[n+1].GeneScore = 0.0; 
   Exons[n+1].Remainder = 0;
   strcpy(Exons[n+1].Group,NOGROUP);
@@ -278,12 +283,12 @@ void SortExons(packExons* allExons,
   long left;
   long right;
   long room;
-  char mess[MAXSTRING]; 
+  char mess[MAXSTRING];
   long HowMany;
 
   /* 0. Creating the array for sorting: 1 - Length of fragment */
   left = l1 + COFFSET - LENGTHCODON;
-  right = l2 + COFFSET;
+  right = l2 + COFFSET + LENGTHCODON;
   l =  right - left + 1;
 
   /* Allocating memory for array ExonList */
@@ -348,13 +353,70 @@ void SortExons(packExons* allExons,
   if (scanORF)
     for (i=0;i<allExons->nORFs;i++) 
       {
-		acceptor=(allExons->ORFs+i)->Acceptor->Position - left;
-		(allExons->ORFs+i)->Strand = '+';
-		CorrectORF(allExons->ORFs+i);
-		offset = (allExons->ORFs+i)->offset1;
-		UpdateList(&(ExonList[acceptor + offset]), allExons->ORFs+i); 
+	acceptor=(allExons->ORFs+i)->Acceptor->Position - left;
+	(allExons->ORFs+i)->Strand = '+';
+	CorrectORF(allExons->ORFs+i);
+	offset = (allExons->ORFs+i)->offset1;
+	UpdateList(&(ExonList[acceptor + offset]), allExons->ORFs+i); 
       }
-
+  if (UTR){
+    for (i=0;i<allExons->nUtrInitialExons;i++) 
+      {
+	acceptor=(allExons->UtrInitialExons+i)->Acceptor->Position - left;
+	(allExons->UtrInitialExons+i)->Strand = '+';
+	CorrectExon(allExons->UtrInitialExons+i);
+	offset = (allExons->UtrInitialExons+i)->offset1;
+	UpdateList(&(ExonList[acceptor + offset]), allExons->UtrInitialExons+i); 
+      }
+    for (i=0;i<allExons->nUtrInitialHalfExons;i++)
+      {
+	acceptor=(allExons->UtrInitialHalfExons+i)->Acceptor->Position - left;
+	(allExons->UtrInitialHalfExons+i)->Strand = '+';
+	CorrectUTR(allExons->UtrInitialHalfExons+i);
+	offset = (allExons->UtrInitialHalfExons+i)->offset1;
+	UpdateList(&(ExonList[acceptor + offset]), allExons->UtrInitialHalfExons+i);
+      }
+    for (i=0;i<allExons->nUtrInternalExons;i++)
+      {
+	acceptor=(allExons->UtrInternalExons+i)->Acceptor->Position - left;
+	(allExons->UtrInternalExons+i)->Strand = '+';
+	CorrectExon(allExons->UtrInternalExons+i);
+	offset = (allExons->UtrInternalExons+i)->offset1;
+	UpdateList(&(ExonList[acceptor + offset]), allExons->UtrInternalExons+i);
+      }
+    for (i=0;i<allExons->nUtr5InternalHalfExons;i++)
+      {
+	acceptor=(allExons->Utr5InternalHalfExons+i)->Acceptor->Position - left;
+	(allExons->Utr5InternalHalfExons+i)->Strand = '+';
+	CorrectUTR(allExons->Utr5InternalHalfExons+i);
+	offset = (allExons->Utr5InternalHalfExons+i)->offset1;
+	UpdateList(&(ExonList[acceptor + offset]), allExons->Utr5InternalHalfExons+i);
+      }
+    for (i=0;i<allExons->nUtr3InternalHalfExons;i++)
+      {
+	acceptor=(allExons->Utr3InternalHalfExons+i)->Acceptor->Position - left;
+	(allExons->Utr3InternalHalfExons+i)->Strand = '+';
+	CorrectUTR(allExons->Utr3InternalHalfExons+i);
+	offset = (allExons->Utr3InternalHalfExons+i)->offset1;
+	UpdateList(&(ExonList[acceptor + offset]), allExons->Utr3InternalHalfExons+i);
+      }
+    for (i=0;i<allExons->nUtrTerminalHalfExons;i++)
+      {
+	acceptor=(allExons->UtrTerminalHalfExons+i)->Acceptor->Position - left;
+	(allExons->UtrTerminalHalfExons+i)->Strand = '+';
+	CorrectUTR(allExons->UtrTerminalHalfExons+i);
+	offset = (allExons->UtrTerminalHalfExons+i)->offset1;
+	UpdateList(&(ExonList[acceptor + offset]), allExons->UtrTerminalHalfExons+i);
+      }
+    for (i=0;i<allExons->nUtrTerminalExons;i++)
+      {
+	acceptor=(allExons->UtrTerminalExons+i)->Acceptor->Position - left;
+	(allExons->UtrTerminalExons+i)->Strand = '+';
+	CorrectExon(allExons->UtrTerminalExons+i);
+	offset = (allExons->UtrTerminalExons+i)->offset1;
+	UpdateList(&(ExonList[acceptor + offset]), allExons->UtrTerminalExons+i);
+      }
+  }
   /* Adding predicted exons in the reverse sense */
   for (i=0;i<allExons_r->nInitialExons;i++) 
     {
@@ -364,7 +426,6 @@ void SortExons(packExons* allExons,
       offset = (allExons_r->InitialExons+i)->offset1;
       UpdateList(&(ExonList[acceptor + offset]), allExons_r->InitialExons+i); 
     }
-
   for (i=0;i<allExons_r->nInternalExons;i++) 
     {
       acceptor=(allExons_r->InternalExons+i)->Acceptor->Position - left;
@@ -406,64 +467,118 @@ void SortExons(packExons* allExons,
   if (scanORF)
     for (i=0;i<allExons_r->nORFs;i++) 
       {
-		acceptor=(allExons_r->ORFs+i)->Acceptor->Position - left;
-		(allExons_r->ORFs+i)->Strand = '-';
-		CorrectORF(allExons_r->ORFs+i);
-		offset = (allExons_r->ORFs+i)->offset1;
-		UpdateList(&(ExonList[acceptor + offset]), allExons_r->ORFs+i); 
+	acceptor=(allExons_r->ORFs+i)->Acceptor->Position - left;
+	(allExons_r->ORFs+i)->Strand = '-';
+	CorrectORF(allExons_r->ORFs+i);
+	offset = (allExons_r->ORFs+i)->offset1;
+	UpdateList(&(ExonList[acceptor + offset]), allExons_r->ORFs+i); 
       }
 
+  if (UTR){
+    for (i=0;i<allExons_r->nUtrInitialExons;i++) 
+      {
+	acceptor=(allExons_r->UtrInitialExons+i)->Acceptor->Position - left;
+	(allExons_r->UtrInitialExons+i)->Strand = '-';
+	CorrectExon(allExons_r->UtrInitialExons+i);
+	offset = (allExons_r->UtrInitialExons+i)->offset1;
+	UpdateList(&(ExonList[acceptor + offset]), allExons_r->UtrInitialExons+i); 
+      }
+    for (i=0;i<allExons_r->nUtrInitialHalfExons;i++)
+      {
+	acceptor=(allExons_r->UtrInitialHalfExons+i)->Acceptor->Position - left;
+	(allExons_r->UtrInitialHalfExons+i)->Strand = '-';
+	CorrectUTR(allExons_r->UtrInitialHalfExons+i);
+	offset = (allExons_r->UtrInitialHalfExons+i)->offset1;
+	UpdateList(&(ExonList[acceptor + offset]), allExons_r->UtrInitialHalfExons+i);
+      }
+    for (i=0;i<allExons_r->nUtrInternalExons;i++)
+      {
+	acceptor=(allExons_r->UtrInternalExons+i)->Acceptor->Position - left;
+	(allExons_r->UtrInternalExons+i)->Strand = '-';
+	CorrectExon(allExons_r->UtrInternalExons+i);
+	offset = (allExons_r->UtrInternalExons+i)->offset1;
+	UpdateList(&(ExonList[acceptor + offset]), allExons_r->UtrInternalExons+i);
+      }
+    for (i=0;i<allExons_r->nUtr5InternalHalfExons;i++)
+      {
+	acceptor=(allExons_r->Utr5InternalHalfExons+i)->Acceptor->Position - left;
+	(allExons_r->Utr5InternalHalfExons+i)->Strand = '-';
+	CorrectUTR(allExons_r->Utr5InternalHalfExons+i);
+	offset = (allExons_r->Utr5InternalHalfExons+i)->offset1;
+	UpdateList(&(ExonList[acceptor + offset]), allExons_r->Utr5InternalHalfExons+i);
+      }
+    for (i=0;i<allExons_r->nUtr3InternalHalfExons;i++)
+      {
+	acceptor=(allExons_r->Utr3InternalHalfExons+i)->Acceptor->Position - left;
+	(allExons_r->Utr3InternalHalfExons+i)->Strand = '-';
+	CorrectUTR(allExons_r->Utr3InternalHalfExons+i);
+	offset = (allExons_r->Utr3InternalHalfExons+i)->offset1;
+	UpdateList(&(ExonList[acceptor + offset]), allExons_r->Utr3InternalHalfExons+i);
+      }
+    for (i=0;i<allExons_r->nUtrTerminalHalfExons;i++)
+      {
+	acceptor=(allExons_r->UtrTerminalHalfExons+i)->Acceptor->Position - left;
+	(allExons_r->UtrTerminalHalfExons+i)->Strand = '-';
+	CorrectUTR(allExons_r->UtrTerminalHalfExons+i);
+	offset = (allExons_r->UtrTerminalHalfExons+i)->offset1;
+	UpdateList(&(ExonList[acceptor + offset]), allExons_r->UtrTerminalHalfExons+i);
+      }
+    for (i=0;i<allExons_r->nUtrTerminalExons;i++)
+      {
+	acceptor=(allExons_r->UtrTerminalExons+i)->Acceptor->Position - left;
+	(allExons_r->UtrTerminalExons+i)->Strand = '-';
+	CorrectExon(allExons_r->UtrTerminalExons+i);
+	offset = (allExons_r->UtrTerminalExons+i)->offset1;
+	UpdateList(&(ExonList[acceptor + offset]), allExons_r->UtrTerminalExons+i);
+      }
+  }
   /* 2. Merge evidence exons (annotations) with predictions */
   if (EVD && pv != NULL)
     for (i = external->i1vExons; i < external->i2vExons ; i++) 
       {  
-/* 	(pv->vExons + i)->Acceptor->class = U2; */
-/* 	(pv->vExons + i)->Donor->class = U2; */
-		acceptor=(pv->vExons + i)->Acceptor->Position - left;
-		/* donor=(pv->vExons + i)->Donor->Position - left; */
-		offset = (pv->vExons + i)->offset1;
-		room = ((acceptor + offset)<0)? 0 : (acceptor + offset);
+	acceptor=(pv->vExons + i)->Acceptor->Position - left;
+	offset = (pv->vExons + i)->offset1;
+	room = ((acceptor + offset)<0)? 0 : (acceptor + offset);
 		
-		/* Requirement 1: range of values */
-		if (acceptor < 0)
-		  {
-			/* Skip wrong exon (A) */
-			sprintf(mess,"Skipped evidence (range): %ld %ld %c %hd",
-					(pv->vExons + i)->Acceptor->Position,
-					(pv->vExons + i)->Donor->Position,
-					(pv->vExons + i)->Strand,
-					(pv->vExons + i)->Frame);
-			printMess(mess);
-		  }
-		else
-		  {
-			/* Requirement 2: forced strand prediction */
-			if ( (!FWD && (pv->vExons + i)->Strand == '+') ||
-				 (!RVS && (pv->vExons + i)->Strand == '-'))
-			  {
-				/* Skip wrong exon (B) */
-				sprintf(mess,"Skipped evidence (strand): %ld %ld %c %hd",
-						(pv->vExons + i)->Acceptor->Position,
-						(pv->vExons + i)->Donor->Position,
-						(pv->vExons + i)->Strand,
-						(pv->vExons + i)->Frame);
-				printMess(mess);
-			  }
-			else{
-			  UpdateList(&(ExonList[room]), pv->vExons+i);
-			}
-		  }
+	/* Requirement 1: range of values */
+	if (acceptor < 0)
+	  {
+	    /* Skip wrong exon (A) */
+	    sprintf(mess,"Skipped evidence (range): %ld %ld %c %hd",
+		    (pv->vExons + i)->Acceptor->Position,
+		    (pv->vExons + i)->Donor->Position,
+		    (pv->vExons + i)->Strand,
+		    (pv->vExons + i)->Frame);
+	    printMess(mess);
+	  }
+	else
+	  {
+	    /* Requirement 2: forced strand prediction */
+	    if ( (!FWD && (pv->vExons + i)->Strand == '+') ||
+		 (!RVS && (pv->vExons + i)->Strand == '-'))
+	      {
+		/* Skip wrong exon (B) */
+		sprintf(mess,"Skipped evidence (strand): %ld %ld %c %hd",
+			(pv->vExons + i)->Acceptor->Position,
+			(pv->vExons + i)->Donor->Position,
+			(pv->vExons + i)->Strand,
+			(pv->vExons + i)->Frame);
+		printMess(mess);
+	      }
+	    else{
+	      UpdateList(&(ExonList[room]), pv->vExons+i);
+	    }
+	  }
       }
-
 
   /* FIRST SPLIT: Insert first artificial exon */
   if (l1 == lowerlimit)
-	{
-	  InsertBeginExon(Exons,lowerlimit);
-	  n = 2;
-	}
+    {
+      InsertBeginExon(Exons,lowerlimit);
+      n = 2;
+    }
   else
-	n = 0;
+    n = 0;
 
   /* 3. Traversing the table extracting the exons sorted by left position */
   HowMany = FSORT*NUMEXONS;
@@ -483,6 +598,7 @@ void SortExons(packExons* allExons,
 		  Exons[n].Score = q->Exon->Score;
 		  Exons[n].PartialScore = q->Exon->PartialScore;
 		  Exons[n].HSPScore = q->Exon->HSPScore;
+		  Exons[n].R = q->Exon->R;
 		  Exons[n].GeneScore = 0.0; 
 		  Exons[n].Remainder = q->Exon->Remainder;
 		  strcpy(Exons[n].Group,q->Exon->Group);

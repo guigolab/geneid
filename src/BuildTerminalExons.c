@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: BuildTerminalExons.c,v 1.7 2006-12-11 09:50:48 talioto Exp $  */
+/*  $Id: BuildTerminalExons.c,v 1.8 2010-04-16 10:08:39 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -44,7 +44,7 @@ long BuildTerminalExons (site *Acceptor, long nAcceptors,
 {
   int Frame[FRAMES];
   long i, f, j, js;
-  
+/*   char mess[MAXSTRING]; */
   /* Final number of predicted terminal exons */
   long nExon;
   
@@ -80,9 +80,11 @@ long BuildTerminalExons (site *Acceptor, long nAcceptors,
 			{
 			  /* Save the new exon for the current couple (Acceptor,Stop) */
 			  /* CutPoint: to preserve sorted exons between fragments */
-			  if ((Stop+js)->Position >= (Acceptor+i)->Position &&
-				  (Stop+js)->Position >= cutPoint)
+			  if ((Stop+js)->Position >= (Acceptor+i)->Position 
+			      &&(Stop+js)->Position >= cutPoint
+			      )
 				{
+				  
 				  (Exon+nExon)->Acceptor=(Acceptor+i);
 				  (Exon+nExon)->Donor=(Stop+js);
 				  (Exon+nExon)->Frame = f;
@@ -94,7 +96,6 @@ long BuildTerminalExons (site *Acceptor, long nAcceptors,
 
 				  /* Store info about frame and remainder nucleotides to avoid building stops in frame */
 				  ComputeStopInfo((Exon+nExon),Sequence);
-
 				  nExon++;
 				}
 			  /* Close this frame */

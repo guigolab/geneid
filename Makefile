@@ -14,18 +14,18 @@ PROGRAM= geneid
 PRODUCT= $(BIN)/$(PROGRAM)
 CC=gcc
 OPTS=-I$(INCLUDE) -Wall -O3
-### OPTS=-I$(INCLUDE) -Wall -O3 -g
+#OPTS=-I$(INCLUDE) -Wall -g
 #######
 
-OBJECTS = $(OBJ)/BackupGenes.o $(OBJ)/BuildAcceptors.o $(OBJ)/BuildU12Acceptors.o $(OBJ)/BuildDonors.o \
-	$(OBJ)/BuildInitialExons.o $(OBJ)/BuildInternalExons.o $(OBJ)/BuildZeroLengthExons.o \
+OBJECTS = $(OBJ)/BackupGenes.o $(OBJ)/PeakEdgeScore.o $(OBJ)/GetTranscriptTermini-usingslopes.o $(OBJ)/BuildAcceptors.o $(OBJ)/BuildU12Acceptors.o $(OBJ)/BuildDonors.o \
+	$(OBJ)/BuildInitialExons.o $(OBJ)/BuildInternalExons.o $(OBJ)/BuildZeroLengthExons.o $(OBJ)/BuildUTRExons.o\
 	$(OBJ)/BuildORFs.o $(OBJ)/BuildSingles.o $(OBJ)/BuildSort.o $(OBJ)/BuildTerminalExons.o \
 	$(OBJ)/ComputeStopInfo.o $(OBJ)/CookingGenes.o $(OBJ)/CorrectExon.o \
 	$(OBJ)/Dictionary.o $(OBJ)/DumpHash.o $(OBJ)/FetchSequence.o \
 	$(OBJ)/GetSitesWithProfile.o $(OBJ)/GetStopCodons.o $(OBJ)/Output.o \
 	$(OBJ)/PrintExons.o $(OBJ)/PrintSites.o $(OBJ)/ReadExonsGFF.o \
 	$(OBJ)/ReadGeneModel.o $(OBJ)/ReadSequence.o $(OBJ)/ReadHSP.o $(OBJ)/RecomputePositions.o \
-	$(OBJ)/RequestMemory.o $(OBJ)/ScoreExons.o $(OBJ)/SearchEvidenceExons.o \
+	$(OBJ)/RequestMemory.o $(OBJ)/ProcessHSPs.o $(OBJ)/ScoreExons.o $(OBJ)/SearchEvidenceExons.o \
 	$(OBJ)/SetRatios.o $(OBJ)/SortExons.o $(OBJ)/SortSites.o $(OBJ)/SortHSPs.o $(OBJ)/SwitchFrames.o \
 	$(OBJ)/SwitchPositions.o $(OBJ)/Translate.o \
 	$(OBJ)/account.o $(OBJ)/beggar.o $(OBJ)/genamic.o $(OBJ)/manager.o \
@@ -66,6 +66,9 @@ $(OBJ)/readparam.o : $(CDIR)/readparam.c $(HEADERS)
 $(OBJ)/BackupGenes.o : $(CDIR)/BackupGenes.c $(HEADERS)
 	$(CC) -c $(OPTS) $(CDIR)/BackupGenes.c -o $(OBJ)/BackupGenes.o
 
+$(OBJ)/GetTranscriptTermini-usingslopes.o : $(CDIR)/GetTranscriptTermini-usingslopes.c $(HEADERS)
+	$(CC) -c $(OPTS) $(CDIR)/GetTranscriptTermini-usingslopes.c -o $(OBJ)/GetTranscriptTermini-usingslopes.o
+
 $(OBJ)/BuildAcceptors.o : $(CDIR)/BuildAcceptors.c $(HEADERS)
 	$(CC) -c $(OPTS) $(CDIR)/BuildAcceptors.c -o $(OBJ)/BuildAcceptors.o
 
@@ -86,6 +89,9 @@ $(OBJ)/BuildInternalExons.o : $(CDIR)/BuildInternalExons.c $(HEADERS)
 
 $(OBJ)/BuildZeroLengthExons.o : $(CDIR)/BuildZeroLengthExons.c $(HEADERS)
 	$(CC) -c $(OPTS) $(CDIR)/BuildZeroLengthExons.c -o $(OBJ)/BuildZeroLengthExons.o
+
+$(OBJ)/BuildUTRExons.o : $(CDIR)/BuildUTRExons.c $(HEADERS)
+	$(CC) -c $(OPTS) $(CDIR)/BuildUTRExons.c -o $(OBJ)/BuildUTRExons.o
 
 $(OBJ)/BuildORFs.o : $(CDIR)/BuildORFs.c $(HEADERS)	
 	$(CC) -c $(OPTS) $(CDIR)/BuildORFs.c -o $(OBJ)/BuildORFs.o
@@ -126,11 +132,17 @@ $(OBJ)/GetStopCodons.o : $(CDIR)/GetStopCodons.c $(HEADERS)
 $(OBJ)/Output.o: $(CDIR)/Output.c $(HEADERS)
 	$(CC) -c $(OPTS) $(CDIR)/Output.c -o $(OBJ)/Output.o
 
+$(OBJ)/PeakEdgeScore.o :  $(CDIR)/PeakEdgeScore.c $(HEADERS)
+	$(CC) -c $(OPTS) $(CDIR)/PeakEdgeScore.c -o $(OBJ)/PeakEdgeScore.o
+
 $(OBJ)/PrintExons.o :  $(CDIR)/PrintExons.c $(HEADERS)
 	$(CC) -c $(OPTS) $(CDIR)/PrintExons.c -o $(OBJ)/PrintExons.o
 
 $(OBJ)/PrintSites.o :  $(CDIR)/PrintSites.c $(HEADERS)
 	$(CC) -c $(OPTS) $(CDIR)/PrintSites.c -o $(OBJ)/PrintSites.o
+
+$(OBJ)/ProcessHSPs.o :  $(CDIR)/ProcessHSPs.c $(HEADERS)
+	$(CC) -c $(OPTS) $(CDIR)/ProcessHSPs.c -o $(OBJ)/ProcessHSPs.o
 
 $(OBJ)/ReadGeneModel.o: $(CDIR)/ReadGeneModel.c $(HEADERS)
 	$(CC) -c $(OPTS) $(CDIR)/ReadGeneModel.c -o $(OBJ)/ReadGeneModel.o

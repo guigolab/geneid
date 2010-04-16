@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: ReadHSP.c,v 1.4 2006-12-11 09:50:48 talioto Exp $  */
+/*  $Id: ReadHSP.c,v 1.5 2010-04-16 10:08:40 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -120,7 +120,7 @@ long ReadHSP (char* FileName, packExternalInformation* external)
   
   /* 0. Opening the HSP file */
   if ((file=fopen(FileName, "r"))==NULL)
-    printError("The protein homology file can not be opened to read");
+    printError("The homology file can not be opened to read");
   
   /* 1. Read HSPs */
   i = 0;

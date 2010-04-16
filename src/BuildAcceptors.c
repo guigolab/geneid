@@ -33,7 +33,7 @@ extern int TRANS[];
 
 /* Maximum allowed number of generic sites */
 extern long NUMSITES;
-
+extern int UTR;
 /* Additional profiles */
 extern int BP;
 extern int PPT;
@@ -150,7 +150,9 @@ long  BuildAcceptors(char* s,
 		     long l1, 
 		     long l2,
 		     long ns,
-		     long nsites) 
+		     long nsites,
+		     int Strand,
+		     packExternalInformation* external) 
 { 
   int i,j;
   char* sOriginal;
@@ -206,7 +208,11 @@ long  BuildAcceptors(char* s,
 	    scoreAcc = score;
 	    score = score + scoreBP;
 	    score = p->afactor + (p->bfactor * score); 
+	    if(UTR){
+	      score = score + PeakEdgeScore(is + p->order,Strand,external,l1,l2,6);
+	    }
 	    /* Acceptor core is used as a global cutoff */
+	    
 	    if (score >= p->cutoff) 
 	      {
 		st[ns].Position = is + p->order;
@@ -261,14 +267,16 @@ long  BuildAcceptors(char* s,
 	    scoreAcc = score;
 	    score = score + scoreBP;
 	    score = p->afactor + (p->bfactor * score); 
-
+	    if(UTR){
+	      score = score + PeakEdgeScore(left + is + p->offset,Strand,external,l1,l2,6);
+	    }
 	    if (score >= p->cutoff) 
 	      {
 		st[ns].Position = left + is + p->offset;
 		st[ns].ScoreBP = scoreBP;
 		st[ns].ScorePPT = scorePPT;
-		st[ns].ScoreAccProfile = scoreAcc;
 		st[ns].class= class;
+		st[ns].ScoreAccProfile = scoreAcc;
 		st[ns].Score = score;
 		strcpy(st[ns].type,type);
 		strcpy(st[ns].subtype,subtype);
@@ -312,6 +320,9 @@ long  BuildAcceptors(char* s,
 	    scoreAcc = score;
 	    score = score + scoreBP;
 	    score = p->afactor + (p->bfactor * score); 
+	    if(UTR){
+	      score = score + PeakEdgeScore(left + is + p->offset,Strand,external,l1,l2,6);
+	    } 
 
 	    if (score >= p->cutoff) 
 	      {
@@ -365,6 +376,9 @@ long  BuildAcceptors(char* s,
 	    scoreAcc = score;
 	    score = score + scoreBP;
 	    score = p->afactor + (p->bfactor * score); 
+	    if(UTR){
+	      score = score + PeakEdgeScore(left + is + p->offset,Strand,external,l1,l2,6);
+	    } 
 
 	    if (score >= p->cutoff) 
 	      {

@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: Translate.c,v 1.12 2007-08-01 13:45:06 talioto Exp $  */
+/*  $Id: Translate.c,v 1.13 2010-04-16 10:08:40 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -103,15 +103,16 @@ void TranslateGene(exonGFF* e,
   short currRmd;
   int lAux;
   char rmdProt[LENGTHCODON+1];
+  int lastExon = 1;
 
   /* A. Translating a forward sense exon: Terminal > Internal >.. First */
   if (e->Strand == '+')
     {
-      /* Traversing the list of exons */
+      prot[0] = '\0';
+      /* Traversing the list of exons */      
       for(i=0, totalAA=0, currFrame=0; i<nExons; i++)
 	{
-	  if (strcmp(e->Type,sINTRON)){
-/* 	    PrintExonGFF(e,"exon","inTranslate"); */
+	  if (!strcmp(e->Type,sSINGLE)||!strcmp(e->Type,sFIRST)||!strcmp(e->Type,sINTERNAL)||!strcmp(e->Type,sTERMINAL)){
 	    /* 0. Acquire the real positions of the exon in the sequence */
 	    p1 = (e->evidence)?
 	      e->Acceptor->Position + e->offset1 : 
@@ -121,7 +122,7 @@ void TranslateGene(exonGFF* e,
 	      e->Donor->Position + e->offset2 - COFFSET;
 
 	    /* -- Remainder nucleotides of the last exon in the gene -- */
-	    if (!i)
+	    if (!i && !lastExon)
 	      {
 		switch (e->Remainder)
 		  {
@@ -202,7 +203,7 @@ void TranslateGene(exonGFF* e,
 	    tAA[i][0] = MAX(1,totalAA);
         
 	    /* Discounting one uncomplete codon: twice added */
-	    if (!e->Remainder && i)
+	    if (!e->Remainder && i && !lastExon)
 	      tAA[i][0]++;
            
 	    if (e->Frame)
@@ -213,6 +214,7 @@ void TranslateGene(exonGFF* e,
 	  }
 	  /* 5. Pointer jumping to the next exon */
 	  e = e->PreviousExon;
+	  lastExon = 0;
 	} /* endfor */
       
 	  /* 6. Adding first uncomplete codon of the first exon in the gene */    
@@ -246,15 +248,13 @@ void TranslateGene(exonGFF* e,
       /* Traversing the list of exons */
       for(i=0, totalAA=0, currRmd=0; i<nExons; i++)
 	{
-	  if (strcmp(e->Type,sINTRON)){
+	  if (!strcmp(e->Type,sSINGLE)||!strcmp(e->Type,sFIRST)||!strcmp(e->Type,sINTERNAL)||!strcmp(e->Type,sTERMINAL)){
 	    p1 = (e->evidence)? 
 	      e->Acceptor->Position + e->offset1: 
 	      e->Acceptor->Position + e->offset1 - COFFSET;
 	    p2 = (e->evidence)? 
 	      e->Donor->Position + e->offset2: 
 	      e->Donor->Position + e->offset2 - COFFSET;
-/* 	    PrintExonGFF(e,"exon","inTranslate"); */
-/* 	    printf("evidence: %i, a: %ld, d: %ld, exonsize: %ld\n",e->evidence,e->Acceptor->Position,e->Donor->Position,p2-p1+2); */
 	    /* Memory for the reverse exon sequence */
 	    if ((rs = (char*) calloc(p2-p1+2,sizeof(char))) == NULL)
 	      printError("Not enough memory: reverse gene translation");
@@ -262,7 +262,7 @@ void TranslateGene(exonGFF* e,
 	    ReverseSubSequence(p1, p2, s, rs);
 
 	    /* Frame of the last exon in sequence */
-	    if (!i)
+	    if (!i && !lastExon)
 	      {
 		switch (e->Frame)
 		  {
@@ -335,7 +335,7 @@ void TranslateGene(exonGFF* e,
 	    /* Updating boundary aminoacids of this exon */
 	    tAA[i][0] = MAX(1,totalAA);
 
-	    if (!e->Frame && i)
+	    if (!e->Frame && i && !lastExon)
 	      tAA[i][0]++;
   	  
 	    if (currRmd)
@@ -377,13 +377,13 @@ void TranslateGene(exonGFF* e,
       for(j = 0; j < currRmd; j++)
 	prot[lAux+j] = rmdProt[j];
       prot[lAux+j] = '\0'; 
-		
+      lastExon = 0;
     } /* end of reverse translation */
 
   *nAA = totalAA;
 }
 
-/* Extract the genomic (exonic) sequence of a predicted gene */
+/* Extract the genomic (CDS) sequence of a predicted gene */
 /* Returns the length of the genomic sequence produced */
 void GetcDNA(exonGFF* e,
              char* s,
@@ -396,11 +396,9 @@ void GetcDNA(exonGFF* e,
   char* rs;
   int i;
   long j;
-/*   char mess[MAXSTRING]; */
-/*   sprintf(mess,"nExons = %ld",nExons); */
-/*   printMess(mess); */
+
   if ((tmpDNA = (char*) calloc(MAXCDNA,sizeof(char))) == NULL)
-    printError("Not enough memory: producing exonic DNA");
+    printError("Not enough memory: producing CDS DNA");
 
   cDNA[0] = '\0';
 
@@ -408,9 +406,7 @@ void GetcDNA(exonGFF* e,
     {
       for(i=0, *nNN = 0; i<nExons; i++)
 		{
-		  if (strcmp(e->Type,sINTRON)){
-/* 		    sprintf(mess,"exon = %i",i); */
-/* 		    printMess(mess); */
+		  if (!strcmp(e->Type,sSINGLE)||!strcmp(e->Type,sFIRST)||!strcmp(e->Type,sINTERNAL)||!strcmp(e->Type,sTERMINAL)){
 		    p1 = (e->evidence)? 
 		      e->Acceptor->Position + e->offset1: 
 		      e->Acceptor->Position + e->offset1 - COFFSET;
@@ -439,13 +435,11 @@ void GetcDNA(exonGFF* e,
   else
     {
       if ((rs = (char*) calloc(MAXCDNA,sizeof(char))) == NULL)
-		printError("Not enough memory: producing reverse exonic DNA");
+		printError("Not enough memory: producing reverse CDS DNA");
 
       for(i=0, *nNN = 0; i<nExons; i++)
 		{
-		  if (strcmp(e->Type,sINTRON)){
-/* 		    sprintf(mess,"exon = %i",i); */
-/* 		    printMess(mess); */
+		  if (!strcmp(e->Type,sSINGLE)||!strcmp(e->Type,sFIRST)||!strcmp(e->Type,sINTERNAL)||!strcmp(e->Type,sTERMINAL)){
 		    p1 = (e->evidence)? 
 		      e->Acceptor->Position + e->offset1: 
 		      e->Acceptor->Position + e->offset1 - COFFSET;
@@ -480,3 +474,93 @@ void GetcDNA(exonGFF* e,
   free(tmpDNA);
 }
 
+/* Extract the genomic (exonic) sequence of a predicted gene */
+/* Returns the length of the genomic sequence produced */
+void GetTDNA(exonGFF* e,
+             char* s,
+             long nExons,
+             char* cDNA,
+             long* nNN)
+{  
+  char* tmpDNA;
+  long p1,p2;
+  char* rs;
+  int i;
+  long j;
+
+  if ((tmpDNA = (char*) calloc(MAXCDNA,sizeof(char))) == NULL)
+    printError("Not enough memory: producing exonic DNA");
+
+  cDNA[0] = '\0';
+
+  if (e->Strand == '+')
+    {
+      for(i=0, *nNN = 0; i<nExons; i++)
+	{
+/* 	  if (!strcmp(e->Type,sSINGLE)||!strcmp(e->Type,sFIRST)||!strcmp(e->Type,sINTERNAL)||!strcmp(e->Type,sTERMINAL)){ */
+	    p1 = (e->evidence)? 
+	      e->Acceptor->Position + e->offset1: 
+	      e->Acceptor->Position + e->offset1 - COFFSET;
+	    p2 = (e->evidence)? 
+	      e->Donor->Position + e->offset2: 
+	      e->Donor->Position + e->offset2 - COFFSET;
+	  
+	    /* Get the cDNA for this exon */
+	    tmpDNA[0] = '\0';
+   
+	    for(j=p1; j <= p2; j++)
+	      tmpDNA[j-p1] = s[j];
+        
+	    tmpDNA[j-p1]='\0';
+        
+	    /* Concat the current cDNA before the previous */
+	    strcat(tmpDNA,cDNA);
+	    strcpy(cDNA,tmpDNA);
+        
+	    *nNN += p2-p1+1;
+	  /* } */
+	  e = e->PreviousExon;
+	}
+    }
+  /* Reverse and complement the sequence in this strand */
+  else
+    {
+      if ((rs = (char*) calloc(MAXCDNA,sizeof(char))) == NULL)
+	printError("Not enough memory: producing reverse exonic DNA");
+
+      for(i=0, *nNN = 0; i<nExons; i++)
+	{
+/* 	  if (!strcmp(e->Type,sSINGLE)||!strcmp(e->Type,sFIRST)||!strcmp(e->Type,sINTERNAL)||!strcmp(e->Type,sTERMINAL)){ */
+	    p1 = (e->evidence)? 
+	      e->Acceptor->Position + e->offset1: 
+	      e->Acceptor->Position + e->offset1 - COFFSET;
+	    p2 = (e->evidence)? 
+	      e->Donor->Position + e->offset2: 
+	      e->Donor->Position + e->offset2 - COFFSET;
+	    /* Get the cDNA for this exon */
+	    tmpDNA[0] = '\0';
+	    rs[0] = '\0';
+   
+	    for(j=p1; j <= p2; j++)
+	      tmpDNA[j-p1] = s[j];
+        
+	    tmpDNA[j-p1]='\0';
+        
+	    ReverseSubSequence(0, j-p1-1, tmpDNA, rs);
+	    rs[j-p1]='\0';
+   
+	    /* Concat the current cDNA after the previous */
+	    strcat(cDNA,rs);
+   
+	    *nNN += p2-p1+1;
+	 /*  } */
+	  e = e->PreviousExon;
+		  
+	} 
+      /* Set free reverse sequence */
+      free(rs);
+    }
+
+  /* Set free temporary result sequence */
+  free(tmpDNA);
+}

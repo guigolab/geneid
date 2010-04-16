@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: RecomputePositions.c,v 1.5 2006-12-11 09:50:48 talioto Exp $  */
+/*  $Id: RecomputePositions.c,v 1.6 2010-04-16 10:08:40 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -49,6 +49,14 @@ void RecomputePositions(packSites* allSites, long l)
   for (i=0; i < allSites->nStopCodons; i++)
     (allSites->StopCodons+i)->Position = 
       l-(allSites->StopCodons+i)->Position-1;
+
+  for (i=0; i < allSites->nTS; i++)
+    (allSites->TS+i)->Position = 
+      l-(allSites->TS+i)->Position-1;
+
+  for (i=0; i < allSites->nTE; i++)
+    (allSites->TE+i)->Position = 
+      l-(allSites->TE+i)->Position-1;
 }
 
    

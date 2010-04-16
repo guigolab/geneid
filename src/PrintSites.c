@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: PrintSites.c,v 1.13 2010-01-04 15:17:58 talioto Exp $  */
+/*  $Id: PrintSites.c,v 1.14 2010-04-16 10:08:40 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -72,6 +72,14 @@ void PrintSite(site* s, int type,
     case STA:strcpy(Type,sSTA);
       k = 0;
       offset = 2;
+      break;
+    case TSS: strcpy(Type,sTSS);
+      k = 0;
+      offset = 0;
+      break;
+    case TES: strcpy(Type,sTES);
+      k = 0;
+      offset = 0;
       break;
 	default:
 	  /* It will be supposed to be an acceptor splice site */
@@ -281,6 +289,24 @@ void PrintSites (site* s,
 			i--;
 		  printPoint = i+1;
 		  i = 0;
+		}
+      break;
+
+    case TSS:strcpy(Type,sTSS);
+      if ((Strand == FORWARD) && (l1 != lowerlimit))
+		{
+		  i = 0;
+		  while(i<ns && ((s+i)->Position < limit))
+			i++;
+		}
+      break;
+
+    case TES:strcpy(Type,sTES);
+      if ((Strand == FORWARD) && (l1 != lowerlimit))
+		{
+		  i = 0;
+		  while(i<ns && ((s+i)->Position < limit))
+			i++;
 		}
       break;
     }

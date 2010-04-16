@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: genamic.c,v 1.18 2008-03-10 15:31:39 talioto Exp $  */
+/*  $Id: genamic.c,v 1.19 2010-04-16 10:08:40 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -66,7 +66,7 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
     }
   else
     {
-      /* GENAMIC processign only: option -O */
+      /* GENAMIC processing only: option -O */
       /* Exons from the current fragment of sequence */
       SwitchFrames(E,nExons);
     }
@@ -224,7 +224,7 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 		    )
 		  {
 			  
-		    if (!strcmp((E+i)->Type,"Intron")){			    
+		    if (!strcmp((E+i)->Type,sINTRON)||!strcmp((E+i)->Type,sUTRINTRON)||!strcmp((E+i)->Type,sUTR5INTRON)||!strcmp((E+i)->Type,sUTR3INTRON)){			    
 		      (E+i)->GeneScore = pg->Ga[etype][frame][spliceclass]->GeneScore + (E+i)->Score;
 		      (E+i)->PreviousExon = pg->Ga[etype][frame][spliceclass];
 		      (E+i)->lValue = pg->Ga[etype][frame][spliceclass]->lValue;
@@ -272,7 +272,7 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 
 	    /* Updating the best gene assembled (final gene) */
 	    if ((((E+i)->GeneScore) > (pg->GOptim -> GeneScore))){
-	      if (((E+i)->PreviousExon->Strand == '*')&&(!strcmp((E+i)->Type,"Intron"))){
+	      if (((E+i)->PreviousExon->Strand == '*')&&(!strcmp((E+i)->Type,sINTRON) || !strcmp((E+i)->Type,sUTRINTRON) || !strcmp((E+i)->Type,sUTR5INTRON) || !strcmp((E+i)->Type,sUTR3INTRON))){
 	      }else{
 		pg->GOptim = (E+i);
 	      }
