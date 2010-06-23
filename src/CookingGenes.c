@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: CookingGenes.c,v 1.29 2010-04-16 10:08:40 talioto Exp $  */
+/*  $Id: CookingGenes.c,v 1.30 2010-06-23 13:43:50 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -695,24 +695,35 @@ void PrintGene(exonGFF* start,
   int type1;
   int type2;
   int strand;
-  int intronnum = 1;
+  int intronnum = 0;
   int exonnum = 1;
   int cdsnum = 1;
   int utrnum = 1;
   int featnum =0;
 /*   char mess[MAXSTRING]; */
- 
-  if (strcmp(start->Type,sINTRON)
+/*  if (start != end){ */
+   eaux = start->PreviousExon;
+/*    if (((!strcmp(start->Type,sTERMINAL)||!strcmp(start->Type,sSINGLE))&&(!strcmp(last->Type,sUTR3INTERNALHALF)||!strcmp(last->Type,sUTRTERMINALHALF)))){ */
+/*      sprintf(mess,"cexons: %ld",cexons);printMess(mess);  */
+/*    } */
+   if (strcmp(start->Type,sINTRON)
       && strcmp(start->Type,sUTRINTRON)
       && strcmp(start->Type,sUTR5INTRON)
       && strcmp(start->Type,sUTR3INTRON)
-      && strcmp(start->Type,sUTRFIRSTHALF)
-      && strcmp(start->Type,sUTR5INTERNALHALF)
-      && strcmp(start->Type,sUTR3INTERNALHALF)
-      && strcmp(start->Type,sUTRTERMINALHALF)){
+
+      &&!((!strcmp(start->Type,sUTRFIRSTHALF)||!strcmp(start->Type,sUTR5INTERNALHALF))&&(!strcmp(last->Type,sFIRST)||!strcmp(last->Type,sSINGLE)))
+      &&!((!strcmp(start->Type,sTERMINAL)||!strcmp(start->Type,sSINGLE))&&(!strcmp(last->Type,sUTR3INTERNALHALF)||!strcmp(last->Type,sUTRTERMINALHALF)))
+       &&!((!strcmp(last->Type,sUTRFIRSTHALF)||!strcmp(last->Type,sUTR5INTERNALHALF))&&(!strcmp(start->Type,sFIRST)||!strcmp(start->Type,sSINGLE)))
+       &&!((!strcmp(last->Type,sTERMINAL)||!strcmp(last->Type,sSINGLE))&&(!strcmp(start->Type,sUTR3INTERNALHALF)||!strcmp(start->Type,sUTRTERMINALHALF)))
+      
+       ){
     cexons++;
 		      
-  }
+  }	      
+/*  }else{ */
+
+/*  } */
+  
   if (strcmp(start->Type,sINTRON)
       && strcmp(start->Type,sUTRINTRON)
       && strcmp(start->Type,sUTR5INTRON)
@@ -735,7 +746,8 @@ void PrintGene(exonGFF* start,
   if (start != end)
     {
       eaux = start->PreviousExon;
-      if (PRINTINT && strcmp(start->Type,sINTRON) && strcmp(start->Type,sUTRINTRON) && strcmp(start->Type,sUTR5INTRON)&& strcmp(start->Type,sUTR3INTRON)&&
+      /*	if (PRINTINT && strcmp(start->Type,sINTRON) && strcmp(start->Type,sUTRINTRON) && strcmp(start->Type,sUTR5INTRON)&& strcmp(start->Type,sUTR3INTRON)&&*/
+	if (strcmp(start->Type,sINTRON) && strcmp(start->Type,sUTRINTRON) && strcmp(start->Type,sUTR5INTRON)&& strcmp(start->Type,sUTR3INTRON)&&
 	  !(
 	    ((start->Strand == '-')&& (!strcmp(start->Type,sUTRFIRSTHALF)||!strcmp(start->Type,sUTR5INTERNALHALF))&&(!strcmp(eaux->Type,sFIRST)||!strcmp(eaux->Type,sSINGLE)))||
 	    ((start->Strand == '+')&& (!strcmp(eaux->Type,sUTRFIRSTHALF)||!strcmp(eaux->Type,sUTR5INTERNALHALF))&&(!strcmp(start->Type,sFIRST)||!strcmp(start->Type,sSINGLE)))||
@@ -746,8 +758,9 @@ void PrintGene(exonGFF* start,
 	cintrons++;
       }
       /* a.1. Recursive call to print before the rest of the gene */
+	/*cexons = cintrons; +(cfeats - (ccds +cutrs)) + 1;*/
       PrintGene(eaux,end,start,Name,s,gp,dAA,igen,nAA,tAA,cexons,cintrons,ccds,cutrs,cfeats,info,geneindex,GenePrefix);
-      
+/*       cexons = cintrons+(cfeats - ccds -cutrs) + 1; */
       if (strcmp(start->Type,sINTRON)&&strcmp(start->Type,sUTRINTRON)&&strcmp(start->Type,sUTR5INTRON)&&strcmp(start->Type,sUTR3INTRON)){
 	/* a.2. printing this exon: XML, extend, gff or geneid format */      
 	if (XML)
@@ -778,8 +791,10 @@ void PrintGene(exonGFF* start,
 	      }
 	      PrintSite(start->Donor,type2,Name,strand,s,p2);
 	    }
-	  else {
-	    if (PRINTINT && (strcmp(eaux->Type,sINTRON)&&strcmp(eaux->Type,sUTRINTRON)&&strcmp(eaux->Type,sUTR5INTRON)&&strcmp(eaux->Type,sUTR3INTRON))&&
+	  else {	    
+	    /*if (PRINTINT && (strcmp(eaux->Type,sINTRON)&&strcmp(eaux->Type,sUTRINTRON)&&strcmp(eaux->Type,sUTR5INTRON)&&strcmp(eaux->Type,sUTR3INTRON))&&*/
+
+	    if ((strcmp(eaux->Type,sINTRON)&&strcmp(eaux->Type,sUTRINTRON)&&strcmp(eaux->Type,sUTR5INTRON)&&strcmp(eaux->Type,sUTR3INTRON))&&
 		!(
 		 ((start->Strand == '-')&& (!strcmp(start->Type,sUTRFIRSTHALF)||!strcmp(start->Type,sUTR5INTERNALHALF))&&(!strcmp(eaux->Type,sFIRST)||!strcmp(eaux->Type,sSINGLE)))||
 		 ((start->Strand == '+')&& (!strcmp(eaux->Type,sUTRFIRSTHALF)||!strcmp(eaux->Type,sUTR5INTERNALHALF))&&(!strcmp(start->Type,sFIRST)||!strcmp(start->Type,sSINGLE)))||
@@ -788,7 +803,7 @@ void PrintGene(exonGFF* start,
 		 )
 		){
 	      intronnum = (start->Strand == '-')? cintrons: info[geneindex].nintrons - cintrons + 1;
-	      PrintGIntron(eaux,start,Name,igen,intronnum,GenePrefix,0,0.0,start->Type);
+	      if (PRINTINT){PrintGIntron(eaux,start,Name,igen,intronnum,GenePrefix,0,0.0,start->Type);}
 	    }
 	    /*this is for CDS and UTR features*/
 	    if (!strcmp(start->Type,sFIRST)||!strcmp(start->Type,sINTERNAL)||!strcmp(start->Type,sTERMINAL)||!strcmp(start->Type,sSINGLE)){
@@ -815,11 +830,13 @@ void PrintGene(exonGFF* start,
 		  
 /* 		  sprintf(mess,"cexons: %ld",cexons);printMess(mess); */
 		  exonnum = (start->Strand == '-')? (cexons?cexons:1): info[geneindex].nexons - cexons + 1;
+/* 		  exonnum = intronnum + 1; */
 		  PrintGExon(start,3,Name,igen,exonnum,GenePrefix,0,0.0);
 		}else{
 		  
 /* 		  sprintf(mess,"cexons: %ld",cexons);printMess(mess); */
 		  exonnum = (start->Strand == '-')? (cexons?cexons:1): info[geneindex].nexons - cexons + 1;
+/* 		  exonnum = intronnum + 1; */
 		  PrintGExon(start,2,Name,igen,exonnum,GenePrefix,0,0.0);
 		}
 	      }
@@ -831,14 +848,15 @@ void PrintGene(exonGFF* start,
 		 ((last->Strand == '-')&& (!strcmp(last->Type,sTERMINAL)||!strcmp(last->Type,sSINGLE))&&(!strcmp(start->Type,sUTR3INTERNALHALF)||!strcmp(start->Type,sUTRTERMINALHALF)))||
 		 ((last->Strand == '+')&& (!strcmp(start->Type,sTERMINAL)||!strcmp(start->Type,sSINGLE))&&(!strcmp(last->Type,sUTR3INTERNALHALF)||!strcmp(last->Type,sUTRTERMINALHALF)))
 		 )){
-		exonnum = (start->Strand == '-')? cexons: info[geneindex].nexons - cexons + 1;
+ 		exonnum = (start->Strand == '-')? (cexons?cexons:1): info[geneindex].nexons - cexons + 1; 
+		/* exonnum = intronnum + 1; */  
 		PrintGExon(start,1,Name,igen,exonnum,GenePrefix,0,0.0);
 	      }
 	    }
 	  }
       }else{
+	intronnum = (start->Strand == '-')? cintrons: info[geneindex].nintrons - cintrons + 1;  
 	if (PRINTINT){
-	  intronnum = (start->Strand == '-')? cintrons: info[geneindex].nintrons - cintrons + 1;  
 	  PrintGIntron(eaux,last,Name,igen,intronnum,GenePrefix,1,start->Score,start->Type);	  
 	}
       }

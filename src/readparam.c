@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: readparam.c,v 1.15 2010-04-16 10:08:40 talioto Exp $  */
+/*  $Id: readparam.c,v 1.16 2010-06-23 13:43:50 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -40,6 +40,7 @@ extern int U2GTG;
 extern int U2GTY;
 extern int SGE;
 extern int PAS;
+extern int BKGD_SUBTRACT_FLANK_LENGTH;
 extern short SPLICECLASSES;
 extern float U12_SPLICE_SCORE_THRESH;
 extern float U12_EXON_SCORE_THRESH;
@@ -903,6 +904,7 @@ int readparam (char* name, gparam** isochores)
   int i;
   char line[MAXLINE];
   char mess[MAXSTRING];
+  char header[MAXSTRING];
   int nIsochores;
 
   /* 0. Select parameters filename for reading it */
@@ -946,11 +948,35 @@ int readparam (char* name, gparam** isochores)
   sprintf(mess,"NO_SCORE: \t%9.2f",
 		  NO_SCORE);
   printMess(mess);
+  /* BKGD_SUBTRACT_FLANK_LENGTH */
+
 
   /* 2. Read the number of isochores */
   readHeader(RootFile,line);
+  if ((sscanf(line,"%s",header))!=1)
+		{
+		  sprintf(mess,"Wrong format: header for number of isochores");
+		  printError(mess);
+		}
+  while(strcasecmp(header,sNUMISO))
+  { 
+    if(!strcasecmp(header,sBKGD_SUBTRACT_FLANK_LENGTH)){
+		  readLine(RootFile,line);
+		  if ((sscanf(line,"%d\n", &(BKGD_SUBTRACT_FLANK_LENGTH)))!=1)
+			printError("Wrong format: BKGD_SUBTRACT_FLANK_LENGTH value (integer)");  
+
+		  sprintf(mess,"BKGD_SUBTRACT_FLANK_LENGTH: \t%d",
+				  BKGD_SUBTRACT_FLANK_LENGTH);
+		  printMess(mess);
+	}
+	readHeader(RootFile,line);
+	if ((sscanf(line,"%s",header))!=1)
+		{
+		  sprintf(mess,"Wrong format: header for number of isochores");
+		  printError(mess);
+		}
+  }
   readLine(RootFile,line);
-  
   if ((sscanf(line,"%d\n", &(nIsochores)))!=1)
 	printError("Wrong format: Number of isochores");
     

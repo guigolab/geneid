@@ -25,7 +25,7 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
  *************************************************************************/
 
-/*  $Id: BuildUTRExons.c,v 1.1 2010-04-16 10:36:10 talioto Exp $  */
+/*  $Id: BuildUTRExons.c,v 1.2 2010-06-23 13:43:50 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -56,7 +56,7 @@ long BuildUTRExons(
 
   long i, j, k, ks;
   int l;
-  float pen = 0.01;
+  float pen = 0.002;
   /* Final number of predicted UTR exons */
   long nExon;
   
@@ -96,6 +96,10 @@ long BuildUTRExons(
 	  /* a. There is room to save this new exon */
 	  if (nLocalExons < MaxDonors) 
 	    {
+	      
+/* 	      if (!strcmp(ExonType,sUTRTERMINALHALF)){ */
+/* 		sprintf(mess,"start pos: %ld\nend pos: %ld",(Start+i)->Position,(Donor+ks)->Position);  	      	printMess(mess);  */
+/* 		  } */
 	      /* 	sprintf(mess,"start pos: %ld\nend pos: %ld",(Start+i)->Position,(Donor+ks)->Position); */
 /* 	      	printMess(mess); */
 	      (LocalExon+nLocalExons)->Acceptor=(Start+i);
@@ -107,13 +111,18 @@ long BuildUTRExons(
 		  LowestLocalScore = (Donor+ks)->Score - pen*((Donor+ks)->Position - (Start+i)->Position + 1);
 		  LowestLocalExon = nLocalExons;
 		}
+/* 	      sprintf(mess,"ExonType: %s   start pos: %ld   don pos: %ld   curr exon don score: %f    lowest exon donor score: %f",ExonType, (Start+i)->Position,(Donor+ks)->Position,((Donor+ks)->Score - pen*((Donor+ks)->Position - (Start+i)->Position + 1)),LowestLocalScore); */
+/* 	      printMess(mess); */
 	      nLocalExons++;
 	    }
 	  else 
 	    {
 	      /* b. Keep only the top scoring MaxDonors */
+	      
 	      if (((Donor+ks)->Score - pen*((Donor+ks)->Position - (Start+i)->Position + 1)) > LowestLocalScore)
 		{
+/* 		  sprintf(mess,"ExonType: %s   start pos: %ld   don pos: %ld   curr exon don score: %f    lowest exon donor score: %f",ExonType, (Start+i)->Position,(Donor+ks)->Position,((Donor+ks)->Score - pen*((Donor+ks)->Position - (Start+i)->Position + 1)),LowestLocalScore); */
+/* 	      printMess(mess); */
 		  /* Extract the worst exon and input the new exon */
 		  for (l=LowestLocalExon;l<nLocalExons-1;l++)
 		    LocalExon[l]=LocalExon[l+1];
@@ -149,7 +158,8 @@ long BuildUTRExons(
 	  (Exon+nExon)->evidence = 0;		    
 	  (Exon+nExon)->rValue = 0;
 	  (Exon+nExon)->lValue = 0;
-	  
+/* 	  sprintf(mess,"ExonType: %s   start pos: %ld   don pos: %ld   curr exon don score: %f",ExonType, (LocalExon+l)->Acceptor->Position,(LocalExon+l)->Donor->Position,(LocalExon+l)->Donor->Score); */
+/* 	  printMess(mess); */
 	  nExon++;
 	  
 	}

@@ -71,3 +71,46 @@ float PeakEdgeScore(long Position,
   return(Score);
 }
 
+int ClusterEdge(long Position, 
+				   int Strand, 
+				   packExternalInformation* external, 
+		    long l1, long l2)
+{
+  int index;
+  short trueFrame;
+  long relPos;
+  int Score = 0;
+  
+/*   int win = 6; */
+/*   char mess[MAXSTRING]; */
+
+  relPos = Position - l1 + COFFSET;
+
+  if (Strand == FORWARD)
+    index = 0; 
+  else
+    index = FRAMES;
+  
+  /* Frame blast definition: according to the sequence start */
+  trueFrame = 0;
+  trueFrame += index;
+  
+  /* Access the sr array to obtain the homology score for current score */
+  if (((relPos -2) >=0) && ((relPos +1) < LENGTHSi) && ((Position+1)<l2)){
+    if (((external->sr[trueFrame][relPos -1] - external->sr[trueFrame][relPos -2]) == 0)&&((external->sr[trueFrame][relPos] - external->sr[trueFrame][relPos -1]) > 0)){
+      Score = 1;
+    }
+    if (((external->sr[trueFrame][relPos] - external->sr[trueFrame][relPos -1]) > 0)&&((external->sr[trueFrame][relPos+1] - external->sr[trueFrame][relPos]) == 0)){
+      Score = -1;
+    }
+    
+/*     sprintf(mess,"relPos: %ld\nslope 2: %f\nslope 1: %f",relPos,((external->sr[trueFrame][relPos +win] - external->sr[trueFrame][relPos])/win),((external->sr[trueFrame][relPos] - external->sr[trueFrame][relPos -win])/win)); */
+/*     printMess(mess); */
+/*     sprintf(mess,"peakEdgeScore: %f",(factor*(((external->sr[trueFrame][relPos +win] - external->sr[trueFrame][relPos])/win)  */
+/* 					    - ((external->sr[trueFrame][relPos] - external->sr[trueFrame][relPos -win])/win)))); */
+/*     printMess(mess); */
+  
+  }
+  
+  return(Score);
+}

@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: GetTranscriptTermini-usingslopes.c,v 1.1 2010-04-16 10:36:10 talioto Exp $  */
+/*  $Id: GetTranscriptTermini-usingslopes.c,v 1.2 2010-06-23 13:43:50 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -44,7 +44,7 @@ long GetTSS(
 	    ) 
 {
   long ns;
-  float thresh = 0.8;
+  float thresh = 1.2;
   /* Final number of potential transcript termini */
   ns = 0;  
 /*   char mess[MAXSTRING]; */
@@ -54,8 +54,11 @@ long GetTSS(
   long js=j;
   int window = 3;
   int ssExists = 0;
+  int cluster_edge = 0;
   float pes=0;
-  float splicethresh = 6;
+  float splicethresh = 5;
+  float prev_score =0;
+  float prev_prev_score = 0;
   is = 0;     
 
   while ((is < (l2- l1 + 1)) && (ns<NUMSITES))
@@ -64,15 +67,17 @@ long GetTSS(
       ssExists =0;
       score=0.0;
       pes = (PeakEdgeScore(l1 + is,Strand,external,l1,l2,6));
+      cluster_edge = ClusterEdge(l1 + is,Strand,external,l1,l2);
       score = score + pes; 
-		  
-      if ((ns<NUMSITES)&&(score>thresh)){
+/*       sprintf(mess,"pos %ld:%f",l1 + is -1,prev_score); */
+/* 	  	printMess(mess); */
+      if ((ns<NUMSITES)&&((cluster_edge == 1)||(prev_score>thresh && prev_score>prev_prev_score && prev_score>score))){
 	j=js;
-	while ((j < nAcceptors) && ((Acceptors+j)->Position < (l1 + is - window)))
+	while ((j < nAcceptors) && ((Acceptors+j)->Position < (l1 + is - 1 - window)))
 	  j++;
 	js=j;
 	
-	while ((j < nAcceptors) && ((Acceptors+j)->Position < (l1 + is + window))){
+	while ((j < nAcceptors) && ((Acceptors+j)->Position < (l1 + is - 1 + window))){
 	  
 		/* Save counter j for the next iteration */
 	  if ((Acceptors+j)->Score > splicethresh){
@@ -84,15 +89,21 @@ long GetTSS(
 	if (ssExists == 0){
 /* 	  sprintf(mess,"PES TSS: pos %ld:%f",LengthSequence - (l1 + is),score); */
 /* 	  	printMess(mess); */
-	  /* sprintf(mess,"PES TSS: pos %ld:%f",is,score); */
-	  /* 	printMess(mess); */
-	  sc[ns].Position=(l1 + is);  
-	  sc[ns].Score=score;
+/* 	  sprintf(mess,"PES TSS: pos %ld:%f",l1 + is -1,prev_score); */
+/* 	  	printMess(mess); */
+	  sc[ns].Position=(l1 + is -1);  
+	  sc[ns].Score=prev_score;
 	  sc[ns].class=U2;
 	  ns++;
+	}else{
+	  
+/* 	  sprintf(mess,"SS exists PES TSS: pos %ld:%f",l1 + is -1,prev_score); */
+/* 	  	printMess(mess); */
 	}
       }
       is++;
+      prev_prev_score = prev_score;
+      prev_score = score;
     }
 
   if (ns >= NUMSITES)
@@ -124,26 +135,29 @@ long GetTES(
   long js=j;
   int window = 3;
   int ssExists = 0;
-  float thresh = 0.8;
+  int cluster_edge = 0;
+  float thresh = 1.2;
   float pes=0;
-  float splicethresh = 6;
+  float splicethresh = 5;
   is = 0;     
-
+  float prev_score =0;
+  float prev_prev_score = 0;
   while ((is < (l2- l1 + 1)) && (ns<NUMSITES))
     { 
       /* is = 0..right */
       ssExists = 0;
       score=0.0;
       pes = (PeakEdgeScore(l1 + is,Strand,external,l1,l2,6));
+      cluster_edge = ClusterEdge(l1 + is,Strand,external,l1,l2);
       score = score - pes; /* (pes>0?pes:-pes); */
 		  
-      if ((ns<NUMSITES)&&(score>thresh)){
+      if ((ns<NUMSITES)&&((cluster_edge == -1)||(prev_score>thresh && prev_score>prev_prev_score && prev_score>score))){
 	j=js;
-	while ((j < nDonors) && ((Donors+j)->Position < (l1 + is - window)))
+	while ((j < nDonors) && ((Donors+j)->Position < (l1 + is -1 - window)))
 	  j++;
 	js=j;
 	
-	while ((j < nDonors) && ((Donors+j)->Position < (l1 + is + window))){
+	while ((j < nDonors) && ((Donors+j)->Position < (l1 + is -1 + window))){
 		/* Save counter j for the next iteration */
 	  if ((Donors+j)->Score > splicethresh){
 	    ssExists++;
@@ -151,14 +165,16 @@ long GetTES(
 	  j++;
 	}
 	if (ssExists == 0){
-/* 	  sprintf(mess,"PES TES: pos %ld:%f",LengthSequence - (l1 + is),score); */
+/* 	  sprintf(mess,"TES pos: %ld   PES TES: pos %ld:%f",l1 + is,LengthSequence - (l1 + is),score); */
 /* 	  	printMess(mess); */
-	  sc[ns].Position=(l1 + is);  
-	  sc[ns].Score=score;
+	  sc[ns].Position=(l1 + is -1);  
+	  sc[ns].Score=prev_score;
 	  sc[ns].class=U2;
 	  ns++;
 	}
       }
+      prev_prev_score = prev_score;
+      prev_score = score;
       is++;
     }
 

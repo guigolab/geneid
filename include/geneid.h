@@ -28,7 +28,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/     
 
-/* $Id: geneid.h,v 1.50 2010-04-16 10:08:39 talioto Exp $ */
+/* $Id: geneid.h,v 1.51 2010-06-23 13:43:50 talioto Exp $ */
 
 /* Required libraries */
 #include <stdlib.h>
@@ -101,9 +101,11 @@ A. DEFINITIONS
 #define MAXUTREXONLENGTH 1000
 /* UTRMAXGAP used to be 55 */ 
 #define UTRMAXGAP 5
-/* Ratio for reads */
+
+/* read params */
 #define RREADS 1
-#define COV 3
+#define COV 5
+
 /* Length of allowed UTR including stop codon before intron: used to be 55 */
 #define MAXNMDLENGTH 1000
 
@@ -185,7 +187,7 @@ A. DEFINITIONS
 #define FASTALINE 60             
 
 /* Maximum length for strings (mess)        */
-#define MAXSTRING 200            
+#define MAXSTRING 600            
 
 /* Mark rules up as blocking in Gene model  */
 #define BLOCK 1                  
@@ -310,6 +312,8 @@ A. DEFINITIONS
 /* Header evidence factor and weight */
 #define sEVIDENCEF "Evidence_Factor"
 #define sEVIDENCEW "Evidence_Exon_Weight"
+#define sBKGD_SUBTRACT_FLANK_LENGTH "BKGD_SUBTRACT_FLANK_LENGTH"
+#define sNUMISO "number_of_isochores"
 
 /* Exons                                    */
 #define FIRST             0
@@ -761,7 +765,10 @@ float PeakEdgeScore(long Position,
 /* 		    site* st,  */
 /* 		    long l1,  */
 /* 		    long l2);  */
-
+int ClusterEdge(long Position, 
+		int Strand, 
+		packExternalInformation* external, 
+		long l1, long l2);
 long GetStopCodons(char *s, profile *p, site *sc, long l1, long l2);
 
 long BuildInitialExons(site *Start, long nStarts, 

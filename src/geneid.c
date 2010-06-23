@@ -29,7 +29,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/* $Id: geneid.c,v 1.25 2010-04-16 10:08:40 talioto Exp $ */
+/* $Id: geneid.c,v 1.26 2010-06-23 13:43:50 talioto Exp $ */
 
 #include "geneid.h"
 /* #include <mcheck.h> */
@@ -79,7 +79,9 @@ int
   /* Detection of U2gty donor sites */
   U2GTY=0,
   /* Detection of PolyA Signal */
-  PAS=0;
+  PAS=0,
+/* Length of flank around exons to subtract background RNA-seq signal */
+  BKGD_SUBTRACT_FLANK_LENGTH = 0;
 
 
 short

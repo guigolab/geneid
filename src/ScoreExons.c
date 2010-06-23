@@ -38,6 +38,7 @@ extern int U12GTAG;
 extern int U12ATAC;
 extern float RSSMARKOVSCORE;
 extern int RSS;
+extern int BKGD_SUBTRACT_FLANK_LENGTH;
 
 /* Matrix to translate characters to numbers. borrowed from jwf */
 int TRANS[] = {
@@ -252,450 +253,6 @@ void MarkovScan(char* sequence,
     }
 }
 
-/* /\* Projection of HSPs: save the maximum for each nucleotide *\/ */
-/* /\* Requirement: HSPs must sorted by Position1 *\/ */
-/* void HSPScan(packExternalInformation* external, */
-/* 			 packHSP* hsp,  */
-/* 			 int Strand,  */
-/* 			 long l1, long l2) */
-/* { */
-/*   short x; */
-/*   short frameStart, frameEnd; */
-/*   long i,j; */
-/*   float scoreHSP; */
-  
-/*   if (Strand == FORWARD) */
-/*     { */
-/* 	  frameStart = 0;  */
-/* 	  frameEnd = FRAMES; */
-
-/* 	  /\* For each frame and strand, preprocess homology information *\/ */
-/* 	  for(x=frameStart; x < frameEnd; x++) */
-/* 		{ */
-/* 		  /\* Reset arrays: NO_SCORE values *\/ */
-/* 		  for(i=0; i < l2-l1+1; i++) */
-/* 			external->sr[x][i] = NO_SCORE; */
-		  
-		  
-/* 		  if (hsp != NULL) */
-/* 			{ */
-/* 			  /\* A. Skip HSPs out of this range: [l1,l2] *\/ */
-/* 			  for (i = external->iSegments[x];  */
-/* 				   i < hsp->nSegments[x] && hsp->sPairs[x][i]->Pos2 < l1;  */
-/* 				   i++) */
-/* 				; */
-			  
-/* 			  /\* B. Partial HSPs in this fragment: left end is out (Pos2 >= l1) *\/ */
-/* 			  for (i = external->iSegments[x];  */
-/* 				   i < hsp->nSegments[x] && hsp->sPairs[x][i]->Pos1 < l1;  */
-/* 				   i++) */
-/* 				{ */
-/* 				  /\* Score value *\/ */
-/* 				  scoreHSP = hsp->sPairs[x][i]->Score /  */
-/* 					(hsp->sPairs[x][i]->Pos2 - hsp->sPairs[x][i]->Pos1 + 1); */
-				  
-/* 				  /\* For each position in the HSP update the array sr *\/ */
-/* 				  /\* Save the projection of HSPs into the array: including negative HSPs *\/ */
-/* 				  for(j = l1;  */
-/* 					  j <= hsp->sPairs[x][i]->Pos2 && j <l2; */
-/* 					  j++) */
-/* 					{ */
-/* 					  if (scoreHSP > external->sr[x][j-l1] ||  */
-/* 						  external->sr[x][j-l1] == NO_SCORE) */
-/* 						external->sr[x][j-l1] = scoreHSP; */
-/* 					} */
-/* 				} */
-			  
-/* 			  /\* C. Complete HSPs in this fragment (Pos1 >= l1, Pos2 <= l2-OVERLAP) *\/ */
-/* 			  for (;  */
-/* 				   i < hsp->nSegments[x] && hsp->sPairs[x][i]->Pos2 <= l2-OVERLAP;  */
-/* 				   i++) */
-/* 				{ */
-/* 				  /\* Score value *\/ */
-/* 				  scoreHSP = hsp->sPairs[x][i]->Score /  */
-/* 					(hsp->sPairs[x][i]->Pos2 - hsp->sPairs[x][i]->Pos1 + 1); */
-				  
-/* 				  /\* For each position in the HSP update the array sr *\/ */
-/* 				  /\* Save the projection of HSPs into the array: including negative HSPs *\/ */
-/* 				  for(j = hsp->sPairs[x][i]->Pos1;  */
-/* 					  j <= hsp->sPairs[x][i]->Pos2 && j <l2; */
-/* 					  j++) */
-/* 					{ */
-/* 					  if (scoreHSP > external->sr[x][j-l1] ||  */
-/* 						  external->sr[x][j-l1] == NO_SCORE) */
-/* 						external->sr[x][j-l1] = scoreHSP; */
-/* 					} */
-/* 				} */
-			  
-/* 			  /\* Update partial counter: previous HSPs are useless for next split *\/ */
-/* 			  external->iSegments[x] = i; 	   */
-			  
-/* 			  /\* D. Partial HSPs in this fragment: right end is out (Pos2 > l2) *\/ */
-/* 			  for (;  */
-/* 				   i < hsp->nSegments[x] &&  hsp->sPairs[x][i]->Pos1 <= l2;  */
-/* 				   i++) */
-/* 				{ */
-/* 				  /\* Score value *\/ */
-/* 				  scoreHSP = hsp->sPairs[x][i]->Score /  */
-/* 					(hsp->sPairs[x][i]->Pos2 - hsp->sPairs[x][i]->Pos1 + 1); */
-				  
-/* 				  /\* Update the array sr with some positions of current HSPs *\/ */
-/* 				  for(j = hsp->sPairs[x][i]->Pos1;  */
-/* 					  j <= hsp->sPairs[x][i]->Pos2 && j <= l2; */
-/* 					  j++) */
-/* 					{ */
-/* 					  if (scoreHSP > external->sr[x][j-l1] || */
-/* 						  external->sr[x][j-l1] == NO_SCORE) */
-/* 						external->sr[x][j-l1] = scoreHSP; */
-/* 					} */
-/* 				} */
-/* 			} */
-/* 		} */
-/* 	} */
-/*   else */
-/* 	{ */
-/* 	  /\* HSPs in REVERSE strand *\/ */
-/* 	  frameStart = FRAMES;  */
-/* 	  frameEnd = 2*FRAMES; */
-
-/* 	  /\* For each frame and strand, preprocess homology information *\/ */
-/* 	  /\* HSPs in reverse strand are reverse-sorted by Position2 *\/ */
-/* 	  for(x=frameStart; x < frameEnd; x++) */
-/* 		{ */
-/* 		  /\* Reset arrays: NO_SCORE values *\/ */
-/* 		  for(i=0; i < l2-l1+1; i++) */
-/* 			external->sr[x][i] = NO_SCORE; */
-		  
-/* 		  if (hsp != NULL) */
-/* 			{ */
-/* 			  /\* A. Skip HSPs out of this range: [l1,l2] *\/ */
-/* 			  for (i = external->iSegments[x];  */
-/* 				   i < hsp->nSegments[x] && hsp->sPairs[x][i]->Pos1 > l2;  */
-/* 				   i++) */
-/* 				; */
-			  
-/* 			  /\* B. Partial HSPs in this fragment: left end is out (Pos1 <= l2) *\/ */
-/* 			  for (i = external->iSegments[x];  */
-/* 				   i < hsp->nSegments[x] && hsp->sPairs[x][i]->Pos2 > l2;  */
-/* 				   i++) */
-/* 				{ */
-/* 				  /\* Score value *\/ */
-/* 				  scoreHSP = hsp->sPairs[x][i]->Score /  */
-/* 					(hsp->sPairs[x][i]->Pos2 - hsp->sPairs[x][i]->Pos1 + 1); */
-				  
-/* 				  /\* For each position in the HSP update the array sr *\/ */
-/* 				  for(j = hsp->sPairs[x][i]->Pos1;  */
-/* 					  j < l2; */
-/* 					  j++) */
-/* 					{ */
-/* 					  if (scoreHSP > external->sr[x][j-l1] || */
-/* 						  external->sr[x][j-l1] == NO_SCORE) */
-/* 						external->sr[x][j-l1] = scoreHSP; */
-/* 					} */
-/* 				} */
-			  
-/* 			  /\* C. Complete HSPs in this fragment (Pos2 <= l2,Pos1 >= l1+OVERLAP) *\/ */
-/* 			  for (;  */
-/* 				   i < hsp->nSegments[x] && hsp->sPairs[x][i]->Pos1 >= l1+OVERLAP;  */
-/* 				   i++) */
-/* 				{ */
-/* 				  /\* Score value *\/ */
-/* 				  scoreHSP = hsp->sPairs[x][i]->Score /  */
-/* 					(hsp->sPairs[x][i]->Pos2 - hsp->sPairs[x][i]->Pos1 + 1); */
-				  
-/* 				  /\* For each position in the HSP update the array sr *\/ */
-/* 				  for(j = hsp->sPairs[x][i]->Pos1;  */
-/* 					  j <= hsp->sPairs[x][i]->Pos2 && j <l2; */
-/* 					  j++) */
-/* 					{ */
-/* 					  if (scoreHSP > external->sr[x][j-l1] || */
-/* 						  external->sr[x][j-l1] == NO_SCORE) */
-/* 						external->sr[x][j-l1] = scoreHSP; */
-/* 					} */
-/* 				} */
-			  
-/* 			  /\* Update partial counter: previous HSPs are useless for next split *\/ */
-/* 			  external->iSegments[x] = i; 	   */
-			  
-/* 			  /\* D. Partial HSPs in this fragment: left end is out (Pos1 < l1) *\/ */
-/* 			  for (;  */
-/* 				   i < hsp->nSegments[x] &&  hsp->sPairs[x][i]->Pos2 >= l1;  */
-/* 				   i++) */
-/* 				{ */
-/* 				  /\* Score value *\/ */
-/* 				  scoreHSP = hsp->sPairs[x][i]->Score /  */
-/* 					(hsp->sPairs[x][i]->Pos2 - hsp->sPairs[x][i]->Pos1 + 1); */
-				  
-/* 				  /\* Update the array sr with some positions of current HSPs *\/ */
-/* 				  for(j = hsp->sPairs[x][i]->Pos2;  */
-/* 					  j >= hsp->sPairs[x][i]->Pos1 && j >= l1; */
-/* 					  j--) */
-/* 					{ */
-/* 					  if (scoreHSP > external->sr[x][j-l1] || */
-/* 						  external->sr[x][j-l1] == NO_SCORE) */
-/* 						external->sr[x][j-l1] = scoreHSP; */
-/* 					} */
-/* 				} */
-/* 			} */
-/* 		} */
-/* 	} */
-/* } */
-/* /\* Projection of HSPs: save the maximum for each nucleotide *\/ */
-/* /\* Requirement: HSPs must sorted by Position1 *\/ */
-/* void ReadScan(packExternalInformation* external, */
-/* 			 packHSP* hsp,  */
-/* 			 int Strand,  */
-/* 			 long l1, long l2) */
-/* { */
-/*   short x; */
-/*   short frameStart, frameEnd; */
-/*   long i,j; */
-/*   float scoreHSP; */
-  
-/*   if (Strand == FORWARD) */
-/*     { */
-/* 	  frameStart = 0;  */
-/* 	  frameEnd = FRAMES; */
-
-/* 	  /\* For each frame and strand, preprocess homology information *\/ */
-/* 	  for(x=frameStart; x < frameEnd; x++) */
-/* 		{ */
-/* 		  /\* Reset arrays: NO_SCORE values *\/ */
-/* 		  for(i=0; i < l2-l1+1; i++) */
-/* 			external->sr[x][i] = NO_SCORE; */
-/* 		  /\* Reset arrays: NO_SCORE values *\/ */
-/* 		  for(i=0; i < l2-l1+1; i++) */
-/* 			external->readcount[x][i] = 0.0; */
-		  
-		  
-/* 		  if (hsp != NULL) */
-/* 			{ */
-/* 			  /\* A. Skip HSPs out of this range: [l1,l2] *\/ */
-/* 			  for (i = external->iSegments[x];  */
-/* 				   i < hsp->nSegments[x] && hsp->sPairs[x][i]->Pos2 < l1;  */
-/* 				   i++) */
-/* 				; */
-			  
-/* 			  /\* B. Partial HSPs in this fragment: left end is out (Pos2 >= l1) *\/ */
-/* 			  for (i = external->iSegments[x];  */
-/* 				   i < hsp->nSegments[x] && hsp->sPairs[x][i]->Pos1 < l1;  */
-/* 				   i++) */
-/* 				{ */
-/* 				  /\* Score value *\/ */
-/* 				  scoreHSP = (RREADS/MRM) * hsp->sPairs[x][i]->Score; */
-/* 				  /\* / (hsp->sPairs[x][i]->Pos2 - hsp->sPairs[x][i]->Pos1 + 1); *\/ */
-				  
-/* 				  /\* For each position in the HSP update the array sr *\/ */
-/* 				  /\* Save the projection of HSPs into the array: including negative HSPs *\/ */
-/* 				  for(j = l1;  */
-/* 					  j <= hsp->sPairs[x][i]->Pos2 && j <l2; */
-/* 					  j++) */
-/* 					{ */
-/* 					  if (external->sr[x][j-l1] == NO_SCORE){ */
-/* 					    external->sr[x][j-l1] = scoreHSP; */
-/* 					  }else{ */
-/* 					    external->sr[x][j-l1] = MIN(external->sr[x][j-l1]+scoreHSP,COV); */
-/* 					  } */
-/* 					  external->readcount[x][j-l1] = external->readcount[x][j-l1] + hsp->sPairs[x][i]->Score; */
-/* 					} */
-/* 				} */
-			  
-/* 			  /\* C. Complete HSPs in this fragment (Pos1 >= l1, Pos2 <= l2-OVERLAP) *\/ */
-/* 			  for (;  */
-/* 				   i < hsp->nSegments[x] && hsp->sPairs[x][i]->Pos2 <= l2-OVERLAP;  */
-/* 				   i++) */
-/* 				{ */
-/* 				  /\* Score value *\/ */
-/* 				  scoreHSP = (RREADS/MRM) * hsp->sPairs[x][i]->Score;  */
-/* /\* 				    /(hsp->sPairs[x][i]->Pos2 - hsp->sPairs[x][i]->Pos1 + 1); *\/ */
-				  
-/* 				  /\* For each position in the HSP update the array sr *\/ */
-/* 				  /\* Save the projection of HSPs into the array: including negative HSPs *\/ */
-/* 				  for(j = hsp->sPairs[x][i]->Pos1;  */
-/* 					  j <= hsp->sPairs[x][i]->Pos2 && j <l2; */
-/* 					  j++) */
-/* 					{ */
-/* 					  if (external->sr[x][j-l1] == NO_SCORE){ */
-/* 					    external->sr[x][j-l1] = scoreHSP; */
-/* 					  }else{ */
-/* 					    external->sr[x][j-l1] = MIN(external->sr[x][j-l1]+scoreHSP,COV); */
-/* 					  } */
-/* 					  external->readcount[x][j-l1] = external->readcount[x][j-l1] + hsp->sPairs[x][i]->Score; */
-/* 					} */
-/* 				} */
-			  
-/* 			  /\* Update partial counter: previous HSPs are useless for next split *\/ */
-/* 			  external->iSegments[x] = i; 	   */
-			  
-/* 			  /\* D. Partial HSPs in this fragment: right end is out (Pos2 > l2) *\/ */
-/* 			  for (;  */
-/* 				   i < hsp->nSegments[x] &&  hsp->sPairs[x][i]->Pos1 <= l2;  */
-/* 				   i++) */
-/* 				{ */
-/* 				  /\* Score value *\/ */
-/* 				  scoreHSP = (RREADS/MRM) * hsp->sPairs[x][i]->Score;  */
-/* /\* 				    /(hsp->sPairs[x][i]->Pos2 - hsp->sPairs[x][i]->Pos1 + 1); *\/ */
-				  
-/* 				  /\* Update the array sr with some positions of current HSPs *\/ */
-/* 				  for(j = hsp->sPairs[x][i]->Pos1;  */
-/* 					  j <= hsp->sPairs[x][i]->Pos2 && j <= l2; */
-/* 					  j++) */
-/* 					{ */
-/* 					  if (external->sr[x][j-l1] == NO_SCORE){ */
-/* 					    external->sr[x][j-l1] = scoreHSP; */
-/* 					  }else{ */
-/* 					    external->sr[x][j-l1] = MIN(external->sr[x][j-l1]+scoreHSP,COV); */
-/* 					  } */
-/* 					  external->readcount[x][j-l1] = external->readcount[x][j-l1] + hsp->sPairs[x][i]->Score; */
-/* 					} */
-/* 				} */
-/* 			} */
-/* 		} */
-/* 	} */
-/*   else */
-/* 	{ */
-/* 	  /\* HSPs in REVERSE strand *\/ */
-/* 	  frameStart = FRAMES;  */
-/* 	  frameEnd = 2*FRAMES; */
-
-/* 	  /\* For each frame and strand, preprocess homology information *\/ */
-/* 	  /\* HSPs in reverse strand are reverse-sorted by Position2 *\/ */
-/* 	  for(x=frameStart; x < frameEnd; x++) */
-/* 		{ */
-/* 		  /\* Reset arrays: NO_SCORE values *\/ */
-/* 		  for(i=0; i < l2-l1+1; i++) */
-/* 			external->sr[x][i] = NO_SCORE; */
-/* 		  /\* Reset arrays: NO_SCORE values *\/ */
-/* 		  for(i=0; i < l2-l1+1; i++) */
-/* 			external->readcount[x][i] = 0.0; */
-		  
-/* 		  if (hsp != NULL) */
-/* 			{ */
-/* 			  /\* A. Skip HSPs out of this range: [l1,l2] *\/ */
-/* 			  for (i = external->iSegments[x];  */
-/* 				   i < hsp->nSegments[x] && hsp->sPairs[x][i]->Pos1 > l2;  */
-/* 				   i++) */
-/* 				; */
-			  
-/* 			  /\* B. Partial HSPs in this fragment: left end is out (Pos1 <= l2) *\/ */
-/* 			  for (i = external->iSegments[x];  */
-/* 				   i < hsp->nSegments[x] && hsp->sPairs[x][i]->Pos2 > l2;  */
-/* 				   i++) */
-/* 				{ */
-/* 				  /\* Score value *\/ */
-/* 				  scoreHSP = (RREADS/MRM) * hsp->sPairs[x][i]->Score; */
-/* /\* 				  / (hsp->sPairs[x][i]->Pos2 - hsp->sPairs[x][i]->Pos1 + 1); *\/ */
-				  
-/* 				  /\* For each position in the HSP update the array sr *\/ */
-/* 				  for(j = hsp->sPairs[x][i]->Pos1;  */
-/* 					  j < l2; */
-/* 					  j++) */
-/* 					{ */
-/* 					  if (external->sr[x][j-l1] == NO_SCORE){ */
-/* 					    external->sr[x][j-l1] = scoreHSP; */
-/* 					  }else{ */
-/* 					    external->sr[x][j-l1] = MIN(external->sr[x][j-l1]+scoreHSP,COV); */
-/* 					  } */
-/* 					  external->readcount[x][j-l1] = external->readcount[x][j-l1] + hsp->sPairs[x][i]->Score; */
-/* 					} */
-/* 				} */
-			  
-/* 			  /\* C. Complete HSPs in this fragment (Pos2 <= l2,Pos1 >= l1+OVERLAP) *\/ */
-/* 			  for (;  */
-/* 				   i < hsp->nSegments[x] && hsp->sPairs[x][i]->Pos1 >= l1+OVERLAP;  */
-/* 				   i++) */
-/* 				{ */
-/* 				  /\* Score value *\/ */
-/* 				  scoreHSP = (RREADS/MRM) * hsp->sPairs[x][i]->Score; */
-/* /\* 				  /(hsp->sPairs[x][i]->Pos2 - hsp->sPairs[x][i]->Pos1 + 1); *\/ */
-				  
-/* 				  /\* For each position in the HSP update the array sr *\/ */
-/* 				  for(j = hsp->sPairs[x][i]->Pos1;  */
-/* 					  j <= hsp->sPairs[x][i]->Pos2 && j <l2; */
-/* 					  j++) */
-/* 					{ */
-/* 					  if (external->sr[x][j-l1] == NO_SCORE){ */
-/* 					    external->sr[x][j-l1] = scoreHSP; */
-/* 					  }else{ */
-/* 					    external->sr[x][j-l1] = MIN(external->sr[x][j-l1]+scoreHSP,COV); */
-/* 					  } */
-/* 					  external->readcount[x][j-l1] = external->readcount[x][j-l1] + hsp->sPairs[x][i]->Score; */
-/* 					} */
-/* 				} */
-			  
-/* 			  /\* Update partial counter: previous HSPs are useless for next split *\/ */
-/* 			  external->iSegments[x] = i; 	   */
-			  
-/* 			  /\* D. Partial HSPs in this fragment: left end is out (Pos1 < l1) *\/ */
-/* 			  for (;  */
-/* 				   i < hsp->nSegments[x] &&  hsp->sPairs[x][i]->Pos2 >= l1;  */
-/* 				   i++) */
-/* 				{ */
-/* 				  /\* Score value *\/ */
-/* 				  scoreHSP = (RREADS/MRM) * hsp->sPairs[x][i]->Score; */
-/* /\* 				  / (hsp->sPairs[x][i]->Pos2 - hsp->sPairs[x][i]->Pos1 + 1); *\/ */
-				  
-/* 				  /\* Update the array sr with some positions of current HSPs *\/ */
-/* 				  for(j = hsp->sPairs[x][i]->Pos2;  */
-/* 					  j >= hsp->sPairs[x][i]->Pos1 && j >= l1; */
-/* 					  j--) */
-/* 					{ */
-/* 					  if (external->sr[x][j-l1] == NO_SCORE){ */
-/* 					    external->sr[x][j-l1] = scoreHSP; */
-/* 					  }else{ */
-/* 					    external->sr[x][j-l1] = MIN(external->sr[x][j-l1]+scoreHSP,COV); */
-/* 					  } */
-/* 					  external->readcount[x][j-l1] = external->readcount[x][j-l1] + hsp->sPairs[x][i]->Score; */
-/* 					} */
-/* 				} */
-/* 			} */
-/* 		} */
-/* 	} */
-/* } */
-
-/* /\* Preprocessing of HSPs projections *\/ */
-/* void HSPScan2(packExternalInformation* external, */
-/* 			  packHSP* hsp,  */
-/* 			  int Strand,  */
-/* 			  long l1, long l2) */
-/* { */
-/*   short x; */
-/*   long i; */
-/*   float previousScore; */
-/*   float previousReadCount; */
-/*   short frameStart, frameEnd; */
-  
-/*   if (Strand == FORWARD) */
-/*     { */
-/* 	  frameStart = 0;  */
-/* 	  frameEnd = FRAMES; */
-/* 	} */
-/*   else */
-/* 	{ */
-/* 	  frameStart = FRAMES;  */
-/* 	  frameEnd = 2*FRAMES; */
-/* 	} */
-  
-/*   for(x=frameStart; x < frameEnd; x++) */
-/*     { */
-/*       previousScore = 0.0; */
-/*       previousReadCount = 0.0; */
-/*       /\* Screening the whole sequence to accumulate the sum in every base *\/ */
-/*       for (i=l1; i<=l2; i++) */
-/* 		{ */
-/* 		  /\* Accumulating step *\/ */
-/* 		  if (UTR){ */
-/* 		    external->sr[x][i-l1] = previousScore + log(external->sr[x][i-l1] + 1); */
-/* 		    previousScore = external->sr[x][i-l1]; */
-/* 		    external->readcount[x][i-l1] = previousReadCount + external->readcount[x][i-l1]; */
-/* 		    previousReadCount = external->readcount[x][i-l1]; */
-/* 		  }else{ */
-/* 		    external->sr[x][i-l1] = previousScore + external->sr[x][i-l1]; */
-/* 		    previousScore = external->sr[x][i-l1]; */
-/* 		  } */
-/* 		} */
-/*     }   */
-/* } */
 
 /* Homology to protein score: using homology information (blast HSPs) */
 float ScoreHSPexon(exonGFF* exon, 
@@ -706,8 +263,17 @@ float ScoreHSPexon(exonGFF* exon,
   int index;
   short trueFrame;
   long iniExon, endExon;
-  float Score;
+  float Score = 0.0;
+  float sum_left = 0.0;
+  float sum_right = 0.0;
+  long left;
+  long right;
+  long len_left = 0;
+  long len_right = 0;
+  long flank = BKGD_SUBTRACT_FLANK_LENGTH;
+/*   char mess[MAXSTRING]; */
 
+  
   iniExon = exon->Acceptor->Position - l1 + COFFSET;
   endExon = exon->Donor->Position - l1 + COFFSET ;
 
@@ -722,8 +288,33 @@ float ScoreHSPexon(exonGFF* exon,
   
   /* Access the sr array to obtain the homology score for current score */
   Score = external->sr[trueFrame][endExon] - 
-	external->sr[trueFrame][(iniExon>0)?iniExon-1:iniExon];
+    external->sr[trueFrame][(iniExon>0)?iniExon-1:iniExon];
+  if (UTR && flank > 0){
+    left = MAX(0,(iniExon - flank));
+    right = MIN((l2-l1),endExon + flank);
 
+    if ((iniExon > 0)
+	&&strcmp(exon->Type,sSINGLE)
+	&&((Strand == FORWARD)?(strcmp(exon->Type,sFIRST)&&strcmp(exon->Type,sUTR3INTERNALHALF)&&strcmp(exon->Type,sUTRTERMINALHALF)):(strcmp(exon->Type,sTERMINAL)&&strcmp(exon->Type,sUTR5INTERNALHALF)&&strcmp(exon->Type,sUTRFIRSTHALF)))
+	){
+      len_left = (iniExon - left);
+      sum_left = external->sr[trueFrame][iniExon] - 
+	external->sr[trueFrame][left];
+
+    }
+    if (endExon < (l2-l1)
+	&&strcmp(exon->Type,sSINGLE)
+	&&((Strand == REVERSE)?(strcmp(exon->Type,sFIRST)&&strcmp(exon->Type,sUTR3INTERNALHALF)&&strcmp(exon->Type,sUTRTERMINALHALF)):(strcmp(exon->Type,sTERMINAL)&&strcmp(exon->Type,sUTR5INTERNALHALF)&&strcmp(exon->Type,sUTRFIRSTHALF)))
+	){
+      len_right = (right - endExon);
+      sum_right = external->sr[trueFrame][right] - 
+	external->sr[trueFrame][endExon];
+    }
+  
+    Score = Score - 1.0*((float)(sum_left + sum_right)/((float)(len_left + len_right)/(float)(endExon-iniExon+1)));
+    /*   sprintf(mess,"iniExon: %ld   endExon: %ld   sum_left + sum_right: %f   len_left + len_right: %ld   endExon-iniExon+1: %ld  BkgScore: %f   Score: %f",exon->Acceptor->Position,exon->Donor->Position,(sum_left + sum_right),(len_left + len_right),(endExon-iniExon+1),((float)(sum_left + sum_right)/((float)(len_left + len_right)/(float)(endExon-iniExon+1))),Score); */
+    /* 	  printMess(mess); */
+  }
   return(Score);
 }
 /* Homology to protein score: using homology information (blast HSPs) */
