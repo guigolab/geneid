@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: Translate.c,v 1.13 2010-04-16 10:08:40 talioto Exp $  */
+/*  $Id: Translate.c,v 1.14 2010-07-29 10:58:44 talioto Exp $  */
 
 #include "geneid.h"
 
@@ -122,7 +122,7 @@ void TranslateGene(exonGFF* e,
 	      e->Donor->Position + e->offset2 - COFFSET;
 
 	    /* -- Remainder nucleotides of the last exon in the gene -- */
-	    if (!i && !lastExon)
+	    if (!i || lastExon)
 	      {
 		switch (e->Remainder)
 		  {
@@ -262,7 +262,7 @@ void TranslateGene(exonGFF* e,
 	    ReverseSubSequence(p1, p2, s, rs);
 
 	    /* Frame of the last exon in sequence */
-	    if (!i && !lastExon)
+	    if (!i || lastExon)
 	      {
 		switch (e->Frame)
 		  {
@@ -348,7 +348,7 @@ void TranslateGene(exonGFF* e,
 	    free(rs);
 	  }
 	  e = e->PreviousExon;
-		  
+	  lastExon = 0;
 		  
 	}
       /* Frame of the last exon in the gene */
@@ -377,7 +377,7 @@ void TranslateGene(exonGFF* e,
       for(j = 0; j < currRmd; j++)
 	prot[lAux+j] = rmdProt[j];
       prot[lAux+j] = '\0'; 
-      lastExon = 0;
+      
     } /* end of reverse translation */
 
   *nAA = totalAA;

@@ -28,7 +28,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/     
 
-/* $Id: geneid.h,v 1.52 2010-06-25 10:20:56 talioto Exp $ */
+/* $Id: geneid.h,v 1.53 2010-07-29 10:58:44 talioto Exp $ */
 
 /* Required libraries */
 #include <stdlib.h>
@@ -43,6 +43,12 @@
 /*************************************************************************
 A. DEFINITIONS
 *************************************************************************/
+
+/* The name of the game                     */
+#define VERSION   "geneid_v1.4"  
+#define SITES     "geneid_v1.4"  
+#define EXONS     "geneid_v1.4"       
+#define EVIDENCE  "evidence"           
 
 /* Length of every processed fragment       */ 
 #define LENGTHSi 220000          
@@ -93,7 +99,7 @@ A. DEFINITIONS
 #define MAXSITESEVIDENCES 3*MAXEVIDENCES
 
 /* Max number of HSP per locus/frame/strand */
-#define MAXHSP 16000000             
+#define MAXHSP 40000000             
 
 /* UTR prediction parameters */            
 #define MAXUTRDONORS 8
@@ -211,12 +217,6 @@ A. DEFINITIONS
 
 /* Name of default parameter file           */
 #define PARAMETERFILE  "param.default"   
-
-/* The name of the game                     */
-#define VERSION   "geneid_v1.3"  
-#define SITES     "geneid_v1.3"  
-#define EXONS     "geneid_v1.3"       
-#define EVIDENCE  "evidence"           
 
 /* Constants:                               */
 #define FRAMES 3                   
