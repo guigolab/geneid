@@ -271,7 +271,7 @@ float ScoreHSPexon(exonGFF* exon,
   long len_left = 0;
   long len_right = 0;
   long flank = BKGD_SUBTRACT_FLANK_LENGTH;
-/*   char mess[MAXSTRING]; */
+  /* char mess[MAXSTRING]; */
 
   
   iniExon = exon->Acceptor->Position - l1 + COFFSET;
@@ -287,8 +287,12 @@ float ScoreHSPexon(exonGFF* exon,
   trueFrame += index;
   
   /* Access the sr array to obtain the homology score for current score */
-  Score = external->sr[trueFrame][endExon] - 
+  Score = external->sr[trueFrame][(endExon>0)?endExon-1:endExon] - 
     external->sr[trueFrame][(iniExon>0)?iniExon-1:iniExon];
+  /* if (Score > 2000){ */
+  /*   sprintf(mess,"iniExonRel: %ld endExonRel: %ld   iniExon: %ld  endExon: %ld  Score: %f  ValEnd: %f  ValIni: %f",iniExon,endExon,exon->Acceptor->Position,exon->Donor->Position,Score,external->sr[trueFrame][endExon],external->sr[trueFrame][(iniExon>0)?iniExon-1:iniExon]); */
+  /*   	  printMess(mess); */
+  /* } */
   if (UTR && flank > 0){
     left = MAX(0,(iniExon - flank));
     right = MIN((l2-l1),endExon + flank);
@@ -302,7 +306,7 @@ float ScoreHSPexon(exonGFF* exon,
 	external->sr[trueFrame][left];
 
     }
-    if (endExon < (l2-l1)
+    if (endExon < (l2-l1 + COFFSET)
 	&&strcmp(exon->Type,sSINGLE)
 	&&((Strand == REVERSE)?(strcmp(exon->Type,sFIRST)&&strcmp(exon->Type,sUTR3INTERNALHALF)&&strcmp(exon->Type,sUTRTERMINALHALF)):(strcmp(exon->Type,sTERMINAL)&&strcmp(exon->Type,sUTR5INTERNALHALF)&&strcmp(exon->Type,sUTRFIRSTHALF)))
 	){
@@ -342,7 +346,7 @@ float GetReadCount(exonGFF* exon,
   
   /* Access the sr array to obtain the homology score for current score */
   if ((endExon-iniExon + 1)>0){
-      Score = (external->readcount[trueFrame][endExon] - 
+      Score = (external->readcount[trueFrame][(endExon>0)?endExon-1:endExon] - 
 	    external->readcount[trueFrame][(iniExon>0)?iniExon-1:iniExon]);
     }else{
       Score = 0.0;

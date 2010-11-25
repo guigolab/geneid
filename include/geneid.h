@@ -28,7 +28,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/     
 
-/* $Id: geneid.h,v 1.53 2010-07-29 10:58:44 talioto Exp $ */
+/* $Id: geneid.h,v 1.54 2010-11-25 20:48:06 talioto Exp $ */
 
 /* Required libraries */
 #include <stdlib.h>
@@ -110,7 +110,7 @@ A. DEFINITIONS
 
 /* read params */
 #define RREADS 1
-#define COV 5
+#define COV 15
 
 /* Length of allowed UTR including stop codon before intron: used to be 55 */
 #define MAXNMDLENGTH 1000
