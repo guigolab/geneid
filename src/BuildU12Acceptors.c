@@ -5,7 +5,7 @@
 *   Signal prediction by using a Position Weighted Array                 *
 *   using U12 branch point                                               *
 *                                                                        *
-*   This file is part of the geneid 1.3 distribution                     *
+*   This file is part of the geneid 1.4 distribution                     *
 *                                                                        *
 *     Copyright (C) 2006 - Enrique BLANCO GARCIA                         *
 *                          Roderic GUIGO SERRA                           *

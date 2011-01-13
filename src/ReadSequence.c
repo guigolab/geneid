@@ -4,7 +4,7 @@
 *                                                                        *
 *   Reading input sequences of DNA in fasta format                       *
 *                                                                        *
-*   This file is part of the geneid 1.3 distribution                     *
+*   This file is part of the geneid 1.4 distribution                     *
 *                                                                        *
 *     Copyright (C) 2006 - Enrique BLANCO GARCIA                         *
 *                          Roderic GUIGO SERRA                           *
@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: ReadSequence.c,v 1.7 2006-12-11 09:50:48 talioto Exp $  */
+/*  $Id: ReadSequence.c,v 1.8 2011-01-13 11:06:16 talioto Exp $  */
 
 #include "geneid.h"
 

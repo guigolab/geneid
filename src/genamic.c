@@ -4,7 +4,7 @@
 *                                                                        *
 *   Assembling genes from the input set of exons                         *
 *                                                                        *
-*   This file is part of the geneid 1.3 Distribution                     *
+*   This file is part of the geneid 1.4 Distribution                     *
 *                                                                        *
 *     Copyright (C) 2006 - Enrique BLANCO GARCIA                         *
 *                          Roderic GUIGO SERRA                           *
@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: genamic.c,v 1.19 2010-04-16 10:08:40 talioto Exp $  */
+/*  $Id: genamic.c,v 1.20 2011-01-13 11:06:16 talioto Exp $  */
 
 #include "geneid.h"
 

@@ -4,7 +4,7 @@
  *                                                                        *
  *   From start/stop codons and donor sites, to build initial exons       *
  *                                                                        *
- *   This file is part of the geneid 1.3 distribution                     *
+ *   This file is part of the geneid 1.4 distribution                     *
  *                                                                        *
  *     Copyright (C) 2006 - Enrique BLANCO GARCIA                         *
  *                          Roderic GUIGO SERRA                           *
@@ -25,7 +25,7 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
  *************************************************************************/
 
-/*  $Id: BuildUTRExons.c,v 1.2 2010-06-23 13:43:50 talioto Exp $  */
+/*  $Id: BuildUTRExons.c,v 1.3 2011-01-13 11:06:16 talioto Exp $  */
 
 #include "geneid.h"
 

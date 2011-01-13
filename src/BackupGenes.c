@@ -4,7 +4,7 @@
 *                                                                        *
 *   To save best partial genes between 2 contigous fragments             *
 *                                                                        *
-*   This file is part of the geneid 1.3 distribution                     *
+*   This file is part of the geneid 1.4 distribution                     *
 *                                                                        *
 *     Copyright (C) 2006 - Enrique BLANCO GARCIA                         *
 *                          Roderic GUIGO SERRA                           *
@@ -25,7 +25,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: BackupGenes.c,v 1.10 2010-04-16 10:08:39 talioto Exp $  */
+/*  $Id: BackupGenes.c,v 1.11 2011-01-13 11:06:16 talioto Exp $  */
 
 #include "geneid.h"
 
