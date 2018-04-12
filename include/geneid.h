@@ -28,7 +28,7 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/     
 
-/* $Id: geneid.h,v 1.54 2010-11-25 20:48:06 talioto Exp $ */
+/* $Id: geneid.h,v 1.54 2010/11/25 20:48:06 talioto Exp $ */
 
 /* Required libraries */
 #include <stdlib.h>
@@ -116,7 +116,7 @@ A. DEFINITIONS
 #define MAXNMDLENGTH 1000
 
 /* Max number of locus in multi-fasta files */
-#define MAXNSEQUENCES 1         
+#define MAXNSEQUENCES 100         
 
 /* Maximum number of predicted genes        */
 #define MAXGENE 15000            
