@@ -1,4 +1,4 @@
-******************** geneid v.1.4.x README File ********************
+******************** geneid v.1.4.6 README File ********************
 
 Summary:
 A. What's geneid ?
@@ -86,7 +86,7 @@ source code of geneid program.
 This software is registered under GNU license.
 
 ** Makefile
-This file is required to build geneidbinary file.
+This file is required to build geneid binary file.
 
 ** README
 This file.
