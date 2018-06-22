@@ -31,7 +31,7 @@
 # 
 # ALSO, IT WOULD BE NICE IF YOU LET ME KNOW YOU USED IT.
 # ===============================================================
-#!/bin/awk -f
+#!/usr/bin/env awk -f
 
 {
   OFS="\t";

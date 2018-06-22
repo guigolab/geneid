@@ -136,7 +136,7 @@ long GetTES(
   int window = 3;
   int ssExists = 0;
   int cluster_edge = 0;
-  float thresh = 1.2;
+  float thresh = 8; //1.2
   float pes=0;
   float splicethresh = 5;
   is = 0;     
