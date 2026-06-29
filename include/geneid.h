@@ -119,7 +119,7 @@ A. DEFINITIONS
 #define MAXNSEQUENCES 100         
 
 /* Maximum number of predicted genes        */
-#define MAXGENE 15000            
+#define MAXGENE 100000
 
 /* Maximum number of exons in a gene        */
 #define MAXEXONGENE 1000         

@@ -50,22 +50,32 @@ int Translate(long p1,
 	}
 
   /* Translating complet codons in the exon */
+  /* Guard: sAux is sized MAXAA; never write past it (e.g. a huge */
+  /* single-exon ORF would otherwise smash the buffer). Leave headroom */
+  /* for the trailing remainder/shared codons appended by the caller.   */
   nAA = nAux;
-  for(i=p1+ fra; i<= p2 - rmd; i=i+3)
+  for(i=p1+ fra; i<= p2 - rmd && nAux < MAXAA - 8; i=i+3)
 	{
 	  codon[0] = s[i];
 	  codon[1] = s[i+1];
 	  codon[2] = s[i+2];
 	  codon[3] = '\0';
-        
+
 	  /* Looking up the amino acid dictionary */
 	  sAux[nAux] = getAADict(dAA,codon);
 	  nAux++;
 	}
+  if (i <= p2 - rmd)
+	{
+	  static int warnedAA = 0;
+	  if (!warnedAA)
+		{ fprintf(stderr,"Warning: exon translation reached MAXAA (%d); "
+				 "protein truncated.\n", MAXAA); warnedAA = 1; }
+	}
   nAA = nAux - nAA;
-   
+
   /* Saving last uncomplete codon in the exon (remainder) */
-  for(i=p2 - rmd + 1; i <= p2; i++)
+  for(i=p2 - rmd + 1; i <= p2 && nAux < MAXAA - 1; i++)
 	{
 	  sAux[nAux] = s[i] + 32;
 	  nAux++;
@@ -105,12 +115,22 @@ void TranslateGene(exonGFF* e,
   char rmdProt[LENGTHCODON+1];
   int lastExon = 1;
 
+  /* Guard: tAA has room for MAXEXONGENE features; warn once if a gene */
+  /* exceeds it (the exon loops below stop at MAXEXONGENE to stay safe). */
+  if (nExons > MAXEXONGENE)
+    {
+      static int warnedFeats = 0;
+      if (!warnedFeats)
+	{ fprintf(stderr,"Warning: gene has %ld features > MAXEXONGENE (%d); "
+			 "protein truncated.\n", nExons, MAXEXONGENE); warnedFeats = 1; }
+    }
+
   /* A. Translating a forward sense exon: Terminal > Internal >.. First */
   if (e->Strand == '+')
     {
       prot[0] = '\0';
-      /* Traversing the list of exons */      
-      for(i=0, totalAA=0, currFrame=0; i<nExons; i++)
+      /* Traversing the list of exons (bounded by MAXEXONGENE -> tAA size) */
+      for(i=0, totalAA=0, currFrame=0; i<nExons && i<MAXEXONGENE; i++)
 	{
 	  if (!strcmp(e->Type,sSINGLE)||!strcmp(e->Type,sFIRST)||!strcmp(e->Type,sINTERNAL)||!strcmp(e->Type,sTERMINAL)){
 	    /* 0. Acquire the real positions of the exon in the sequence */
@@ -163,7 +183,7 @@ void TranslateGene(exonGFF* e,
 		codon[3] = '\0';
 		/* translate this codon */
 		aa = getAADict(dAA,codon);
-		lAux = strlen(sAux);
+		lAux = strlen(sAux); if (lAux > MAXAA - 9) lAux = MAXAA - 9; /* clamp: keep prot/sAux writes inside MAXAA */
 		sAux[lAux] = aa;
 		sAux[lAux+1] = '\0'; 
 		break;
@@ -173,13 +193,26 @@ void TranslateGene(exonGFF* e,
 		codon[0] = s[p2];
 		codon[3] = '\0';
 		aa = getAADict(dAA,codon);
-		lAux = strlen(sAux);
+		lAux = strlen(sAux); if (lAux > MAXAA - 9) lAux = MAXAA - 9; /* clamp: keep prot/sAux writes inside MAXAA */
 		sAux[lAux] = aa;
 		sAux[lAux+1] = '\0'; 
 		break;
 	      }
 
 	    /* Concat translation(current exon) with translation(last exon) */
+	    /* Guard: keep combined length within MAXAA (sAux/prot are MAXAA) */
+	    { long lsaux = (long) strlen(sAux);
+	      long room  = MAXAA - 8 - lsaux;
+	      if (room < 0) room = 0;
+	      if ((long) strlen(prot) > room)
+		{
+		  static int warnedProt = 0;
+		  if (!warnedProt)
+		    { fprintf(stderr,"Warning: protein reached MAXAA (%d); "
+				     "truncated.\n", MAXAA); warnedProt = 1; }
+		  prot[room] = '\0';
+		}
+	    }
 	    strcat(sAux,prot);
 	    /* Leaving the result into prot */
 	    strcpy(prot,sAux);
@@ -244,9 +277,9 @@ void TranslateGene(exonGFF* e,
   /* B. Translating a reverse sense exon: First > Internal >.. Terminal */
   else
     {
-      prot[0] = '\0'; 
-      /* Traversing the list of exons */
-      for(i=0, totalAA=0, currRmd=0; i<nExons; i++)
+      prot[0] = '\0';
+      /* Traversing the list of exons (bounded by MAXEXONGENE -> tAA size) */
+      for(i=0, totalAA=0, currRmd=0; i<nExons && i<MAXEXONGENE; i++)
 	{
 	  if (!strcmp(e->Type,sSINGLE)||!strcmp(e->Type,sFIRST)||!strcmp(e->Type,sINTERNAL)||!strcmp(e->Type,sTERMINAL)){
 	    p1 = (e->evidence)? 
@@ -298,7 +331,7 @@ void TranslateGene(exonGFF* e,
 		codon[3] = '\0';
 		/* translate this codon */
 		aa = getAADict(dAA,codon);
-		lAux = strlen(prot);
+		lAux = strlen(prot); if (lAux > MAXAA - 9) lAux = MAXAA - 9; /* clamp: keep prot/sAux writes inside MAXAA */
 		prot[lAux] = aa;
 		prot[lAux+1] = '\0'; 
 		break;
@@ -308,13 +341,26 @@ void TranslateGene(exonGFF* e,
 		codon[2] = rs[0];
 		codon[3] = '\0';
 		aa = getAADict(dAA,codon);
-		lAux = strlen(prot);
+		lAux = strlen(prot); if (lAux > MAXAA - 9) lAux = MAXAA - 9; /* clamp: keep prot/sAux writes inside MAXAA */
 		prot[lAux] = aa;
 		prot[lAux+1] = '\0'; 
 		break;
 	      }
 	  
 	    /* exon translation after translated remainder */
+	    /* Guard: keep combined length within MAXAA (sAux/prot are MAXAA) */
+	    { long lprot = (long) strlen(prot);
+	      long room  = MAXAA - 8 - lprot;
+	      if (room < 0) room = 0;
+	      if ((long) strlen(sAux) > room)
+		{
+		  static int warnedProtR = 0;
+		  if (!warnedProtR)
+		    { fprintf(stderr,"Warning: protein reached MAXAA (%d); "
+				     "truncated.\n", MAXAA); warnedProtR = 1; }
+		  sAux[room] = '\0';
+		}
+	    }
 	    strcat(prot,sAux);
 	  
 	    /* Codon information for translating the next shared codon */
@@ -373,7 +419,7 @@ void TranslateGene(exonGFF* e,
 	  break;
 	}
       
-      lAux = strlen(prot);
+      lAux = strlen(prot); if (lAux > MAXAA - 9) lAux = MAXAA - 9; /* clamp: keep prot/sAux writes inside MAXAA */
       for(j = 0; j < currRmd; j++)
 	prot[lAux+j] = rmdProt[j];
       prot[lAux+j] = '\0'; 
@@ -417,13 +463,15 @@ void GetcDNA(exonGFF* e,
 		  /* Get the cDNA for this exon */
 		  tmpDNA[0] = '\0';
    
-		  for(j=p1; j <= p2; j++)
+		  for(j=p1; j <= p2 && (j-p1) < MAXCDNA - 1; j++)
 			tmpDNA[j-p1] = s[j];
         
 		  tmpDNA[j-p1]='\0';
         
 		  /* Concat the current cDNA before the previous */
-		  strcat(tmpDNA,cDNA);
+		  { long room = MAXCDNA - 1 - (long) strlen(tmpDNA); if (room < 0) room = 0;
+	    if ((long) strlen(cDNA) > room) cDNA[room] = '\0'; } /* guard MAXCDNA */
+	  strcat(tmpDNA,cDNA);
 		  strcpy(cDNA,tmpDNA);
         
 		  *nNN += p2-p1+1;
@@ -450,7 +498,7 @@ void GetcDNA(exonGFF* e,
 		  tmpDNA[0] = '\0';
 		  rs[0] = '\0';
    
-		  for(j=p1; j <= p2; j++)
+		  for(j=p1; j <= p2 && (j-p1) < MAXCDNA - 1; j++)
 			tmpDNA[j-p1] = s[j];
         
 		  tmpDNA[j-p1]='\0';
@@ -459,7 +507,9 @@ void GetcDNA(exonGFF* e,
 		  rs[j-p1]='\0';
    
 		  /* Concat the current cDNA after the previous */
-		  strcat(cDNA,rs);
+		  { long room = MAXCDNA - 1 - (long) strlen(cDNA); if (room < 0) room = 0;
+	    if ((long) strlen(rs) > room) rs[room] = '\0'; } /* guard MAXCDNA */
+	  strcat(cDNA,rs);
    
 		  *nNN += p2-p1+1;
 		  }
@@ -508,13 +558,15 @@ void GetTDNA(exonGFF* e,
 	    /* Get the cDNA for this exon */
 	    tmpDNA[0] = '\0';
    
-	    for(j=p1; j <= p2; j++)
+	    for(j=p1; j <= p2 && (j-p1) < MAXCDNA - 1; j++)
 	      tmpDNA[j-p1] = s[j];
         
 	    tmpDNA[j-p1]='\0';
         
 	    /* Concat the current cDNA before the previous */
-	    strcat(tmpDNA,cDNA);
+	    { long room = MAXCDNA - 1 - (long) strlen(tmpDNA); if (room < 0) room = 0;
+	    if ((long) strlen(cDNA) > room) cDNA[room] = '\0'; } /* guard MAXCDNA */
+	  strcat(tmpDNA,cDNA);
 	    strcpy(cDNA,tmpDNA);
         
 	    *nNN += p2-p1+1;
@@ -541,7 +593,7 @@ void GetTDNA(exonGFF* e,
 	    tmpDNA[0] = '\0';
 	    rs[0] = '\0';
    
-	    for(j=p1; j <= p2; j++)
+	    for(j=p1; j <= p2 && (j-p1) < MAXCDNA - 1; j++)
 	      tmpDNA[j-p1] = s[j];
         
 	    tmpDNA[j-p1]='\0';
@@ -550,7 +602,9 @@ void GetTDNA(exonGFF* e,
 	    rs[j-p1]='\0';
    
 	    /* Concat the current cDNA after the previous */
-	    strcat(cDNA,rs);
+	    { long room = MAXCDNA - 1 - (long) strlen(cDNA); if (room < 0) room = 0;
+	    if ((long) strlen(rs) > room) rs[room] = '\0'; } /* guard MAXCDNA */
+	  strcat(cDNA,rs);
    
 	    *nNN += p2-p1+1;
 	 /*  } */
