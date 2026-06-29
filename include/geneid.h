@@ -50,43 +50,70 @@ A. DEFINITIONS
 #define EXONS     "geneid_v1.4"       
 #define EVIDENCE  "evidence"           
 
-/* Length of every processed fragment       */ 
-#define LENGTHSi 500000          /* medium default (was 220000) */
+/* -------------------------------------------------------------------------
+ * MEMORY PROFILE (build-time tunable)
+ * The six constants below dominate the amount of memory geneid reserves
+ * (mostly via NUMEXONS = LENGTHSi/REXONS and the FSORT multiplier). The
+ * values here are the DEFAULT ("medium") profile, sized for ~16-24 GB
+ * machines (~13 GB reserved on a large dense genome). Each is wrapped in
+ * #ifndef so the Makefile can override it on the compiler command line:
+ *     make MEM=low     (smaller arrays, ~5 GB; may be tight on dense genomes)
+ *     make             (medium, the defaults below)
+ *     make MEM=high    (max headroom, ~45 GB reserved; lazy, RSS stays low)
+ * Do not raise FSORT/REXONS independently without checking: the exon-sort
+ * table must hold the sum of all per-type build arrays (~8.2 x NUMEXONS),
+ * so FSORT should stay >= ~9.
+ * ---------------------------------------------------------------------- */
+
+/* Length of every processed fragment       */
+#ifndef LENGTHSi
+#define LENGTHSi 500000
+#endif
 
 /* Overlap between 2 fragments              */
-#define OVERLAP 10000            
+#define OVERLAP 10000
 
 /* One signal per L / RSITES bp             */
 #define RSITES 1
 
 /* /\* One U12 signal per L / RU12SITES bp             *\/ */
-/* #define RU12SITES 6   */               
+/* #define RU12SITES 6   */
 
-/* One exon per L / REXONS bp      was 3         */
-#define REXONS 0.75               /* medium default (was 2); NUMEXONS=LENGTHSi/REXONS */
+/* One exon per L / REXONS bp  (divisor: smaller -> more exon headroom) */
+#ifndef REXONS
+#define REXONS 0.75
+#endif
 
 /* /\* One U12 intron-flanking exon per L / RU12EXONS bp               *\/ */
 /* #define RU12EXONS 6  */
 
-/* Estimated amount of backup signals       */
-#define RBSITES 75               
+/* Estimated amount of backup signals (divisor: smaller -> more backup) */
+#ifndef RBSITES
+#define RBSITES 75
+#endif
 
-/* Estimated amount of backup exons : was 125        */
-#define RBEXONS 125              
+/* Estimated amount of backup exons   (divisor: smaller -> more backup) */
+#ifndef RBEXONS
+#define RBEXONS 125
+#endif
 
 /* Ratios for every exon type               */
-#define RFIRST 3                 
+#define RFIRST 3
 #define RINTER 1
 #define RTERMI 2
-#define RSINGL 4 
+#define RSINGL 4
 #define RORF   4
 #define RUTR   0.5
 
-/* Total number of exons/fragment (factor) was 8,then 12 */
-#define FSORT 12                  
+/* Total number of exons/fragment (exon-sort factor; keep >= ~9) */
+#ifndef FSORT
+#define FSORT 12
+#endif
 
-/* Number of exons to save every fragment   */ 
-#define FDARRAY 10                 /* medium default (was 5) */
+/* Number of exons to save every fragment   */
+#ifndef FDARRAY
+#define FDARRAY 10
+#endif
 
 /* Basic values (in addition to ratios)     */
 #define BASEVALUESITES_SHORT 100000
