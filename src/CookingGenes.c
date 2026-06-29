@@ -38,6 +38,12 @@ extern int PSEQ;
 extern int tDNA;
 extern int PRINTINT;
 
+/* Clamp a per-feature index into tAA[] (sized MAXEXONGENE rows) so that a
+   gene with > MAXEXONGENE features can never read past the buffer. Pairs
+   with the MAXEXONGENE write cap in TranslateGene (Translate.c). */
+#define AAIDX(cf) ( ((cf)-COFFSET) < 0 ? 0 : \
+		    ( ((cf)-COFFSET) < MAXEXONGENE ? ((cf)-COFFSET) : MAXEXONGENE-1 ) )
+
 /* Local data structure to record stats about every gene */
 typedef struct s_gene
 {
@@ -414,7 +420,10 @@ long CookingInfo(exonGFF* eorig,
   /* starting from the last exon of the last gene (bottom-up) */
   igen = 0;
   stop = (e->Strand == '*');
-  while (!stop)
+  /* Guard: info[] has room for MAXGENE genes only. Stop recording before
+     writing past the buffer (was an unchecked overflow -> segfault on
+     very large/dense scaffolds with > MAXGENE predicted genes). */
+  while (!stop && (igen < MAXGENE))
     {
       /* A. Skip BEGIN/END features */
       if (!strcmp(e->Type,sEND) || !strcmp(e->Type,sBEGIN))
@@ -663,9 +672,16 @@ long CookingInfo(exonGFF* eorig,
 	    }
 	  info[igen].nintrons =  info[igen].nexons - 1;
 	  igen++;
-	} 
+	}
     }
-  
+
+  /* Warn (non-fatal) if the MAXGENE cap truncated the gene solution */
+  if (!stop && (igen >= MAXGENE))
+    fprintf(stderr,
+	    "Warning: reached MAXGENE limit (%d) recovering gene solution; "
+	    "output truncated. Increase MAXGENE in geneid.h and recompile.\n",
+	    MAXGENE);
+
   return (igen);
 }
 
@@ -784,7 +800,7 @@ void PrintGene(exonGFF* start,
 	      PrintSite(start->Acceptor,type1,Name,strand,s,p1);
 	      if (!strcmp(start->Type,sFIRST)||!strcmp(start->Type,sINTERNAL)||!strcmp(start->Type,sTERMINAL)||!strcmp(start->Type,sSINGLE)){
 		cdsnum = (start->Strand == '-')? ccds: info[geneindex].ncds - ccds + 1;
-		PrintGCDS(start,Name,s,dAA,igen,tAA[cfeats - COFFSET][0],tAA[cfeats - COFFSET][1],nAA,cdsnum,GenePrefix);
+		PrintGCDS(start,Name,s,dAA,igen,tAA[AAIDX(cfeats)][0],tAA[AAIDX(cfeats)][1],nAA,cdsnum,GenePrefix);
 	      }else{
 		utrnum = (start->Strand == '-')? cutrs: info[geneindex].nutrs - cutrs + 1;
 		PrintGUTR(start,Name,s,igen,utrnum,GenePrefix);
@@ -808,7 +824,7 @@ void PrintGene(exonGFF* start,
 	    /*this is for CDS and UTR features*/
 	    if (!strcmp(start->Type,sFIRST)||!strcmp(start->Type,sINTERNAL)||!strcmp(start->Type,sTERMINAL)||!strcmp(start->Type,sSINGLE)){
 	      cdsnum = (start->Strand == '-')? ccds: info[geneindex].ncds - ccds + 1;
-	      PrintGCDS(start,Name,s,dAA,igen,tAA[cfeats - COFFSET][0],tAA[cfeats- COFFSET][1],nAA,cdsnum,GenePrefix);
+	      PrintGCDS(start,Name,s,dAA,igen,tAA[AAIDX(cfeats)][0],tAA[AAIDX(cfeats)][1],nAA,cdsnum,GenePrefix);
 	    }else{
 	      utrnum = (start->Strand == '-')? cutrs: info[geneindex].nutrs - cutrs + 1;
 	      PrintGUTR(start,Name,s,igen,utrnum,GenePrefix);
@@ -888,7 +904,7 @@ void PrintGene(exonGFF* start,
 	      if (!strcmp(end->Type,sFIRST)||!strcmp(start->Type,sINTERNAL)||!strcmp(start->Type,sTERMINAL)||!strcmp(start->Type,sSINGLE)){
 		cdsnum = (start->Strand == '-')? ccds: info[geneindex].ncds - ccds + 1;
 		featnum = (start->Strand == '-')? cfeats: info[geneindex].nfeats - cfeats + 1;
-		PrintGCDS(end,Name,s,dAA,igen,tAA[cfeats - COFFSET][0],tAA[cfeats - COFFSET][1],nAA,cdsnum,GenePrefix);
+		PrintGCDS(end,Name,s,dAA,igen,tAA[AAIDX(cfeats)][0],tAA[AAIDX(cfeats)][1],nAA,cdsnum,GenePrefix);
 	      }else{
 		utrnum = (start->Strand == '-')? cutrs: info[geneindex].nutrs - cutrs + 1;
 		PrintGUTR(end,Name,s,igen,utrnum,GenePrefix);
@@ -899,7 +915,7 @@ void PrintGene(exonGFF* start,
 
 	    if (!strcmp(end->Type,sFIRST)||!strcmp(start->Type,sINTERNAL)||!strcmp(start->Type,sTERMINAL)||!strcmp(start->Type,sSINGLE)){		
 	      cdsnum = (start->Strand == '-')? ccds: info[geneindex].ncds - ccds + 1;
-	      PrintGCDS(end,Name,s,dAA,igen,tAA[cfeats - COFFSET][0],tAA[cfeats - COFFSET][1],nAA,cdsnum,GenePrefix);
+	      PrintGCDS(end,Name,s,dAA,igen,tAA[AAIDX(cfeats)][0],tAA[AAIDX(cfeats)][1],nAA,cdsnum,GenePrefix);
 	    }else{
 	      utrnum = (start->Strand == '-')? cutrs: info[geneindex].nutrs - cutrs + 1;
 	      PrintGUTR(end,Name,s,igen,utrnum,GenePrefix);

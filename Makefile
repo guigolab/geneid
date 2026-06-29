@@ -13,8 +13,54 @@ HEADERS = $(INCLUDE)/geneid.h
 PROGRAM= geneid
 PRODUCT= $(BIN)/$(PROGRAM)
 CC=gcc
-OPTS=-I$(INCLUDE) -Wall -O3
-#OPTS=-I$(INCLUDE) -Wall -g
+
+#######
+# Memory profile: pick the array-sizing constants for the target machine.
+#   make             -> MEM=auto: detect THIS machine's RAM and pick a profile
+#   make MEM=low      ~5 GB reserved  (small machines; tight on dense genomes)
+#   make MEM=medium   ~13 GB reserved (16-24 GB machines)
+#   make MEM=high     ~45 GB reserved (big servers; lazy alloc, RSS stays ~4 GB)
+# Profiles override the #ifndef'd defaults in include/geneid.h via -D.
+#
+# *** auto detects the BUILD machine's RAM. *** If you build and run on
+# different machines (e.g. a cluster login node vs a fat compute node),
+# auto can guess wrong -- pass an explicit MEM=low|medium|high matching the
+# RUN machine. The resolved profile is printed on every build, and
+# `make print-mem` shows the detected RAM. Always `make clean` when
+# switching profiles (the constants are compile-time).
+#######
+MEM ?= auto
+
+# auto -> resolve to low/medium/high from physical RAM (macOS sysctl / Linux /proc)
+ifeq ($(MEM),auto)
+  MEM_BYTES := $(shell sysctl -n hw.memsize 2>/dev/null || awk '/MemTotal/{print $$2*1024}' /proc/meminfo 2>/dev/null || echo 0)
+  MEM_RESOLVED := $(shell b="$(MEM_BYTES)"; \
+    if   [ "$$b" -ge 51539607552 ]; then echo high;   \
+    elif [ "$$b" -ge 17179869184 ]; then echo medium; \
+    elif [ "$$b" -gt 0 ];          then echo low;     \
+    else echo medium; fi)
+else
+  MEM_BYTES := 0
+  MEM_RESOLVED := $(MEM)
+endif
+
+ifeq ($(MEM_RESOLVED),low)
+  MEMFLAGS = -DLENGTHSi=220000 -DREXONS=2 -DFSORT=12 -DFDARRAY=5 -DRBSITES=150 -DRBEXONS=250
+else ifeq ($(MEM_RESOLVED),medium)
+  MEMFLAGS =
+else ifeq ($(MEM_RESOLVED),high)
+  MEMFLAGS = -DLENGTHSi=500000 -DREXONS=0.25 -DFSORT=20 -DFDARRAY=10 -DRBSITES=75 -DRBEXONS=125
+else
+  $(error Unknown MEM='$(MEM)' (resolved '$(MEM_RESOLVED)'). Use one of: auto, low, medium, high)
+endif
+
+$(info geneid memory profile: MEM=$(MEM) -> '$(MEM_RESOLVED)')
+
+OPTS=-I$(INCLUDE) -Wall -O3 $(MEMFLAGS)
+#OPTS=-I$(INCLUDE) -Wall -g $(MEMFLAGS)
+
+# Keep the program the default goal (print-mem is defined after it below)
+.DEFAULT_GOAL := $(PRODUCT)
 #######
 
 OBJECTS = $(OBJ)/BackupGenes.o $(OBJ)/PeakEdgeScore.o $(OBJ)/GetTranscriptTermini-usingslopes.o $(OBJ)/BuildAcceptors.o $(OBJ)/BuildU12Acceptors.o $(OBJ)/BuildDonors.o \
@@ -192,4 +238,10 @@ $(OBJ)/Translate.o :  $(CDIR)/Translate.c $(HEADERS)
 clean:
 	rm -f $(OBJ)/*.o $(PRODUCT) *~ $(INCLUDE)/*~ $(CDIR)/*~ core;
 	rmdir $(BIN) $(OBJ);
+
+# Show the active memory profile, detected RAM, and the -D flags it injects
+print-mem:
+	@echo "MEM=$(MEM)  resolved=$(MEM_RESOLVED)  detected_RAM_bytes=$(MEM_BYTES)"
+	@echo "MEMFLAGS=$(MEMFLAGS)"
+.PHONY: print-mem clean
 
