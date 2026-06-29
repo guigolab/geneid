@@ -51,7 +51,7 @@ A. DEFINITIONS
 #define EVIDENCE  "evidence"           
 
 /* Length of every processed fragment       */ 
-#define LENGTHSi 220000          
+#define LENGTHSi 500000          /* medium default (was 220000) */
 
 /* Overlap between 2 fragments              */
 #define OVERLAP 10000            
@@ -63,7 +63,7 @@ A. DEFINITIONS
 /* #define RU12SITES 6   */               
 
 /* One exon per L / REXONS bp      was 3         */
-#define REXONS 2                
+#define REXONS 0.75               /* medium default (was 2); NUMEXONS=LENGTHSi/REXONS */
 
 /* /\* One U12 intron-flanking exon per L / RU12EXONS bp               *\/ */
 /* #define RU12EXONS 6  */
@@ -86,7 +86,7 @@ A. DEFINITIONS
 #define FSORT 12                  
 
 /* Number of exons to save every fragment   */ 
-#define FDARRAY 5
+#define FDARRAY 10                 /* medium default (was 5) */
 
 /* Basic values (in addition to ratios)     */
 #define BASEVALUESITES_SHORT 100000
