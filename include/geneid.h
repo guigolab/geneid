@@ -784,14 +784,6 @@ float PeakEdgeScore(long Position,
 		    int Strand, 
 		    packExternalInformation* external, 
 		    long l1, long l2, int win);
-/* long BuildU12Donors(char* s, */
-/* 		    char* type, */
-/* 		    char* subtype, */
-/* 		    profile* u12gtag_p, */
-/* 		    profile* u12atac_p, */
-/* 		    site* st,  */
-/* 		    long l1,  */
-/* 		    long l2);  */
 int ClusterEdge(long Position, 
 		int Strand, 
 		packExternalInformation* external, 
