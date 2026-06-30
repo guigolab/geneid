@@ -145,8 +145,9 @@ A. DEFINITIONS
 /* Max number of locus in multi-fasta files */
 #define MAXNSEQUENCES 100         
 
-/* Maximum number of predicted genes        */
-#define MAXGENE 100000
+/* Initial capacity of the growable per-gene info[] array (CookingGenes).   */
+/* Not a ceiling: the array doubles on demand, so gene count is data-driven. */
+#define INITGENES 256
 
 /* Maximum number of exons in a gene        */
 #define MAXEXONGENE 1000         
