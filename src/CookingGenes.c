@@ -816,6 +816,7 @@ void CookingGenes(exonGFF* e,
   gene* info;
   long infocap;
   char* prot;
+  long protcap;
   char* tmpDNA;
   char* tmpTDNA;
   long tmpDNAcap;
@@ -861,9 +862,10 @@ void CookingGenes(exonGFF* e,
     if ((tAA[i] = (int*) calloc(2,sizeof(int))) == NULL)
       printError("Not enough memory: tAA[] structure");
   
-  /* Protein space */
-  /* if (PSEQ) */
-  if ((prot = (char*) calloc(MAXAA,sizeof(char))) == NULL)
+  /* Protein space (growable: TranslateGene grows it to fit the assembled
+     protein, so whole-protein length is no longer capped at MAXAA) */
+  protcap = INITAA;
+  if ((prot = (char*) calloc(protcap,sizeof(char))) == NULL)
     printError("Not enough memory: protein product");
   
   /* cDNA memory if required (growable: GetcDNA grows it to fit the transcript) */
@@ -897,7 +899,7 @@ void CookingGenes(exonGFF* e,
       cfeats = 0;
       /* Translate gene into protein */
 /*       sprintf(mess,"gene: %ld; nfeats: %ld",igen,info[igen].nfeats);printMess(mess); */
-      TranslateGene(info[igen].start,s,dAA,(info[igen].nfeats),tAA,prot,&nAA);
+      TranslateGene(info[igen].start,s,dAA,(info[igen].nfeats),tAA,&prot,&protcap,&nAA);
       
       /* Get genomic DNA for exons if required */
       if (cDNA)
@@ -1015,7 +1017,7 @@ void CookingGenes(exonGFF* e,
 	  
 	  
 	  /* Translate gene into protein */
-	  TranslateGene(info[igen].start,s,dAA,(info[igen].nfeats),tAA,prot,&nAA);
+	  TranslateGene(info[igen].start,s,dAA,(info[igen].nfeats),tAA,&prot,&protcap,&nAA);
 	  /* Protein in FASTA format (except promoters) */
 	  if (strcmp(info[igen].start->Type,sPROMOTER) && nAA>0)
 	    printProt(Name,ngen-igen,prot,nAA,PROT,GenePrefix);
