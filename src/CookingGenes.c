@@ -147,6 +147,40 @@ void printProt(char* Name,
 }
 
 /* Returns signal types and profiles according to the type of input exon */
+/* Map an exon-type string (sFIRST, sINTERNAL, ...) to its integer code
+   (FIRST, INTERNAL, ... defined in geneid.h). Returns -1 if unrecognized.
+   This replaces the long strcmp ladders that dispatched on the type string. */
+static int exonType2int(const char* type)
+{
+  static const struct { const char* name; int code; } exonTypeTable[] = {
+    { sFIRST,            FIRST            },
+    { sINTERNAL,         INTERNAL         },
+    { sTERMINAL,         TERMINAL         },
+    { sSINGLE,           SINGLE           },
+    { sORF,              ORF              },
+    { sZEROLENGTH,       ZEROLENGTH       },
+    { sINTRON,           INTRON           },
+    { sUTRFIRST,         UTRFIRST         },
+    { sUTRFIRSTHALF,     UTRFIRSTHALF     },
+    { sUTRINTERNAL,      UTRINTERNAL      },
+    { sUTR5INTERNALHALF, UTR5INTERNALHALF },
+    { sUTR3INTERNALHALF, UTR3INTERNALHALF },
+    { sUTRTERMINALHALF,  UTRTERMINALHALF  },
+    { sUTRTERMINAL,      UTRTERMINAL      },
+    { sUTRINTRON,        UTRINTRON        },
+    { sUTR5INTRON,       UTR5INTRON       },
+    { sUTR3INTRON,       UTR3INTRON       },
+  };
+  size_t i;
+  for (i = 0; i < sizeof(exonTypeTable)/sizeof(exonTypeTable[0]); i++)
+    if (!strcmp(type, exonTypeTable[i].name))
+      return exonTypeTable[i].code;
+  return -1;
+}
+
+/* Choose the signal types and flanking profiles used to (re)score an exon of
+   a given type. type1/p1 is the 5' (left-in-sequence) signal, type2/p2 the
+   3' (right) signal; on the reverse strand those two roles are swapped. */
 void selectFeatures(char* exonType,
                     char exonStrand,
                     profile** p1,
@@ -159,234 +193,108 @@ void selectFeatures(char* exonType,
   if (exonStrand == '+')
     {
       *strand = FORWARD;
-      if (!strcmp(exonType,sFIRST))
+      switch (exonType2int(exonType))
 	{
-	  *type1 = STA;
-	  *type2 = DON;
-	  *p1 = gp->StartProfile;
-	  *p2 = gp->DonorProfile;
-	}
-      if (!strcmp(exonType,sINTERNAL))
-	{
-	  *type1 = ACC;
-	  *type2 = DON;
-	  *p1 = gp->AcceptorProfile;
-	  *p2 = gp->DonorProfile;    
-	}
-      if (!strcmp(exonType,sZEROLENGTH))
-	{
-	  *type1 = ACC;
-	  *type2 = DON;
-	  *p1 = gp->AcceptorProfile;
-	  *p2 = gp->DonorProfile;    
-	}
-      if (!strcmp(exonType,sTERMINAL))
-	{
-	  *type1 = ACC;
-	  *type2 = STO;
-	  *p1 = gp->AcceptorProfile;
-	  *p2 = gp->StopProfile;    
-	}
-      if (!strcmp(exonType,sSINGLE))
-	{
-	  *type1 = STA;
-	  *type2 = STO;
-	  *p1 = gp->StartProfile;
-	  *p2 = gp->StopProfile;    
-	}
-      if (!strcmp(exonType,sINTRON))
-	{
-	  *type1 = ACC;
-	  *type2 = DON;
-	  *p1 = gp->AcceptorProfile;
-	  *p2 = gp->DonorProfile;		      
-	}
-      if (!strcmp(exonType,sUTRINTRON))
-	{
-	  *type1 = ACC;
-	  *type2 = DON;
-	  *p1 = gp->AcceptorProfile;
-	  *p2 = gp->DonorProfile;		      
-	}
-      if (!strcmp(exonType,sUTR5INTRON))
-	{
-	  *type1 = ACC;
-	  *type2 = DON;
-	  *p1 = gp->AcceptorProfile;
-	  *p2 = gp->DonorProfile;		      
-	}
-      if (!strcmp(exonType,sUTR3INTRON))
-	{
-	  *type1 = ACC;
-	  *type2 = DON;
-	  *p1 = gp->AcceptorProfile;
-	  *p2 = gp->DonorProfile;		      
-	}
-      if (!strcmp(exonType,sUTRFIRST))
-	{
-	  *type1 = TSS;
-	  *type2 = DON;
-	  *p1 = gp->StartProfile;
-	  *p2 = gp->DonorProfile;		      
-	}
-      if (!strcmp(exonType,sUTRFIRSTHALF))
-	{
-	  *type1 = TSS;
-	  *type2 = STA;
-	  *p1 = gp->StartProfile;
-	  *p2 = gp->StartProfile;		      
-	}
-      if (!strcmp(exonType,sUTRINTERNAL))
-	{
-	  *type1 = ACC;
-	  *type2 = DON;
-	  *p1 = gp->AcceptorProfile;
-	  *p2 = gp->DonorProfile;		      
-	}
-      if (!strcmp(exonType,sUTR5INTERNALHALF))
-	{
-	  *type1 = ACC;
-	  *type2 = STA;
-	  *p1 = gp->AcceptorProfile;
-	  *p2 = gp->StartProfile;		      
-	}
-      if (!strcmp(exonType,sUTR3INTERNALHALF))
-	{
-	  *type1 = STO;
-	  *type2 = DON;
-	  *p1 = gp->StopProfile;
-	  *p2 = gp->DonorProfile;		      
-	}
-      if (!strcmp(exonType,sUTRTERMINAL))
-	{
-	  *type1 = ACC;
-	  *type2 = TES;
-	  *p1 = gp->AcceptorProfile;
-	  *p2 = gp->StopProfile;		      
-	}
-      if (!strcmp(exonType,sUTRTERMINALHALF))
-	{
-	  *type1 = STO;
-	  *type2 = TES;
-	  *p1 = gp->StopProfile;
-	  *p2 = gp->StopProfile;		      
+	case FIRST:
+	  *type1 = STA; *type2 = DON;
+	  *p1 = gp->StartProfile;    *p2 = gp->DonorProfile;
+	  break;
+	case INTERNAL:
+	case ZEROLENGTH:
+	case INTRON:
+	case UTRINTRON:
+	case UTR5INTRON:
+	case UTR3INTRON:
+	case UTRINTERNAL:
+	  *type1 = ACC; *type2 = DON;
+	  *p1 = gp->AcceptorProfile; *p2 = gp->DonorProfile;
+	  break;
+	case TERMINAL:
+	  *type1 = ACC; *type2 = STO;
+	  *p1 = gp->AcceptorProfile; *p2 = gp->StopProfile;
+	  break;
+	case SINGLE:
+	  *type1 = STA; *type2 = STO;
+	  *p1 = gp->StartProfile;    *p2 = gp->StopProfile;
+	  break;
+	case UTRFIRST:
+	  *type1 = TSS; *type2 = DON;
+	  *p1 = gp->StartProfile;    *p2 = gp->DonorProfile;
+	  break;
+	case UTRFIRSTHALF:
+	  *type1 = TSS; *type2 = STA;
+	  *p1 = gp->StartProfile;    *p2 = gp->StartProfile;
+	  break;
+	case UTR5INTERNALHALF:
+	  *type1 = ACC; *type2 = STA;
+	  *p1 = gp->AcceptorProfile; *p2 = gp->StartProfile;
+	  break;
+	case UTR3INTERNALHALF:
+	  *type1 = STO; *type2 = DON;
+	  *p1 = gp->StopProfile;     *p2 = gp->DonorProfile;
+	  break;
+	case UTRTERMINAL:
+	  *type1 = ACC; *type2 = TES;
+	  *p1 = gp->AcceptorProfile; *p2 = gp->StopProfile;
+	  break;
+	case UTRTERMINALHALF:
+	  *type1 = STO; *type2 = TES;
+	  *p1 = gp->StopProfile;     *p2 = gp->StopProfile;
+	  break;
 	}
     }
-  /* Reverse strand */
+  /* Reverse strand: the 5'/3' signal roles (type1/type2, p1/p2) are swapped */
   else
     {
       *strand = REVERSE;
-      if (!strcmp(exonType,sFIRST))
+      switch (exonType2int(exonType))
 	{
-	  *type2 = STA;
-	  *type1 = DON;
-	  *p2 = gp->StartProfile;
-	  *p1 = gp->DonorProfile;    
-	}
-      if (!strcmp(exonType,sINTERNAL))
-	{
-	  *type2 = ACC;
-	  *type1 = DON;
-	  *p2 = gp->AcceptorProfile;
-	  *p1 = gp->DonorProfile;    
-	}
-      if (!strcmp(exonType,sZEROLENGTH))
-	{
-	  *type2 = ACC;
-	  *type1 = DON;
-	  *p2 = gp->AcceptorProfile;
-	  *p1 = gp->DonorProfile;    
-	}
-      if (!strcmp(exonType,sINTRON))
-	{
-	  *type2 = ACC;
-	  *type1 = DON;
-	  *p2 = gp->AcceptorProfile;
-	  *p1 = gp->DonorProfile;
-	}
-      if (!strcmp(exonType,sUTRINTRON))
-	{
-	  *type2 = ACC;
-	  *type1 = DON;
-	  *p2 = gp->AcceptorProfile;
-	  *p1 = gp->DonorProfile;
-	}
-      if (!strcmp(exonType,sUTR5INTRON))
-	{
-	  *type2 = ACC;
-	  *type1 = DON;
-	  *p2 = gp->AcceptorProfile;
-	  *p1 = gp->DonorProfile;
-	}
-      if (!strcmp(exonType,sUTR3INTRON))
-	{
-	  *type2 = ACC;
-	  *type1 = DON;
-	  *p2 = gp->AcceptorProfile;
-	  *p1 = gp->DonorProfile;
-	}
-      if (!strcmp(exonType,sTERMINAL))
-	{
-	  *type2 = ACC;
-	  *type1 = STO;
-	  *p2 = gp->AcceptorProfile;
-	  *p1 = gp->StopProfile;    
-	}
-      if (!strcmp(exonType,sSINGLE))
-	{
-	  *type2 = STA;
-	  *type1 = STO;
-	  *p2 = gp->StartProfile;
-	  *p1 = gp->StopProfile;    
-	}
-       if (!strcmp(exonType,sUTRFIRST))
-	{
-	  *type2 = TSS;
-	  *type1 = DON;
-	  *p2 = gp->StartProfile;
-	  *p1 = gp->DonorProfile;		      
-	}
-      if (!strcmp(exonType,sUTRFIRSTHALF))
-	{
-	  *type2 = TSS;
-	  *type1 = STA;
-	  *p2 = gp->StartProfile;
-	  *p1 = gp->StartProfile;		      
-	}
-      if (!strcmp(exonType,sUTRINTERNAL))
-	{
-	  *type2 = ACC;
-	  *type1 = DON;
-	  *p2 = gp->AcceptorProfile;
-	  *p1 = gp->DonorProfile;		      
-	}
-      if (!strcmp(exonType,sUTR5INTERNALHALF))
-	{
-	  *type2 = ACC;
-	  *type1 = STA;
-	  *p2 = gp->AcceptorProfile;
-	  *p1 = gp->StartProfile;		      
-	}
-      if (!strcmp(exonType,sUTR3INTERNALHALF))
-	{
-	  *type2 = STO;
-	  *type1 = DON;
-	  *p2 = gp->StopProfile;
-	  *p1 = gp->DonorProfile;		      
-	}
-      if (!strcmp(exonType,sUTRTERMINAL))
-	{
-	  *type2 = ACC;
-	  *type1 = TES;
-	  *p2 = gp->AcceptorProfile;
-	  *p1 = gp->StopProfile;		      
-	}
-      if (!strcmp(exonType,sUTRTERMINALHALF))
-	{
-	  *type2 = STO;
-	  *type1 = TES;
-	  *p2 = gp->StopProfile;
-	  *p1 = gp->StopProfile;		      
+	case FIRST:
+	  *type2 = STA; *type1 = DON;
+	  *p2 = gp->StartProfile;    *p1 = gp->DonorProfile;
+	  break;
+	case INTERNAL:
+	case ZEROLENGTH:
+	case INTRON:
+	case UTRINTRON:
+	case UTR5INTRON:
+	case UTR3INTRON:
+	case UTRINTERNAL:
+	  *type2 = ACC; *type1 = DON;
+	  *p2 = gp->AcceptorProfile; *p1 = gp->DonorProfile;
+	  break;
+	case TERMINAL:
+	  *type2 = ACC; *type1 = STO;
+	  *p2 = gp->AcceptorProfile; *p1 = gp->StopProfile;
+	  break;
+	case SINGLE:
+	  *type2 = STA; *type1 = STO;
+	  *p2 = gp->StartProfile;    *p1 = gp->StopProfile;
+	  break;
+	case UTRFIRST:
+	  *type2 = TSS; *type1 = DON;
+	  *p2 = gp->StartProfile;    *p1 = gp->DonorProfile;
+	  break;
+	case UTRFIRSTHALF:
+	  *type2 = TSS; *type1 = STA;
+	  *p2 = gp->StartProfile;    *p1 = gp->StartProfile;
+	  break;
+	case UTR5INTERNALHALF:
+	  *type2 = ACC; *type1 = STA;
+	  *p2 = gp->AcceptorProfile; *p1 = gp->StartProfile;
+	  break;
+	case UTR3INTERNALHALF:
+	  *type2 = STO; *type1 = DON;
+	  *p2 = gp->StopProfile;     *p1 = gp->DonorProfile;
+	  break;
+	case UTRTERMINAL:
+	  *type2 = ACC; *type1 = TES;
+	  *p2 = gp->AcceptorProfile; *p1 = gp->StopProfile;
+	  break;
+	case UTRTERMINALHALF:
+	  *type2 = STO; *type1 = TES;
+	  *p2 = gp->StopProfile;     *p1 = gp->StopProfile;
+	  break;
 	}
     }
 }
