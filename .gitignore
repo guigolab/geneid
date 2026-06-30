@@ -3,9 +3,10 @@
 param/.DS_Store
 scripts/.DS_Store
 
-# Local build & test artifacts
-bin/geneid.asan
-bin/*.dSYM/
+# Local build artifacts. The whole bin/ dir is build output: geneid is built
+# by `make`, not tracked (it was committed by accident long ago, was macOS-
+# specific, and broke incremental rebuilds). Also covers geneid.asan, *.dSYM.
+/bin/
 # chr21.fa is derived on demand from GRCh38.chr21.fa.gz by test/regression/run.sh
 /samples/chr21.fa
 # symlink to the full 363Mb snake scaffold in another checkout
