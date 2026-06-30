@@ -38,11 +38,10 @@ extern int PSEQ;
 extern int tDNA;
 extern int PRINTINT;
 
-/* Clamp a per-feature index into tAA[] (sized MAXEXONGENE rows) so that a
-   gene with > MAXEXONGENE features can never read past the buffer. Pairs
-   with the MAXEXONGENE write cap in TranslateGene (Translate.c). */
-#define AAIDX(cf) ( ((cf)-COFFSET) < 0 ? 0 : \
-		    ( ((cf)-COFFSET) < MAXEXONGENE ? ((cf)-COFFSET) : MAXEXONGENE-1 ) )
+/* Map a per-feature counter to a tAA[] row index. tAA is sized to the
+   largest gene's feature count (see CookingGenes), so cf-COFFSET is always
+   within range; the low-end clamp stays as a defensive guard. */
+#define AAIDX(cf) ( ((cf)-COFFSET) < 0 ? 0 : ((cf)-COFFSET) )
 
 /* Local data structure to record stats about every gene */
 typedef struct s_gene
@@ -823,6 +822,7 @@ void CookingGenes(exonGFF* e,
   int** tAA;
   double artificialScore;
   long i;
+  long tAArows;
   long cexons;
   long cintrons;
   long cutrs;
@@ -840,18 +840,22 @@ void CookingGenes(exonGFF* e,
   if ((info = (gene *) calloc(infocap,sizeof(gene))) == NULL)
     printError("Not enough memory: post-processing genes");
   
-  /* tAA[gene][exon[0] is the first amino acid of that exon */
-  /* tAA[gene][exon[1] is the last amino acid of that exon */
-  /* according to the protein product for that gene */
-  if ((tAA = (int**) calloc(MAXEXONGENE,sizeof(int*))) == NULL)
-    printError("Not enough memory: tAA general structure");
-  
-  for(i=0; i<MAXEXONGENE; i++)
-    if ((tAA[i] = (int*) calloc(2,sizeof(int))) == NULL)
-      printError("Not enough memory: tAA[] structure");
-  
   /* Post-processing of genes */
   ngen = CookingInfo(e,&info,&infocap,&artificialScore);
+
+  /* tAA[feature][0] = first amino acid of that feature's CDS, [1] = last.
+     Size it to the largest gene's feature count (no MAXEXONGENE ceiling):
+     PrintGene reads tAA[cfeats-COFFSET] and TranslateGene writes tAA[0..nfeats),
+     both bounded by that gene's nfeats. */
+  tAArows = 1;
+  for(i=0; i<ngen; i++)
+    if (info[i].nfeats > tAArows) tAArows = info[i].nfeats;
+  if ((tAA = (int**) calloc(tAArows,sizeof(int*))) == NULL)
+    printError("Not enough memory: tAA general structure");
+
+  for(i=0; i<tAArows; i++)
+    if ((tAA[i] = (int*) calloc(2,sizeof(int))) == NULL)
+      printError("Not enough memory: tAA[] structure");
   
   /* Protein space */
   /* if (PSEQ) */
@@ -1035,7 +1039,7 @@ void CookingGenes(exonGFF* e,
   if (PSEQ)
     free(prot);
   free(info);
-  for(i=0; i<MAXEXONGENE; i++)
+  for(i=0; i<tAArows; i++)
     free(tAA[i]);
   if (cDNA)
     free(tmpDNA);

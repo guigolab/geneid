@@ -115,22 +115,12 @@ void TranslateGene(exonGFF* e,
   char rmdProt[LENGTHCODON+1];
   int lastExon = 1;
 
-  /* Guard: tAA has room for MAXEXONGENE features; warn once if a gene */
-  /* exceeds it (the exon loops below stop at MAXEXONGENE to stay safe). */
-  if (nExons > MAXEXONGENE)
-    {
-      static int warnedFeats = 0;
-      if (!warnedFeats)
-	{ fprintf(stderr,"Warning: gene has %ld features > MAXEXONGENE (%d); "
-			 "protein truncated.\n", nExons, MAXEXONGENE); warnedFeats = 1; }
-    }
-
   /* A. Translating a forward sense exon: Terminal > Internal >.. First */
   if (e->Strand == '+')
     {
       prot[0] = '\0';
-      /* Traversing the list of exons (bounded by MAXEXONGENE -> tAA size) */
-      for(i=0, totalAA=0, currFrame=0; i<nExons && i<MAXEXONGENE; i++)
+      /* Traversing the list of features; tAA is sized to hold all nExons */
+      for(i=0, totalAA=0, currFrame=0; i<nExons; i++)
 	{
 	  if (!strcmp(e->Type,sSINGLE)||!strcmp(e->Type,sFIRST)||!strcmp(e->Type,sINTERNAL)||!strcmp(e->Type,sTERMINAL)){
 	    /* 0. Acquire the real positions of the exon in the sequence */
@@ -278,8 +268,8 @@ void TranslateGene(exonGFF* e,
   else
     {
       prot[0] = '\0';
-      /* Traversing the list of exons (bounded by MAXEXONGENE -> tAA size) */
-      for(i=0, totalAA=0, currRmd=0; i<nExons && i<MAXEXONGENE; i++)
+      /* Traversing the list of features; tAA is sized to hold all nExons */
+      for(i=0, totalAA=0, currRmd=0; i<nExons; i++)
 	{
 	  if (!strcmp(e->Type,sSINGLE)||!strcmp(e->Type,sFIRST)||!strcmp(e->Type,sINTERNAL)||!strcmp(e->Type,sTERMINAL)){
 	    p1 = (e->evidence)? 
