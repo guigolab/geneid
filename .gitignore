@@ -2,3 +2,14 @@
 *.o
 param/.DS_Store
 scripts/.DS_Store
+
+# Local build & test artifacts
+bin/geneid.asan
+bin/*.dSYM/
+# chr21.fa is derived on demand from GRCh38.chr21.fa.gz by test/regression/run.sh
+/samples/chr21.fa
+# symlink to the full 363Mb snake scaffold in another checkout
+/samples/rHemHip.H1.SUPER_1.fasta
+# scratch run outputs (the committed suite lives in test/regression/)
+/test/*.gff3
+/test/*.log
