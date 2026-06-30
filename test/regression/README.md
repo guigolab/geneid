@@ -21,6 +21,7 @@ Exit status is non-zero if any case fails, so it can gate a commit/PR.
 | Case | Param | Sequence | What it exercises |
 |------|-------|----------|-------------------|
 | `snake` | Hemorrhois (1 isochore) | rHemHip 1Mb fragment | Full output paths (`-3UDTA`): genes, proteins, cDNA, tDNA on a large realistic genome (~48 genes) |
+| `longprot` | Hemorrhois (1 isochore) | rHemHip 155kb window | Very long transcript: a 153-exon / 23313-aa gene (the longest protein on SUPER_1) exercises the growable whole-protein and cDNA/tDNA buffers |
 | `human` | human3iso (3 isochores) | example1.fa | Isochore selection + protein/cDNA/tDNA on the documented example |
 | `morc_u12` | human3isoU12 | chr21 MORC3 locus | U12 intron prediction (`-3UnDTA`); the MORC3 gene has two real U12 introns |
 | `rnaseq` | human.rnaseq | chr21 MORC3 locus | RNA-seq evidence: intron junctions (`-R`), expression coverage (`-S`), UTRs (`-u`) |
@@ -35,7 +36,8 @@ processing to the locus with `-j 36315000 -k 36380000`, which keeps each run
 `chr21.fa` is large and is **not** tracked; `run.sh` derives it on demand
 from the tracked `samples/GRCh38.chr21.fa.gz` (the same `gunzip` step the
 chapter describes). All other inputs (params, example1.fa, the snake
-fragment + its param, and the MORC evidence GFFs) are tracked.
+fragment + its param, the `longprot` 155 kb window cut from SUPER_1
+(~199.14-199.30 Mb), and the MORC evidence GFFs) are tracked.
 
 ## Guarantee
 

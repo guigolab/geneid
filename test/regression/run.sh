@@ -28,6 +28,9 @@ BIN="$ROOT/bin/geneid"
 CASES=(
   # snake: large realistic single-isochore genome, full output paths
   "snake|param/Hemorrhois_hippocrepis.geneid.optimized.param|-3UDTA|samples/rHemHip.H1.SUPER_1.1Mb.fasta"
+  # longprot: 153-exon / 23313-aa gene (the longest protein on SUPER_1) -- exercises
+  # the growable whole-protein + cDNA/tDNA buffers; window cut from SUPER_1 ~199.14-199.30 Mb
+  "longprot|param/Hemorrhois_hippocrepis.geneid.optimized.param|-3UDTA|samples/rHemHip.H1.SUPER_1.longprot.fasta"
   # human: 3-isochore selection + protein/cDNA/tDNA on the documented example
   "human|param/human3iso.param|-3UDTA|samples/example1.fa"
   # morc_u12: U12 intron prediction on the MORC3 locus (2 real U12 introns), introns printed
