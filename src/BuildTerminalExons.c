@@ -40,24 +40,22 @@ long BuildTerminalExons (site *Acceptor, long nAcceptors,
                          long cutPoint,
 						 char* ExonType,
 						 char* Sequence,
-						 exonGFF* Exon, long nexons)
+						 exonGFF** ExonP, long* capP)
 {
   int Frame[FRAMES];
   long i, f, j, js;
 /*   char mess[MAXSTRING]; */
   /* Final number of predicted terminal exons */
   long nExon;
-  
-  /* Maximum allowed number of predicted initial exons per fragment */
-  long HowMany;
-  
-  
+
+  /* Growable output array (grows on demand; capacity tracked by caller) */
+  exonGFF* Exon = *ExonP;
+  long cap = *capP;
+
   /* Main loop: forall Acceptor, first Stop in every Frame defines an exon */
   /* There are therefore, 3 terminal exons starting by this Acceptor */
-  HowMany = (MAXBACKUPSITES)? (long)(nexons/RTERMI): nexons;
-  
   for (i=0, j=0, js=0, nExon=0;
-       (i<nAcceptors) && (nExon<HowMany);
+       (i<nAcceptors);
        i++)
     {
       /* Open the 3 frames for current Acceptor */
@@ -73,8 +71,7 @@ long BuildTerminalExons (site *Acceptor, long nAcceptors,
       
       /* Use current Stops if its frame is still opened */
       while ((Frame[0]==1 || Frame[1]==1 || Frame[2]==1)
-			 && (js < nStops)
-			 && (nExon<HowMany))
+			 && (js < nStops))
 		{
 		  if (Frame[f=((Stop+js)->Position - (Acceptor+i)->Position + 1) % 3])
 			{
@@ -85,6 +82,7 @@ long BuildTerminalExons (site *Acceptor, long nAcceptors,
 			      )
 				{
 				  
+				  GrowExonArray(&Exon,&cap,nExon+1);
 				  (Exon+nExon)->Acceptor=(Acceptor+i);
 				  (Exon+nExon)->Donor=(Stop+js);
 				  (Exon+nExon)->Frame = f;
@@ -103,10 +101,9 @@ long BuildTerminalExons (site *Acceptor, long nAcceptors,
 			} 
 		  js++;
 		} /* next stop */     
-    } /* next acceptor */   
-  
-  if (nExon >= HowMany)
-	printError("Too many terminal exons: decrease RTERMI parameter");
-  
+    } /* next acceptor */
+
+  *ExonP = Exon;
+  *capP = cap;
   return(nExon);
 }

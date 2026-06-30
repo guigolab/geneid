@@ -298,7 +298,7 @@ void  manager(char *Sequence,
 			allSites->DonorSites,allSites->nDonorSites,
 			allSites->StopCodons,allSites->nStopCodons,
 			gp->MaxDonors,sFIRST,Sequence,
-			allExons->InitialExons,NUMEXONS);
+			&allExons->InitialExons, &allExons->capInitialExons);
     sprintf(mess,"Initial Exons \t\t%8ld", allExons->nInitialExons);
     printRes(mess); 
 
@@ -307,7 +307,7 @@ void  manager(char *Sequence,
 			 allSites->DonorSites,allSites->nDonorSites,
 			 allSites->StopCodons,allSites->nStopCodons,
 			 gp->MaxDonors,sINTERNAL,Sequence,
-			 allExons->InternalExons,NUMEXONS);
+			 &allExons->InternalExons, &allExons->capInternalExons);
     sprintf(mess,"Internal Exons \t\t%8ld", allExons->nInternalExons);
     printRes(mess); 
 
@@ -317,7 +317,7 @@ void  manager(char *Sequence,
 			     allSites->DonorSites,allSites->nDonorSites,
 			     allSites->StopCodons,allSites->nStopCodons,
 			     gp->MaxDonors,sZEROLENGTH,Sequence,
-			     allExons->ZeroLengthExons,NUMEXONS);
+			     &allExons->ZeroLengthExons, &allExons->capZeroLengthExons);
       sprintf(mess,"Zero-Length Exons \t%8ld", allExons->nZeroLengthExons);
       printRes(mess); 
     }
@@ -325,7 +325,7 @@ void  manager(char *Sequence,
       BuildTerminalExons(allSites->AcceptorSites,allSites->nAcceptorSites,
 			 allSites->StopCodons,allSites->nStopCodons,
 			 LengthSequence,cutPoint,sTERMINAL,Sequence,
-			 allExons->TerminalExons,NUMEXONS);
+			 &allExons->TerminalExons, &allExons->capTerminalExons);
     sprintf(mess,"Terminal Exons \t\t%8ld", allExons->nTerminalExons);
     printRes(mess); 
   
@@ -333,7 +333,7 @@ void  manager(char *Sequence,
       BuildSingles(allSites->StartCodons,allSites->nStartCodons,
 		   allSites->StopCodons,allSites->nStopCodons,
 		   cutPoint, Sequence,
-		   allExons->Singles);
+		   &allExons->Singles, &allExons->capSingles);
     sprintf(mess,"Single genes \t\t%8ld", allExons->nSingles);
     printRes(mess); 
     
@@ -402,7 +402,7 @@ void  manager(char *Sequence,
 	  BuildORFs(allSites->StopCodons,allSites->nStopCodons,
 		    allSites->StopCodons,allSites->nStopCodons,
 		    cutPoint, Sequence,
-		    allExons->ORFs);
+		    &allExons->ORFs, &allExons->capORFs);
 	sprintf(mess,"ORFs \t\t\t%8ld", allExons->nORFs);
 	printRes(mess); 
       }

@@ -36,21 +36,21 @@ extern long MAXBACKUPSITES;
 long BuildORFs(site *Start, long nStarts, 
                site *Stop, long nStops,
                long cutPoint, char* Sequence,
-               exonGFF *Exon) 
+               exonGFF **ExonP, long* capP)
 {
   int Frame;
   long i, j, js;
-  
-  /* Maximum allowed number of ORFs per fragment */     
-  long HowMany;
-  
+
+  /* Growable output array (grows on demand; capacity tracked by caller) */
+  exonGFF* Exon = *ExonP;
+  long cap = *capP;
+
   /* Final number of predicted ORFs */
   long nSingles;
-  
+
   /* Main loop, for each Start codon searching the first Stop in frame */
-  HowMany=(MAXBACKUPSITES)? (long)(NUMEXONS/RSINGL): NUMEXONS;
   for (i=0, j=0, nSingles=0;
-	   (i < nStarts) && (j<nStops) && (nSingles<HowMany);
+	   (i < nStarts) && (j<nStops);
 	   i++)
     {
       Frame = ((Start+i)->Position + 1) % 3;
@@ -74,6 +74,7 @@ long BuildORFs(site *Start, long nStarts,
 			   >= 
 			   ORFLENGTH)
 			{
+			  GrowExonArray(&Exon,&cap,nSingles+1);
 			  (Exon + nSingles)->Acceptor = (Start+i);
 			  (Exon + nSingles)->Donor = (Stop+js);
 			  (Exon + nSingles)->Frame = 0;
@@ -89,9 +90,8 @@ long BuildORFs(site *Start, long nStarts,
 			}
 		}
     }
-  
-  if (nSingles >= HowMany)
-	printError("Too many ORF exons: decrease RSINGL parameter");
-  
+
+  *ExonP = Exon;
+  *capP = cap;
   return(nSingles);
 }
