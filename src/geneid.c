@@ -151,8 +151,9 @@ int main (int argc, char *argv[])
   site* tssites = NULL;
   site* tesites = NULL;
 
-  /* Table to sort predicted exons by acceptor */
-  exonGFF* exons; 
+  /* Table to sort predicted exons by acceptor (growable; see SortExons) */
+  exonGFF* exons;
+  long exonscap;
   long nExons;
   
   /* External information: reannotation */
@@ -248,6 +249,7 @@ int main (int argc, char *argv[])
   printMess("Request Memory Sort Exons\n");
   
   exons         = (exonGFF*)      RequestMemorySortExons();
+  exonscap      = INITSORT;
   printMess("Request Memory Sort Sites\n");
   donorsites    = (site*)         RequestMemorySortSites(); /* Temporary structure for sorting donor sites */
   acceptorsites = (site*)         RequestMemorySortSites(); /* Temporary structure for sorting acceptor sites */
@@ -482,13 +484,13 @@ int main (int argc, char *argv[])
 	      printMess(mess);
 			  
 	      /* Merge predicted exons with some evidence exons */
-	      SortExons(allExons, allExons_r, 
+	      SortExons(allExons, allExons_r,
 			external,
-			evidence, 
-			exons, 
-			l1, l2, 
+			evidence,
+			&exons, &exonscap,
+			l1, l2,
 			lowerlimit,
-			upperlimit);			  
+			upperlimit);
 	      sprintf(mess,"Finished sorting %ld exons\n", nExons);  
 	      printMess(mess);
 			  
