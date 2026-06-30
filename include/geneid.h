@@ -149,8 +149,14 @@ A. DEFINITIONS
 /* Not a ceiling: the array doubles on demand, so gene count is data-driven. */
 #define INITGENES 256
 
-/* Maximum length of a protein              */
-#define MAXAA 50000              
+/* Per-exon translation guard: max amino acids one exon contributes in       */
+/* Translate() (a single exon is always far below this; PrintExons relies on  */
+/* it too). The WHOLE-protein length is no longer capped -- see INITAA.       */
+#define MAXAA 50000
+
+/* Initial capacity of the growable whole-protein buffer (prot/sAux in        */
+/* TranslateGene). Not a ceiling: it grows to fit the assembled protein.      */
+#define INITAA 8192
 
 /* Initial capacity of the growable cDNA/tDNA transcript buffers (GetcDNA/   */
 /* GetTDNA). Not a ceiling: the buffers grow to fit the transcript length.   */
@@ -1015,7 +1021,8 @@ void TranslateGene(exonGFF* e,
                    dict* dAA,
                    long nExons,
                    int** tAA,
-                   char* prot,
+                   char** prot,
+                   long* cap,
                    long* nAA);
 
 void resetDumpHash(dumpHash* h);

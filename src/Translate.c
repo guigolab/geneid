@@ -116,14 +116,18 @@ void TranslateGene(exonGFF* e,
                    dict* dAA,
                    long nExons,
                    int** tAA,
-                   char* prot,
+                   char** pprot,
+                   long* pprotcap,
                    long* nAA)
-{  
+{
   long i;
   short j;
   int totalAA;
   int currAA;
-  char sAux[MAXAA];
+  char* prot = *pprot;
+  long  protcap = *pprotcap;
+  char* sAux = NULL;
+  long  sAuxcap = 0;
   char* rs;
   long p1, p2;
   char codon[LENGTHCODON+1];
@@ -133,6 +137,11 @@ void TranslateGene(exonGFF* e,
   int lAux;
   char rmdProt[LENGTHCODON+1];
   int lastExon = 1;
+
+  /* sAux is the per-exon scratch buffer handed to Translate(), which may
+     write up to MAXAA chars into it; keep it at least that large. It also
+     holds (exon + running protein) at the concat steps, so it grows too. */
+  growStr(&sAux,&sAuxcap, MAXAA);
 
   /* A. Translating a forward sense exon: Terminal > Internal >.. First */
   if (e->Strand == '+')
@@ -192,38 +201,28 @@ void TranslateGene(exonGFF* e,
 		codon[3] = '\0';
 		/* translate this codon */
 		aa = getAADict(dAA,codon);
-		lAux = strlen(sAux); if (lAux > MAXAA - 9) lAux = MAXAA - 9; /* clamp: keep prot/sAux writes inside MAXAA */
+		lAux = strlen(sAux);
 		sAux[lAux] = aa;
-		sAux[lAux+1] = '\0'; 
+		sAux[lAux+1] = '\0';
 		break;
-            
+
 	      case 2:
 		/* curr RMD must be ONE */
 		codon[0] = s[p2];
 		codon[3] = '\0';
 		aa = getAADict(dAA,codon);
-		lAux = strlen(sAux); if (lAux > MAXAA - 9) lAux = MAXAA - 9; /* clamp: keep prot/sAux writes inside MAXAA */
+		lAux = strlen(sAux);
 		sAux[lAux] = aa;
-		sAux[lAux+1] = '\0'; 
+		sAux[lAux+1] = '\0';
 		break;
 	      }
 
-	    /* Concat translation(current exon) with translation(last exon) */
-	    /* Guard: keep combined length within MAXAA (sAux/prot are MAXAA) */
-	    { long lsaux = (long) strlen(sAux);
-	      long room  = MAXAA - 8 - lsaux;
-	      if (room < 0) room = 0;
-	      if ((long) strlen(prot) > room)
-		{
-		  static int warnedProt = 0;
-		  if (!warnedProt)
-		    { fprintf(stderr,"Warning: protein reached MAXAA (%d); "
-				     "truncated.\n", MAXAA); warnedProt = 1; }
-		  prot[room] = '\0';
-		}
-	    }
+	    /* Concat translation(current exon) before the running protein.
+	       Grow both buffers to hold the combined string (no MAXAA cap). */
+	    growStr(&sAux,&sAuxcap, (long)strlen(sAux)+(long)strlen(prot)+1);
 	    strcat(sAux,prot);
 	    /* Leaving the result into prot */
+	    growStr(&prot,&protcap, (long)strlen(sAux)+1);
 	    strcpy(prot,sAux);
 
 	    /* 3. Saving information to translate the next shared codon */
@@ -278,9 +277,11 @@ void TranslateGene(exonGFF* e,
 	}
       
       /* Concat uncomplete codon at the beginning of the protein */
+      growStr(&sAux,&sAuxcap, (long)strlen(rmdProt)+(long)strlen(prot)+1);
       sprintf(sAux,"%s%s",rmdProt,prot);
+      growStr(&prot,&protcap, (long)strlen(sAux)+1);
       strcpy(prot,sAux);
-		
+
     }
 
   /* B. Translating a reverse sense exon: First > Internal >.. Terminal */
@@ -340,36 +341,27 @@ void TranslateGene(exonGFF* e,
 		codon[3] = '\0';
 		/* translate this codon */
 		aa = getAADict(dAA,codon);
-		lAux = strlen(prot); if (lAux > MAXAA - 9) lAux = MAXAA - 9; /* clamp: keep prot/sAux writes inside MAXAA */
+		growStr(&prot,&protcap, (long)strlen(prot)+2);
+		lAux = strlen(prot);
 		prot[lAux] = aa;
-		prot[lAux+1] = '\0'; 
+		prot[lAux+1] = '\0';
 		break;
-	      
+
 	      case 2:
 		/* curr FRAME must be ONE */
 		codon[2] = rs[0];
 		codon[3] = '\0';
 		aa = getAADict(dAA,codon);
-		lAux = strlen(prot); if (lAux > MAXAA - 9) lAux = MAXAA - 9; /* clamp: keep prot/sAux writes inside MAXAA */
+		growStr(&prot,&protcap, (long)strlen(prot)+2);
+		lAux = strlen(prot);
 		prot[lAux] = aa;
-		prot[lAux+1] = '\0'; 
+		prot[lAux+1] = '\0';
 		break;
 	      }
-	  
-	    /* exon translation after translated remainder */
-	    /* Guard: keep combined length within MAXAA (sAux/prot are MAXAA) */
-	    { long lprot = (long) strlen(prot);
-	      long room  = MAXAA - 8 - lprot;
-	      if (room < 0) room = 0;
-	      if ((long) strlen(sAux) > room)
-		{
-		  static int warnedProtR = 0;
-		  if (!warnedProtR)
-		    { fprintf(stderr,"Warning: protein reached MAXAA (%d); "
-				     "truncated.\n", MAXAA); warnedProtR = 1; }
-		  sAux[room] = '\0';
-		}
-	    }
+
+	    /* exon translation after translated remainder; grow prot to hold
+	       the running protein plus this exon (no MAXAA cap). */
+	    growStr(&prot,&protcap, (long)strlen(prot)+(long)strlen(sAux)+1);
 	    strcat(prot,sAux);
 	  
 	    /* Codon information for translating the next shared codon */
@@ -407,9 +399,11 @@ void TranslateGene(exonGFF* e,
 		  
 	}
       /* Frame of the last exon in the gene */
+      growStr(&sAux,&sAuxcap, (long)strlen(rmdProt)+(long)strlen(prot)+1);
       sprintf(sAux,"%s%s",rmdProt,prot);
+      growStr(&prot,&protcap, (long)strlen(sAux)+1);
       strcpy(prot,sAux);
-      
+
       /* Remainder of the first exon in sequence */
       switch (currRmd)
 	{
@@ -428,13 +422,18 @@ void TranslateGene(exonGFF* e,
 	  break;
 	}
       
-      lAux = strlen(prot); if (lAux > MAXAA - 9) lAux = MAXAA - 9; /* clamp: keep prot/sAux writes inside MAXAA */
+      growStr(&prot,&protcap, (long)strlen(prot)+currRmd+1);
+      lAux = strlen(prot);
       for(j = 0; j < currRmd; j++)
 	prot[lAux+j] = rmdProt[j];
-      prot[lAux+j] = '\0'; 
-      
+      prot[lAux+j] = '\0';
+
     } /* end of reverse translation */
 
+  /* Hand back the (possibly grown) protein buffer; free the scratch buffer */
+  free(sAux);
+  *pprot = prot;
+  *pprotcap = protcap;
   *nAA = totalAA;
 }
 
