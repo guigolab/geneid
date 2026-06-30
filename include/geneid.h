@@ -162,6 +162,11 @@ A. DEFINITIONS
 /* GetTDNA). Not a ceiling: the buffers grow to fit the transcript length.   */
 #define INITCDNA 4096
 
+/* Initial capacity of the growable exon-sort table (SortExons). It grows on  */
+/* demand, so the table is no longer reserved at FSORT*NUMEXONS up front nor  */
+/* capped (the old "increase FSORT" hard error is gone).                      */
+#define INITSORT 4096
+
 /* Maximum number of isochores              */
 #define MAXISOCHORES 4           
 
@@ -885,11 +890,12 @@ void SearchEvidenceExons(packExternalInformation* external,
 			 packEvidence* pv, 
 			 long l2);
 
-void SortExons(packExons* allExons, 
-               packExons* allExons_r, 
+void SortExons(packExons* allExons,
+               packExons* allExons_r,
 	       packExternalInformation* external,
 	       packEvidence* pv,
-               exonGFF* Exons,         
+               exonGFF** Exons,
+               long* Exonscap,
                long l1, long l2,long lowerlimit,
 	       long upperlimit);
 

@@ -212,8 +212,10 @@ exonGFF* RequestMemorySortExons()
   exonGFF *exons;
   long HowMany;
 
-  /* Sorting Exons */
-  HowMany = NUMEXONS * FSORT;
+  /* Sorting Exons: start small; SortExons grows this on demand so the table
+     is no longer reserved at FSORT*NUMEXONS up front (was the dominant
+     allocation) nor capped. */
+  HowMany = INITSORT;
   if ((exons =
        (exonGFF*) calloc(HowMany, sizeof(exonGFF)))  == NULL)
     printError("Not enough memory: table to sort exons");
