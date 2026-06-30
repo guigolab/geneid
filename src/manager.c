@@ -342,7 +342,7 @@ void  manager(char *Sequence,
 	BuildUTRExons(allSites->TS,allSites->nTS,
 		      allSites->DonorSites,allSites->nDonorSites,
 		      MAXUTRDONORS,MAXUTREXONLENGTH,cutPoint,sUTRFIRST,
-		      allExons->UtrInitialExons,NUMEXONS);
+		      &allExons->UtrInitialExons, &allExons->capUtrInitialExons);
       sprintf(mess,"UTR Initial Exons \t%8ld", allExons->nUtrInitialExons);
       printRes(mess);
 
@@ -350,7 +350,7 @@ void  manager(char *Sequence,
 	BuildUTRExons(allSites->TS,allSites->nTS,
 		      allSites->StartCodons,allSites->nStartCodons,
 		      MAXUTRDONORS,MAXUTREXONLENGTH,cutPoint,sUTRFIRSTHALF,
-		      allExons->UtrInitialHalfExons,NUMEXONS);
+		      &allExons->UtrInitialHalfExons, &allExons->capUtrInitialHalfExons);
       sprintf(mess,"UTR Initial Half Exons \t%8ld", allExons->nUtrInitialHalfExons);
       printRes(mess);
 
@@ -358,42 +358,42 @@ void  manager(char *Sequence,
 	BuildUTRExons(allSites->AcceptorSites,allSites->nAcceptorSites,
 		      allSites->DonorSites,allSites->nDonorSites,
 		      MAXUTRDONORS,MAXUTREXONLENGTH,cutPoint,sUTRINTERNAL,
-		      allExons->UtrInternalExons,NUMEXONS);
+		      &allExons->UtrInternalExons, &allExons->capUtrInternalExons);
       sprintf(mess,"UTR Internal Exons \t%8ld", allExons->nUtrInternalExons);
-      printRes(mess); 
+      printRes(mess);
 
       allExons->nUtr5InternalHalfExons =
 	BuildUTRExons(allSites->AcceptorSites,allSites->nAcceptorSites,
 		      allSites->StartCodons,allSites->nStartCodons,
 		      MAXUTRDONORS,MAXUTREXONLENGTH,cutPoint,sUTR5INTERNALHALF,
-		      allExons->Utr5InternalHalfExons,NUMEXONS);
+		      &allExons->Utr5InternalHalfExons, &allExons->capUtr5InternalHalfExons);
       sprintf(mess,"UTR 5' Int. Half Exons \t%8ld", allExons->nUtr5InternalHalfExons);
-      printRes(mess);  
+      printRes(mess);
 
       allExons->nUtr3InternalHalfExons =
 	BuildUTRExons(allSites->StopCodons,allSites->nStopCodons,
 		      allSites->DonorSites,allSites->nDonorSites,
 		      MAXUTRDONORS,MAXNMDLENGTH,cutPoint,sUTR3INTERNALHALF,
-		      allExons->Utr3InternalHalfExons,NUMEXONS);
+		      &allExons->Utr3InternalHalfExons, &allExons->capUtr3InternalHalfExons);
       sprintf(mess,"UTR 3' Int. Half Exons \t%8ld", allExons->nUtr3InternalHalfExons);
-      printRes(mess);  
+      printRes(mess);
 
       allExons->nUtrTerminalHalfExons =
 	BuildUTRExons(allSites->StopCodons,allSites->nStopCodons,
 		      allSites->TE,allSites->nTE,
 		      MAXUTRDONORS,MAX3UTREXONLENGTH,cutPoint,sUTRTERMINALHALF,
-		      allExons->UtrTerminalHalfExons,NUMEXONS);
+		      &allExons->UtrTerminalHalfExons, &allExons->capUtrTerminalHalfExons);
       sprintf(mess,"UTR Term. Half Exons \t%8ld", allExons->nUtrTerminalHalfExons);
-      printRes(mess);   
+      printRes(mess);
 
       allExons->nUtrTerminalExons =
 	BuildUTRExons(allSites->AcceptorSites,allSites->nAcceptorSites,
 		      allSites->TE,allSites->nTE,
 		      MAXUTRDONORS,MAX3UTREXONLENGTH,cutPoint,sUTRTERMINAL,
-		      allExons->UtrTerminalExons,NUMEXONS);
+		      &allExons->UtrTerminalExons, &allExons->capUtrTerminalExons);
       sprintf(mess,"UTR Terminal Exons \t%8ld", allExons->nUtrTerminalExons);
-      printRes(mess); 
- 
+      printRes(mess);
+
     }
 
     if (scanORF)

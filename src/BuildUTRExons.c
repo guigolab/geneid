@@ -40,7 +40,7 @@ long BuildUTRExons(
 				int MaxDonors,
 				int MaxExonLength,long cutPoint,
 				char* ExonType,
-				exonGFF *Exon,long nexons) 
+				exonGFF **ExonP, long* capP)
 {
   /* Best exons built by using the current start codon */
   exonGFF *LocalExon;
@@ -48,9 +48,10 @@ long BuildUTRExons(
   float LowestLocalScore;
 /*   char mess[MAXSTRING]; */
 
-  /* Maximum allowed number of predicted initial exons per fragment */
-  long HowMany;
-  
+  /* Growable output array (grows on demand; capacity tracked by caller) */
+  exonGFF* Exon = *ExonP;
+  long cap = *capP;
+
 /*   int Frame; */
 /*   int js; */
 
@@ -59,16 +60,15 @@ long BuildUTRExons(
   float pen = 0.002;
   /* Final number of predicted UTR exons */
   long nExon;
-  
+
   /* Allocating space for exons built by using the current start codon */
   /* MaxDonors is the maximum allowed number of exons with this signal */
   if ((LocalExon = (exonGFF*) calloc(MaxDonors,sizeof(exonGFF))) == NULL)
-    printError("Not enough memory: local UTR exons"); 
-  
+    printError("Not enough memory: local UTR exons");
+
   /* Main loop, forall beginning sites looking for ending sites... */
-  HowMany = (MAXBACKUPSITES)? (long)(nexons/RUTR): nexons;
   for (i = 0, j = 0, k = 0, nExon = 0;
-       (nExon < HowMany) && (i < nStarts); i++)
+       (i < nStarts); i++)
     { 
       /* Reset the best local exons array */
       nLocalExons = 0;
@@ -147,8 +147,9 @@ long BuildUTRExons(
 	} /* end while */
 	  
 	  /* Save the best exons beginning by the current start */
-      for (l=0;(l<nLocalExons) && (nExon<HowMany);l++) 
+      for (l=0; l<nLocalExons; l++)
 	{
+	  GrowExonArray(&Exon,&cap,nExon+1);
 	  Exon[nExon] = LocalExon[l];
 	  (Exon+nExon)->Frame = 0;
 	  (Exon+nExon)->Remainder = 0; 
@@ -164,12 +165,11 @@ long BuildUTRExons(
 	  
 	}
     }
-  
-  if (nExon >= HowMany)
-    printError("Too many UTR exons: decrease RUTR parameter");
-  
+
   free(LocalExon);
-  
+
+  *ExonP = Exon;
+  *capP = cap;
   return(nExon);
 }
 
