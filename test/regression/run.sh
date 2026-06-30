@@ -56,6 +56,10 @@ esac; done
 
 if [ "$BUILD" = 1 ]; then
   echo "# building (MEM=medium)..."
+  # bin/geneid is a tracked binary, so a git checkout can leave it with a
+  # newer mtime than the objects and make would skip the relink -- running a
+  # stale binary against the goldens. Remove it first to force a fresh link.
+  rm -f "$BIN"
   make MEM=medium >/dev/null 2>&1 || { echo "BUILD FAILED"; exit 2; }
 fi
 [ -x "$BIN" ] || { echo "no binary at $BIN (drop --no-build?)"; exit 2; }
