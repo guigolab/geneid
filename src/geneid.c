@@ -145,11 +145,8 @@ int main (int argc, char *argv[])
   packSites* allSites_r;
   packExons* allExons_r;
   
-  /* Structures for sorting sites */
-  site* donorsites;
-  site* acceptorsites;
-  site* tssites = NULL;
-  site* tesites = NULL;
+  /* Growable scratch buffers for sorting sites (see packSortSites) */
+  packSortSites sortSites;
 
   /* Table to sort predicted exons by acceptor (growable; see SortExons) */
   exonGFF* exons;
@@ -251,11 +248,20 @@ int main (int argc, char *argv[])
   exons         = (exonGFF*)      RequestMemorySortExons();
   exonscap      = INITSORT;
   printMess("Request Memory Sort Sites\n");
-  donorsites    = (site*)         RequestMemorySortSites(); /* Temporary structure for sorting donor sites */
-  acceptorsites = (site*)         RequestMemorySortSites(); /* Temporary structure for sorting acceptor sites */
+  /* Scratch buffers for SortSites; each grows on demand (see GrowSiteArray) */
+  sortSites.donorsites    = (site*) RequestMemorySortSites();
+  sortSites.donorsitescap = INITSITESORT;
+  sortSites.acceptorsites    = (site*) RequestMemorySortSites();
+  sortSites.acceptorsitescap = INITSITESORT;
+  sortSites.tssites = NULL;
+  sortSites.tssitescap = 0;
+  sortSites.tesites = NULL;
+  sortSites.tesitescap = 0;
   if (UTR){
-    tssites = (site*)         RequestMemorySortSites(); /* Temporary structure for sorting acceptor sites */
-    tesites = (site*)         RequestMemorySortSites(); /* Temporary structure for sorting acceptor sites */
+    sortSites.tssites    = (site*) RequestMemorySortSites();
+    sortSites.tssitescap = INITSITESORT;
+    sortSites.tesites    = (site*) RequestMemorySortSites();
+    sortSites.tesitescap = INITSITESORT;
   }
   printMess("Request Memory Isochores, etc.\n");
   isochores     = (gparam**)      RequestMemoryIsochoresParams(); 
@@ -418,7 +424,7 @@ int main (int argc, char *argv[])
 			  FORWARD, 
 			  external, hsp, gp,
 			  isochores,nIsochores,
-			  GCInfo,acceptorsites,donorsites,tssites,tesites);
+			  GCInfo,&sortSites);
 		}      
 	      if (RVS) 
 		{
@@ -435,7 +441,7 @@ int main (int argc, char *argv[])
 			  REVERSE, 
 			  external, hsp, gp,
 			  isochores,nIsochores,
-			  GCInfo_r,acceptorsites,donorsites,tssites,tesites);
+			  GCInfo_r,&sortSites);
 				  				  
 		  /* normalised positions: according to forward sense reading */
 		  RecomputePositions(allSites_r, LengthSequence);

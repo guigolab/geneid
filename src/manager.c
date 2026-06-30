@@ -51,7 +51,7 @@ extern int UTR;
 extern long NUMSITES,NUMEXONS;
 
 /* Management of splice sites prediction and exon construction/scoring */
-void  manager(char *Sequence, 
+void  manager(char *Sequence,
 	      long LengthSequence,
 	      packSites* allSites,
 	      packExons* allExons,
@@ -63,10 +63,7 @@ void  manager(char *Sequence,
 	      gparam** isochores,
 	      int nIsochores,
 	      packGC* GCInfo,
-	      site* acceptorsites,
-	      site* donorsites,
-	      site* tssites,
-	      site* tesites
+	      packSortSites* sortSites
 	      )
 {
   char mess[MAXSTRING];
@@ -246,8 +243,8 @@ void  manager(char *Sequence,
   if ( U12GTAG || U12ATAC || U2GCAG || U2GTA || U2GTG || U2GTY ){
     /* Predicted sites must be sorted by position */
     printMess ("Sorting Donor and Acceptor sites ...");
-    SortSites(allSites->DonorSites,allSites->nDonorSites,donorsites,l1b,l2b);
-    SortSites(allSites->AcceptorSites,allSites->nAcceptorSites,acceptorsites,l1a,l2a);
+    SortSites(allSites->DonorSites,allSites->nDonorSites,&sortSites->donorsites,&sortSites->donorsitescap,l1b,l2b);
+    SortSites(allSites->AcceptorSites,allSites->nAcceptorSites,&sortSites->acceptorsites,&sortSites->acceptorsitescap,l1a,l2a);
   }
   allSites->nTS=0;
   allSites->nTE=0;
@@ -285,8 +282,8 @@ void  manager(char *Sequence,
   if ( UTR ){
     /* Predicted sites must be sorted by position */
     printMess ("Sorting TSS/TES sites ...");
-    SortSites(allSites->TS,allSites->nTS,tssites,l1,l2);
-    SortSites(allSites->TE,allSites->nTE,tesites,l1,l2);
+    SortSites(allSites->TS,allSites->nTS,&sortSites->tssites,&sortSites->tssitescap,l1,l2);
+    SortSites(allSites->TE,allSites->nTE,&sortSites->tesites,&sortSites->tesitescap,l1,l2);
   }
   if (GENAMIC || (!GENAMIC && (EFP || EIP || ETP || ESP || EOP || EXP))){
     /* 2. Building exons with splice sites predicted before */ 
