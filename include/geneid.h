@@ -149,9 +149,6 @@ A. DEFINITIONS
 /* Not a ceiling: the array doubles on demand, so gene count is data-driven. */
 #define INITGENES 256
 
-/* Maximum number of exons in a gene        */
-#define MAXEXONGENE 1000         
-
 /* Maximum length of a protein              */
 #define MAXAA 50000              
 
