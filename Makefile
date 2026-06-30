@@ -124,9 +124,6 @@ $(OBJ)/BuildU12Acceptors.o : $(CDIR)/BuildU12Acceptors.c $(HEADERS)
 $(OBJ)/BuildDonors.o : $(CDIR)/BuildDonors.c $(HEADERS)
 	$(CC) -c $(OPTS) $(CDIR)/BuildDonors.c -o $(OBJ)/BuildDonors.o
 
-#$(OBJ)/BuildU12Donors.o : $(CDIR)/BuildU12Donors.c $(HEADERS)
-#	$(CC) -c $(OPTS) $(CDIR)/BuildU12Donors.c -o $(OBJ)/BuildU12Donors.o
-
 $(OBJ)/BuildInitialExons.o : $(CDIR)/BuildInitialExons.c $(HEADERS)
 	$(CC) -c $(OPTS) $(CDIR)/BuildInitialExons.c -o $(OBJ)/BuildInitialExons.o
 
