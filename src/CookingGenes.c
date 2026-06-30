@@ -818,6 +818,8 @@ void CookingGenes(exonGFF* e,
   char* prot;
   char* tmpDNA;
   char* tmpTDNA;
+  long tmpDNAcap;
+  long tmpTDNAcap;
   long nAA, nNN, nTN;
   int** tAA;
   double artificialScore;
@@ -832,7 +834,9 @@ void CookingGenes(exonGFF* e,
 
   tmpDNA = NULL;
   tmpTDNA = NULL;
-  
+  tmpDNAcap = 0;
+  tmpTDNAcap = 0;
+
 
   /* Get info about each gene (growable: starts at INITGENES, doubles as
      CookingInfo records more genes -- gene count is no longer capped). */
@@ -862,14 +866,18 @@ void CookingGenes(exonGFF* e,
   if ((prot = (char*) calloc(MAXAA,sizeof(char))) == NULL)
     printError("Not enough memory: protein product");
   
-  /* cDNA memory if required */
-  if (cDNA)
-    if ((tmpDNA = (char*) calloc(MAXCDNA,sizeof(char))) == NULL)
+  /* cDNA memory if required (growable: GetcDNA grows it to fit the transcript) */
+  if (cDNA){
+    tmpDNAcap = INITCDNA;
+    if ((tmpDNA = (char*) calloc(tmpDNAcap,sizeof(char))) == NULL)
       printError("Not enough memory: cDNA product");
-  /* tDNA memory if required */
-  if (tDNA)
-    if ((tmpTDNA = (char*) calloc(MAXCDNA,sizeof(char))) == NULL)
+  }
+  /* tDNA memory if required (growable: GetTDNA grows it to fit the transcript) */
+  if (tDNA){
+    tmpTDNAcap = INITCDNA;
+    if ((tmpTDNA = (char*) calloc(tmpTDNAcap,sizeof(char))) == NULL)
       printError("Not enough memory: tDNA product");
+  }
   
   /* Principal header: forced annotations not used in gene score sum */
   if (XML)
@@ -893,9 +901,9 @@ void CookingGenes(exonGFF* e,
       
       /* Get genomic DNA for exons if required */
       if (cDNA)
-	GetcDNA(info[igen].start,s,(info[igen].nfeats), tmpDNA, &nNN);
+	GetcDNA(info[igen].start,s,(info[igen].nfeats), &tmpDNA, &tmpDNAcap, &nNN);
       if (tDNA)
-	GetTDNA(info[igen].start,s,(info[igen].nfeats), tmpTDNA, &nTN);
+	GetTDNA(info[igen].start,s,(info[igen].nfeats), &tmpTDNA, &tmpTDNAcap, &nTN);
 	  
       /* Gene header */
       if (XML)
@@ -1018,7 +1026,7 @@ void CookingGenes(exonGFF* e,
       /* Pretty-printing of every gene */
       for(igen=ngen-1; igen>=0; igen--)
 	{
-	  GetcDNA(info[igen].start,s,(info[igen].nfeats), tmpDNA, &nNN);
+	  GetcDNA(info[igen].start,s,(info[igen].nfeats), &tmpDNA, &tmpDNAcap, &nNN);
 	  if (nNN > 0)
 	    printProt(Name,ngen-igen,tmpDNA,nNN,DNA,GenePrefix);
 
@@ -1028,7 +1036,7 @@ void CookingGenes(exonGFF* e,
       /* Pretty-printing of every gene */
       for(igen=ngen-1; igen>=0; igen--)
 	{
-	  GetTDNA(info[igen].start,s,(info[igen].nfeats), tmpTDNA, &nTN);
+	  GetTDNA(info[igen].start,s,(info[igen].nfeats), &tmpTDNA, &tmpTDNAcap, &nTN);
 	  printProt(Name,ngen-igen,tmpTDNA,nTN,TDNA,GenePrefix);
 
 	}
@@ -1043,6 +1051,8 @@ void CookingGenes(exonGFF* e,
     free(tAA[i]);
   if (cDNA)
     free(tmpDNA);
+  if (tDNA)
+    free(tmpTDNA);
 }
 
 

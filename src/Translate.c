@@ -29,6 +29,25 @@
 
 #include "geneid.h"
 
+/* Grow *buf (a C string buffer) so it can hold at least `need` bytes,        */
+/* preserving existing contents. Used by the cDNA/tDNA builders so the        */
+/* transcript length is data-driven rather than capped at a fixed size.       */
+static void growStr(char** buf, long* cap, long need)
+{
+  long ncap;
+  char* tmp;
+
+  if (need <= *cap)
+    return;
+  ncap = (*cap > 0) ? *cap : 1;
+  while (ncap < need)
+    ncap *= 2;
+  if ((tmp = (char*) realloc(*buf, ncap * sizeof(char))) == NULL)
+    printError("Not enough memory: growing sequence buffer");
+  *buf = tmp;
+  *cap = ncap;
+}
+
 /* Obtaining the amino acid sequence from an exon (given a reading frame) */
 int Translate(long p1,
               long p2,
@@ -424,17 +443,20 @@ void TranslateGene(exonGFF* e,
 void GetcDNA(exonGFF* e,
              char* s,
              long nExons,
-             char* cDNA,
+             char** pcDNA,
+             long* pcap,
              long* nNN)
-{  
-  char* tmpDNA;
+{
+  char* cDNA = *pcDNA;
+  long  cap  = *pcap;
+  char* tmpDNA = NULL;
+  long  tmpcap = 0;
+  char* rs = NULL;
+  long  rscap = 0;
   long p1,p2;
-  char* rs;
+  long ltmp,lc;
   int i;
   long j;
-
-  if ((tmpDNA = (char*) calloc(MAXCDNA,sizeof(char))) == NULL)
-    printError("Not enough memory: producing CDS DNA");
 
   cDNA[0] = '\0';
 
@@ -443,27 +465,30 @@ void GetcDNA(exonGFF* e,
       for(i=0, *nNN = 0; i<nExons; i++)
 		{
 		  if (!strcmp(e->Type,sSINGLE)||!strcmp(e->Type,sFIRST)||!strcmp(e->Type,sINTERNAL)||!strcmp(e->Type,sTERMINAL)){
-		    p1 = (e->evidence)? 
-		      e->Acceptor->Position + e->offset1: 
+		    p1 = (e->evidence)?
+		      e->Acceptor->Position + e->offset1:
 		      e->Acceptor->Position + e->offset1 - COFFSET;
-		    p2 = (e->evidence)? 
-		      e->Donor->Position + e->offset2: 
+		    p2 = (e->evidence)?
+		      e->Donor->Position + e->offset2:
 		      e->Donor->Position + e->offset2 - COFFSET;
-	  
+
 		  /* Get the cDNA for this exon */
+		  growStr(&tmpDNA,&tmpcap, p2-p1+2);
 		  tmpDNA[0] = '\0';
-   
-		  for(j=p1; j <= p2 && (j-p1) < MAXCDNA - 1; j++)
+
+		  for(j=p1; j <= p2; j++)
 			tmpDNA[j-p1] = s[j];
-        
+
 		  tmpDNA[j-p1]='\0';
-        
+
 		  /* Concat the current cDNA before the previous */
-		  { long room = MAXCDNA - 1 - (long) strlen(tmpDNA); if (room < 0) room = 0;
-	    if ((long) strlen(cDNA) > room) cDNA[room] = '\0'; } /* guard MAXCDNA */
-	  strcat(tmpDNA,cDNA);
+		  ltmp = (long) strlen(tmpDNA);
+		  lc   = (long) strlen(cDNA);
+		  growStr(&tmpDNA,&tmpcap, ltmp+lc+1);
+		  strcat(tmpDNA,cDNA);
+		  growStr(&cDNA,&cap, ltmp+lc+1);
 		  strcpy(cDNA,tmpDNA);
-        
+
 		  *nNN += p2-p1+1;
 		  }
 		  e = e->PreviousExon;
@@ -472,46 +497,45 @@ void GetcDNA(exonGFF* e,
   /* Reverse and complement the sequence in this strand */
   else
     {
-      if ((rs = (char*) calloc(MAXCDNA,sizeof(char))) == NULL)
-		printError("Not enough memory: producing reverse CDS DNA");
-
       for(i=0, *nNN = 0; i<nExons; i++)
 		{
 		  if (!strcmp(e->Type,sSINGLE)||!strcmp(e->Type,sFIRST)||!strcmp(e->Type,sINTERNAL)||!strcmp(e->Type,sTERMINAL)){
-		    p1 = (e->evidence)? 
-		      e->Acceptor->Position + e->offset1: 
+		    p1 = (e->evidence)?
+		      e->Acceptor->Position + e->offset1:
 		      e->Acceptor->Position + e->offset1 - COFFSET;
-		    p2 = (e->evidence)? 
-		      e->Donor->Position + e->offset2: 
+		    p2 = (e->evidence)?
+		      e->Donor->Position + e->offset2:
 		      e->Donor->Position + e->offset2 - COFFSET;
 		  /* Get the cDNA for this exon */
+		  growStr(&tmpDNA,&tmpcap, p2-p1+2);
+		  growStr(&rs,&rscap, p2-p1+2);
 		  tmpDNA[0] = '\0';
 		  rs[0] = '\0';
-   
-		  for(j=p1; j <= p2 && (j-p1) < MAXCDNA - 1; j++)
+
+		  for(j=p1; j <= p2; j++)
 			tmpDNA[j-p1] = s[j];
-        
+
 		  tmpDNA[j-p1]='\0';
-        
+
 		  ReverseSubSequence(0, j-p1-1, tmpDNA, rs);
 		  rs[j-p1]='\0';
-   
+
 		  /* Concat the current cDNA after the previous */
-		  { long room = MAXCDNA - 1 - (long) strlen(cDNA); if (room < 0) room = 0;
-	    if ((long) strlen(rs) > room) rs[room] = '\0'; } /* guard MAXCDNA */
-	  strcat(cDNA,rs);
-   
+		  growStr(&cDNA,&cap, (long)strlen(cDNA)+(long)strlen(rs)+1);
+		  strcat(cDNA,rs);
+
 		  *nNN += p2-p1+1;
 		  }
 		  e = e->PreviousExon;
-		  
-		} 
-      /* Set free reverse sequence */
-      free(rs);
+
+		}
     }
 
-  /* Set free temporary result sequence */
-  free(tmpDNA);
+  /* Set free temporary buffers; hand back the (possibly grown) result */
+  if (tmpDNA) free(tmpDNA);
+  if (rs) free(rs);
+  *pcDNA = cDNA;
+  *pcap = cap;
 }
 
 /* Extract the genomic (exonic) sequence of a predicted gene */
@@ -519,17 +543,20 @@ void GetcDNA(exonGFF* e,
 void GetTDNA(exonGFF* e,
              char* s,
              long nExons,
-             char* cDNA,
+             char** pcDNA,
+             long* pcap,
              long* nNN)
-{  
-  char* tmpDNA;
+{
+  char* cDNA = *pcDNA;
+  long  cap  = *pcap;
+  char* tmpDNA = NULL;
+  long  tmpcap = 0;
+  char* rs = NULL;
+  long  rscap = 0;
   long p1,p2;
-  char* rs;
+  long ltmp,lc;
   int i;
   long j;
-
-  if ((tmpDNA = (char*) calloc(MAXCDNA,sizeof(char))) == NULL)
-    printError("Not enough memory: producing exonic DNA");
 
   cDNA[0] = '\0';
 
@@ -538,27 +565,30 @@ void GetTDNA(exonGFF* e,
       for(i=0, *nNN = 0; i<nExons; i++)
 	{
 /* 	  if (!strcmp(e->Type,sSINGLE)||!strcmp(e->Type,sFIRST)||!strcmp(e->Type,sINTERNAL)||!strcmp(e->Type,sTERMINAL)){ */
-	    p1 = (e->evidence)? 
-	      e->Acceptor->Position + e->offset1: 
+	    p1 = (e->evidence)?
+	      e->Acceptor->Position + e->offset1:
 	      e->Acceptor->Position + e->offset1 - COFFSET;
-	    p2 = (e->evidence)? 
-	      e->Donor->Position + e->offset2: 
+	    p2 = (e->evidence)?
+	      e->Donor->Position + e->offset2:
 	      e->Donor->Position + e->offset2 - COFFSET;
-	  
+
 	    /* Get the cDNA for this exon */
+	    growStr(&tmpDNA,&tmpcap, p2-p1+2);
 	    tmpDNA[0] = '\0';
-   
-	    for(j=p1; j <= p2 && (j-p1) < MAXCDNA - 1; j++)
+
+	    for(j=p1; j <= p2; j++)
 	      tmpDNA[j-p1] = s[j];
-        
+
 	    tmpDNA[j-p1]='\0';
-        
+
 	    /* Concat the current cDNA before the previous */
-	    { long room = MAXCDNA - 1 - (long) strlen(tmpDNA); if (room < 0) room = 0;
-	    if ((long) strlen(cDNA) > room) cDNA[room] = '\0'; } /* guard MAXCDNA */
-	  strcat(tmpDNA,cDNA);
+	    ltmp = (long) strlen(tmpDNA);
+	    lc   = (long) strlen(cDNA);
+	    growStr(&tmpDNA,&tmpcap, ltmp+lc+1);
+	    strcat(tmpDNA,cDNA);
+	    growStr(&cDNA,&cap, ltmp+lc+1);
 	    strcpy(cDNA,tmpDNA);
-        
+
 	    *nNN += p2-p1+1;
 	  /* } */
 	  e = e->PreviousExon;
@@ -567,44 +597,43 @@ void GetTDNA(exonGFF* e,
   /* Reverse and complement the sequence in this strand */
   else
     {
-      if ((rs = (char*) calloc(MAXCDNA,sizeof(char))) == NULL)
-	printError("Not enough memory: producing reverse exonic DNA");
-
       for(i=0, *nNN = 0; i<nExons; i++)
 	{
 /* 	  if (!strcmp(e->Type,sSINGLE)||!strcmp(e->Type,sFIRST)||!strcmp(e->Type,sINTERNAL)||!strcmp(e->Type,sTERMINAL)){ */
-	    p1 = (e->evidence)? 
-	      e->Acceptor->Position + e->offset1: 
+	    p1 = (e->evidence)?
+	      e->Acceptor->Position + e->offset1:
 	      e->Acceptor->Position + e->offset1 - COFFSET;
-	    p2 = (e->evidence)? 
-	      e->Donor->Position + e->offset2: 
+	    p2 = (e->evidence)?
+	      e->Donor->Position + e->offset2:
 	      e->Donor->Position + e->offset2 - COFFSET;
 	    /* Get the cDNA for this exon */
+	    growStr(&tmpDNA,&tmpcap, p2-p1+2);
+	    growStr(&rs,&rscap, p2-p1+2);
 	    tmpDNA[0] = '\0';
 	    rs[0] = '\0';
-   
-	    for(j=p1; j <= p2 && (j-p1) < MAXCDNA - 1; j++)
+
+	    for(j=p1; j <= p2; j++)
 	      tmpDNA[j-p1] = s[j];
-        
+
 	    tmpDNA[j-p1]='\0';
-        
+
 	    ReverseSubSequence(0, j-p1-1, tmpDNA, rs);
 	    rs[j-p1]='\0';
-   
+
 	    /* Concat the current cDNA after the previous */
-	    { long room = MAXCDNA - 1 - (long) strlen(cDNA); if (room < 0) room = 0;
-	    if ((long) strlen(rs) > room) rs[room] = '\0'; } /* guard MAXCDNA */
-	  strcat(cDNA,rs);
-   
+	    growStr(&cDNA,&cap, (long)strlen(cDNA)+(long)strlen(rs)+1);
+	    strcat(cDNA,rs);
+
 	    *nNN += p2-p1+1;
 	 /*  } */
 	  e = e->PreviousExon;
-		  
-	} 
-      /* Set free reverse sequence */
-      free(rs);
+
+	}
     }
 
-  /* Set free temporary result sequence */
-  free(tmpDNA);
+  /* Set free temporary buffers; hand back the (possibly grown) result */
+  if (tmpDNA) free(tmpDNA);
+  if (rs) free(rs);
+  *pcDNA = cDNA;
+  *pcap = cap;
 }

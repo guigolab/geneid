@@ -152,8 +152,9 @@ A. DEFINITIONS
 /* Maximum length of a protein              */
 #define MAXAA 50000              
 
-/* Maximum length of (cDNA) in genes        */
-#define MAXCDNA MAXAA*3          
+/* Initial capacity of the growable cDNA/tDNA transcript buffers (GetcDNA/   */
+/* GetTDNA). Not a ceiling: the buffers grow to fit the transcript length.   */
+#define INITCDNA 4096
 
 /* Maximum number of isochores              */
 #define MAXISOCHORES 4           
@@ -1059,8 +1060,8 @@ void ScoreExons(char *Sequence,
                 int nIsochores,
                 packGC* GCInfo);
 
-void GetcDNA(exonGFF* e, char* s, long nExons, char* cDNA, long* nNN);
-void GetTDNA(exonGFF* e, char* s, long nExons, char* tDNA, long* nTN);
+void GetcDNA(exonGFF* e, char* s, long nExons, char** cDNA, long* cap, long* nNN);
+void GetTDNA(exonGFF* e, char* s, long nExons, char** tDNA, long* cap, long* nTN);
 
 float ComputeGC(packGC* GCInfo, long inigc, long endgc);
 
