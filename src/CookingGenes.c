@@ -178,6 +178,25 @@ static int exonType2int(const char* type)
   return -1;
 }
 
+/* Predicates over the exon type (used by the gene-recovery/printing loops to
+   classify features). Each takes the type string and maps it via exonType2int. */
+static int isCodingExon(const char* type)  /* First / Internal / Terminal / Single */
+{
+  int c = exonType2int(type);
+  return c == FIRST || c == INTERNAL || c == TERMINAL || c == SINGLE;
+}
+static int isAnyIntron(const char* type)   /* coding or UTR intron, any flavor */
+{
+  int c = exonType2int(type);
+  return c == INTRON || c == UTRINTRON || c == UTR5INTRON || c == UTR3INTRON;
+}
+static int isHalfUTR(const char* type)     /* UTR exon carrying a single terminus */
+{
+  int c = exonType2int(type);
+  return c == UTRFIRSTHALF || c == UTR5INTERNALHALF
+      || c == UTR3INTERNALHALF || c == UTRTERMINALHALF;
+}
+
 /* Choose the signal types and flanking profiles used to (re)score an exon of
    a given type. type1/p1 is the 5' (left-in-sequence) signal, type2/p2 the
    3' (right) signal; on the reverse strand those two roles are swapped. */
@@ -351,32 +370,14 @@ long CookingInfo(exonGFF* eorig,
 	      info[igen].start = e;
 	      info[igen].end = e;
 	      info[igen].nfeats++;
-	      if (strcmp(e->Type,sINTRON)
-		  && strcmp(e->Type,sUTRINTRON)
-		  && strcmp(e->Type,sUTR5INTRON)
-		  && strcmp(e->Type,sUTR3INTRON)
-		  && strcmp(e->Type,sUTRFIRSTHALF)
-		  && strcmp(e->Type,sUTR5INTERNALHALF)
-		  && strcmp(e->Type,sUTR3INTERNALHALF)
-		  && strcmp(e->Type,sUTRTERMINALHALF)){
+	      if (!isAnyIntron(e->Type) && !isHalfUTR(e->Type)){
 		info[igen].nexons++;
 	      }
-	      if (strcmp(e->Type,sINTRON)
-		  && strcmp(e->Type,sUTRINTRON)
-		  && strcmp(e->Type,sUTR5INTRON)
-		  && strcmp(e->Type,sUTR3INTRON)
-		  && strcmp(e->Type,sFIRST)
-		  && strcmp(e->Type,sINTERNAL)
-		  && strcmp(e->Type,sTERMINAL)
-		  && strcmp(e->Type,sSINGLE)){
+	      if (!isAnyIntron(e->Type) && !isCodingExon(e->Type)){
 		info[igen].nutrs++;
 	      }
 
-	      if (!strcmp(e->Type,sFIRST)
-		  || !strcmp(e->Type,sINTERNAL)
-		  || !strcmp(e->Type,sTERMINAL)
-		  || !strcmp(e->Type,sSINGLE)
-		  ){
+	      if (isCodingExon(e->Type)){
 		info[igen].ncds++;
 	      }
 	      /* Evidences (annotations) not added if infinitum score */
@@ -410,31 +411,13 @@ long CookingInfo(exonGFF* eorig,
 				    
 		{  
 		  info[igen].nfeats++;
-		  if (strcmp(e->Type,sINTRON)
-		      && strcmp(e->Type,sUTRINTRON)
-		      && strcmp(e->Type,sUTR5INTRON)
-		      && strcmp(e->Type,sUTR3INTRON)
-		      && strcmp(e->Type,sUTRFIRSTHALF)
-		      && strcmp(e->Type,sUTR5INTERNALHALF)
-		      && strcmp(e->Type,sUTR3INTERNALHALF)
-		      && strcmp(e->Type,sUTRTERMINALHALF)){
+		  if (!isAnyIntron(e->Type) && !isHalfUTR(e->Type)){
 		    info[igen].nexons++;
 		  }
-		  if (strcmp(e->Type,sINTRON)
-		      && strcmp(e->Type,sUTRINTRON)
-		      && strcmp(e->Type,sUTR5INTRON)
-		      && strcmp(e->Type,sUTR3INTRON)
-		      && strcmp(e->Type,sFIRST)
-		      && strcmp(e->Type,sINTERNAL)
-		      && strcmp(e->Type,sTERMINAL)
-		      && strcmp(e->Type,sSINGLE)){
+		  if (!isAnyIntron(e->Type) && !isCodingExon(e->Type)){
 		    info[igen].nutrs++;
 		  }
-		  if (!strcmp(e->Type,sFIRST)
-		      || !strcmp(e->Type,sINTERNAL)
-		      || !strcmp(e->Type,sTERMINAL)
-		      || !strcmp(e->Type,sSINGLE)
-		      ){
+		  if (isCodingExon(e->Type)){
 		    info[igen].ncds++;
 		  }
 		  /* Evidences (annotations) not summed if infinite score */
@@ -472,31 +455,13 @@ long CookingInfo(exonGFF* eorig,
 		  info[igen].start = e;
 		  info[igen].end = e;
 		  info[igen].nfeats++;
-		  if (strcmp(e->Type,sINTRON)
-		      && strcmp(e->Type,sUTRINTRON)
-		      && strcmp(e->Type,sUTR5INTRON)
-		      && strcmp(e->Type,sUTR3INTRON)
-		      && strcmp(e->Type,sUTRFIRSTHALF)
-		      && strcmp(e->Type,sUTR5INTERNALHALF)
-		      && strcmp(e->Type,sUTR3INTERNALHALF)
-		      && strcmp(e->Type,sUTRTERMINALHALF)){
+		  if (!isAnyIntron(e->Type) && !isHalfUTR(e->Type)){
 		    info[igen].nexons++;
 		  }
-		  if (strcmp(e->Type,sINTRON)
-		      && strcmp(e->Type,sUTRINTRON)
-		      && strcmp(e->Type,sUTR5INTRON)
-		      && strcmp(e->Type,sUTR3INTRON)
-		      && strcmp(e->Type,sFIRST)
-		      && strcmp(e->Type,sINTERNAL)
-		      && strcmp(e->Type,sTERMINAL)
-		      && strcmp(e->Type,sSINGLE)){
+		  if (!isAnyIntron(e->Type) && !isCodingExon(e->Type)){
 		    info[igen].nutrs++;
 		  }
-		  if (!strcmp(e->Type,sFIRST)
-		      || !strcmp(e->Type,sINTERNAL)
-		      || !strcmp(e->Type,sTERMINAL)
-		      || !strcmp(e->Type,sSINGLE)
-		      ){
+		  if (isCodingExon(e->Type)){
 		    info[igen].ncds++;
 		  }
 		  if (e->Score==MAXSCORE)
@@ -526,31 +491,13 @@ long CookingInfo(exonGFF* eorig,
 		  while( !stop && !stop2 )
 		    { 
 		      info[igen].nfeats++;
-		      if (strcmp(e->Type,sINTRON)
-			  && strcmp(e->Type,sUTRINTRON)
-			  && strcmp(e->Type,sUTR5INTRON)
-			  && strcmp(e->Type,sUTR3INTRON)
-			  && strcmp(e->Type,sUTRFIRSTHALF)
-			  && strcmp(e->Type,sUTR5INTERNALHALF)
-			  && strcmp(e->Type,sUTR3INTERNALHALF)
-			  && strcmp(e->Type,sUTRTERMINALHALF)){
+		      if (!isAnyIntron(e->Type) && !isHalfUTR(e->Type)){
 			info[igen].nexons++;
 		      }
-		      if (strcmp(e->Type,sINTRON)
-			  && strcmp(e->Type,sUTRINTRON)
-			  && strcmp(e->Type,sUTR5INTRON)
-			  && strcmp(e->Type,sUTR3INTRON)
-			  && strcmp(e->Type,sFIRST)
-			  && strcmp(e->Type,sINTERNAL)
-			  && strcmp(e->Type,sTERMINAL)
-			  && strcmp(e->Type,sSINGLE)){
+		      if (!isAnyIntron(e->Type) && !isCodingExon(e->Type)){
 			info[igen].nutrs++;
 		      }
-		      if (!strcmp(e->Type,sFIRST)
-			  || !strcmp(e->Type,sINTERNAL)
-			  || !strcmp(e->Type,sTERMINAL)
-			  || !strcmp(e->Type,sSINGLE)
-			  ){
+		      if (isCodingExon(e->Type)){
 			info[igen].ncds++;
 		      }
 		      /* Evidences (annotations) not added if infinitum score */
