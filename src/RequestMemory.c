@@ -125,8 +125,7 @@ void GrowExonArray(exonGFF** buf, long* cap, long need)
 packExons* RequestMemoryExons()
 {
   packExons* allExons;
-  long HowMany;
-  
+
   /* Allocating memory for exons */
   if ((allExons = 
        (struct s_packExons *) malloc(sizeof(struct s_packExons))) == NULL)
@@ -165,45 +164,52 @@ packExons* RequestMemoryExons()
     printError("Not enough memory: single genes");
 
   allExons->capORFs = 0;
+  allExons->capUtrInitialExons = 0;
+  allExons->capUtrInitialHalfExons = 0;
+  allExons->capUtrInternalExons = 0;
+  allExons->capUtr5InternalHalfExons = 0;
+  allExons->capUtr3InternalHalfExons = 0;
+  allExons->capUtrTerminalHalfExons = 0;
+  allExons->capUtrTerminalExons = 0;
 
   if (UTR){
-    /* UTR Exons */
-    HowMany = (long)(NUMEXONS/RUTR);
-    if ((allExons->UtrInitialExons = 
-	 (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
+    /* UTR Exons: start small; BuildUTRExons grows each on demand */
+    allExons->capUtrInitialExons = INITEXONS;
+    if ((allExons->UtrInitialExons =
+	 (exonGFF*) calloc(allExons->capUtrInitialExons, sizeof(exonGFF))) == NULL)
       printError("Not enough memory: UtrInitialExons");
 
-    HowMany = (long)(NUMEXONS/RUTR);
-    if ((allExons->UtrInitialHalfExons = 
-	 (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
+    allExons->capUtrInitialHalfExons = INITEXONS;
+    if ((allExons->UtrInitialHalfExons =
+	 (exonGFF*) calloc(allExons->capUtrInitialHalfExons, sizeof(exonGFF))) == NULL)
       printError("Not enough memory: UtrInitialhalfExons");
 
-    HowMany = (long)(NUMEXONS/RUTR);
-    if ((allExons->UtrInternalExons = 
-	 (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
+    allExons->capUtrInternalExons = INITEXONS;
+    if ((allExons->UtrInternalExons =
+	 (exonGFF*) calloc(allExons->capUtrInternalExons, sizeof(exonGFF))) == NULL)
       printError("Not enough memory: UtrInternalExons");
 
-    HowMany = (long)(NUMEXONS/RUTR);
-    if ((allExons->Utr5InternalHalfExons = 
-	 (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
+    allExons->capUtr5InternalHalfExons = INITEXONS;
+    if ((allExons->Utr5InternalHalfExons =
+	 (exonGFF*) calloc(allExons->capUtr5InternalHalfExons, sizeof(exonGFF))) == NULL)
       printError("Not enough memory: Utr5InternalHalfExons");
 
-    HowMany = (long)(NUMEXONS/RUTR);
-    if ((allExons->Utr3InternalHalfExons = 
-	 (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
+    allExons->capUtr3InternalHalfExons = INITEXONS;
+    if ((allExons->Utr3InternalHalfExons =
+	 (exonGFF*) calloc(allExons->capUtr3InternalHalfExons, sizeof(exonGFF))) == NULL)
       printError("Not enough memory: Utr3InternalHalfExons");
 
-    HowMany = (long)(NUMEXONS/RUTR);
-    if ((allExons->UtrTerminalHalfExons = 
-	 (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
+    allExons->capUtrTerminalHalfExons = INITEXONS;
+    if ((allExons->UtrTerminalHalfExons =
+	 (exonGFF*) calloc(allExons->capUtrTerminalHalfExons, sizeof(exonGFF))) == NULL)
       printError("Not enough memory: UtrTerminalHalfExons");
 
-    HowMany = (long)(NUMEXONS/RUTR);
-    if ((allExons->UtrTerminalExons = 
-	 (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
+    allExons->capUtrTerminalExons = INITEXONS;
+    if ((allExons->UtrTerminalExons =
+	 (exonGFF*) calloc(allExons->capUtrTerminalExons, sizeof(exonGFF))) == NULL)
       printError("Not enough memory: UtrTerminalExons");
   }
- 
+
 
   /* IF Scan ORF is switched on... */
   if (scanORF)

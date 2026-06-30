@@ -564,6 +564,13 @@ typedef struct s_packExons
   long capTerminalExons;
   long capSingles;
   long capORFs;
+  long capUtrInitialExons;
+  long capUtrInitialHalfExons;
+  long capUtrInternalExons;
+  long capUtr5InternalHalfExons;
+  long capUtr3InternalHalfExons;
+  long capUtrTerminalHalfExons;
+  long capUtrTerminalExons;
 } packExons;
 
 typedef struct s_packGenes
@@ -858,12 +865,12 @@ long BuildORFs(site *Start, long nStarts,
 	       exonGFF **Exon, long* cap);
 
 long BuildUTRExons(
-		   site *Start, long nStarts, 
+		   site *Start, long nStarts,
 		   site *Donor, long nDonors,
 		   int MaxDonors,
 		   int MaxExonLength,long cutPoint,
 		   char* ExonType,
-		   exonGFF *Exon,long nexons);
+		   exonGFF **Exon, long* cap);
 
 packSites* RequestMemorySites();
 packExons* RequestMemoryExons();
