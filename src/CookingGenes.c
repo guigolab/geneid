@@ -321,19 +321,23 @@ void selectFeatures(char* exonType,
 /* Processing of genes to make pretty printing afterwards */
 /* artScore is the value that must be substracted from total score (forced evidences) */
 long CookingInfo(exonGFF* eorig,
-                 gene info[],
+                 gene** pinfo,
+                 long* pcap,
                  double* artScore)
 {
   /* Identifier of current gene */
   long igen;
   int stop,stop1,stop2,currentIsUTR;
   exonGFF* e;
+  /* Growable info[] array (capacity grows on demand, see below) */
+  gene* info = *pinfo;
+  long cap = *pcap;
 /*   char mess[MAXSTRING]; */
   /* Reset counters into the gene information structure */
   currentIsUTR=0;
   *artScore = 0.0;
   e = eorig;
-  for(igen=0; igen < MAXGENE; igen++)
+  for(igen=0; igen < cap; igen++)
     {
       info[igen].nexons = 0;
       info[igen].nutrs = 0;
@@ -347,11 +351,21 @@ long CookingInfo(exonGFF* eorig,
   /* starting from the last exon of the last gene (bottom-up) */
   igen = 0;
   stop = (e->Strand == '*');
-  /* Guard: info[] has room for MAXGENE genes only. Stop recording before
-     writing past the buffer (was an unchecked overflow -> segfault on
-     very large/dense scaffolds with > MAXGENE predicted genes). */
-  while (!stop && (igen < MAXGENE))
+  while (!stop)
     {
+      /* Grow info[] on demand: the gene count is data-driven, not a fixed
+         ceiling. Double the capacity and zero the new slots (the gene loop
+         below increments counters that must start at 0). */
+      if (igen >= cap)
+        {
+          long ncap = cap * 2;
+          gene* tmp = (gene*) realloc(info, ncap * sizeof(gene));
+          if (tmp == NULL)
+            printError("Not enough memory: post-processing genes");
+          info = tmp;
+          memset(info + cap, 0, (ncap - cap) * sizeof(gene));
+          cap = ncap;
+        }
       /* A. Skip BEGIN/END features */
       if (!strcmp(e->Type,sEND) || !strcmp(e->Type,sBEGIN))
 	{
@@ -530,12 +544,9 @@ long CookingInfo(exonGFF* eorig,
 	}
     }
 
-  /* Warn (non-fatal) if the MAXGENE cap truncated the gene solution */
-  if (!stop && (igen >= MAXGENE))
-    fprintf(stderr,
-	    "Warning: reached MAXGENE limit (%d) recovering gene solution; "
-	    "output truncated. Increase MAXGENE in geneid.h and recompile.\n",
-	    MAXGENE);
+  /* Hand back the (possibly grown) array and its capacity */
+  *pinfo = info;
+  *pcap = cap;
 
   return (igen);
 }
@@ -804,6 +815,7 @@ void CookingGenes(exonGFF* e,
   long igen;
   long ngen;
   gene* info;
+  long infocap;
   char* prot;
   char* tmpDNA;
   char* tmpTDNA;
@@ -822,8 +834,10 @@ void CookingGenes(exonGFF* e,
   tmpTDNA = NULL;
   
 
-  /* Get info about each gene */
-  if ((info = (gene *) calloc(MAXGENE,sizeof(gene))) == NULL)
+  /* Get info about each gene (growable: starts at INITGENES, doubles as
+     CookingInfo records more genes -- gene count is no longer capped). */
+  infocap = INITGENES;
+  if ((info = (gene *) calloc(infocap,sizeof(gene))) == NULL)
     printError("Not enough memory: post-processing genes");
   
   /* tAA[gene][exon[0] is the first amino acid of that exon */
@@ -837,7 +851,7 @@ void CookingGenes(exonGFF* e,
       printError("Not enough memory: tAA[] structure");
   
   /* Post-processing of genes */
-  ngen = CookingInfo(e,info,&artificialScore);
+  ngen = CookingInfo(e,&info,&infocap,&artificialScore);
   
   /* Protein space */
   /* if (PSEQ) */
