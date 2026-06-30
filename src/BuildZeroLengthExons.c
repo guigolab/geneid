@@ -43,7 +43,7 @@ long BuildZeroLengthExons(site *Acceptor, long nAcceptors,
                         int MaxDonors,
 			char* ExonType,
 			char* Sequence,
-                        exonGFF* Exon, long nexons)
+                        exonGFF** ExonP, long* capP)
 {
   /* Best exons built using the current Acceptor and frame availability */
   struct iexon
@@ -51,20 +51,21 @@ long BuildZeroLengthExons(site *Acceptor, long nAcceptors,
     site *Acceptor;
     site *Donor;
     int Frame[FRAMES];
-  } *LocalExon; 
+  } *LocalExon;
   int nLocalExons, LowestLocalExon;
   float LowestLocalScore;
   /* char mess[MAXSTRING]; */
 
-  /* Boolean array of windows: closed or opened */ 
+  /* Boolean array of windows: closed or opened */
   int Frame[FRAMES];
-  
+
   long i, j, js, k;
   int f, l, ll;
-  
-  /* Maximum allowed number of predicted internal exons per fragment */
-  long HowMany;
-  
+
+  /* Growable output array (grows on demand; capacity tracked by caller) */
+  exonGFF* Exon = *ExonP;
+  long cap = *capP;
+
   /* Final number of predicted internal exons */
   long nExon;
   
@@ -76,11 +77,8 @@ long BuildZeroLengthExons(site *Acceptor, long nAcceptors,
   
   /* Main loop, forall Acceptor looking for donor sites... */
   /* ...until 3 windows are closed due to 3 stop codons */
-  HowMany = (MAXBACKUPSITES)? (long)(nexons/RINTER): nexons;
-  
-  
   for (i=0, j=0, k=0, nExon = 0;
-       (i < nAcceptors) && (nExon<HowMany); i++)
+       (i < nAcceptors); i++)
     {
       /* Open the 3 windows */
       for (f=0;f<FRAMES;f++) 
@@ -122,13 +120,14 @@ long BuildZeroLengthExons(site *Acceptor, long nAcceptors,
       }
      	  	  
       /* Save predicted exons for the current Acceptor site */
-      for (l=0;(l<nLocalExons) && (nExon<HowMany);l++) 
+      for (l=0; l<nLocalExons; l++)
 	{
 	  /* There are exons in every frame */
-	  for (ll=0;(ll<FRAMES) && (nExon < HowMany);ll++)
-	    if ((LocalExon+l)->Frame[ll]) 
+	  for (ll=0; ll<FRAMES; ll++)
+	    if ((LocalExon+l)->Frame[ll])
 	      {
 		/* Frame was opened then */
+		GrowExonArray(&Exon,&cap,nExon+1);
 		(Exon+nExon)->Acceptor = (LocalExon+l)->Acceptor;
 		(Exon+nExon)->Donor = (LocalExon+l)->Donor;
 		(Exon+nExon)->Frame = ll;
@@ -155,12 +154,11 @@ long BuildZeroLengthExons(site *Acceptor, long nAcceptors,
 	      }
 	}
     }
-  
-  if (nExon >= HowMany)
-    printError("Too many zero-length exons: decrease RINTER parameter");
-  
+
   free(LocalExon);
-  
+
+  *ExonP = Exon;
+  *capP = cap;
   return(nExon);
 }
 

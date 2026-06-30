@@ -29,26 +29,6 @@
 
 #include "geneid.h"
 
-/* Grow the exon-sort table *buf so it can hold at least `need` entries,
-   preserving existing contents and zeroing the new ones (the table was
-   originally calloc'd, and unfilled slots must stay zeroed). */
-static void growExons(exonGFF** buf, long* cap, long need)
-{
-  long ncap;
-  exonGFF* tmp;
-
-  if (need <= *cap)
-    return;
-  ncap = *cap;
-  while (ncap < need)
-    ncap *= 2;
-  if ((tmp = (exonGFF*) realloc(*buf, ncap * sizeof(exonGFF))) == NULL)
-    printError("Not enough memory: growing exon sort table");
-  memset(tmp + *cap, 0, (ncap - *cap) * sizeof(exonGFF));
-  *buf = tmp;
-  *cap = ncap;
-}
-
 extern int RSS;
 extern int EVD;
 extern int UTR;
@@ -303,7 +283,7 @@ void SortExons(packExons* allExons,
   long right;
   long room;
   char mess[MAXSTRING];
-  /* Growable exon-sort table (grows on demand; see growExons) */
+  /* Growable exon-sort table (grows on demand; see GrowExonArray) */
   exonGFF* Exons = *pExons;
   long cap = *pcap;
 
@@ -595,7 +575,7 @@ void SortExons(packExons* allExons,
   /* FIRST SPLIT: Insert first artificial exon */
   if (l1 == lowerlimit)
     {
-      growExons(&Exons,&cap, 2);
+      GrowExonArray(&Exons,&cap, 2);
       InsertBeginExon(Exons,lowerlimit);
       n = 2;
     }
@@ -611,7 +591,7 @@ void SortExons(packExons* allExons,
       while (q != NULL)
 		{
 		  /* Grow the table on demand instead of capping at FSORT*NUMEXONS */
-		  growExons(&Exons,&cap, n+1);
+		  GrowExonArray(&Exons,&cap, n+1);
 		  /* Save the extracted exon */
 		  Exons[n].Acceptor = q->Exon->Acceptor;
 		  Exons[n].Donor = q->Exon->Donor;
@@ -644,7 +624,7 @@ void SortExons(packExons* allExons,
   /* FINISHING split: Insert last artificial exon */
   if (l2 == upperlimit)
 	{
-	  growExons(&Exons,&cap, n+2);
+	  GrowExonArray(&Exons,&cap, n+2);
 	  InsertEndExon(Exons, n, upperlimit + 1);
 	  n = n + 2;
 	}

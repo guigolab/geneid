@@ -37,21 +37,21 @@ long BuildSingles(site *Start, long nStarts,
                   site *Stop, long nStops,
                   long cutPoint, 
 				  char* Sequence,
-                  exonGFF *Exon) 
+                  exonGFF **ExonP, long* capP)
 {
-  /* Maximum allowed number of predicted single gene exons per fragment */
-  long HowMany;
-  
   int Frame;
   long i, j, js;
-  
+
+  /* Growable output array (grows on demand; capacity tracked by caller) */
+  exonGFF* Exon = *ExonP;
+  long cap = *capP;
+
   /* Final number of predicted single genes exons */
   long nSingles;
-  
+
   /* Main loop, for each Start codon searching the first Stop in frame */
-  HowMany = (MAXBACKUPSITES)? (long)(NUMEXONS/RSINGL) : NUMEXONS;
   for (i=0, j=0, nSingles=0;
-	   (i < nStarts) && (j<nStops) && (nSingles< HowMany);
+	   (i < nStarts) && (j<nStops);
 	   i++)
     {
       Frame = (Start+i)->Position % 3;
@@ -74,6 +74,7 @@ long BuildSingles(site *Start, long nStarts,
 		  if ( ((Stop+js)->Position + LENGTHCODON - (Start+i)->Position + 1)
 			   >= SINGLEGENELENGTH)
 			{
+			  GrowExonArray(&Exon,&cap,nSingles+1);
 			  (Exon + nSingles)->Acceptor = (Start+i);
 			  (Exon + nSingles)->Donor = (Stop+js);
 			  (Exon + nSingles)->Frame = 0;
@@ -86,9 +87,8 @@ long BuildSingles(site *Start, long nStarts,
 			}
 		}
     }
-  
-  if (nSingles >= HowMany)
-	printError("Too many single gene exons: decrease RSINGL parameter");
-  
+
+  *ExonP = Exon;
+  *capP = cap;
   return(nSingles);
 }

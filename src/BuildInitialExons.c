@@ -40,16 +40,17 @@ long BuildInitialExons(site *Start, long nStarts,
                        int MaxDonors,
 					   char* ExonType,
 					   char* Sequence,
-                       exonGFF *Exon,long nexons) 
+                       exonGFF **ExonP, long* capP)
 {
   /* Best exons built by using the current start codon */
   exonGFF *LocalExon;
   int nLocalExons, LowestLocalExon;
   float LowestLocalScore;
-  
-  /* Maximum allowed number of predicted initial exons per fragment */
-  long HowMany;
-  
+
+  /* Growable output array (grows on demand; capacity tracked by caller) */
+  exonGFF* Exon = *ExonP;
+  long cap = *capP;
+
   int Frame;
   long i, j, js, k, ks;
   int l;
@@ -65,9 +66,8 @@ long BuildInitialExons(site *Start, long nStarts,
   
   /* Main loop, forall start codon looking for donor sites... */
   /* ...until the first stop codon in frame is reached */
-  HowMany = (MAXBACKUPSITES)? (long)(nexons/RFIRST): nexons;
   for (i = 0, j = 0, k = 0, nExon = 0;
-       (nExon < HowMany) && (i < nStarts); i++)
+       (i < nStarts); i++)
 	{ 
 	  /* Reset the best local exons array */
 	  nLocalExons = 0;
@@ -143,8 +143,9 @@ long BuildInitialExons(site *Start, long nStarts,
 		} /* end while */
 	  
 	  /* Save the best exons beginning by the current start */
-	  for (l=0;(l<nLocalExons) && (nExon<HowMany);l++) 
+	  for (l=0; l<nLocalExons; l++)
 		{
+		  GrowExonArray(&Exon,&cap,nExon+1);
 		  Exon[nExon] = LocalExon[l];
 		  (Exon+nExon)->Frame = 0;
 		  (Exon+nExon)->Remainder = ((Exon+nExon)->Donor->Position -
@@ -161,12 +162,11 @@ long BuildInitialExons(site *Start, long nStarts,
          nExon++;
 		}
 	}
-  
-  if (nExon >= HowMany)
-	printError("Too many initial exons: decrease RFIRST parameter");
-  
+
   free(LocalExon);
-  
+
+  *ExonP = Exon;
+  *capP = cap;
   return(nExon);
 }
 

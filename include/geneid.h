@@ -167,6 +167,12 @@ A. DEFINITIONS
 /* capped (the old "increase FSORT" hard error is gone).                      */
 #define INITSORT 4096
 
+/* Initial capacity of the growable per-type exon Build arrays (packExons).   */
+/* Not a ceiling: each Build* grows its array on demand, so the old           */
+/* "decrease RFIRST/RINTER/..." hard errors and the NUMEXONS/Rxxx reservation */
+/* are gone.                                                                  */
+#define INITEXONS 4096
+
 /* Maximum number of isochores              */
 #define MAXISOCHORES 4           
 
@@ -550,7 +556,14 @@ typedef struct s_packExons
   long nUtr3InternalHalfExons;
   long nUtrTerminalHalfExons;
   long nUtrTerminalExons;
-  long nExons;                         
+  long nExons;
+  /* Allocated capacity of each growable per-type array (grown by Build*) */
+  long capInitialExons;
+  long capInternalExons;
+  long capZeroLengthExons;
+  long capTerminalExons;
+  long capSingles;
+  long capORFs;
 } packExons;
 
 typedef struct s_packGenes
@@ -806,43 +819,43 @@ long BuildInitialExons(site *Start, long nStarts,
                        int MaxDonors,
 		       char* ExonType,
 		       char* Sequence,
-                       exonGFF *Exon,long nexons );
+                       exonGFF **Exon, long* cap );
 
-long BuildInternalExons(site *Acceptor, long nAcceptors, 
+long BuildInternalExons(site *Acceptor, long nAcceptors,
                         site *Donor, long nDonors,
                         site *Stop, long nStops,
                         int MaxDonors,
 			char* ExonType,
 			char* Sequence,
-                        exonGFF* Exon,long nexons);
+                        exonGFF** Exon, long* cap);
 
-long BuildZeroLengthExons(site *Acceptor, long nAcceptors, 
+long BuildZeroLengthExons(site *Acceptor, long nAcceptors,
                         site *Donor, long nDonors,
                         site *Stop, long nStops,
                         int MaxDonors,
 			char* ExonType,
 			char* Sequence,
-                        exonGFF* Exon,long nexons); 
+                        exonGFF** Exon, long* cap);
 
-long BuildTerminalExons (site *Acceptor, long nAcceptors, 
+long BuildTerminalExons (site *Acceptor, long nAcceptors,
                          site *Stop, long nStops,
                          long LengthSequence,
                          long cutPoint,
 			 char* ExonType,
 			 char* Sequence,
-			 exonGFF* Exon,long nexons);
+			 exonGFF** Exon, long* cap);
 
-long BuildSingles(site *Start, long nStarts, 
+long BuildSingles(site *Start, long nStarts,
                   site *Stop, long nStops,
                   long cutPoint,
 		  char* Sequence,
-                  exonGFF *Exon);
+                  exonGFF **Exon, long* cap);
 
-long BuildORFs(site *Start, long nStarts, 
+long BuildORFs(site *Start, long nStarts,
 	       site *Stop, long nStops,
 	       long cutPoint,
 	       char* Sequence,
-	       exonGFF *Exon);
+	       exonGFF **Exon, long* cap);
 
 long BuildUTRExons(
 		   site *Start, long nStarts, 
@@ -855,6 +868,11 @@ long BuildUTRExons(
 packSites* RequestMemorySites();
 packExons* RequestMemoryExons();
 exonGFF* RequestMemorySortExons();
+
+/* Grow an exonGFF array *buf to hold at least `need` entries (realloc-double,
+   zeroing the new entries since the arrays were originally calloc'd). Shared
+   by the growable per-type Build arrays and the exon-sort table. */
+void GrowExonArray(exonGFF** buf, long* cap, long need);
 site* RequestMemorySortSites();
 gparam* RequestMemoryParams();
 packGenes* RequestMemoryGenes();

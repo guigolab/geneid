@@ -101,6 +101,26 @@ packSites* RequestMemorySites()
   return(allSites);
 }
 
+/* Grow an exonGFF array *buf to hold at least `need` entries. Doubles the
+   capacity, preserves existing contents, and zeroes the new entries (the
+   arrays were originally calloc'd, so unfilled slots must stay zeroed). */
+void GrowExonArray(exonGFF** buf, long* cap, long need)
+{
+  long ncap;
+  exonGFF* tmp;
+
+  if (need <= *cap)
+    return;
+  ncap = (*cap > 0) ? *cap : 1;
+  while (ncap < need)
+    ncap *= 2;
+  if ((tmp = (exonGFF*) realloc(*buf, ncap * sizeof(exonGFF))) == NULL)
+    printError("Not enough memory: growing exon array");
+  memset(tmp + *cap, 0, (ncap - *cap) * sizeof(exonGFF));
+  *buf = tmp;
+  *cap = ncap;
+}
+
 /* Allocating pack of exons (only in one sense) in memory */
 packExons* RequestMemoryExons()
 {
@@ -112,36 +132,40 @@ packExons* RequestMemoryExons()
        (struct s_packExons *) malloc(sizeof(struct s_packExons))) == NULL)
     printError("Not enough memory: pack of exons");  
 
+  /* Per-type exon arrays start small and grow on demand (see GrowExonArray /
+     the Build* functions); their capacity is tracked in cap* fields. */
   /* InitialExons */
-  HowMany = (long)(NUMEXONS/RFIRST);
-  if ((allExons->InitialExons = 
-       (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
+  allExons->capInitialExons = INITEXONS;
+  if ((allExons->InitialExons =
+       (exonGFF*) calloc(allExons->capInitialExons, sizeof(exonGFF))) == NULL)
     printError("Not enough memory: first exons");
-      
+
   /* InternalExons */
-  HowMany = (long)(NUMEXONS/RINTER); 
-  if ((allExons->InternalExons = 
-       (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
+  allExons->capInternalExons = INITEXONS;
+  if ((allExons->InternalExons =
+       (exonGFF*) calloc(allExons->capInternalExons, sizeof(exonGFF))) == NULL)
     printError("Not enough memory: internal exons");
 
   /* ZeroLengthExons */
-  HowMany = (long)(NUMEXONS/RINTER); 
-  if ((allExons->ZeroLengthExons = 
-       (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
+  allExons->capZeroLengthExons = INITEXONS;
+  if ((allExons->ZeroLengthExons =
+       (exonGFF*) calloc(allExons->capZeroLengthExons, sizeof(exonGFF))) == NULL)
     printError("Not enough memory: zero length exons");
-         
+
   /* TerminalExons */
-  HowMany = (long)(NUMEXONS/RTERMI);
-  if ((allExons->TerminalExons = 
-       (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
+  allExons->capTerminalExons = INITEXONS;
+  if ((allExons->TerminalExons =
+       (exonGFF*) calloc(allExons->capTerminalExons, sizeof(exonGFF))) == NULL)
     printError("Not enough memory: terminal exons");
 
   /* SingleExons */
-  HowMany = (long)(NUMEXONS/RSINGL);
-  if ((allExons->Singles = 
-       (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
+  allExons->capSingles = INITEXONS;
+  if ((allExons->Singles =
+       (exonGFF*) calloc(allExons->capSingles, sizeof(exonGFF))) == NULL)
     printError("Not enough memory: single genes");
-  
+
+  allExons->capORFs = 0;
+
   if (UTR){
     /* UTR Exons */
     HowMany = (long)(NUMEXONS/RUTR);
@@ -184,9 +208,9 @@ packExons* RequestMemoryExons()
   /* IF Scan ORF is switched on... */
   if (scanORF)
     {
-	  HowMany = (long)(NUMEXONS/RORF);
-	  if ((allExons->ORFs = 
-		   (exonGFF*) calloc(HowMany, sizeof(exonGFF))) == NULL)
+	  allExons->capORFs = INITEXONS;
+	  if ((allExons->ORFs =
+		   (exonGFF*) calloc(allExons->capORFs, sizeof(exonGFF))) == NULL)
         printError("Not enough memory: Open Reading Frames");
     }
   allExons->nInitialExons = 0;
