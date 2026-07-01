@@ -27,6 +27,24 @@
 
 #include "geneid.h"
 
+/* This file implements geneid's "coding potential" score for an exon: how
+ * much the exon's own sequence looks like real coding DNA, independent of
+ * its splice/start/stop signal scores (those are scored where they are
+ * predicted, in Build*.c). It is a 2nd-order-ish Markov chain trained per
+ * isochore (see readparam.c, which loads the OligoLogsIni/OligoLogsTran log-
+ * likelihood tables) and applied here in two passes:
+ *   MarkovScan()  pre-scans the WHOLE fragment once per isochore, filling
+ *                 OligoDistIni/OligoDistTran with (accumulated) log-odds
+ *                 for every position and reading frame.
+ *   Score()       then scores each candidate exon in O(1) by taking the
+ *                 difference of two pre-scanned accumulated sums, adds the
+ *                 homology (HSP) and RNA-seq read-count scores, and filters
+ *                 out exons below the isochore's cutoffs.
+ * ScoreExons() is the entry point manager.c calls once per fragment/strand:
+ * it runs MarkovScan for every isochore, then Score for every exon-type
+ * array in allExons. */
+
+
 extern float MRM;
 extern int UTR;
 extern int scanORF;
@@ -66,15 +84,21 @@ int TRANS[] = {
 
 /* Translation from string into integer: for oligonucleotides with this length */
 /* s: sequence; ls: length of sequence; cardinal: length of the alphabet */
+/* Encodes the ls-mer at s as a single base-`cardinal` number (each base's
+   TRANS value, 0..3 for A/C/G/T, is a "digit"; N/other maps to 4, which is
+   why callers check index/intword against the model's dimension and treat
+   an out-of-range result as "unknown oligo" -- see MarkovScan below). This
+   gives every distinct oligomer a unique index into the OligoLogsIni/
+   OligoLogsTran tables. */
 long OligoToInt(char* s, int ls, int cardinal)
-{ 
+{
   long index;
   int weight;
   short i;
-  
+
   index = 0;
   weight = 1;
-  
+
   for ( i=ls-1; i>=0; --i )
     {
       index += weight*TRANS[(int)s[i]];
@@ -193,11 +217,24 @@ void GCScan(char* s, packGC* GCInfo, long l1, long l2)
 /* Compute the coding potential statistic for a sequence: pre-processing */
 /* There are Initial (penta) and Transition (hexa) score matrices: */
 /* Transition scores for every position are accumulated sums */
+/* Precomputes, for one isochore, the per-base coding-potential contribution
+   at every position of the fragment [l1,l2] -- so later, scoring any
+   candidate exon is just a table difference (see Score() below) instead of
+   rescanning its sequence. Two tables are filled:
+     OligoDistIni[codonPosition][pos]  the model's log-odds for the
+        OligoLength-mer (an "initial", order-0 oligomer score) starting at
+        pos, looked up per codon position (0/1/2) since the model is
+        trained separately for each.
+     OligoDistTran[frame][pos]  the RUNNING SUM, up to and including pos, of
+        the model's log-odds for the (OligoLength+1)-mer ending at pos (a
+        higher-order "transition" score), one running sum per reading frame
+        so Score() can get the sum over any sub-range by subtracting two
+        values. */
 void MarkovScan(char* sequence,
                 gparam* gp,
-                float* OligoDistIni[3], 
+                float* OligoDistIni[3],
                 float* OligoDistTran[3],
-                long l1, long l2) 
+                long l1, long l2)
 {
   int OligoLength_1;
   long i;
@@ -211,26 +248,28 @@ void MarkovScan(char* sequence,
       /* Indexing the initialMarkov with the oligonucleotide */
       intword=OligoToInt(sequence+i,gp->OligoLength,4);
 
-      /* Assign the pentanucleotide score depending on the codon position */
+      /* Out-of-range (an N or other ambiguous base was in this oligomer):
+	 use the model's null/unknown-oligo score instead of a table lookup. */
       if (intword>=gp->OligoDim)
 		for (x=0;x<3;x++)
 		  OligoDistIni[x][i-l1] = NULL_OLIGO_SCORE;
-      else 
-		for (x=0;x<3;x++) 
+      else
+		for (x=0;x<3;x++)
 		  OligoDistIni[x][i-l1] = gp->OligoLogsIni[x][intword];
-    }    
-  
+    }
+
   /* Hexanucleotides score: transition values for Markov chains */
   /* Accumulated sum is stored for every position and codon position */
   OligoLength_1=gp->OligoLength+1;
-  
-  /* For every codon position computing the accumulated sum of scores */
+
+  /* For every reading frame, accumulate log-odds along the whole fragment so
+     OligoDistTran[x][pos] holds the running sum from l1 up to pos. */
   for (x=0; x<FRAMES; x++)
     {
       previousScore = 0.0;
       /* Codon position and frame are different properties of exons */
       cp = (3-x) % 3;
-      
+
       /* Screening the whole sequence to accumulate the sum in every base */
       for (i=l1; (i<=l2 && *(sequence+i+OligoLength_1 - 1)) ; i++)
 		{
@@ -255,9 +294,18 @@ void MarkovScan(char* sequence,
 
 
 /* Homology to protein score: using homology information (blast HSPs) */
-float ScoreHSPexon(exonGFF* exon, 
-				   int Strand, 
-				   packExternalInformation* external, 
+/* Like MarkovScan's tables, external->sr[frame][pos] is an accumulated sum
+   (built once per fragment, before scoring begins -- see HSPScan, currently
+   disabled below in ScoreExons) of per-base homology support, indexed by a
+   "true frame" derived from the sequence start so the running sum lines up
+   with codon boundaries; this exon's score is again just the difference of
+   the sum at its two ends. When UTR read-coverage mode is on, it further
+   subtracts a local background level (the average per-base score in a
+   flanking window) so a strong local peak stands out rather than a whole
+   generally-well-covered region scoring high uniformly. */
+float ScoreHSPexon(exonGFF* exon,
+				   int Strand,
+				   packExternalInformation* external,
 				   long l1, long l2)
 {
   int index;
@@ -321,10 +369,14 @@ float ScoreHSPexon(exonGFF* exon,
   }
   return(Score);
 }
-/* Homology to protein score: using homology information (blast HSPs) */
-float GetReadCount(exonGFF* exon, 
-				   int Strand, 
-				   packExternalInformation* external, 
+/* RNA-seq read-support score for this exon (from external->readcount, an
+   accumulated sum over the fragment exactly like external->sr above).
+   Stored into exonGFF.R, which does not itself feed scoreTotal below --
+   it is only used later to report the exon's rpkm= GFF3 attribute
+   (see PrintExons.c). */
+float GetReadCount(exonGFF* exon,
+				   int Strand,
+				   packExternalInformation* external,
 				   long l1, long l2)
 {
   int index;
@@ -354,6 +406,11 @@ float GetReadCount(exonGFF* exon,
   return(Score);
 }
 /* Computing the score of a list of exons from (Sites, Markov, homology) */
+/* Scores every exon in Exons[0..nExons) in place, compacting the survivors
+   (those clearing both cutoffs below) down to Exons[0..n) and returning n --
+   this is how exon arrays get filtered, not just scored. Each exon may pick
+   a DIFFERENT isochore (via its local G+C%), since geneid supports several
+   isochores per input sequence. */
 long Score(exonGFF *Exons,
            long nExons,
            long l1,
@@ -366,21 +423,21 @@ long Score(exonGFF *Exons,
 {
   long iniExon, endExon, i, j;
   int exonLen;
-  long inigc, endgc;
+  long inigc, endgc;        /* the +/-ISOCONTEXT window used to estimate local G+C% */
   short frame;
   short codonPosition;
-  long n;
-  float scoreMarkov;
-  float scoreHSP;
-  float exonR;
-  float scoreTotal;
+  long n;                   /* count of survivor exons written back into Exons[] */
+  float scoreMarkov;        /* this exon's coding-potential score (from MarkovScan's tables) */
+  float scoreHSP;           /* this exon's homology (or, in UTR mode, background-corrected read) score */
+  float exonR;              /* raw RNA-seq read-support value, just for the rpkm= report (see GetReadCount) */
+  float scoreTotal;         /* site + coding + homology, weighted by this isochore/exon-type's paramexons */
   int OligoLength_1;
-  float ExonWeight;
+  float ExonWeight;         /* per-exon-type constant bonus/penalty (tunable via -E, and -V for U12) */
   float percentGC;
-  int currentIsochore;
-  paramexons* p;
+  int currentIsochore;      /* which of the isochores[] this exon's local G+C% selects */
+  paramexons* p;            /* the exon-type-specific score weights/cutoffs for currentIsochore */
   int OligoLength;
-  gparam* gp;
+  gparam* gp;               /* currentIsochore's full parameter set (profiles, Markov tables, ...) */
 /*   char mess[MAXSTRING]; */
 /*   float million = 1000000; */
 /*   int u12correction; */
@@ -441,7 +498,10 @@ long Score(exonGFF *Exons,
 /* 		p = gp->utr; */
       
       /* 1. Coding potential score: initial plus accumulated sums */
-      /* Checkpoint for exons shorter than a minimum value */
+      /* Checkpoint for exons shorter than a minimum value, and for exon
+	 types that carry no real coding sequence of their own (UTR
+	 exons/introns fall through to here, keeping the "default: UTR"
+	 params set above but skipping the lookup below entirely) */
       if ((exonLen < MINEXONLENGTH)
 	  || (strcmp((Exons+i)->Type,sFIRST)&&strcmp((Exons+i)->Type,sINTERNAL)&&strcmp((Exons+i)->Type,sTERMINAL)&&strcmp((Exons+i)->Type,sSINGLE)&&strcmp((Exons+i)->Type,sORF))
 
@@ -451,19 +511,24 @@ long Score(exonGFF *Exons,
       }
       else
 	{
+	  /* This is the payoff of MarkovScan's pre-scan: look up the initial
+	     (OligoLength-mer) score at the exon's start, then add the
+	     transition-table difference between its start and end -- the
+	     accumulated-sum trick turns "sum the per-base score across this
+	     whole exon" into two table reads, regardless of exon length. */
 	  scoreMarkov = 0.0;
 	  frame = (Exons+i)->Frame;
-         
+
 	  /* Translate frame to position into codon */
 	  codonPosition = (3 - frame) % 3;
-   
+
 	  /* Assign initial probability: pentanucleotide */
 	  scoreMarkov += gp->OligoDistIni[codonPosition][iniExon];
-         
+
 	  /* Which one of the three combinations? */
 	  j = (iniExon + (3-codonPosition)) % 3;
-   
-	  /* Accumulating transition probabilities: hexanucleotides */    
+
+	  /* Accumulating transition probabilities: hexanucleotides */
 	  scoreMarkov +=
 	    gp->OligoDistTran[j][(endExon>OligoLength_1)?endExon-OligoLength_1+1 : endExon]
 	    - gp->OligoDistTran[j][(iniExon)? iniExon - 1 : 0];
@@ -513,8 +578,10 @@ long Score(exonGFF *Exons,
 		+ (p->HSPFactor * scoreHSP); 
 	    }
 	  }
-	  /* Second cutoff- final score */
-	  if (scoreTotal >= p->ExonCutoff) 
+	  /* Second cutoff- final score: exons failing this are dropped (n is
+	     not advanced, so Exons[i] is simply overwritten by the next
+	     survivor -- this is the in-place compaction mentioned above). */
+	  if (scoreTotal >= p->ExonCutoff)
 	    {
 	      Exons[n]=Exons[i];
 
