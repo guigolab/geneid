@@ -45,8 +45,8 @@ A. DEFINITIONS
 *************************************************************************/
 
 /* The name of the game                     */
-#define VERSION   "geneid_v1.4"  
-#define SITES     "geneid_v1.4"  
+#define VERSION   "geneid_v1.5"
+#define SITES     "geneid_v1.5"
 #define EXONS     "geneid_v1.4"       
 #define EVIDENCE  "evidence"           
 
