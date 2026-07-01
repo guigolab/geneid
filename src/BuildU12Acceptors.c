@@ -31,9 +31,6 @@
 /* Function TRANS: char -> integer such that A=0, C=1, G=2 and T/U=2 */
 extern int TRANS[];
 
-/* Maximum allowed number of generic sites */
-extern long NUMSITES;
-
 /* Additional profiles */
 extern int BP;
 extern int PPT;
@@ -141,14 +138,14 @@ long  BuildU12Acceptors(char* s,
 			profile* u12_p,
 			profile* u12bp,
 			profile* ppt,
-			site* st, 
-			long l1, 
+			site** stP,
+			long l1,
 			long l2,
 			long ns,
-			long nsites,
+			long* capP,
 			int Strand,
-			packExternalInformation* external) 
-{ 
+			packExternalInformation* external)
+{
   int i,j;
   char* sOriginal;
   float score;
@@ -160,6 +157,9 @@ long  BuildU12Acceptors(char* s,
   long left,right;
   int index;
   float cutoff;
+  /* Growable output array (grows on demand; capacity tracked by caller) */
+  site* st = *stP;
+  long cap = *capP;
 
   /* Back-up the origin of the sequence */
   sOriginal = s;
@@ -171,9 +171,9 @@ long  BuildU12Acceptors(char* s,
   /* 1. Searching sites between beginning of the sequence and p->offset */
   if (!l1)
     {
-      for (is = 0; is < u12_p->offset && (ns<NUMSITES); is++)
+      for (is = 0; is < u12_p->offset; is++)
 	{ 	  
-	  if (ns<NUMSITES){
+	  {
 		  	  
 	    scorePPT = 0.0;
 	    scoreBP = 0.0;
@@ -194,6 +194,7 @@ long  BuildU12Acceptors(char* s,
 	      {
 				  
 		/* Using additional profiles */
+		GrowSiteArray(&st,&cap,ns+1);
 		scoreBP = ComputeU12BranchProfile(sOriginal,u12_p->offset-is,l2,u12bp,&st[ns]);
 		if (scoreBP >=u12bp->cutoff) {
 		if (PPT)
@@ -237,9 +238,9 @@ long  BuildU12Acceptors(char* s,
   if (u12_p->order == 0)
     {
       /* discovering splice sites with current profile */
-      while (*(s+u12_p->dimension-1) && (is < right- left + 1) && (ns<NUMSITES))
+      while (*(s+u12_p->dimension-1) && (is < right- left + 1))
 	{ 	
-	  if (ns<NUMSITES){
+	  {
 
 	    scorePPT = 0.0;
 	    scoreBP = 0.0;
@@ -258,6 +259,7 @@ long  BuildU12Acceptors(char* s,
 	    if (score >= cutoff) 
 	      {
 		/* Using additional profiles */
+		GrowSiteArray(&st,&cap,ns+1);
 		scoreBP = ComputeU12BranchProfile(sOriginal,left + is + u12_p->offset,l2,u12bp,&st[ns]);  
 		if (scoreBP >=u12bp->cutoff) {	  
 		if (PPT)
@@ -295,9 +297,9 @@ long  BuildU12Acceptors(char* s,
     {
 
       /* discovering splice sites with current profile */
-      while (*(s+u12_p->dimension-1) && (is < right- left + 1) && (ns<NUMSITES))
+      while (*(s+u12_p->dimension-1) && (is < right- left + 1))
 	{ 		
-	  if (ns<NUMSITES){
+	  {
 	    /*Do for U12GTAG*/
 			  
 	    scorePPT = 0.0;
@@ -318,6 +320,7 @@ long  BuildU12Acceptors(char* s,
 	    if (score >= cutoff) 
 	      {
 		/* Using additional profiles */
+		GrowSiteArray(&st,&cap,ns+1);
 		scoreBP = ComputeU12BranchProfile(sOriginal,left + is + u12_p->offset,l2,u12bp,&st[ns]);
 		if (scoreBP >=u12bp->cutoff) {	  
 		if (PPT)
@@ -354,9 +357,9 @@ long  BuildU12Acceptors(char* s,
   else
     {
       /* discovering splice sites with current profile */
-      while (*(s+u12_p->dimension-1) && (is < right- left + 1) && (ns<NUMSITES))
+      while (*(s+u12_p->dimension-1) && (is < right- left + 1))
 	{ 
-	  if (ns<NUMSITES){
+	  {
 			  
 	    scorePPT = 0.0;
 	    scoreBP = 0.0;
@@ -376,6 +379,7 @@ long  BuildU12Acceptors(char* s,
 	    if (score >= cutoff) 
 	      {
 		/* Using additional profiles */
+		GrowSiteArray(&st,&cap,ns+1);
 		scoreBP = ComputeU12BranchProfile(sOriginal,left + is + u12_p->offset,l2,u12bp,&st[ns]);
 		if (scoreBP >=u12bp->cutoff) {
 		if (PPT)
@@ -407,11 +411,9 @@ long  BuildU12Acceptors(char* s,
 	  s++;
 	}
     }
-  if (ns >= nsites)
-    printError("Too many predicted sites: decrease RSITES parameter");
-  
-  return(ns);  
-
+  *stP = st;
+  *capP = cap;
+  return(ns);
 }
 
  

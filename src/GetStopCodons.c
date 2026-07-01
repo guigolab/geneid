@@ -32,18 +32,18 @@
 /* Function TRANS: char -> integer such that A=0, C=1, G=2 and T/U=2 */
 extern int TRANS[];
 
-/* Maximum allowed number of generic sites */
-extern long NUMSITES;
-
 long GetStopCodons(char* s,
                    profile* p,
-                   site* sc, 
-                   long l1, 
-                   long l2) 
+                   site** scP, long* capP,
+                   long l1,
+                   long l2)
 {
   long ns,is;
   float score;
   int i,j;
+  /* Growable output array (grows on demand; capacity tracked by caller) */
+  site* sc = *scP;
+  long cap = *capP;
   
   /* Strings defining Stop codons */
   static char *stop[] =
@@ -63,7 +63,7 @@ long GetStopCodons(char* s,
   /* 1. Searching sites between beginning of the sequence and p->offset */
   if (!l1)
     {
-      for (is = 0; is < p->offset && (ns<NUMSITES); is++)
+      for (is = 0; is < p->offset; is++)
 		{
 		  score=0.0;
 		  /* Applying part of the profile */
@@ -80,6 +80,7 @@ long GetStopCodons(char* s,
 		  
 		  if (score >= p->cutoff) 
 			{
+			  GrowSiteArray(&sc,&cap,ns+1);
 			  sc[ns].Position = is + p->order;
 			  sc[ns].Score=score;
 			  sc[ns].class=U2;
@@ -99,7 +100,7 @@ long GetStopCodons(char* s,
   if (p->order==0)
     {
       /* discovering splice sites with current profile */
-      while (*(s+p->dimension) && (is < right - left + 1) && (ns<NUMSITES))  
+      while (*(s+p->dimension) && (is < right - left + 1))  
 		{
 		  /* The candidate region must contain the STOP in the right position */
 		  strncpy(codon,s+p->offset+1,LENGTHCODON);
@@ -123,6 +124,7 @@ long GetStopCodons(char* s,
 			  if (score >= p->cutoff) 
 				{
 				  /* Position given is last coding position before Stop */ 
+				  GrowSiteArray(&sc,&cap,ns+1);
 				  sc[ns].Position=left + is + p->offset;
 				  sc[ns].Score=score;
 				  sc[ns].class=U2;
@@ -137,7 +139,7 @@ long GetStopCodons(char* s,
   else if (p->order==1)
     {
       /* discovering splice sites with current profile */
-      while (*(s+p->dimension) && (is < right - left + 1) && (ns<NUMSITES))  
+      while (*(s+p->dimension) && (is < right - left + 1))  
 		{
 		  /* The candidate region must contain the STOP in the right position */
 		  strncpy(codon,s+p->offset+1,LENGTHCODON);
@@ -161,6 +163,7 @@ long GetStopCodons(char* s,
 			  if (score >= p->cutoff) 
 				{
 				  /* Position given is last coding position before Stop */ 
+				  GrowSiteArray(&sc,&cap,ns+1);
 				  sc[ns].Position=left + is + p->offset;
 				  sc[ns].Score=score;
 				  sc[ns].class=U2;
@@ -175,7 +178,7 @@ long GetStopCodons(char* s,
   else
     {
 	  /* discovering splice sites with current profile */
-      while (*(s+p->dimension) && (is < right - left + 1) && (ns<NUMSITES))  
+      while (*(s+p->dimension) && (is < right - left + 1))  
 		{
 		  /* The candidate region must contain the STOP in the right position */
 		  strncpy(codon,s+p->offset+1,LENGTHCODON);
@@ -199,6 +202,7 @@ long GetStopCodons(char* s,
 			  if (score >= p->cutoff) 
 				{
 				  /* Position given is last coding position before Stop */ 
+				  GrowSiteArray(&sc,&cap,ns+1);
 				  sc[ns].Position=left + is + p->offset;
 				  sc[ns].Score=score;
 				  sc[ns].class=U2;
@@ -216,7 +220,7 @@ long GetStopCodons(char* s,
       s=(s-is);
       is+=p->offset;
       
-      while (*(s+is) && (ns<NUMSITES))  
+      while (*(s+is))  
 		{
 		  /* The candidate region must contain the STOP in the right position */
 		  strncpy(codon,(s+is),LENGTHCODON);
@@ -225,6 +229,7 @@ long GetStopCodons(char* s,
 		  if (!strcmp(codon,stop[0]) || !strcmp(codon,stop[1]) || !strcmp(codon,stop[2]))
 			{
 			  /* Position given is last coding position before Stop */
+			  GrowSiteArray(&sc,&cap,ns+1);
 			  sc[ns].Position=is-1;  
 			  sc[ns].Score=0;
 			  sc[ns].class=U2;
@@ -234,8 +239,7 @@ long GetStopCodons(char* s,
 		}
     }
   
-  if (ns >= NUMSITES)
-    printError("Too many predicted sites: decrease RSITES parameter");
-  
+  *scP = sc;
+  *capP = cap;
   return(ns);
 }

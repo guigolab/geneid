@@ -133,7 +133,7 @@ void  manager(char *Sequence,
   printMess ("Computing sites ...");
 
   allSites->nStartCodons =
-    GetSitesWithProfile(Sequence,gp->StartProfile,allSites->StartCodons,l1a,l2a);
+    GetSitesWithProfile(Sequence,gp->StartProfile,&allSites->StartCodons,&allSites->capStartCodons,l1a,l2a);
   sprintf(mess, "Start Codons \t\t%8ld", allSites->nStartCodons);
   printRes(mess);
   
@@ -147,8 +147,8 @@ void  manager(char *Sequence,
 		   gp->AcceptorProfile,
 		   gp->PolyPTractProfile,
 		   gp->BranchPointProfile,
-		   allSites->AcceptorSites,
-		   l1a,l2a,numAccsites,NUMSITES,Strand,external);
+		   &allSites->AcceptorSites,
+		   l1a,l2a,numAccsites,&allSites->capAcceptorSites,Strand,external);
   
   sprintf(mess, "Acceptor Sites \t\t%8ld", allSites->nAcceptorSites - numAccsites);
   numAccsites = allSites->nAcceptorSites;
@@ -161,8 +161,8 @@ void  manager(char *Sequence,
 					   gp->U12gtagAcceptorProfile,
 					   gp->U12BranchPointProfile,
 					   gp->PolyPTractProfile,
-					   allSites->AcceptorSites,
-					   l1a,l2a,numAccsites,NUMSITES,Strand,external);
+					   &allSites->AcceptorSites,
+					   l1a,l2a,numAccsites,&allSites->capAcceptorSites,Strand,external);
 
 	  sprintf(mess, "U12gtag Acceptor Sites \t%8ld", allSites->nAcceptorSites - numAccsites);
 	  numAccsites = allSites->nAcceptorSites;
@@ -175,8 +175,8 @@ void  manager(char *Sequence,
 					   gp->U12atacAcceptorProfile,
 					   gp->U12BranchPointProfile,
 					   gp->PolyPTractProfile,
-					   allSites->AcceptorSites,
-					   l1a,l2a,numAccsites,NUMSITES,Strand,external);
+					   &allSites->AcceptorSites,
+					   l1a,l2a,numAccsites,&allSites->capAcceptorSites,Strand,external);
 
 	  sprintf(mess, "U12atac Acceptor Sites \t%8ld", allSites->nAcceptorSites - numAccsites);
 	  numAccsites = allSites->nAcceptorSites;
@@ -186,57 +186,57 @@ void  manager(char *Sequence,
   long numDonsites = 0;
 
   allSites->nDonorSites =
-    /* BuildDonors(Sequence,U2,sU2type,sU2, gp->DonorProfile,allSites->DonorSites,l1b,l2b,numDonsites,NUMSITES); */
-    BuildDonors(Sequence,U2,sU2type,sU2, gp->DonorProfile,allSites->DonorSites,l1b,l2b,numDonsites,NUMSITES,Strand,external);
+    /* BuildDonors(Sequence,U2,sU2type,sU2, gp->DonorProfile,&allSites->DonorSites,l1b,l2b,numDonsites,&allSites->capDonorSites); */
+    BuildDonors(Sequence,U2,sU2type,sU2, gp->DonorProfile,&allSites->DonorSites,l1b,l2b,numDonsites,&allSites->capDonorSites,Strand,external);
   sprintf (mess,"Donor Sites \t\t%8ld", allSites->nDonorSites);
   numDonsites = allSites->nDonorSites;
   printRes(mess);
 
   if (U12GTAG){
 	  allSites->nDonorSites =
-	    BuildDonors(Sequence,U12gtag,sU12type,sU12gtag, gp->U12gtagDonorProfile,allSites->DonorSites,l1b,l2b,numDonsites,NUMSITES,Strand,external);
+	    BuildDonors(Sequence,U12gtag,sU12type,sU12gtag, gp->U12gtagDonorProfile,&allSites->DonorSites,l1b,l2b,numDonsites,&allSites->capDonorSites,Strand,external);
 	  sprintf (mess,"U12gtag Donor Sites \t%8ld", allSites->nDonorSites - numDonsites);
 	  numDonsites = allSites->nDonorSites;
 	  printRes(mess);
   }
   if (U12ATAC){
 	  allSites->nDonorSites =
-	    BuildDonors(Sequence, U12atac,sU12type,sU12atac, gp->U12atacDonorProfile,allSites->DonorSites,l1b,l2b,numDonsites,NUMSITES,Strand,external);
+	    BuildDonors(Sequence, U12atac,sU12type,sU12atac, gp->U12atacDonorProfile,&allSites->DonorSites,l1b,l2b,numDonsites,&allSites->capDonorSites,Strand,external);
 	  sprintf (mess,"U12atac Donor Sites \t%8ld", allSites->nDonorSites - numDonsites);
 	  numDonsites = allSites->nDonorSites;
 	  printRes(mess);
   }
   if (U2GCAG){
 	  allSites->nDonorSites =
-	    BuildDonors(Sequence,U2, sU2type,sU2gcag, gp->U2gcagDonorProfile,allSites->DonorSites,l1b,l2b,numDonsites,NUMSITES,Strand,external);
+	    BuildDonors(Sequence,U2, sU2type,sU2gcag, gp->U2gcagDonorProfile,&allSites->DonorSites,l1b,l2b,numDonsites,&allSites->capDonorSites,Strand,external);
 	  sprintf (mess,"U2gcag Donor Sites \t%8ld", allSites->nDonorSites - numDonsites);
 	  numDonsites = allSites->nDonorSites;
 	  printRes(mess);
   }  
   if (U2GTA){
 	  allSites->nDonorSites =
-    	BuildDonors(Sequence,U2,sU2type,sU2gta, gp->U2gtaDonorProfile,allSites->DonorSites,l1b,l2b,numDonsites,NUMSITES,Strand,external);
+    	BuildDonors(Sequence,U2,sU2type,sU2gta, gp->U2gtaDonorProfile,&allSites->DonorSites,l1b,l2b,numDonsites,&allSites->capDonorSites,Strand,external);
 	  sprintf (mess,"U2gta Donor Sites \t%8ld", allSites->nDonorSites - numDonsites);
 	  numDonsites = allSites->nDonorSites;
 	  printRes(mess);
   }  
   if (U2GTG){
 	  allSites->nDonorSites =
-    	BuildDonors(Sequence,U2,sU2type,sU2gtg, gp->U2gtgDonorProfile,allSites->DonorSites,l1b,l2b,numDonsites,NUMSITES,Strand,external);
+    	BuildDonors(Sequence,U2,sU2type,sU2gtg, gp->U2gtgDonorProfile,&allSites->DonorSites,l1b,l2b,numDonsites,&allSites->capDonorSites,Strand,external);
 	  sprintf (mess,"U2gtg Donor Sites \t%8ld", allSites->nDonorSites - numDonsites);
 	  numDonsites = allSites->nDonorSites;
 	  printRes(mess);
   }  
   if (U2GTY){
 	  allSites->nDonorSites =
-    	BuildDonors(Sequence,U2,sU2type,sU2gty, gp->U2gtyDonorProfile,allSites->DonorSites,l1b,l2b,numDonsites,NUMSITES,Strand,external);
+    	BuildDonors(Sequence,U2,sU2type,sU2gty, gp->U2gtyDonorProfile,&allSites->DonorSites,l1b,l2b,numDonsites,&allSites->capDonorSites,Strand,external);
 	  sprintf (mess,"U2gty Donor Sites \t%8ld", allSites->nDonorSites - numDonsites);
 	  numDonsites = allSites->nDonorSites;
 	  printRes(mess);
   }  
 
   allSites->nStopCodons =
-	GetStopCodons(Sequence,gp->StopProfile, allSites->StopCodons,l1c,l2c);
+	GetStopCodons(Sequence,gp->StopProfile, &allSites->StopCodons,&allSites->capStopCodons,l1c,l2c);
   sprintf (mess,"Stop Codons \t\t%8ld", allSites->nStopCodons);
   printRes(mess);
   
@@ -250,18 +250,18 @@ void  manager(char *Sequence,
   allSites->nTE=0;
   if (UTR){
     allSites->nTS =
-      GetTSS(allSites->TS,allSites->AcceptorSites, allSites->nAcceptorSites, external,hsp,Strand,LengthSequence,l1,l2);
+      GetTSS(&allSites->TS,&allSites->capTS,allSites->AcceptorSites, allSites->nAcceptorSites, external,hsp,Strand,LengthSequence,l1,l2);
     sprintf(mess, "TS \t\t\t%8ld", allSites->nTS);
     printRes(mess);
     long numTE = 0;
     if(PAS){allSites->nTE =
-	GetSitesWithProfile(Sequence,gp->PolyASignalProfile,allSites->TE,l1,l2);
+	GetSitesWithProfile(Sequence,gp->PolyASignalProfile,&allSites->TE,&allSites->capTE,l1,l2);
       sprintf(mess, "PolyA Signals \t\t%8ld", allSites->nTE);
       numTE = allSites->nTE;
       printRes(mess);
     }
     allSites->nTE =
-      GetTES(allSites->TE,allSites->DonorSites, allSites->nDonorSites,external,hsp,Strand,LengthSequence,l1,l2,numTE);
+      GetTES(&allSites->TE,&allSites->capTE,allSites->DonorSites, allSites->nDonorSites,external,hsp,Strand,LengthSequence,l1,l2,numTE);
     sprintf(mess, "TE \t\t\t%8ld", allSites->nTE);
     printRes(mess);
   }
