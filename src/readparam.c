@@ -77,6 +77,17 @@ void readHeader(FILE* File, char* line)
     printError("Parameter file: unexpected end of reading");
 }
 
+/* Loads p->transitionValues[0..dimension) from the .param file and fills in
+   the entries for oligomers containing an N. The file only lists scores for
+   the 4^(order+1) pure-ACGT oligomers (in a fixed A,C,G,T order per
+   position); this function reads those, then SYNTHESIZES every entry that
+   involves at least one N as the average of its 4 pure-base variants (e.g.
+   for order 1: AN = avg(AA,AC,AG,AT), NA = avg(AA,CA,GA,TA), NN = avg of all
+   4, ...), so a lookup with OligoToInt's 5-letter (A/C/G/T/N) index is
+   always defined -- see the profile struct comment in geneid.h. The three
+   cases below (order 0/1/2) are the same idea at 5/25/125 combinations per
+   position; order 2's case nests one more level of N-substitution (X.N,
+   .N., N..) to reach all 125. */
 void SetProfile(profile* p, FILE* RootFile, char* signal)
 {
   int i,j,x,y;
@@ -351,6 +362,18 @@ void ReadProfile(FILE* RootFile, profile* p, char* signal, int H)
 }
 
 /* Read information useful to predict Acceptor splice sites */
+/* Reads this isochore's splice-site section of the .param file: a run of
+   OPTIONAL profiles (each introduced by its own header line, in any order,
+   any subset), terminated by a fixed required profile, for each side:
+     acceptor side:  {PPT, BP, U12BP, U12gtagACC, U12atacACC}* then ACC
+     donor side:     {U12gtagDON, U12atacDON, U2gcagDON, U2gtaDON,
+                       U2gtyDON}* then DON
+   (the while loops below just walk headers until they see the fixed one).
+   Finally, U12 splicing is only switched on if ALL THREE of its supporting
+   profiles were present (branch point + both acceptor and donor for that
+   subtype) -- see the u12bp/u12gtagAcc/... counters and the check at the
+   end -- and each subtype enabled adds one more DP splice-class (see
+   SPLICECLASSES / packGenes->Ga in genamic.c). */
 void ReadProfileSpliceSites(FILE* RootFile, gparam* gp)
 {
   char line[MAXLINE];
@@ -364,7 +387,7 @@ void ReadProfileSpliceSites(FILE* RootFile, gparam* gp)
   int u12atacDon=0;
 
 
-  /* A. Optional profiles: U12GTAG, U12ATAC Donor, acceptor and branch points 
+  /* A. Optional profiles: U12GTAG, U12ATAC Donor, acceptor and branch points
   and U2 branch points and Poly Pyrimidine Tract */
   
   readHeader(RootFile,line);
@@ -686,7 +709,8 @@ void ReadIsochore(FILE* RootFile, gparam* gp)
 		}
   while(strcasecmp(header,sExon_weights)&& strcmp(header,"Exon_weigths"))
   { 
-	 /* 1. Read RSSMARKOVSCORE for markov score to assign non-exonic recursively spliced elements */
+	 /* Optional: RSSMARKOVSCORE, the coding-potential score assigned to a
+	    zero-length (recursively spliced) element instead of computing one */
 	if(!strcasecmp(header,sRSSMARKOVSCORE)){
 		  readLine(RootFile,line);
 		  if ((sscanf(line,"%f\n", &(RSSMARKOVSCORE)))!=1)
@@ -695,7 +719,7 @@ void ReadIsochore(FILE* RootFile, gparam* gp)
 		  sprintf(mess,"RSSMARKOVSCORE: \t%9.2f",RSSMARKOVSCORE);
 		  printMess(mess);
 	}
-	 /* 1. Read Evidence Exon Weight */
+	 /* Optional: EvidenceExonWeight, a flat bonus/penalty for evidence-backed exons */
 	if(!strcasecmp(header,sEVIDENCEW)){
 		  readLine(RootFile,line);
 		  if ((sscanf(line,"%f\n", &(EvidenceEW)))!=1)
@@ -704,7 +728,7 @@ void ReadIsochore(FILE* RootFile, gparam* gp)
 		  sprintf(mess,"EvidenceExonWeight: \t%9.2f",EvidenceEW);
 		  printMess(mess);
 	}
-	 /* 1. Read Evidence Exon Factor */
+	 /* Optional: EvidenceFactor, a score-weight multiplier for evidence-backed exons */
 	if(!strcasecmp(header,sEVIDENCEF)){
 		  readLine(RootFile,line);
 		  if ((sscanf(line,"%f\n", &(EvidenceFactor)))!=1)
@@ -713,7 +737,7 @@ void ReadIsochore(FILE* RootFile, gparam* gp)
 		  sprintf(mess,"EvidenceFactor: \t%9.2f",EvidenceFactor);
 		  printMess(mess);
 	}
-	 /* 1. Read RSS_Donor_Score_Cutoff */
+	 /* Optional: RSSDON, minimum donor score for a recursive splice site */
 	if(!strcasecmp(header,sRSS_DONOR_SCORE_CUTOFF)){
 		  readLine(RootFile,line);
 		  if ((sscanf(line,"%f\n", &(RSSDON)))!=1)
@@ -722,7 +746,7 @@ void ReadIsochore(FILE* RootFile, gparam* gp)
 		  sprintf(mess,"RSSDON: \t%9.2f",RSSDON);
 		  printMess(mess);
 	}
-	 /* 1. Read RSSMARKOVSCORE for markov score to assign non-exonic recursively spliced elements */
+	 /* Optional: RSSACC, minimum acceptor score for a recursive splice site */
 	if(!strcasecmp(header,sRSS_ACCEPTOR_SCORE_CUTOFF)){
 		  readLine(RootFile,line);
 		  if ((sscanf(line,"%f\n", &(RSSACC)))!=1)
@@ -731,7 +755,8 @@ void ReadIsochore(FILE* RootFile, gparam* gp)
 		  sprintf(mess,"RSSACC: \t%9.2f",RSSACC);
 		  printMess(mess);
 	}
-	 /* 1. Read U12_SPLICE_SCORE_THRESH for sum of U12 donor and acceptor splice scores */
+	 /* Optional: U12_SPLICE_SCORE_THRESH, minimum combined donor+acceptor
+	    signal score to accept a minor-spliceosome (U12) join (see genamic.c) */
 	if(!strcasecmp(header,sU12_SPLICE_SCORE_THRESH)){
 		  readLine(RootFile,line);
 		  if ((sscanf(line,"%f\n", &(U12_SPLICE_SCORE_THRESH)))!=1)
@@ -741,7 +766,8 @@ void ReadIsochore(FILE* RootFile, gparam* gp)
 				  U12_SPLICE_SCORE_THRESH);
 		  printMess(mess);
 	}
-	 /* 1. Read U12_EXON_SCORE_THRESH for sum of U12 donor and acceptor exon scores */
+	 /* Optional: U12_EXON_SCORE_THRESH, minimum combined exon score to accept
+	    a minor-spliceosome (U12) join (see genamic.c) */
 	if(!strcasecmp(header,sU12_EXON_SCORE_THRESH)){
 		  readLine(RootFile,line);
 		  if ((sscanf(line,"%f\n", &(U12_EXON_SCORE_THRESH)))!=1)
@@ -751,7 +777,7 @@ void ReadIsochore(FILE* RootFile, gparam* gp)
 				  U12_EXON_SCORE_THRESH);
 		  printMess(mess);
 	}
-	 /* 1. Read U12_EXON_WEIGHT, an additional exon weight that applies to exons flanking U12 introns */
+	 /* Optional: U12_EXON_WEIGHT, an additional exon weight that applies to exons flanking U12 introns */
 	if(!strcasecmp(header,sU12_EXON_WEIGHT)){
 		  readLine(RootFile,line);
 		  if ((sscanf(line,"%f\n", &(U12EW)))!=1)
