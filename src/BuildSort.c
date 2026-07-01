@@ -37,6 +37,7 @@ void BuildSort(dict *D,
                int DE[][MAXENTRY],
                int nclass,
                long km[],
+               long dcap[],
                exonGFF* **d,
                exonGFF *E,
                long nexons)
@@ -65,8 +66,24 @@ void BuildSort(dict *D,
 	  for(j=0; j < nc[type]; j++)
 	    {
 	      class = UC[type][j];
+
+	      /* Grow this class's array on demand: the insertion below adds one
+		 entry (writes up to index km[class]), so ensure room for it.
+		 d[class] is pg->d[class], so the realloc propagates to the pack. */
+	      if (km[class] + 1 > dcap[class])
+		{
+		  long ncap = dcap[class] ? dcap[class] : 1;
+		  exonGFF** tmp;
+		  while (ncap < km[class] + 1)
+		    ncap *= 2;
+		  if ((tmp = (exonGFF**) realloc(d[class], ncap * sizeof(exonGFF*))) == NULL)
+		    printError("Not enough memory: growing sort-by-donor array");
+		  d[class] = tmp;
+		  dcap[class] = ncap;
+		}
+
 	      k = km[class]-1;
-			  
+
 	      /* Screening the exons sorted before: sorting by insertion */
 	      while (k>=0 && (((E+i)->Donor->Position + (E+i)->offset2) 
 			      < 
