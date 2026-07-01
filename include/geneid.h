@@ -188,6 +188,11 @@ A. DEFINITIONS
 /* reservation (and an unchecked overflow).                                   */
 #define INITDARRAY 256
 
+/* Chunk size (entries) of the growable dumpster backup arrays (BackupGenes.c).*/
+/* Chunks are stable-address: allocated once, never moved, so backed-up        */
+/* exons/sites keep their pointers valid while the dumpster grows on demand.   */
+#define DUMPCHUNK 4096
+
 /* Maximum number of isochores              */
 #define MAXISOCHORES 4           
 
@@ -690,14 +695,21 @@ typedef struct s_dumpHash
 } dumpHash;
 
 typedef struct s_packDump
-{ 
-  site* dumpSites;                     
+{
+  /* Chunked, stable-address backup arrays (see BackupGenes.c). dumpSites and
+     dumpExons are arrays of fixed-size chunks; a chunk is never moved once
+     allocated, so a backed-up site/exon keeps its address for the whole run
+     while the arrays grow on demand -- replacing the old fixed ring buffer
+     that recycled (and could overwrite still-referenced backups). */
+  site** dumpSites;
   long ndumpSites;
-  
-  exonGFF* dumpExons;                  
-  long ndumpExons;
+  long dumpSitesChunks;
 
-  dumpHash* h; 
+  exonGFF** dumpExons;
+  long ndumpExons;
+  long dumpExonsChunks;
+
+  dumpHash* h;
 } packDump;
 
 typedef struct s_account               
