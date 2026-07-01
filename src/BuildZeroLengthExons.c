@@ -50,14 +50,14 @@ long BuildZeroLengthExons(site *Acceptor, long nAcceptors,
     site *Donor;
     int Frame[FRAMES];
   } *LocalExon;
-  int nLocalExons, LowestLocalExon;
+  int nLocalExons;
   float LowestLocalScore;
   /* char mess[MAXSTRING]; */
 
   /* Boolean array of windows: closed or opened */
   int Frame[FRAMES];
 
-  long i, j, js, k;
+  long i, j, k;
   int f, l, ll;
 
   /* Growable output array (grows on demand; capacity tracked by caller) */
@@ -85,15 +85,11 @@ long BuildZeroLengthExons(site *Acceptor, long nAcceptors,
       /* Reset the best local exons array */
       nLocalExons = 0;
       LowestLocalScore = INF;
-      LowestLocalExon = 0;
 
       /* Skip previous Stops to current Acceptor */
       while ((j < nStops) && ((Stop+j)->Position+1 < (Acceptor+i)->Position))
 	j++;
-	  
-      /* Save counter j for the next iteration */
-      js=j;
-      
+
       /* Skip previous Donors to current Acceptor */
       while ((k < nDonors) && ((Donor+k)->Position < (Acceptor+i)->Position - 1))
 	k++;
@@ -111,7 +107,6 @@ long BuildZeroLengthExons(site *Acceptor, long nAcceptors,
 	  if ((Donor+k)->Score < LowestLocalScore)
 	    {
 	      LowestLocalScore = (Donor+k)->Score;
-	      LowestLocalExon = nLocalExons;
 	    }
 	  nLocalExons++;
 	}

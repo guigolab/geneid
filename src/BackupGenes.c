@@ -153,7 +153,7 @@ exonGFF* backupGene(exonGFF* E, packDump* d)
   exonGFF* ResExon;
 
   /* Ghost exon doesn't need backup */
-  if ((E->Strand == '*')) /* ||(E->Strand != '+')||(E->Strand != '-')) */
+  if (E->Strand == '*') /* ||(E->Strand != '+')||(E->Strand != '-')) */
     ResExon = E; 
   else
 	{

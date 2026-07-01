@@ -65,9 +65,10 @@ void beggar(long L)
   memEvi = (MAXEVIDENCES * sizeof(exonGFF)) +
 	(3*MAXEVIDENCES * sizeof(struct s_site));
   
-  /* HSPs */
-  memHSP =  sizeof(struct s_packHSP) +
-	(STRANDS * FRAMES * MAXHSP * sizeof(HSP));
+  /* HSPs (cast: this byte count exceeds float's exact-integer range, but
+     memHSP is only a rough estimate so the rounding is fine) */
+  memHSP =  (float)(sizeof(struct s_packHSP) +
+	(STRANDS * FRAMES * MAXHSP * sizeof(HSP)));
   
   /* G+C INFO */
   memGC = 2 * LENGTHSi * sizeof(long);

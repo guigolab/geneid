@@ -66,12 +66,12 @@ float ComputeU12BranchProfile(char* s,
 	  index = OligoToInt(s + i + j - p->order, p->order+1,5);
 		  
 	  if (index >= p->dimensionTrans)
-	    score = score + -INFI;
+	    score = score + -(float)INFI;
 	  else
 	    score = score + p->transitionValues[j][index];
 	}
 	   
-      score = score - p->penalty_factor * (((float)(abs(i + p->offset -Opt))/((float)(p->acc_context - p->offset - p->opt_dist)))*((float)(abs(i + p->offset
+      score = score - p->penalty_factor * (((float)(labs(i + p->offset -Opt))/((float)(p->acc_context - p->offset - p->opt_dist)))*((float)(labs(i + p->offset
 																			       -Opt))/((float)(p->acc_context - p->offset - p->opt_dist)))); 
       if (score >= maxScore){
 	maxScore = score;
@@ -112,7 +112,7 @@ float ComputePPTProfile(char* s,
 	  index = OligoToInt(s + i + j - p->order, p->order+1,5);
 		  
 	  if (index >= p->dimensionTrans)
-	    score = score + -INFI;
+	    score = score + -(float)INFI;
 	  else
 	    score = score + p->transitionValues[j][index];
 	}
@@ -186,7 +186,7 @@ long  BuildU12Acceptors(char* s,
 		index = OligoToInt(s+j, u12_p->order+1,5);
 
 		if (index >= u12_p->dimensionTrans)
-		  score = score + -INFI;
+		  score = score + -(float)INFI;
 		else
 		  score = score + u12_p->transitionValues[i][index];
 	      }
@@ -252,7 +252,7 @@ long  BuildU12Acceptors(char* s,
 		/* i is the position inside the region */
 		index = TRANS[(int)(*(s + i))];
 		if (index >= u12_p->dimensionTrans)
-		  score = score + -INFI;
+		  score = score + -(float)INFI;
 		else
 		  score = score + u12_p->transitionValues[i][index];
 	      }
@@ -312,7 +312,7 @@ long  BuildU12Acceptors(char* s,
 		/* i is the position inside the region */
 		index = 5*TRANS[(int)(*(s + i -1))] + TRANS[(int)(*(s + i))];
 		if (index >= u12_p->dimensionTrans)
-		  score = score + -INFI;
+		  score = score + -(float)INFI;
 		else
 		  score = score + u12_p->transitionValues[i][index];
 	      }
@@ -372,7 +372,7 @@ long  BuildU12Acceptors(char* s,
 		/* 5 is used because there are A,C,G,T and N */
 		index = OligoToInt(s + i - u12_p->order, u12_p->order+1,5);
 		if (index >= u12_p->dimensionTrans)
-		  score = score + -INFI;
+		  score = score + -(float)INFI;
 		else
 		  score = score + u12_p->transitionValues[i][index];
 	      }

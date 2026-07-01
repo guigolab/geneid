@@ -72,7 +72,7 @@ long  BuildDonors(char* s,
 			  index = OligoToInt(s+j, p->order+1,5);
 			  
 			  if (index >= p->dimensionTrans)
-			    score = score + -INFI;
+			    score = score + -(float)INFI;
 			  else
 			    score = score + p->transitionValues[i][index];
 			}
@@ -112,7 +112,7 @@ long  BuildDonors(char* s,
 			  /* i is the position inside the region */
 			  index = TRANS[(int)(*(s + i))];
 			  if (index >= p->dimensionTrans)
-				score = score + -INFI;
+				score = score + -(float)INFI;
 			  else
 				score = score + p->transitionValues[i][index];
 			}
@@ -147,7 +147,7 @@ long  BuildDonors(char* s,
 			  /* i is the position inside the region */
 			  index = 5*TRANS[(int)(*(s + i -1))] + TRANS[(int)(*(s + i))];
 			  if (index >= p->dimensionTrans)
-				score = score + -INFI;
+				score = score + -(float)INFI;
 			  else
 				score = score + p->transitionValues[i][index];
 			}
@@ -185,7 +185,7 @@ long  BuildDonors(char* s,
 			  index = OligoToInt(s + i - p->order, p->order+1,5);
 
 			  if (index >= p->dimensionTrans)
-				score = score + -INFI;
+				score = score + -(float)INFI;
 			  else
 				score = score + p->transitionValues[i][index];
 			}

@@ -400,9 +400,9 @@ long CookingInfo(exonGFF* eorig,
 		info[igen].score += e->Score;
 	
 	      /* if(!strcmp(e->Type,sUTRFIRSTHALF)||!strcmp(e->Type,sUTR5INTERNALHALF)){ */
-		if(!strcmp(e->Type,sUTRFIRSTHALF)||!strcmp(e->Type,sUTR5INTERNALHALF)||!strcmp(e->Type,sUTRFIRST)){
+	      if(!strcmp(e->Type,sUTRFIRSTHALF)||!strcmp(e->Type,sUTR5INTERNALHALF)||!strcmp(e->Type,sUTRFIRST)){
 		currentIsUTR = 1;
-				    
+
 	      }else{
 		currentIsUTR = 0;
 	      } 			  
@@ -580,7 +580,6 @@ void PrintGene(exonGFF* start,
   int exonnum = 1;
   int cdsnum = 1;
   int utrnum = 1;
-  int featnum =0;
 /*   char mess[MAXSTRING]; */
 /*  if (start != end){ */
    eaux = start->PreviousExon;
@@ -768,7 +767,6 @@ void PrintGene(exonGFF* start,
 	      PrintSite(end->Acceptor,type1,Name,strand,s,p1);
 	      if (!strcmp(end->Type,sFIRST)||!strcmp(start->Type,sINTERNAL)||!strcmp(start->Type,sTERMINAL)||!strcmp(start->Type,sSINGLE)){
 		cdsnum = (start->Strand == '-')? ccds: info[geneindex].ncds - ccds + 1;
-		featnum = (start->Strand == '-')? cfeats: info[geneindex].nfeats - cfeats + 1;
 		PrintGCDS(end,Name,s,dAA,igen,tAA[AAIDX(cfeats)][0],tAA[AAIDX(cfeats)][1],nAA,cdsnum,GenePrefix);
 	      }else{
 		utrnum = (start->Strand == '-')? cutrs: info[geneindex].nutrs - cutrs + 1;

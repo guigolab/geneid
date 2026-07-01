@@ -98,7 +98,6 @@ long ReadHSP (char* FileName, packExternalInformation* external)
   char *line6;
   char *line7;
   char *line8;
-  char *line9;
 
   /* Identifier for a sequence (from dictionary) */
   int a;
@@ -146,8 +145,8 @@ long ReadHSP (char* FileName, packExternalInformation* external)
           line6 = (char *) strtok(NULL,"\t");
           line7 = (char *) strtok(NULL,"\t");
           line8 = (char *) strtok(NULL,"\t");
-          line9 = (char *) strtok(NULL,"\n");
-		  
+          /* the optional 9th column is not used */
+
 		  /* There are 8 mandatory columns and the last one is optional */
 		  if (line1 == NULL || line2 == NULL || line3 == NULL ||
 			  line4 == NULL || line5 == NULL || line6 == NULL ||
