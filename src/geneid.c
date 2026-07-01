@@ -374,12 +374,24 @@ int main (int argc, char *argv[])
 	  /* A.5. Processing sequence into several fragments if required */
 	  /* l1 is the left end and l2 is the right end in Sequence */
 	  /* The arguments HI and LO are converted into lower and upper limit coordinates and l1 and l2 are adjusted */
+	  /* -j/-k (LOW/HI) restrict prediction to a sub-window [lowerlimit,
+	     upperlimit] of the sequence (defaulting to the whole thing); THAT
+	     window is what actually gets split into LENGTHSi-sized, OVERLAP-
+	     overlapping fragments [l1,l2] below -- each new fragment starts
+	     OVERLAP bp before the previous one ended (l1 += LENGTHSi-OVERLAP),
+	     so a splice signal near a fragment boundary is still seen with
+	     full context by at least one fragment (see manager.c's boundary-
+	     window comment for how that overlap is actually used). Everything
+	     genamic assembles that might still be needed once this fragment's
+	     arrays are reused gets copied into the dumpster first (see B.6
+	     below and BackupGenes.c's file comment) -- that's the whole
+	     reason the dumpster exists. */
 	  upperlimit = LengthSequence-1;
 	  lowerlimit = 0;
-		  
+
 	  if ((HI > 0)&&(HI >= LOW)&&(HI < LengthSequence)){
 	    upperlimit = HI - 1;
-	  }else{ 
+	  }else{
 	    upperlimit = LengthSequence-1;
 	  }
 	  if ((LOW > 0)&&(LOW <= upperlimit)){
@@ -389,10 +401,13 @@ int main (int argc, char *argv[])
 	  l2 = MIN(l1 + LENGTHSi-1,LengthSequence-1);
 	  l2 = MIN(l2,upperlimit);
 	  /* Check to see if we are on last split */
-	  lastSplit = (l2 == upperlimit);		 		
-	  sprintf(mess,"Running on range %ld to %ld\n", 
-		  lowerlimit ,upperlimit); 
+	  lastSplit = (l2 == upperlimit);
+	  sprintf(mess,"Running on range %ld to %ld\n",
+		  lowerlimit ,upperlimit);
 	  printMess(mess);
+	  /* Runs at least once (l1==lowerlimit on the first pass) even if the
+	     whole window is short enough to need only one fragment; otherwise
+	     continues until l1 has advanced within OVERLAP of upperlimit. */
 	  while((l1 < (upperlimit + 1 - OVERLAP)) || (l1 == 0)|| (l1 == lowerlimit))
 	    {
 	      /** B.1. Measure G+C content in the current fragment: l1,l2 **/
@@ -528,8 +543,12 @@ int main (int argc, char *argv[])
 		    {
 		      /* backup of unused genes */
 		      printMess("Back-up of d-genes");
+		      /* l2-OVERLAP: the next fragment starts at l1+LENGTHSi-OVERLAP
+			 (<= l2), so exons ending before l2-OVERLAP are behind where
+			 the next fragment will (re)scan from and can be trimmed --
+			 see BackupArrayD's own comment in BackupGenes.c. */
 		      BackupArrayD(genes, l2 - OVERLAP, gp, dumpster);
-					  
+
 		      /* back-up best partial genes */
 		      printMess("Back-up of best partial genes\n");
 		      BackupGenes(genes, gp->nclass, dumpster);

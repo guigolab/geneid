@@ -36,6 +36,17 @@ extern int BP;
 extern int PPT;
 extern int UTR;
 
+/* U12 counterpart of ComputeU2BranchProfile/ComputeU2PPTProfile in
+   BuildAcceptors.c (same sliding-window scan + quadratic distance-from-
+   optimum penalty for the branch point; same PWM/Markov scoring for the
+   PPT), with two real differences from the U2 pair: (1) ComputePPTProfile's
+   search window starts right after wherever the branch point was found
+   (positionAcc + splicesite->PositionBP + 1), since a U12 PPT sits between
+   the branch point and the acceptor, whereas ComputeU2PPTProfile's window
+   is independent of the branch point's exact position; (2) it does not
+   gate on the PPT profile's own cutoff (ComputeU2PPTProfile requires
+   score > p->cutoff, this one only tracks the running max) -- U12 PPTs are
+   rare enough that geneid does not filter on this weaker signal alone. */
 float ComputeU12BranchProfile(char* s,
 			      long positionAcc,
 			      long limitRight,
@@ -96,6 +107,8 @@ float ComputePPTProfile(char* s,
     
   maxScore = -INF;
 
+  /* Start searching just after the branch point already found for this
+     acceptor (see the function-pair comment above) */
   i = MAX(p->order,positionAcc + splicesite->PositionBP + 1);
   i = MAX(i,positionAcc - p->dist - p->dimension);
   end = MIN(positionAcc,limitRight);
@@ -131,6 +144,13 @@ float ComputePPTProfile(char* s,
 }
 
 /* Search for acceptor splice sites, using additional profiles */
+/* U12 counterpart of BuildAcceptors.c's BuildAcceptors: same order-0/1/2
+   PWM/Markov scan (see ScoreExons.c's GetSitesWithProfile) and two-cutoff
+   pattern (raw signal, then combined with branch point), but unlike U2's
+   `cutoff == u12_p->cutoff`, here the pre-filter cutoff is RELAXED by
+   U12ACC_CUTOFF_FACTOR*bfactor -- U12 sites are rare and weak enough that
+   filtering this early on signal alone would discard true sites the
+   branch-point evidence could otherwise rescue. */
 long  BuildU12Acceptors(char* s,
 			short class,
 			char* type,

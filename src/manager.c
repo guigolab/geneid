@@ -51,6 +51,24 @@ extern int UTR;
 extern long NUMSITES,NUMEXONS;
 
 /* Management of splice sites prediction and exon construction/scoring */
+/* Runs the whole predict-sites-then-build-and-score-exons pipeline for ONE
+   fragment [l1,l2] of ONE strand (geneid.c's main loop calls this once per
+   strand per fragment; see that loop's comment for how fragments/overlap
+   work). lowerlimit/upperlimit are the boundaries of the WHOLE region being
+   predicted (which may itself be less than the whole sequence, via -j/-k),
+   so l1==lowerlimit / l2==upperlimit tell this call whether it is handling
+   the very first / very last fragment.
+   Step 0 below computes, per site category, a possibly-NARROWER window
+   than [l1,l2] to actually search in this fragment: on the forward strand,
+   acceptor/start-codon search is cut short by OVERLAP bp on the right
+   (unless this is the last fragment) while donor/stop search uses the full
+   [l1,l2]; on the reverse strand it is the mirror image (donor/start cut
+   short on the left instead). The idea is that a signal sitting in the
+   OVERLAP region near the boundary the NEXT fragment will re-scan gets
+   built into an exon there (with full context on both sides) rather than
+   here, where the paired signal it needs might fall just outside this
+   fragment; cutPoint applies the same boundary to Terminal/Single exons'
+   Stop codon. */
 void  manager(char *Sequence,
 	      long LengthSequence,
 	      packSites* allSites,
