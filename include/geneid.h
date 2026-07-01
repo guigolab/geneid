@@ -178,6 +178,11 @@ A. DEFINITIONS
 /* "increase FSORT" abort on the site-sort path is gone.                      */
 #define INITSITESORT 1024
 
+/* Initial capacity of the growable predicted-site arrays (packSites). Not a   */
+/* ceiling: the site builders grow each array on demand, so the old NUMSITES  */
+/* reservation and the "decrease RSITES" hard errors are gone.                */
+#define INITSITES 4096
+
 /* Maximum number of isochores              */
 #define MAXISOCHORES 4           
 
@@ -497,12 +502,21 @@ typedef struct s_packSites
   site* TS;
   site* TE;
 
-  long  nStartCodons;                  
+  long  nStartCodons;
   long  nAcceptorSites;
   long  nDonorSites;
   long  nStopCodons;
   long  nTS;
   long  nTE;
+
+  /* Allocated capacity of each growable site array (grown by the Build/Get
+     site builders; the arrays are no longer reserved at NUMSITES nor capped). */
+  long  capStartCodons;
+  long  capAcceptorSites;
+  long  capDonorSites;
+  long  capStopCodons;
+  long  capTS;
+  long  capTE;
 
   long nSites;
 } packSites;
@@ -794,10 +808,10 @@ void printRes(char* s);
 
 void printReadingInfo(char* s);
 
-long GetSitesWithProfile(char *s, profile *p, site *st, long l1, long l2); 
+long GetSitesWithProfile(char *s, profile *p, site **st, long* cap, long l1, long l2);
 
 long GetTSS(
-	    site* sc,
+	    site** sc, long* cap,
 	    site* Acceptors, long nAcceptors,
 	    packExternalInformation* external,
 	    packHSP* hsp,
@@ -808,7 +822,7 @@ long GetTSS(
 	    );
 
 long GetTES(
-	    site* sc,
+	    site** sc, long* cap,
 	    site* Donors, long nDonors,
 	    packExternalInformation* external,
 	    packHSP* hsp,
@@ -822,14 +836,14 @@ long GetTES(
 long BuildDonors(char* s,short class,char* type,
 		 char* subtype,
 		 profile* p,
-		 site* st, 
-		 long l1, 
+		 site** st,
+		 long l1,
 		 long l2,
 		 long ns,
-		 long nsites,
+		 long* cap,
 		 int Strand,
 		 packExternalInformation* external
-		 ); 
+		 );
 float PeakEdgeScore(long Position, 
 		    int Strand, 
 		    packExternalInformation* external, 
@@ -838,7 +852,7 @@ int ClusterEdge(long Position,
 		int Strand, 
 		packExternalInformation* external, 
 		long l1, long l2);
-long GetStopCodons(char *s, profile *p, site *sc, long l1, long l2);
+long GetStopCodons(char *s, profile *p, site **sc, long* cap, long l1, long l2);
 
 long BuildInitialExons(site *Start, long nStarts, 
                        site *Donor, long nDonors,
@@ -1179,14 +1193,14 @@ long  BuildU12Acceptors(char* s,
 			profile* u12_p,
 			profile* u12bp,
 			profile* ppt,
-			site* st, 
-			long l1, 
+			site** st,
+			long l1,
 			long l2,
 			long ns,
-			long nsites,
+			long* cap,
 			int Strand,
 			packExternalInformation* external);
-					 
+
 long  BuildAcceptors(char* s,
 		     short class,
 		     char* type,
@@ -1194,10 +1208,10 @@ long  BuildAcceptors(char* s,
 		     profile* p,
 		     profile* ppt,
 		     profile* bp,
-		     site* st, 
-		     long l1, 
+		     site** st,
+		     long l1,
 		     long l2,
 		     long ns,
-		     long nsites,
+		     long* cap,
 		     int Strand,
 		     packExternalInformation* external);

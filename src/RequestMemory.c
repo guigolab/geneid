@@ -67,35 +67,45 @@ packSites* RequestMemorySites()
        (struct s_packSites *) malloc(sizeof(struct s_packSites))) == NULL)
     printError("Not enough memory: pack of sites");  
   
+  /* Site arrays start small and grow on demand (see GrowSiteArray / the site
+     builders); capacity is tracked per array in cap* fields. */
   /* Start codons */
-  if ((allSites->StartCodons = 
-       (struct s_site *) calloc(NUMSITES, sizeof(struct s_site))) == NULL)
+  allSites->capStartCodons = INITSITES;
+  if ((allSites->StartCodons =
+       (struct s_site *) calloc(allSites->capStartCodons, sizeof(struct s_site))) == NULL)
     printError("Not enough memory: start codons");
-  
+
   /* Acceptor sites */
-  if ((allSites->AcceptorSites = 
-       (struct s_site *) calloc(NUMSITES, sizeof(struct s_site))) == NULL)
+  allSites->capAcceptorSites = INITSITES;
+  if ((allSites->AcceptorSites =
+       (struct s_site *) calloc(allSites->capAcceptorSites, sizeof(struct s_site))) == NULL)
     printError("Not enough memory: acceptor sites");
-	      	      
+
   /* Donor sites */
-  if ((allSites->DonorSites = 
-       (struct s_site *) calloc(NUMSITES, sizeof(struct s_site))) == NULL)
+  allSites->capDonorSites = INITSITES;
+  if ((allSites->DonorSites =
+       (struct s_site *) calloc(allSites->capDonorSites, sizeof(struct s_site))) == NULL)
     printError("Not enough memory: donor sites");
 
   /* Stop codons */
-  if ((allSites->StopCodons = 
-       (struct s_site *) calloc(NUMSITES, sizeof(struct s_site))) == NULL)
+  allSites->capStopCodons = INITSITES;
+  if ((allSites->StopCodons =
+       (struct s_site *) calloc(allSites->capStopCodons, sizeof(struct s_site))) == NULL)
     printError("Not enough memory: stop codons");
 
+  allSites->capTS = 0;
+  allSites->capTE = 0;
   if (UTR){
     /* TSS */
-    if ((allSites->TS = 
-	 (struct s_site *) calloc(NUMSITES, sizeof(struct s_site))) == NULL)
+    allSites->capTS = INITSITES;
+    if ((allSites->TS =
+	 (struct s_site *) calloc(allSites->capTS, sizeof(struct s_site))) == NULL)
       printError("Not enough memory: TSS");
-    
+
     /* TES */
-    if ((allSites->TE = 
-	 (struct s_site *) calloc(NUMSITES, sizeof(struct s_site))) == NULL)
+    allSites->capTE = INITSITES;
+    if ((allSites->TE =
+	 (struct s_site *) calloc(allSites->capTE, sizeof(struct s_site))) == NULL)
       printError("Not enough memory: TES");
   }
   return(allSites);

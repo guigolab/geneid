@@ -32,8 +32,6 @@
 /* Function TRANS: char -> integer such that A=0, C=1, G=2 and T/U=2 */
 extern int TRANS[];
 
-/* Maximum allowed number of generic sites */
-extern long NUMSITES;
 extern int UTR;
 
 
@@ -43,25 +41,28 @@ long  BuildDonors(char* s,
 		  char* type,
 		  char* subtype,
 		  profile* p,
-		  site* st, 
-		  long l1, 
+		  site** stP,
+		  long l1,
 		  long l2,
 		  long ns,
-		  long nsites,
+		  long* capP,
 		  int Strand,
 		  packExternalInformation* external
-		  ) 
+		  )
 {
   int i,j;
   float score;
   long is;
   long left,right;
   int index;
+  /* Growable output array (grows on demand; capacity tracked by caller) */
+  site* st = *stP;
+  long cap = *capP;
 
   /* 1. Searching sites between beginning of the sequence and p->offset */
   if (!l1)
     {
-      for (is = 0; is < p->offset && (ns<nsites); is++)
+      for (is = 0; is < p->offset; is++)
 		{
 		  score=0.0;
 		  /* Applying part of the profile */
@@ -81,6 +82,7 @@ long  BuildDonors(char* s,
 		  }
 		  if (score >= p->cutoff) 
 			{
+			  GrowSiteArray(&st,&cap,ns+1);
 			  st[ns].Position = is + p->order;
 			  st[ns].Score= score;
 			  st[ns].class= class;
@@ -101,7 +103,7 @@ long  BuildDonors(char* s,
   if (p->order == 0)
     {
       /* discovering splice sites with current profile */
-      while (*(s+p->dimension-1) && (is < right- left + 1) && (ns<nsites))
+      while (*(s+p->dimension-1) && (is < right- left + 1))
 		{ 
 		  /* is = 0..right */
 		  score=0.0;
@@ -120,6 +122,7 @@ long  BuildDonors(char* s,
 		  }
 		  if (score >= p->cutoff) 
 			{
+			  GrowSiteArray(&st,&cap,ns+1);
 			  st[ns].Position = left + is + p->offset;
 			  st[ns].Score=score;
 			  st[ns].class= class;
@@ -135,7 +138,7 @@ long  BuildDonors(char* s,
   else if (p->order == 1)
     {
       /* discovering splice sites with current profile */
-      while (*(s+p->dimension-1) && (is < right- left + 1) && (ns<nsites))
+      while (*(s+p->dimension-1) && (is < right- left + 1))
 		{ 
 		  /* is = 0..right */
 		  score=0.0;
@@ -154,6 +157,7 @@ long  BuildDonors(char* s,
 		  }
 		  if (score >= p->cutoff) 
 			{
+			  GrowSiteArray(&st,&cap,ns+1);
 			  st[ns].Position = left + is + p->offset;
 			  st[ns].Score=score;
 			  st[ns].class= class;
@@ -170,7 +174,7 @@ long  BuildDonors(char* s,
   else
     {
       /* discovering splice sites with current profile */
-      while (*(s+p->dimension-1) && (is < right- left + 1) && (ns<nsites))
+      while (*(s+p->dimension-1) && (is < right- left + 1))
 		{ 
 		  /* is = 0..right */
 		  score=0.0;
@@ -191,6 +195,7 @@ long  BuildDonors(char* s,
 		  }
 		  if (score >= p->cutoff) 
 			{
+			  GrowSiteArray(&st,&cap,ns+1);
 			  st[ns].Position = left + is + p->offset;
 			  st[ns].Score=score;
 			  st[ns].class= class;
@@ -203,9 +208,8 @@ long  BuildDonors(char* s,
 		}
     }
   
-  if (ns >= nsites)
-    printError("Too many predicted sites: decrease RSITES parameter");
-
+  *stP = st;
+  *capP = cap;
   return(ns);
 }
 

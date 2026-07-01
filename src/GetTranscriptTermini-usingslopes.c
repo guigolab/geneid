@@ -29,24 +29,24 @@
 
 #include "geneid.h"
 
-/* Maximum allowed number of generic sites */
-extern long NUMSITES;
-
 long GetTSS(
-	    site* sc,
+	    site** scP, long* capP,
 	    site* Acceptors, long nAcceptors,
 	    packExternalInformation* external,
 	    packHSP* hsp,
 	    int Strand,
-	    long LengthSequence, 
+	    long LengthSequence,
 	    long l1,
 	    long l2
-	    ) 
+	    )
 {
   long ns;
   float thresh = 1.2;
+  /* Growable output array (grows on demand; capacity tracked by caller) */
+  site* sc = *scP;
+  long cap = *capP;
   /* Final number of potential transcript termini */
-  ns = 0;  
+  ns = 0;
 /*   char mess[MAXSTRING]; */
   float score;
   long is;
@@ -61,7 +61,7 @@ long GetTSS(
   float prev_prev_score = 0;
   is = 0;     
 
-  while ((is < (l2- l1 + 1)) && (ns<NUMSITES))
+  while ((is < (l2- l1 + 1)))
     { 
       /* is = 0..right */
       ssExists =0;
@@ -71,7 +71,7 @@ long GetTSS(
       score = score + pes; 
 /*       sprintf(mess,"pos %ld:%f",l1 + is -1,prev_score); */
 /* 	  	printMess(mess); */
-      if ((ns<NUMSITES)&&((cluster_edge == 1)||(prev_score>thresh && prev_score>prev_prev_score && prev_score>score))){
+      if (((cluster_edge == 1)||(prev_score>thresh && prev_score>prev_prev_score && prev_score>score))){
 	j=js;
 	while ((j < nAcceptors) && ((Acceptors+j)->Position < (l1 + is - 1 - window)))
 	  j++;
@@ -91,6 +91,7 @@ long GetTSS(
 /* 	  	printMess(mess); */
 /* 	  sprintf(mess,"PES TSS: pos %ld:%f",l1 + is -1,prev_score); */
 /* 	  	printMess(mess); */
+	  GrowSiteArray(&sc,&cap,ns+1);
 	  sc[ns].Position=(l1 + is -1);  
 	  sc[ns].Score=prev_score;
 	  sc[ns].class=U2;
@@ -106,26 +107,28 @@ long GetTSS(
       prev_score = score;
     }
 
-  if (ns >= NUMSITES)
-    printError("Too many predicted sites: decrease RSITES parameter");
-  
+  *scP = sc;
+  *capP = cap;
   return(ns);
 
 
 }
 
 long GetTES(
-	    site* sc,
+	    site** scP, long* capP,
 	    site* Donors, long nDonors,
 	    packExternalInformation* external,
 	    packHSP* hsp,
 	    int Strand,
-	    long LengthSequence, 
+	    long LengthSequence,
 	    long l1,
 	    long l2,
 	    long ns
-	    ) 
+	    )
 {
+  /* Growable output array (grows on demand; capacity tracked by caller) */
+  site* sc = *scP;
+  long cap = *capP;
   /* Final number of potential transcript termini */
   /* ns = 0;   */
 /*   char mess[MAXSTRING]; */
@@ -142,7 +145,7 @@ long GetTES(
   is = 0;     
   float prev_score =0;
   float prev_prev_score = 0;
-  while ((is < (l2- l1 + 1)) && (ns<NUMSITES))
+  while ((is < (l2- l1 + 1)))
     { 
       /* is = 0..right */
       ssExists = 0;
@@ -151,7 +154,7 @@ long GetTES(
       cluster_edge = ClusterEdge(l1 + is,Strand,external,l1,l2);
       score = score - pes; /* (pes>0?pes:-pes); */
 		  
-      if ((ns<NUMSITES)&&((cluster_edge == -1)||(prev_score>thresh && prev_score>prev_prev_score && prev_score>score))){
+      if (((cluster_edge == -1)||(prev_score>thresh && prev_score>prev_prev_score && prev_score>score))){
 	j=js;
 	while ((j < nDonors) && ((Donors+j)->Position < (l1 + is -1 - window)))
 	  j++;
@@ -167,6 +170,7 @@ long GetTES(
 	if (ssExists == 0){
 /* 	  sprintf(mess,"TES pos: %ld   PES TES: pos %ld:%f",l1 + is,LengthSequence - (l1 + is),score); */
 /* 	  	printMess(mess); */
+	  GrowSiteArray(&sc,&cap,ns+1);
 	  sc[ns].Position=(l1 + is -1);  
 	  sc[ns].Score=prev_score;
 	  sc[ns].class=U2;
@@ -178,9 +182,8 @@ long GetTES(
       is++;
     }
 
-  if (ns >= NUMSITES)
-    printError("Too many predicted sites: decrease RSITES parameter");
-  
+  *scP = sc;
+  *capP = cap;
   return(ns);
 
 

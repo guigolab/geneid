@@ -32,28 +32,28 @@
 /* Function TRANS: char -> integer such that A=0, C=1, G=2 and T/U=2 */
 extern int TRANS[];
 
-/* Maximum allowed number of generic sites */
-extern long NUMSITES;
-
 long  GetSitesWithProfile(char* s,
                           profile* p,
-                          site* st, 
-                          long l1, 
-                          long l2) 
+                          site** stP, long* capP,
+                          long l1,
+                          long l2)
 {
   int i,j;
   float score;
   long ns,is;
   long left,right;
   int index;
-  
+  /* Growable output array (grows on demand; capacity tracked by caller) */
+  site* st = *stP;
+  long cap = *capP;
+
   /* Final number of predicted signals (that type) */
   ns = 0;
   
   /* 1. Searching sites between beginning of the sequence and p->offset */
   if (!l1)
     {
-      for (is = 0; is < p->offset && (ns<NUMSITES); is++)
+      for (is = 0; is < p->offset; is++)
 		{
 		  score=0.0;
 		  /* Applying part of the profile */
@@ -71,6 +71,7 @@ long  GetSitesWithProfile(char* s,
 		  score = p->afactor + (p->bfactor * score);
 		  if (score >= p->cutoff) 
 			{
+			  GrowSiteArray(&st,&cap,ns+1);
 			  st[ns].Position = is + p->order;
 			  st[ns].Score=score;
 			  st[ns].class=U2;
@@ -90,7 +91,7 @@ long  GetSitesWithProfile(char* s,
   if (p->order == 0)
     {
       /* discovering splice sites with current profile */
-      while (*(s+p->dimension) && (is < right- left + 1) && (ns<NUMSITES))
+      while (*(s+p->dimension) && (is < right- left + 1))
 		{ 
 		  /* is = 0..right */
 		  score=0.0;
@@ -107,6 +108,7 @@ long  GetSitesWithProfile(char* s,
 		  score = p->afactor + (p->bfactor * score);
 		  if (score >= p->cutoff) 
 			{
+			  GrowSiteArray(&st,&cap,ns+1);
 			  st[ns].Position = left + is + p->offset;
 			  st[ns].Score=score;
 			  st[ns].class=U2;
@@ -121,7 +123,7 @@ long  GetSitesWithProfile(char* s,
   else if (p->order == 1)
     {
       /* discovering splice sites with current profile */
-      while (*(s+p->dimension) && (is < right- left + 1) && (ns<NUMSITES))
+      while (*(s+p->dimension) && (is < right- left + 1))
 		{ 
 		  /* is = 0..right */
 		  score=0.0;
@@ -138,6 +140,7 @@ long  GetSitesWithProfile(char* s,
 		  score = p->afactor + (p->bfactor * score);
 		  if (score >= p->cutoff) 
 			{
+			  GrowSiteArray(&st,&cap,ns+1);
 			  st[ns].Position = left + is + p->offset;
 			  st[ns].Score=score;
 			  st[ns].class=U2;
@@ -152,7 +155,7 @@ long  GetSitesWithProfile(char* s,
   else
     {
       /* discovering splice sites with current profile */
-      while (*(s+p->dimension) && (is < right- left + 1) && (ns<NUMSITES))
+      while (*(s+p->dimension) && (is < right- left + 1))
 		{ 
 		  /* is = 0..right */
 		  score=0.0;
@@ -171,6 +174,7 @@ long  GetSitesWithProfile(char* s,
 		  score = p->afactor + (p->bfactor * score);
 		  if (score >= p->cutoff) 
 			{
+			  GrowSiteArray(&st,&cap,ns+1);
 			  st[ns].Position = left + is + p->offset;
 			  st[ns].Score=score;
 			  st[ns].class=U2;
@@ -182,9 +186,8 @@ long  GetSitesWithProfile(char* s,
 		}
     }
   
-  if (ns >= NUMSITES)
-    printError("Too many predicted sites: decrease RSITES parameter");
-  
+  *stP = st;
+  *capP = cap;
   return(ns);
 }
 

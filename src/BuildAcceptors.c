@@ -31,8 +31,6 @@
 /* Function TRANS: char -> integer such that A=0, C=1, G=2 and T/U=2 */
 extern int TRANS[];
 
-/* Maximum allowed number of generic sites */
-extern long NUMSITES;
 extern int UTR;
 /* Additional profiles */
 extern int BP;
@@ -146,14 +144,14 @@ long  BuildAcceptors(char* s,
 		     profile* p,
 		     profile* ppt,
 		     profile* bp,
-		     site* st, 
-		     long l1, 
+		     site** stP,
+		     long l1,
 		     long l2,
 		     long ns,
-		     long nsites,
+		     long* capP,
 		     int Strand,
-		     packExternalInformation* external) 
-{ 
+		     packExternalInformation* external)
+{
   int i,j;
   char* sOriginal;
   float score;
@@ -165,6 +163,9 @@ long  BuildAcceptors(char* s,
   long left,right;
   int index;
   float cutoff;
+  /* Growable output array (grows on demand; capacity tracked by caller) */
+  site* st = *stP;
+  long cap = *capP;
   /* Final number of predicted signals (that type) */
   /*   ns = 0; */
 
@@ -177,7 +178,7 @@ long  BuildAcceptors(char* s,
   /* 1. Searching sites between beginning of the sequence and p->offset */
   if (!l1)
     {
-      for (is = 0; is < (p->offset)  && (ns<NUMSITES); is++)
+      for (is = 0; is < (p->offset) ; is++)
 	{
 	  score=0.0;
 	  /* Applying part of the profile */
@@ -196,6 +197,7 @@ long  BuildAcceptors(char* s,
 	  scoreBP = 0.0;
 	  scoreAcc = 0.0;
 	  if (score >= cutoff){
+	    GrowSiteArray(&st,&cap,ns+1);
 	    /* Using additional profiles */
 	    if (PPT)
 	      scorePPT = ComputeU2PPTProfile(sOriginal,p->offset-is,l2,ppt,&st[ns]);
@@ -239,7 +241,7 @@ long  BuildAcceptors(char* s,
   if (p->order == 0)
     {
       /* discovering splice sites with current profile */
-      while (*(s+p->dimension -1) && (is < right- left + 1) && (ns<NUMSITES))
+      while (*(s+p->dimension -1) && (is < right- left + 1))
 	{ 
 	  /* is = 0..right */
 	  score=0.0;
@@ -257,6 +259,7 @@ long  BuildAcceptors(char* s,
 	  scoreBP = 0.0;
 	  scoreAcc = 0.0;
 	  if (score >= cutoff){
+	    GrowSiteArray(&st,&cap,ns+1);
 	    /* Using additional profiles */
 	    if (PPT)
 	      scorePPT = ComputeU2PPTProfile(sOriginal,left + is + p->offset,l2,ppt,&st[ns]);
@@ -291,7 +294,7 @@ long  BuildAcceptors(char* s,
   else if (p->order == 1)
     {
       /* discovering splice sites with current profile */
-      while (*(s+p->dimension -1) && (is < right- left + 1) && (ns<NUMSITES))
+      while (*(s+p->dimension -1) && (is < right- left + 1))
 	{ 
 	  /* is = 0..right */
 	  score=0.0;
@@ -309,6 +312,7 @@ long  BuildAcceptors(char* s,
 	  scoreBP = 0.0;
 	  scoreAcc = 0.0;
 	  if (score >= cutoff){
+	    GrowSiteArray(&st,&cap,ns+1);
 	    /* Using additional profiles */
 	    if (PPT)
 	      scorePPT = ComputeU2PPTProfile(sOriginal,left + is + p->offset,l2,ppt,&st[ns]);
@@ -345,7 +349,7 @@ long  BuildAcceptors(char* s,
   else
     {
       /* discovering splice sites with current profile */
-      while (*(s+p->dimension -1) && (is < right- left + 1) && (ns<NUMSITES))
+      while (*(s+p->dimension -1) && (is < right- left + 1))
 	{ 
 	  /* is = 0..right */
 	  score=0.0;
@@ -365,6 +369,7 @@ long  BuildAcceptors(char* s,
 	  scoreBP = 0.0;
 	  scoreAcc = 0.0;
 	  if (score >= cutoff){
+	    GrowSiteArray(&st,&cap,ns+1);
 	    /* Using additional profiles */
 	    if (PPT)
 	      scorePPT = ComputeU2PPTProfile(sOriginal,left + is + p->offset,l2,ppt,&st[ns]);
@@ -397,10 +402,9 @@ long  BuildAcceptors(char* s,
 	  s++;
 	}
     }
-  if (ns >= nsites)
-    printError("Too many predicted sites: decrease RSITES parameter");
-  
-  return(ns);   
+  *stP = st;
+  *capP = cap;
+  return(ns);
 }
 
  
