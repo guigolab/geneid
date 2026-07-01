@@ -141,6 +141,16 @@ void OutputHeader(char* locus, long l)
 }
 
 /* Display some predictions results according to the options selected */
+/* This is the RAW per-category prediction dump (one block per signal/exon
+   type), controlled by the individual -a/-b/-d/-e/-f/-i/-s/-t/-x/-z flags
+   (see readargv.c's printHelp): S*P flags are "print this SITE category"
+   (SFP=start, SDP=donor, SAP=acceptor, STP=stop), E*P flags are "print this
+   EXON category" (EFP=first/initial, EIP=internal, ETP=terminal, ESP=
+   single, EOP=orf, EXP=all exons together). None of these are needed for
+   normal use -- they exist for inspecting intermediate predictions, e.g.
+   while tuning a parameter file. The actual GENE predictions (the format
+   most users want) come from OutputGene below, which always runs and is
+   unrelated to these flags. */
 void Output(packSites* allSites,
             packSites* allSites_r,
             packExons* allExons,
@@ -270,6 +280,9 @@ void Output(packSites* allSites,
 }
 
 /* Print best genes using selected format */
+/* The real output most users want: recovers and prints the actual gene
+   structure(s) from the DP's optimal solution (pg->GOptim's PreviousExon
+   chain) via CookingGenes -- see that file for the recovery/printing walk. */
 void OutputGene(packGenes* pg,
                 long nExons,
                 char* Locus,

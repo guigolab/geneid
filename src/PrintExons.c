@@ -43,6 +43,16 @@ extern float MRM;
 
 
 /* Print a predicted exon from a list of exons */
+/* This is the per-exon printer behind Output()'s raw per-category dump (see
+   Output.c's comment on the S*P/E*P debug flags) -- ONE exon, in whichever
+   of GFF3/GFF2/geneid's own default format was selected. The GFF3 branch
+   builds up a ";key=value" attribute string per exon type, reporting the
+   individual signal/coding-potential/homology/RNA-seq sub-scores that sum
+   into e->Score (see ScoreExons.c's Score()); which site plays which role
+   (start/acceptor/donor) depends on both exon type AND strand, because on
+   the reverse strand the Acceptor and Donor site pointers are swapped
+   relative to reading direction -- hence the forward/reverse blocks below
+   mirror each other with Acceptor and Donor exchanged. */
 void PrintExon(exonGFF *e, char Name[], char* s, dict* dAA, char* GenePrefix)
 {
   char sAux[MAXAA];
@@ -272,6 +282,13 @@ void PrintExons (exonGFF *e,
 }
 
 /* Print a predicted exon from a assembled gene: gff/geneid format */
+/* Prints ONE feature (CDS if coding, UTR otherwise) of an already-assembled
+   gene (called from CookingGenes.c's PrintGene walk), with the same
+   per-signal attribute assembly pattern as PrintExon above. AA1/AA2 are
+   this feature's first/last amino-acid indices as recorded in tAA (set by
+   Translate.c's TranslateGene) -- see the AA1/AA2 usage below for why they
+   need a direction flip on the '+' strand before they are valid "protein
+   N-to-C" coordinates for the GFF3 Target= attribute. */
 void PrintGCDS(exonGFF *e,
                 char Name[],
                 char* s,
@@ -419,6 +436,13 @@ void PrintGCDS(exonGFF *e,
 	      strlen(GenePrefix)>0?"-" : "",
 	      Name,
 	      ngen,
+	      /* TranslateGene fills tAA by walking the gene Terminal->First on
+	         the '+' strand (see Translate.c) -- the OPPOSITE of N-to-C
+	         reading order -- so AA1/AA2 there are counted from the C-
+	         terminus; flipping via nAA-AA2/nAA-AA1 converts them to the
+	         N-to-C protein coordinates Target= expects. On '-' strand,
+	         TranslateGene's First->Terminal walk is already N-to-C, so
+	         AA1/AA2 are used as-is. */
 	      (e->Strand=='+')? nAA-AA2+COFFSET : AA1,
 	      (e->Strand=='+')? nAA-AA1+COFFSET : AA2,
 	      attribute);
@@ -733,6 +757,12 @@ void PrintGmRNA(exonGFF *s,
 }
 
 /* Print a predicted intron from an assembled gene: gff/geneid format */
+/* Introns aren't stored as their own exonGFF records in a coding gene (only
+   the coding exons on either side are, joined via PreviousExon) -- this
+   reconstructs an intron's own boundaries from its flanking donor exon d
+   and acceptor exon a, picks U2 vs U12(gtag/atac) from the donor's
+   subtype, and derives phase from the remainder (which side's Remainder to
+   use depends on strand, same swap pattern as elsewhere in this file). */
 void PrintGIntron(exonGFF *d,
 		  exonGFF *a,
 		  char Name[],
@@ -854,7 +884,13 @@ void PrintGIntron(exonGFF *d,
   }
 
 }
-/* Print a predicted intron from an assembled gene: gff/geneid format */
+/* Print one GFF3 exon feature line, possibly MERGING 1-3 consecutive
+   fused segments (e.g. a coding exon fused with an adjacent half-UTR or
+   zero-length piece via PreviousExon) into a single combined feature: given
+   `a` (the last/rightmost segment) and nSegments, walks nSegments-1 steps
+   back via PreviousExon to `d` (the first/leftmost segment), sums each
+   segment's Score/PartialScore/HSPScore/R, and reports the outermost
+   start (d's Acceptor) to end (a's Donor) as one feature's coordinates. */
 void PrintGExon(  exonGFF *a,
 		  int nSegments,
 		  char Name[],

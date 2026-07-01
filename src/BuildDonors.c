@@ -36,6 +36,16 @@ extern int UTR;
 
 
 
+/* Scans every candidate window in [l1,l2] for a donor site, using the same
+   order-0/1/2 PWM/Markov scoring as ScoreExons.c's GetSitesWithProfile
+   (see that function's comment). In UTR mode, PeakEdgeScore's local
+   RNA-seq coverage-change score (a rise vs. drop detector, using the same
+   accumulated-sum external->sr array as ScoreHSPexon in ScoreExons.c) is
+   SUBTRACTED here but ADDED in BuildAcceptors.c: a donor should sit where
+   coverage drops (exon -> intron), which PeakEdgeScore reports as
+   negative, so subtracting it rewards a real drop; an acceptor should sit
+   where coverage rises (intron -> exon), reported as positive, so adding
+   rewards that instead. */
 long  BuildDonors(char* s,
 		  short class,
 		  char* type,
