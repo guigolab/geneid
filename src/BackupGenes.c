@@ -34,69 +34,116 @@ extern long MAXBACKUPSITES, MAXBACKUPEXONS;
 /* The number of compatible splice classes */
 extern short SPLICECLASSES;
 
-/* Increase counters modulus a long number */
-long IncrMod(long x, long Modulus)
+/* Return a stable-address pointer to exon backup slot i, allocating its chunk
+   on first touch. Chunks are never moved (only the array of chunk pointers may
+   realloc), so a pointer handed out here stays valid for the whole run. */
+static exonGFF* dumpExonAt(packDump* d, long i)
 {
-  long z;
-  
-  z = x+1;
-  if (z == Modulus)
-    z = 0;
-  
-  return(z);
+  long c = i / DUMPCHUNK;
+
+  if (c >= d->dumpExonsChunks)
+    {
+      long ncap = d->dumpExonsChunks ? d->dumpExonsChunks : 1;
+      exonGFF** tmp;
+      long k;
+      while (ncap <= c)
+	ncap *= 2;
+      if ((tmp = (exonGFF**) realloc(d->dumpExons, ncap * sizeof(exonGFF*))) == NULL)
+	printError("Not enough memory: backup exon chunk table");
+      for (k = d->dumpExonsChunks; k < ncap; k++)
+	tmp[k] = NULL;
+      d->dumpExons = tmp;
+      d->dumpExonsChunks = ncap;
+    }
+  if (d->dumpExons[c] == NULL)
+    if ((d->dumpExons[c] = (exonGFF*) calloc(DUMPCHUNK, sizeof(exonGFF))) == NULL)
+      printError("Not enough memory: backup exon chunk");
+
+  return &(d->dumpExons[c][i % DUMPCHUNK]);
+}
+
+/* As dumpExonAt, for the site backup array. */
+static site* dumpSiteAt(packDump* d, long i)
+{
+  long c = i / DUMPCHUNK;
+
+  if (c >= d->dumpSitesChunks)
+    {
+      long ncap = d->dumpSitesChunks ? d->dumpSitesChunks : 1;
+      site** tmp;
+      long k;
+      while (ncap <= c)
+	ncap *= 2;
+      if ((tmp = (site**) realloc(d->dumpSites, ncap * sizeof(site*))) == NULL)
+	printError("Not enough memory: backup site chunk table");
+      for (k = d->dumpSitesChunks; k < ncap; k++)
+	tmp[k] = NULL;
+      d->dumpSites = tmp;
+      d->dumpSitesChunks = ncap;
+    }
+  if (d->dumpSites[c] == NULL)
+    if ((d->dumpSites[c] = (site*) calloc(DUMPCHUNK, sizeof(site))) == NULL)
+      printError("Not enough memory: backup site chunk");
+
+  return &(d->dumpSites[c][i % DUMPCHUNK]);
 }
 
 /* Saving exon information (features) into the dumpster */
 exonGFF* backupExon(exonGFF* E, exonGFF* Prev, packDump* d)
 {
+  exonGFF* de = dumpExonAt(d, d->ndumpExons);
+  site* ds;
+
   /* back-up acceptor */
-  d->dumpSites[d->ndumpSites].Position = E->Acceptor->Position;
-  d->dumpSites[d->ndumpSites].Score = E->Acceptor->Score;
-  d->dumpSites[d->ndumpSites].ScoreAccProfile = E->Acceptor->ScoreAccProfile;
-  d->dumpSites[d->ndumpSites].ScorePPT = E->Acceptor->ScorePPT;
-  d->dumpSites[d->ndumpSites].ScoreBP = E->Acceptor->ScoreBP;
-  d->dumpSites[d->ndumpSites].PositionBP = E->Acceptor->PositionBP;
-  d->dumpSites[d->ndumpSites].PositionPPT = E->Acceptor->PositionPPT;
-  d->dumpSites[d->ndumpSites].class = E->Acceptor->class;
-  strcpy(d->dumpSites[d->ndumpSites].subtype,E->Acceptor->subtype);
-  strcpy(d->dumpSites[d->ndumpSites].type,E->Acceptor->type);
-  d->dumpExons[d->ndumpExons].Acceptor = &(d->dumpSites[d->ndumpSites]); 
-  d->ndumpSites = IncrMod(d->ndumpSites, MAXBACKUPSITES);
-  
+  ds = dumpSiteAt(d, d->ndumpSites);
+  ds->Position = E->Acceptor->Position;
+  ds->Score = E->Acceptor->Score;
+  ds->ScoreAccProfile = E->Acceptor->ScoreAccProfile;
+  ds->ScorePPT = E->Acceptor->ScorePPT;
+  ds->ScoreBP = E->Acceptor->ScoreBP;
+  ds->PositionBP = E->Acceptor->PositionBP;
+  ds->PositionPPT = E->Acceptor->PositionPPT;
+  ds->class = E->Acceptor->class;
+  strcpy(ds->subtype,E->Acceptor->subtype);
+  strcpy(ds->type,E->Acceptor->type);
+  de->Acceptor = ds;
+  d->ndumpSites = d->ndumpSites + 1;
+
   /* back-up donor */
-  d->dumpSites[d->ndumpSites].Position = E->Donor->Position;
-  d->dumpSites[d->ndumpSites].Score = E->Donor->Score;
-  d->dumpSites[d->ndumpSites].ScoreAccProfile = E->Donor->ScoreAccProfile;
-  d->dumpSites[d->ndumpSites].ScorePPT = E->Donor->ScorePPT;
-  d->dumpSites[d->ndumpSites].ScoreBP = E->Donor->ScoreBP;
-  d->dumpSites[d->ndumpSites].PositionBP = E->Donor->PositionBP;
-  d->dumpSites[d->ndumpSites].PositionPPT = E->Donor->PositionPPT;
-  d->dumpSites[d->ndumpSites].class = E->Donor->class;
-  strcpy(d->dumpSites[d->ndumpSites].subtype,E->Donor->subtype);
-  strcpy(d->dumpSites[d->ndumpSites].type,E->Donor->type);
-  d->dumpExons[d->ndumpExons].Donor = &(d->dumpSites[d->ndumpSites]); 
-  d->ndumpSites = IncrMod(d->ndumpSites, MAXBACKUPSITES);
-  
+  ds = dumpSiteAt(d, d->ndumpSites);
+  ds->Position = E->Donor->Position;
+  ds->Score = E->Donor->Score;
+  ds->ScoreAccProfile = E->Donor->ScoreAccProfile;
+  ds->ScorePPT = E->Donor->ScorePPT;
+  ds->ScoreBP = E->Donor->ScoreBP;
+  ds->PositionBP = E->Donor->PositionBP;
+  ds->PositionPPT = E->Donor->PositionPPT;
+  ds->class = E->Donor->class;
+  strcpy(ds->subtype,E->Donor->subtype);
+  strcpy(ds->type,E->Donor->type);
+  de->Donor = ds;
+  d->ndumpSites = d->ndumpSites + 1;
+
   /* back-up exon properties */
-  strcpy(d->dumpExons[d->ndumpExons].Type, E->Type);
-  d->dumpExons[d->ndumpExons].Frame  = E->Frame;
-  d->dumpExons[d->ndumpExons].Strand = E->Strand; 
-  d->dumpExons[d->ndumpExons].Score  = E->Score;
-  d->dumpExons[d->ndumpExons].PartialScore = E->PartialScore;
-  d->dumpExons[d->ndumpExons].HSPScore = E->HSPScore;
-  d->dumpExons[d->ndumpExons].R = E->R;
-  d->dumpExons[d->ndumpExons].GeneScore  = E->GeneScore;
-  d->dumpExons[d->ndumpExons].Remainder = E->Remainder; 
-  strcpy(d->dumpExons[d->ndumpExons].Group,E->Group);
-  d->dumpExons[d->ndumpExons].offset1 = E->offset1;
-  d->dumpExons[d->ndumpExons].offset2 = E->offset2;
-  d->dumpExons[d->ndumpExons].lValue = E->lValue;
-  d->dumpExons[d->ndumpExons].rValue = E->rValue;
-  d->dumpExons[d->ndumpExons].evidence = E->evidence;
-  d->dumpExons[d->ndumpExons].PreviousExon = Prev;
-  
+  strcpy(de->Type, E->Type);
+  de->Frame  = E->Frame;
+  de->Strand = E->Strand;
+  de->Score  = E->Score;
+  de->PartialScore = E->PartialScore;
+  de->HSPScore = E->HSPScore;
+  de->R = E->R;
+  de->GeneScore  = E->GeneScore;
+  de->Remainder = E->Remainder;
+  strcpy(de->Group,E->Group);
+  de->offset1 = E->offset1;
+  de->offset2 = E->offset2;
+  de->lValue = E->lValue;
+  de->rValue = E->rValue;
+  de->evidence = E->evidence;
+  de->PreviousExon = Prev;
+
   /* Returns the new exon recently created */
-  return(&(d->dumpExons[d->ndumpExons]));
+  return(de);
 }
 
 /* Saving all about a gene: exons, sites, properties */
@@ -120,7 +167,7 @@ exonGFF* backupGene(exonGFF* E, packDump* d)
 		  ResExon = backupExon(E,PrevExon,d);
 
 
-		  d->ndumpExons = IncrMod(d->ndumpExons, MAXBACKUPEXONS);
+		  d->ndumpExons = d->ndumpExons + 1;
 		  /* adding this exon at hash table */
 		  setExonDumpHash(ResExon, d->h);       
 		}

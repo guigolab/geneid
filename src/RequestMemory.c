@@ -762,15 +762,13 @@ packDump* RequestMemoryDumpster()
        (struct s_packDump *) malloc(sizeof(struct s_packDump))) == NULL)
     printError("Not enough memory: dumpster");  
 
-  /* 1. Temporary dumpster Sites */
-  if ((d->dumpSites = 
-       (struct s_site *) calloc(MAXBACKUPSITES, sizeof(struct s_site))) == NULL)
-    printError("Not enough memory: backup sites");
-
-  /* 2. Temporary dumpster exons */
-  if ((d->dumpExons = 
-       (exonGFF*) calloc(MAXBACKUPEXONS, sizeof(struct s_exonGFF))) == NULL)
-    printError("Not enough memory: backup exons");  
+  /* 1. + 2. Temporary dumpster sites/exons are now chunked and grown on
+     demand by BackupGenes.c (no fixed MAXBACKUP* reservation, no ring-buffer
+     recycling); start empty. */
+  d->dumpSites = NULL;
+  d->dumpSitesChunks = 0;
+  d->dumpExons = NULL;
+  d->dumpExonsChunks = 0;
 
   /* 3. Dumpster hash to find backup exons quickly */
   if ((d->h = 
