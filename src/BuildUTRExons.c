@@ -31,8 +31,6 @@
 
 /* Maximum allowed number of generic exons (divided by RFIRST) */
 /* Sequence is used to save information to prevent Stop codons in frame */
-/* extern long NUMEXONS; */
-extern long MAXBACKUPSITES;
 
 long BuildUTRExons(
 				site *Start, long nStarts, 

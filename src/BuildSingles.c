@@ -30,8 +30,6 @@
 #include "geneid.h"
 
 /* Maximum allowed number of generic exons (divided by RSINGL) */
-extern long NUMEXONS;
-extern long MAXBACKUPSITES;
 
 long BuildSingles(site *Start, long nStarts, 
                   site *Stop, long nStops,

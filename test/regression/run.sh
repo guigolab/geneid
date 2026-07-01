@@ -7,7 +7,7 @@
 # This is the guardrail for the Phase 2 cleanup: any change that alters the
 # output of a covered code path shows up here as a FAIL.
 #
-#   ./run.sh            build (MEM=medium) and verify every case
+#   ./run.sh            build and verify every case
 #   ./run.sh --no-build verify using the existing bin/geneid
 #   ./run.sh --bless    (re)generate the goldens from current output
 #   ./run.sh <name>...  run only the named case(s)
@@ -58,12 +58,12 @@ for a in "$@"; do case "$a" in
 esac; done
 
 if [ "$BUILD" = 1 ]; then
-  echo "# building (MEM=medium)..."
+  echo "# building..."
   # bin/geneid is a tracked binary, so a git checkout can leave it with a
   # newer mtime than the objects and make would skip the relink -- running a
   # stale binary against the goldens. Remove it first to force a fresh link.
   rm -f "$BIN"
-  make MEM=medium >/dev/null 2>&1 || { echo "BUILD FAILED"; exit 2; }
+  make >/dev/null 2>&1 || { echo "BUILD FAILED"; exit 2; }
 fi
 [ -x "$BIN" ] || { echo "no binary at $BIN (drop --no-build?)"; exit 2; }
 
