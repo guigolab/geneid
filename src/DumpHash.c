@@ -46,6 +46,14 @@ void resetDumpHash(dumpHash* h)
   h->total = 0;
 }
 
+/* This hash table is the "dumpster" cross-referenced from BackupGenes.c:
+ * as backupGene() recursively walks a gene's PreviousExon chain, the same
+ * exon can be reached from more than one path (it may be shared by several
+ * partial genes). setExonDumpHash/getExonDumpHash let backupGene recognize
+ * an exon it already copied (by acceptor/donor position, frame, strand,
+ * site class and Type -- not by pointer) and reuse that copy instead of
+ * duplicating it, keeping the backup array's memory bounded. */
+
 /* Hash Function:: String -> Integer between 0..MAXDUMPHASH-1 */
 long fDump(exonGFF* E)
 {

@@ -32,6 +32,16 @@
 /* Function TRANS: char -> integer such that A=0, C=1, G=2 and T/U=2 */
 extern int TRANS[];
 
+/* Scans [l1,l2) for in-frame TAA/TAG/TGA stop codons and scores the region
+ * around each with the order-0/1/2 Markov profile p, exactly like the
+ * splice-site scan in ScoreExons.c's GetSitesWithProfile -- the three
+ * order branches below (PWM, order-1 dinucleotide, order>1 via OligoToInt)
+ * are the same technique, just keyed on a fixed codon match instead of a
+ * splice consensus. Part 1 handles the profile's left edge (only when this
+ * is the very first fragment, l1==0); the main loop is Part 2; Part 3 mops
+ * up any stops so close to the fragment's right edge that the profile
+ * window would run off the end (scored 0, since there isn't enough
+ * downstream context to compute a real score). */
 long GetStopCodons(char* s,
                    profile* p,
                    site** scP, long* capP,
