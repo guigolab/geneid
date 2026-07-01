@@ -149,9 +149,22 @@ void printDTD()
         printf("\tscore    CDATA   #REQUIRED>\n\n");
 }
 
+/* Parses the command line via getopt into the external flags declared
+ * above (shared with geneid.c/manager.c), then validates the combination.
+ * The pipeline has two stages that can each be switched off: GENEID (the
+ * ab initio exon-prediction stage, turned off by -O <exons_file>, which
+ * supplies exons directly instead) and GENAMIC (the gene-assembly/DP
+ * stage, turned off by -o, exon-prediction-only mode -- see Output.c's
+ * S*P/E*P flags for what gets printed instead). geneidOpts/genamicOpts
+ * tally how many options were given that only make sense when the
+ * corresponding stage actually runs, so the checks below can reject e.g.
+ * -O combined with an exon-only-stage option. printOptions tallies the
+ * single-feature debug print flags (-b/-d/-a/-e/-f/-i/-t/-s/-x/-z, i.e.
+ * SFP/SDP/SAP/STP/EFP/EIP/ETP/ESP/EXP/EOP), which are mutually exclusive
+ * with XML output (-M) below. */
 void readargv (int argc,char* argv[],
 			   char* ParamFile, char* SequenceFile,
-	       char* ExonsFile, char* HSPFile, char* GenePrefix) 
+	       char* ExonsFile, char* HSPFile, char* GenePrefix)
 {
   int c;
   int error=0;
@@ -331,6 +344,9 @@ void readargv (int argc,char* argv[],
 	}
 
   /* Setup Errors (b): Wrong number of filenames */
+  /* The one non-option argument left after getopt is the input FASTA file,
+     required unless -O already disabled GENEID (gene-assembly-only runs
+     from a pre-supplied ExonsFile need no separate sequence input here). */
   /* Read the name of the input fasta file */
   if (optind < argc)
     {

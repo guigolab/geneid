@@ -29,7 +29,11 @@
 
 #include "geneid.h"
 
-/* Replicating the gene model rules for every isochore */
+/* The gene model (isochores[0]->D/nc/ne/UC/DE/md/Md/block/nclass) is only  */
+/* ever loaded once, from the .gm/param file, into the first isochore's     */
+/* gparam struct (see ReadGeneModel below). Every other isochore uses the   */
+/* exact same assembly rules, so this just points their pointers/arrays at  */
+/* isochore 0's copy instead of re-parsing or duplicating the data.         */
 void shareGeneModel(gparam** isochores, int nIsochores)
 { 
   int i,j,k;
@@ -66,9 +70,56 @@ void shareGeneModel(gparam** isochores, int nIsochores)
     }
 }
 
-/* Loading the gene model rules to build correct genes */
-/* Every rule is identified by the gm line where it has been found */
-/* Returns how many rules have been loaded right */
+/* Loading the gene model rules to build correct genes.
+ *
+ * The gene model section of the parameter file lists, one per (non-comment,
+ * non-blank) line, the legal ways an already-built exon of one type may be
+ * followed by an exon of another type to form part of a gene. Each such
+ * line is a "rule", and the rule's line number (0-based, in file order) IS
+ * its class id ("nlines" below) -- the same class id that genamic.c's DP
+ * uses to index Ga[class]/d[class] and that this function's own md/Md/
+ * block arrays are indexed by. There is no separate class-name column:
+ * the class is simply "the n-th rule in the file".
+ *
+ * Rule syntax (columns separated by literal space characters):
+ *
+ *   UC1:UC2:(...):UCn   DE1:DE2:(...):DEm   dMin:dMax   [block]
+ *
+ * - Column 1 (UC, "upstream compatible"): colon-separated list of exon
+ *   types that may end a partial gene being extended INTO this class, i.e.
+ *   the predecessor exon's type must appear here for genamic to consider
+ *   this rule at all (see UC[][] below, and its use as gp->UC in genamic.c).
+ * - Column 2 (DE, "downstream equivalent"): colon-separated list of exon
+ *   types that may be the new exon completing this class once the distance
+ *   test passes (see DE[][] below, gp->DE in genamic.c).
+ * - Column 3: the allowed gap between the two exons, as dMin:dMax
+ *   (introns use this as the intron-length window). Use the literal string
+ *   SINFI ("Infinity", case-sensitive) in place of dMax to mean unbounded.
+ * - Column 4 (optional): if this column is present AT ALL, its content is
+ *   never inspected -- any token here (traditionally "block") switches this
+ *   rule's block[] entry to BLOCK, meaning genamic must not let the two
+ *   exons belong to different evidence Groups (group checkpoint). Omitting
+ *   the column entirely leaves it NONBLOCK.
+ *
+ * Common parameter-file pitfalls with this format:
+ * - Columns must be separated by literal space characters, not tabs --
+ *   strtok(line," ") only splits on ' ', so a tab between columns leaves
+ *   the whole line stuck together as line1 and triggers the "Wrong format"
+ *   error below (line2/line3 come back NULL).
+ * - A line is only treated as a comment if '#' or '\n' is the very FIRST
+ *   character (line[0]). Leading whitespace before a '#' is NOT recognized
+ *   as a comment and will instead be parsed as a (malformed) rule.
+ * - Feature type names in columns 1-2 (e.g. "First+", "Internal-",
+ *   "Single+", "Terminal-") are matched against the shared type dictionary
+ *   by exact, case-sensitive string comparison (setkeyDict/getkeyDict). A
+ *   typo or wrong case does NOT raise an error -- it silently registers a
+ *   brand-new, never-produced type, so the rule quietly becomes dead/
+ *   unreachable instead of failing loudly. Copy existing type strings
+ *   rather than retyping them.
+ * - dMax must be either a plain integer or exactly the string SINFI; any
+ *   other non-numeric token there is misread as 0 via atol() with no error.
+ *
+ * Returns how many rules (classes) were loaded. */
 long ReadGeneModel (FILE* file, dict* d,
                     int nc[], int ne[],
                     int UC[][MAXENTRY],
@@ -91,10 +142,7 @@ long ReadGeneModel (FILE* file, dict* d,
   
   char mess[MAXSTRING];
   char *t1;
-  
-  /* Format for gene model rules: 
-     F1:F2:(...):Fn   F1:F2:(...):Fm dmin:dMax  [block] */
-  
+
   /* Input lines from parameter file */
   nlines=0;
   while(fgets(line,MAXLINE,file)!=NULL)
@@ -182,9 +230,15 @@ long ReadGeneModel (FILE* file, dict* d,
   return(nlines);
 }
 
-/* Fill in the Gene Model with artificial lines to build only one gene */
-/* Every rule is identified by the gm line where it has been found */
-/* Returns how many rules have been loaded right */
+/* Used instead of ReadGeneModel when forcing single-gene prediction (-S):
+ * hardcodes the same 4 rules (UC/DE/md/Md/block, same field meanings as
+ * documented above ReadGeneModel) that a "normal" one-gene-per-model .gm
+ * file would express, without needing one on disk. Rules 1-2 chain
+ * First->Internal->Terminal exons (forward/reverse) with the usual
+ * 20:40000 intron window and group blocking; rules 3-4 close the gene off
+ * at the fragment boundaries (sBEGINFWD/sBEGINRVS, sENDFWD/sENDRVS) with
+ * an unbounded (0:Infinity) gap and no group check.
+ * Returns how many rules (always 4) were loaded. */
 long ForceGeneModel (dict* d,
                     int nc[], int ne[],
                     int UC[][MAXENTRY],

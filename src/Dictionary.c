@@ -51,7 +51,12 @@ int f(char s[])
   return(total);
 }
 
-/* Assign a number-key to the new word and store it */
+/* Assign a number-key to the new word and store it. Keys are handed out in
+ * first-seen order (0, 1, 2, ...) via d->nextFree, so e.g. ReadGeneModel.c's
+ * exon-type ids are just "the order each type string first appeared in the
+ * .gm file". Lookup is by exact string match only -- no case-folding, so a
+ * typo'd or mis-cased type string silently becomes a brand-new key instead
+ * of an error (see the pitfalls note above ReadGeneModel). */
 int setkeyDict(dict* d, char s[])
 {
   int key;
@@ -179,7 +184,11 @@ void freeDict(dict* d)
   free(d); 
 }
 
-/* Binding the amino acid (key) to the new codon (word) */
+/* Second, unrelated use of the same hash-table structure: instead of an
+ * auto-assigned sequential key, here the caller supplies the key directly
+ * (the one-letter amino acid code), keyed by codon string. Used to build
+ * the genetic-code table for translation, separate from any feature-type
+ * dictionary built by setkeyDict. */
 void setAADict(dict* d, char s[], char aA)
 {
   node* p;
