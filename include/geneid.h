@@ -471,23 +471,26 @@ typedef struct s_profile
   float*  transitionValues[PROFILEDIM];
 } profile;
 
-typedef struct s_site                  
+/* A single predicted splice site / start / stop / TSS / TES signal. */
+typedef struct s_site
 {
-  long Position;                       
-  float Score;
-  float ScoreAccProfile;                        
-  float ScoreBP;
-  float ScorePPT;
-  int PositionBP;
-  int PositionPPT;
-  char type[MAXSPLICETYPE];
-  char subtype[MAXSUBTYPE];
-  short class;
+  long Position;         /* coordinate in the (fragment-local) sequence */
+  float Score;            /* final signal score (after all sub-profiles below) */
+  float ScoreAccProfile;  /* acceptor PWM/Markov score alone, before adding BP/PPT */
+  float ScoreBP;          /* branch-point sub-profile score (acceptors only) */
+  float ScorePPT;         /* poly-pyrimidine-tract sub-profile score (acceptors only) */
+  int PositionBP;         /* branch point position, relative to this Acceptor */
+  int PositionPPT;        /* poly-pyrimidine-tract position, relative to this Acceptor */
+  char type[MAXSPLICETYPE];    /* e.g. "Acceptor", "Donor", "Start", "Stop" (site kind) */
+  char subtype[MAXSUBTYPE];    /* e.g. "U2", "U12gtag", "U12atac", "GC-AG" (signal flavor) */
+  short class;            /* U2 / U12gtag / U12atac (see #define's above); drives Ga's 3rd axis */
 } site;
 
-typedef struct s_packSites             
+/* All predicted signals for one strand of one fragment, one array per
+   signal kind (TS/TE = transcription start/end sites, UTR-only). */
+typedef struct s_packSites
 {
-  site* StartCodons;                   
+  site* StartCodons;
   site* AcceptorSites;
   site* DonorSites;
   site* StopCodons;
@@ -528,35 +531,42 @@ typedef struct s_packSortSites
   long  tesitescap;
 } packSortSites;
 
+/* A single predicted (or annotated/evidence) exon, and also the node type
+   used to chain exons into genes: genamic's DP walks PreviousExon links to
+   build up a gene, scoring each addition into GeneScore (see genamic.c). */
 typedef struct s_exonGFF *pexonGFF;
 typedef struct s_exonGFF
 {
-  site* Acceptor;
-  site* Donor;
-  char Type[MAXTYPE];
-  short Frame;
-  short Remainder;
-  char Strand;
-  float PartialScore;
-  float HSPScore;
-  float R;
-  float Score;
-  pexonGFF PreviousExon;
-  double GeneScore;
-  char Group[MAXSTRING];
-  int offset1;
-  int offset2;
-  short lValue;
-  short rValue;
-  short evidence;
-  short selected;
-  short three_prime_partial;
-  short five_prime_partial;
+  site* Acceptor;         /* left (5') splice/start signal bounding this exon */
+  site* Donor;            /* right (3') splice/stop signal bounding this exon */
+  char Type[MAXTYPE];     /* "First"/"Internal"/"Terminal"/"Single"/"Intron"/UTR variants/... */
+  short Frame;            /* reading frame this exon starts in (0/1/2) */
+  short Remainder;        /* bases left over from an incomplete trailing codon */
+  char Strand;            /* '+' / '-' / '*' (the Ghost/placeholder exon) */
+  float PartialScore;     /* the coding-potential (Markov) component of Score */
+  float HSPScore;         /* the homology/HSP-support component of Score */
+  float R;                /* RNA-seq coverage evidence (e.g. RPKM) for this exon, if any */
+  float Score;             /* this exon's own score (site + coding + HSP + weight, see ScoreExons) */
+  pexonGFF PreviousExon;  /* best predecessor exon in the assembled gene chain (Ghost if none) */
+  double GeneScore;       /* PreviousExon->GeneScore + Score: best gene score ending at this exon */
+  char Group[MAXSTRING];  /* evidence/annotation group name (NOGROUP if none); see genamic's block rule */
+  int offset1;            /* Acceptor-position correction (fragment-splitting/evidence coordinate offset) */
+  int offset2;            /* Donor-position correction (fragment-splitting/evidence coordinate offset) */
+  short lValue;           /* left split-codon signature (set by ComputeStopInfo; see genamic.c) */
+  short rValue;           /* right split-codon signature (set by ComputeStopInfo; see genamic.c) */
+  short evidence;         /* 1 if this exon comes from external evidence/annotation, 0 if predicted */
+  short selected;         /* scratch mark used by SwitchFrames to track already-processed d-array entries */
+  short three_prime_partial; /* 1 if the gene's 3' end is cut off by the sequence/fragment boundary (GFF3 output) */
+  short five_prime_partial;  /* 1 if the gene's 5' end is cut off by the sequence/fragment boundary (GFF3 output) */
 } exonGFF;
 
-typedef struct s_packExons             
+/* One array per exon type, all built and filled per fragment/strand by the
+   Build*Exons functions (see e.g. BuildInitialExons.c); UTR arrays only
+   used when UTR prediction (-u) is on. Each array grows on demand (see the
+   matching cap* field and GrowExonArray). */
+typedef struct s_packExons
 {
-  exonGFF* InitialExons;               
+  exonGFF* InitialExons;
   exonGFF* InternalExons;
   exonGFF* ZeroLengthExons;
   exonGFF* TerminalExons;
@@ -599,15 +609,18 @@ typedef struct s_packExons
   long capUtrTerminalExons;
 } packExons;
 
+/* The gene-assembly DP state, persisted across all fragments of one locus
+   (reset only when moving to the next input sequence). See the header
+   comment of genamic.c for how these are used together. */
 typedef struct s_packGenes
 {
-  exonGFF* ***Ga;
-  exonGFF* Ghost;
-  exonGFF* GOptim;
-  exonGFF* **d;
-  long* dcap;   /* allocated capacity of each d[class] (grown by BuildSort) */
-  long* km;
-  long* je;
+  exonGFF* ***Ga;   /* Ga[class][frame][spliceclass]: best partial gene ending in that DP cell */
+  exonGFF* Ghost;   /* placeholder "empty gene" every Ga cell starts pointing at (Strand '*') */
+  exonGFF* GOptim;  /* best-scoring complete gene found so far, across the whole locus */
+  exonGFF* **d;     /* d[class]: exons compatible with gene-model class `class`, sorted by Donor position */
+  long* dcap;       /* allocated capacity of each d[class] (grown by BuildSort) */
+  long* km;         /* km[class]: number of exons currently in d[class] */
+  long* je;         /* je[class]: how far d[class] has been folded into Ga so far (forward-only cursor) */
 } packGenes;
 
 typedef struct s_packEvidence
@@ -653,27 +666,35 @@ typedef struct s_packExternalInformation
   float** readcount;
 } packExternalInformation;
 
-typedef struct s_dumpNode *pdumpNode;  
+/* Hash-bucket entry identifying one already-backed-up exon (see DumpHash.c);
+   the key fields mirror exonGFF's Acceptor/Donor/Frame/Strand/Type so
+   getExonDumpHash can recognize a duplicate without re-hashing the exon
+   from scratch. asub/dsub are unused (their fill-in is commented out in
+   setExonDumpHash) -- kept only for the on-disk struct layout. */
+typedef struct s_dumpNode *pdumpNode;
 typedef struct s_dumpNode
 {
-  long acceptor;                      
-  long donor;
-  short aclass;
-  short dclass;
+  long acceptor;    /* the exon's Acceptor->Position */
+  long donor;       /* the exon's Donor->Position */
+  short aclass;     /* the exon's Acceptor->class (U2/U12gtag/U12atac) */
+  short dclass;     /* the exon's Donor->class */
   char asub[MAXSUBTYPE];
   char dsub[MAXSUBTYPE];
-  short frame;
-  char strand;
-  char type[MAXTYPE];
+  short frame;      /* the exon's Frame */
+  char strand;      /* the exon's Strand */
+  char type[MAXTYPE]; /* the exon's Type */
 
-  exonGFF* exon;                      
-  pdumpNode next;
-} dumpNode; 
+  exonGFF* exon;    /* the actual backed-up exon (a stable pointer into a dumpster chunk) */
+  pdumpNode next;   /* next node in this hash bucket's collision chain */
+} dumpNode;
 
-typedef struct s_dumpHash              
+/* Hash table (fixed MAXDUMPHASH buckets, chained) so backupGene can tell in
+   O(1) whether an exon has already been backed up into the dumpster, instead
+   of rescanning it. */
+typedef struct s_dumpHash
 {
-  pdumpNode* T;
-  long total; 
+  pdumpNode* T;   /* T[0..MAXDUMPHASH): bucket array, each a collision chain */
+  long total;     /* total number of exons currently hashed (diagnostic only) */
 } dumpHash;
 
 typedef struct s_packDump
