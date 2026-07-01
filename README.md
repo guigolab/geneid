@@ -1,6 +1,6 @@
 For more information on how to install, train and run geneid check the [Wiki](https://github.com/guigolab/geneid/wiki)
 
-******************** geneid v.1.4.6 README File ********************
+******************** geneid v.1.5 README File ********************
 
 Summary:
 A. What's geneid ?
