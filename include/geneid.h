@@ -454,19 +454,38 @@ typedef struct s_dict
   int nextFree; 
 } dict;
 
-typedef struct s_profile               
+/* One signal-scoring model (start/donor/acceptor/stop/branch-point/PPT/...),
+   loaded directly from one line + matrix block of the .param file by
+   ReadProfile (see readparam.c); BuildAcceptors/BuildDonors/GetSitesWithProfile
+   apply it to score every candidate window of the sequence. */
+typedef struct s_profile
 {
-  int    dimension;
-  int    offset;
-  float  cutoff;
-  int    order;
-  float  afactor;
+  int    dimension;      /* window width scored, in bases */
+  int    offset;         /* position of the actual signal inside the window
+			     (used to convert a window match back to the
+			     signal's true sequence coordinate) */
+  float  cutoff;         /* candidates scoring below this are rejected */
+  int    order;          /* Markov chain order: 0 = plain PWM, 1 = dinucleotide, 2 = higher order */
+  float  afactor;        /* score rescaling: final = afactor + bfactor*raw_loglikelihood */
   float  bfactor;
+  /* The next four are only used when scanning for a branch point (acceptors
+     with a BranchPointProfile): acc_context bounds how far upstream of the
+     acceptor to search; dist/opt_dist give the minimum and the preferred
+     distance from acceptor to branch point; penalty_factor scales a
+     quadratic penalty for straying from opt_dist (see
+     ComputeU2BranchProfile/ComputeU12BranchProfile in BuildAcceptors.c /
+     BuildU12Acceptors.c). */
   int    acc_context;
   int    dist;
   int    opt_dist;
   float    penalty_factor;
 
+  /* transitionValues[pos][oligomer] holds the log-likelihood for that
+     (order+1)-mer occurring at window position pos (0..dimension-1); the
+     oligomer is encoded by OligoToInt with a 5-letter alphabet (A/C/G/T/N),
+     so dimensionTrans = 5^(order+1) always covers every possible index
+     (unlike ScoreExons.c's coding-potential tables, which use a 4-letter
+     alphabet and must explicitly guard against an out-of-range N). */
   long dimensionTrans;
   float*  transitionValues[PROFILEDIM];
 } profile;
@@ -744,19 +763,26 @@ typedef struct s_packGC
   long* N;
 } packGC;
 
-typedef struct s_paramexons            
+/* Per-isochore, per-exon-type score weights and cutoffs, loaded by
+   ReadIsochore (see readparam.c) into gp->Initial/Internal/Terminal/Single/
+   utr; ScoreExons.c's Score() picks one of these (via `p`) per exon and
+   combines them as:
+     scoreTotal = siteFactor*(site scores) + exonFactor*scoreMarkov
+                  + HSPFactor*scoreHSP  (+ ExonWeight, if it clears both
+                  OligoCutoff and ExonCutoff -- see Score()'s two checkpoints) */
+typedef struct s_paramexons
 {
-  float siteFactor;
+  float siteFactor;   /* weight on the bounding splice/start/stop signal score(s) */
 
-  float exonFactor;
-  float OligoCutoff;
+  float exonFactor;   /* weight on the coding-potential (Markov) score */
+  float OligoCutoff;  /* minimum coding-potential score to even consider this exon (1st cutoff) */
 
-  float HSPFactor;
+  float HSPFactor;    /* weight on the homology/RNA-seq evidence score */
 
-  float ExonWeight;
+  float ExonWeight;   /* flat bonus/penalty added after both cutoffs pass (tunable via -E) */
 /*   float U12atacExonWeight; */
 /*   float U12gtagExonWeight; */
-  float ExonCutoff;
+  float ExonCutoff;   /* minimum combined scoreTotal to keep this exon (2nd/final cutoff) */
 } paramexons;
 
 typedef struct s_gparam                

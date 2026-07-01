@@ -319,6 +319,28 @@ void selectFeatures(char* exonType,
 
 /* Processing of genes to make pretty printing afterwards */
 /* artScore is the value that must be substracted from total score (forced evidences) */
+/* genamic's DP leaves behind one long PreviousExon chain: not just one
+   gene's exons, but potentially MANY genes back to back, each one's first
+   exon pointing at a BEGIN/PROMOTER/artificial marker that in turn chains
+   into the next gene, all the way back to the Ghost exon (Strand '*') that
+   terminates the walk. CookingInfo walks that WHOLE chain exactly once,
+   starting from eorig (the optimal solution, pg->GOptim) and following
+   PreviousExon back to the Ghost, splitting it into one gene[] record per
+   gene as it goes: every time it crosses a gene boundary (a First/Single/
+   BEGIN/PROMOTER/UTR-first marker -- see stop1/stop2 below) it starts
+   filling the next info[igen] slot. Per gene it accumulates feature/exon/
+   UTR/CDS/intron counts and the summed score; BEGIN/END pseudo-exons carry
+   a MAXSCORE sentinel instead of a real score and are skipped entirely,
+   with their MAXSCORE refunded via *artScore so the caller can subtract it
+   back out of the reported gene score.
+   Because '-' strand genes are assembled in the OPPOSITE order from how
+   they read (First is added to the chain last), the reverse-strand branch
+   below walks BOTTOM (First) -> TOP (Terminal) while the forward-strand
+   branch walks BOTTOM (Terminal) -> TOP (First); both branches are
+   otherwise the same bookkeeping, just checking the boundary marker for
+   the opposite end of the gene. currentIsUTR remembers whether the feature
+   just visited was a half-UTR piece, so a First/Single exon fused onto a
+   half-UTR isn't mistaken for the start of the NEXT gene. */
 long CookingInfo(exonGFF* eorig,
                  gene** pinfo,
                  long* pcap,

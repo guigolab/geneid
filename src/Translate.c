@@ -48,7 +48,15 @@ static void growStr(char** buf, long* cap, long need)
   *cap = ncap;
 }
 
-/* Obtaining the amino acid sequence from an exon (given a reading frame) */
+/* Translates the WHOLE-CODON interior of one exon, p1..p2 inclusive, into
+   sAux, returning the amino acid count. fra and rmd are the number of
+   leftover bases (0/1/2) at the exon's 5' and 3' ends respectively that do
+   NOT belong to a whole codon within this exon (because the codon they're
+   part of is split across the splice junction with a neighboring exon);
+   those are copied into sAux verbatim, lowercased (+32), as placeholders --
+   TranslateGene (below) is what actually stitches each side's leftover
+   bases together into a real codon and translates it, once both exons on
+   either side of the junction are known. */
 int Translate(long p1,
               long p2,
               short fra,
@@ -111,6 +119,29 @@ int Translate(long p1,
 }
 
 /* Translate gene sequence into the protein */
+/* Walks a gene's PreviousExon chain (like CookingInfo in CookingGenes.c)
+   translating each coding exon's whole-codon interior via Translate(), then
+   stitches the split codon at each exon-exon junction back together and
+   translates THAT too -- so the protein comes out complete even though no
+   single exon's sequence lines up with codon boundaries.
+   The junction bookkeeping: e->Frame is how many bases at this exon's start
+   belong to a codon started in the PREVIOUS exon (0/1/2); e->Remainder is
+   how many bases at this exon's end are left dangling for the NEXT exon to
+   complete. currFrame (forward) / currRmd (reverse) carry the previous
+   iteration's dangling-base count into this one, and codon[] accumulates
+   the actual bases (mixing ends from two different exons) until all 3 are
+   known, at which point it is translated and spliced into the running
+   protein (the two `switch (currFrame)`/`switch (currRmd)` blocks per
+   iteration: one consumes what the PREVIOUS exon left pending using bases
+   from the CURRENT exon, the other stashes what THIS exon leaves pending
+   for the NEXT). rmdProt is the special case at the very ends of the gene
+   (the first exon's leading partial codon, the last exon's trailing
+   partial codon) which have no neighboring exon to complete them, so they
+   are appended untranslated (lowercased, like Translate()'s fra/rmd
+   bases). Forward and reverse strand are mirror images of the same
+   bookkeeping; reverse additionally reverse-complements each exon (via
+   ReverseSubSequence into a scratch buffer rs) before translating it left
+   to right like the forward case. */
 void TranslateGene(exonGFF* e,
                    char* s,
                    dict* dAA,
