@@ -137,6 +137,18 @@ float ComputeU2PPTProfile(char* s,
 }
 
 /* Search for acceptor splice sites, using additional profiles */
+/* Scans every candidate window in [l1,l2] for a U2 acceptor site, using the
+   same order-0/1/2 PWM/Markov scoring as ScoreExons.c's GetSitesWithProfile
+   (see that function's comment for how the order cases work; here they are
+   computed directly per-window rather than pre-scanned, since a whole
+   fragment's worth of acceptor windows is not reused the way coding-
+   potential is). Two cutoffs gate a candidate: `cutoff` (== p->cutoff for
+   U2; BuildU12Acceptors.c relaxes it for U12 acceptors) on the RAW signal
+   score alone, cheaply skipping the expensive branch-point/PPT lookups
+   (ComputeU2BranchProfile/ComputeU2PPTProfile -- see the profile struct
+   comment in geneid.h for acc_context/dist/opt_dist/penalty_factor) for
+   windows that could never pass; then p->cutoff again on the COMBINED
+   score (signal + branch point) before actually saving the site. */
 long  BuildAcceptors(char* s,
 		     short class,
 		     char* type,

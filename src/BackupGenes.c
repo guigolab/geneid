@@ -27,6 +27,26 @@
 
 /*  $Id: BackupGenes.c,v 1.11 2011-01-13 11:06:16 talioto Exp $  */
 
+/* geneid processes a long sequence one LENGTHSi-sized fragment at a time
+ * (see manager.c/geneid.c), but genamic's DP state (packGenes: Ga/d/km/je,
+ * see genamic.c) and the exons it points into are only guaranteed to live
+ * for the CURRENT fragment -- the next fragment's Build.../SortExons calls
+ * reuse/overwrite those arrays. This file is what carries a gene assembly
+ * IN PROGRESS across that boundary:
+ *   BackupGenes()   copies every live "best partial gene" cell (all of
+ *                   pg->Ga, plus GOptim) into the dumpster, so they survive
+ *                   the next fragment's array reuse.
+ *   BackupArrayD()  does the same for pg->d[] (the sort-by-donor arrays),
+ *                   but only the TAIL of each one that might still be
+ *                   needed as a predecessor by a FUTURE exon -- see its own
+ *                   comment below for the trimming logic.
+ * Both funnel through backupGene()/backupExon(), which deep-copy an exon
+ * (and its Acceptor/Donor sites) into the dumpster's chunked, stable-address
+ * storage (see BackupGenes.c's dumpExonAt/dumpSiteAt and the packDump
+ * comment in geneid.h) and follow PreviousExon recursively so the WHOLE gene
+ * chain behind a kept exon survives too, deduplicated via the dump hash so
+ * a chain shared by several kept exons is only copied once. */
+
 #include "geneid.h"
 
 /* Maximum allowed number of sites and exons to save */
@@ -147,6 +167,16 @@ exonGFF* backupExon(exonGFF* E, exonGFF* Prev, packDump* d)
 }
 
 /* Saving all about a gene: exons, sites, properties */
+/* Ensures E (and, recursively, its whole PreviousExon chain) has a backed-up,
+   dumpster-resident copy, and returns a pointer to that copy (NOT to E --
+   E itself belongs to the current fragment's soon-to-be-reused arrays).
+   Returns E itself only in the Ghost/placeholder base case (Strand '*'),
+   since the Ghost is a fixed, never-reused sentinel that needs no backup.
+   The hash lookup makes this idempotent and shared: if E was already backed
+   up (e.g. via a different Ga cell, or a previous call to BackupArrayD/
+   BackupGenes), its existing dumpster copy is reused instead of duplicating
+   it -- so a long shared chain only gets copied once no matter how many
+   live cells still reference it. */
 exonGFF* backupGene(exonGFF* E, packDump* d)
 {
   exonGFF* PrevExon;
@@ -154,22 +184,26 @@ exonGFF* backupGene(exonGFF* E, packDump* d)
 
   /* Ghost exon doesn't need backup */
   if (E->Strand == '*') /* ||(E->Strand != '+')||(E->Strand != '-')) */
-    ResExon = E; 
+    ResExon = E;
   else
 	{
 	  /* Ckeckpoint to discover if exon is already in the dumpster */
 	  ResExon  = (exonGFF*) getExonDumpHash(E, d->h);
-	  
+
 	  /* New exon: save it and insert into the hash table */
 	  if (ResExon == NULL)
 		{
+		  /* Recurse toward the gene's start FIRST, so PrevExon is already
+		     the dumpster-resident copy by the time backupExon links to it
+		     (a backed-up exon's PreviousExon must itself point into the
+		     dumpster, never back into the current fragment's arrays). */
 		  PrevExon = backupGene(E->PreviousExon,d);
 		  ResExon = backupExon(E,PrevExon,d);
 
 
 		  d->ndumpExons = d->ndumpExons + 1;
 		  /* adding this exon at hash table */
-		  setExonDumpHash(ResExon, d->h);       
+		  setExonDumpHash(ResExon, d->h);
 		}
 	  /* if this exon exists, finish backup gene */
 	}
@@ -177,6 +211,12 @@ exonGFF* backupGene(exonGFF* E, packDump* d)
 }
 
 /* It saves the information about partial genes (packGenes) */
+/* Backs up every currently-live "best partial gene" DP cell -- all of
+   Ga[class][frame][spliceclass] plus the running optimum GOptim -- so the
+   next fragment can pick up gene assembly where this one left off (see
+   this file's header comment); note Ga/GOptim themselves are NOT reset
+   here, they keep pointing at these same exons, just now via their
+   dumpster-resident copies. */
 void BackupGenes(packGenes* pg, int nclass, packDump* d)
 {
   int i,j,k;
@@ -193,6 +233,30 @@ void BackupGenes(packGenes* pg, int nclass, packDump* d)
 }
 
 /* It saves information about d-exons: exons needed the next iteration */
+/* Called at the END of a fragment, once we know accSearch (the position the
+   NEXT fragment will start scanning acceptors from): shrinks every
+   pg->d[class] down to just the tail that could still be needed as a
+   predecessor once processing resumes, backing up (into the dumpster) and
+   discarding everything else so the array doesn't grow unboundedly across
+   the whole sequence. Three passes per class, mirroring genamic.c's own
+   je/km bookkeeping:
+     1. Any exon between the old je cursor and accSearch-MinDist is now
+        definitely within range of a future acceptor and will never be
+        looked at again by genamic's forward scan -- so fold it into Ga
+        here (exactly like genamic.c's own forward-scan update) before it
+        potentially gets backed up and its d[] slot reused below.
+     2. Walk backward from there to find jMaxdist: the earliest index whose
+        Donor position is still within MaxDist of accSearch (or, if this
+        class has no max-distance limit, jMaxdist = jUpdate -- nothing
+        before jUpdate can matter any more). Everything at or after
+        jMaxdist might still be reachable by a future exon in genamic's
+        MaxDist backward-recovery scan (see genamic.c step 2a) and so must
+        be kept; everything before it never can be and is dropped.
+     3. Back up that surviving tail (jMaxdist..km) into the dumpster, then
+        compact it down to the front of pg->d[i] (index 0..km-jMaxdist) so
+        the array doesn't grow forever -- BuildSort will append the next
+        fragment's exons right after it. je is shifted by the same amount
+        so it still points at the same logical exon after the compaction. */
 void BackupArrayD(packGenes* pg, long accSearch,
                   gparam* gp, packDump* dumpster)
 {
@@ -205,7 +269,7 @@ void BackupArrayD(packGenes* pg, long accSearch,
   short remainder;
   short donorclass;
   char mess[MAXSTRING];
-  
+
   /* Traversing sort-by-donor array to save some genes (assembling rules) */
   /* These exons have to be beyond the point accSearch (preserve ordering) */
   for(i=0; i < gp->nclass ; i++)
@@ -214,13 +278,17 @@ void BackupArrayD(packGenes* pg, long accSearch,
       j = pg->je[i];
       MaxDist = gp->Md[i];
       MinDist = gp->md[i];
-      
+
       /* 1. Update best genes using remaining exons before accSearch - md */
       while(j < pg->km[i] &&
 			((pg->d[i][j]->Donor->Position + pg->d[i][j]->offset2)
 			 <=
 			 accSearch - MinDist))
 		{
+		  /* Ga is indexed by (frame,splice-class) on the FORWARD strand but
+		     by (remainder,acceptor-class) on the reverse strand -- same
+		     axes genamic.c uses, just swapped per-strand like SwitchFrames
+		     does for Frame/Remainder themselves. */
 		  if (pg->d[i][j]->Strand == cFORWARD){
 			remainder = pg->d[i][j]->Remainder;
 			donorclass = pg->d[i][j]->Donor->class;
@@ -228,29 +296,29 @@ void BackupArrayD(packGenes* pg, long accSearch,
 			remainder = pg->d[i][j]->Frame;
 			donorclass = pg->d[i][j]->Acceptor->class;
 		  }
-		  
+
 		  if (pg->d[i][j]->GeneScore > pg->Ga[i][remainder][donorclass]->GeneScore)
 			pg->Ga[i][remainder][donorclass] = pg->d[i][j];
 		  j++;
 		}
       jUpdate = j;
-      
+
       /* 2. Copy exons needed to recompute maximum distance requirement */
-      if (MaxDist == INFI)      
+      if (MaxDist == INFI)
 		jMaxdist = jUpdate;
       else
 		{
 		  /* Loop back until reaching first exon out of range: acc-dMax */
 		  j = jUpdate;
-		  while (j>=0 && j < pg->km[i]  && 
-				 ((pg->d[i][j]->Donor->Position 
+		  while (j>=0 && j < pg->km[i]  &&
+				 ((pg->d[i][j]->Donor->Position
 				   + pg->d[i][j]->offset2)
-				  >= 
+				  >=
 				  accSearch - MaxDist))
 			j--;
 		  jMaxdist = (j < pg->km[i])? j+1 : j;
 		}
-      
+
       /* 3. To save the set of best genes finished in any selected d-exon */
       for(j = jMaxdist; j < pg->km[i]; j++)
 		{
@@ -260,7 +328,7 @@ void BackupArrayD(packGenes* pg, long accSearch,
       pg->km[i] = pg->km[i] - jMaxdist;
       pg->je[i] = jUpdate - jMaxdist;
     }
-  
+
   sprintf(mess,"%ld d-genes saved(%ld real exons)",
 		  nBackups, dumpster->h->total);
   printMess(mess);
