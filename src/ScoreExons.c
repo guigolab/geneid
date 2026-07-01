@@ -381,7 +381,6 @@ long Score(exonGFF *Exons,
   paramexons* p;
   int OligoLength;
   gparam* gp;
-  int rss = 0;
 /*   char mess[MAXSTRING]; */
 /*   float million = 1000000; */
 /*   int u12correction; */
@@ -396,7 +395,6 @@ long Score(exonGFF *Exons,
       iniExon=(Exons+i)->Acceptor->Position - l1;
       endExon=(Exons+i)->Donor->Position - l1;
       exonLen=endExon-iniExon+1;
-      rss = 0;
       /* 0. Get G+C content of the region around the exon (local) */
       /* selecting the proper isochore to score the exon */
       if (iniExon <= ISOCONTEXT)

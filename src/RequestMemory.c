@@ -715,8 +715,8 @@ packGenes* RequestMemoryGenes()
         printError("Not enough memory: 6 frames in Ga array of genes");
 
       for(aux2=0; aux2 < FRAMES; aux2++){
-      if ((pg->Ga[aux][aux2] = (exonGFF* *)calloc(SPLICECLASSES, sizeof(exonGFF*))) == NULL)
-        printError("Not enough memory: 3 splice classes in Ga array of genes");
+	if ((pg->Ga[aux][aux2] = (exonGFF* *)calloc(SPLICECLASSES, sizeof(exonGFF*))) == NULL)
+	  printError("Not enough memory: 3 splice classes in Ga array of genes");
 
 	for(aux3=0; aux3 < SPLICECLASSES; aux3++){
 	  pg->Ga[aux][aux2][aux3] = pg->Ghost;

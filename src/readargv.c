@@ -51,7 +51,7 @@ char* USAGE="NAME\n\tgeneid - a program to annotate genomic sequences\nSYNOPSIS\
 
 void printHelp()
 {
-  printf(USAGE);
+  printf("%s", USAGE);
 
   printf ("OPTIONS\n");
   

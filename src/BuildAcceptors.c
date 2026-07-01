@@ -66,12 +66,12 @@ float ComputeU2BranchProfile(char* s,
 	  index = OligoToInt(s + i + j - p->order, p->order+1,5);
 		  
 	  if (index >= p->dimensionTrans)
-	    score = score + -INFI;
+	    score = score + -(float)INFI;
 	  else
 	    score = score + p->transitionValues[j][index];
 	}
 	   
-      score = score - p->penalty_factor * (((float)(abs(i + p->offset -Opt))/((float)(p->acc_context - p->offset - p->opt_dist)))*((float)(abs(i + p->offset
+      score = score - p->penalty_factor * (((float)(labs(i + p->offset -Opt))/((float)(p->acc_context - p->offset - p->opt_dist)))*((float)(labs(i + p->offset
 																			     -Opt))/((float)(p->acc_context - p->offset - p->opt_dist)))); 
       score = p->afactor + (p->bfactor * score);
       if ((score >= maxScore)&&(score > p->cutoff)){
@@ -118,7 +118,7 @@ float ComputeU2PPTProfile(char* s,
 	  index = OligoToInt(s + i + j - p->order, p->order+1,5);
 		  
 	  if (index >= p->dimensionTrans)
-	    score = score + -INFI;
+	    score = score + -(float)INFI;
 	  else
 	    score = score + p->transitionValues[j][index];
 	}
@@ -188,7 +188,7 @@ long  BuildAcceptors(char* s,
 	      index = OligoToInt(s+j, p->order+1,5);
 			  
 	      if (index >= p->dimensionTrans)
-		score = score + -INFI;
+		score = score + -(float)INFI;
 	      else
 		score = score + p->transitionValues[i][index];
 	    }
@@ -250,7 +250,7 @@ long  BuildAcceptors(char* s,
 	      /* i is the position inside the region */
 	      index = TRANS[(int)(*(s + i))];
 	      if (index >= p->dimensionTrans)
-		score = score + -INFI;
+		score = score + -(float)INFI;
 	      else
 		score = score + p->transitionValues[i][index];
 	    }
@@ -303,7 +303,7 @@ long  BuildAcceptors(char* s,
 	      /* i is the position inside the region */
 	      index = 5*TRANS[(int)(*(s + i -1))] + TRANS[(int)(*(s + i))];
 	      if (index >= p->dimensionTrans)
-		score = score + -INFI;
+		score = score + -(float)INFI;
 	      else
 		score = score + p->transitionValues[i][index];
 	    }
@@ -360,7 +360,7 @@ long  BuildAcceptors(char* s,
 	      index = OligoToInt(s + i - p->order, p->order+1,5);
 
 	      if (index >= p->dimensionTrans)
-		score = score + -INFI;
+		score = score + -(float)INFI;
 	      else
 		score = score + p->transitionValues[i][index];
 	    }
