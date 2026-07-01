@@ -173,6 +173,11 @@ A. DEFINITIONS
 /* are gone.                                                                  */
 #define INITEXONS 4096
 
+/* Initial capacity of the growable site-sort scratch buffers (SortSites,     */
+/* via packSortSites). Not a ceiling: each grows on demand, so the old        */
+/* "increase FSORT" abort on the site-sort path is gone.                      */
+#define INITSITESORT 1024
+
 /* Maximum number of isochores              */
 #define MAXISOCHORES 4           
 
@@ -499,10 +504,25 @@ typedef struct s_packSites
   long  nTS;
   long  nTE;
 
-  long nSites;                         
+  long nSites;
 } packSites;
 
-typedef struct s_exonGFF *pexonGFF;    
+/* Scratch buffers SortSites uses to stage sorted sites before copying them
+   back into the originating packSites arrays (donor/acceptor/TS/TE). Each
+   grows on demand (see GrowSiteArray); capacity persists across fragments. */
+typedef struct s_packSortSites
+{
+  site* donorsites;
+  long  donorsitescap;
+  site* acceptorsites;
+  long  acceptorsitescap;
+  site* tssites;
+  long  tssitescap;
+  site* tesites;
+  long  tesitescap;
+} packSortSites;
+
+typedef struct s_exonGFF *pexonGFF;
 typedef struct s_exonGFF
 {
   site* Acceptor;
@@ -881,6 +901,10 @@ exonGFF* RequestMemorySortExons();
    by the growable per-type Build arrays and the exon-sort table. */
 void GrowExonArray(exonGFF** buf, long* cap, long need);
 site* RequestMemorySortSites();
+
+/* Grow a site array *buf to hold at least `need` entries (realloc-double,
+   zeroing the new entries). Used by the growable site-sort scratch buffers. */
+void GrowSiteArray(site** buf, long* cap, long need);
 gparam* RequestMemoryParams();
 packGenes* RequestMemoryGenes();
 packDump* RequestMemoryDumpster();
@@ -924,7 +948,7 @@ void SortExons(packExons* allExons,
                long l1, long l2,long lowerlimit,
 	       long upperlimit);
 
-void SortSites(site *Sites, long nSites, site *sortedSites,        
+void SortSites(site *Sites, long nSites, site **sortedSites, long* cap,
                long l1, long l2
 	       );
 
@@ -1130,10 +1154,7 @@ void  manager(char *Sequence, long LengthSequence,
 	      gparam** isochores,
 	      int nIsochores,
 	      packGC* GCInfo,
-	      site* acceptorsites,
-	      site* donorsites,
-	      site* tssites,
-	      site* tesites
+	      packSortSites* sortSites
 	      );
 
 void resetEvidenceCounters(packExternalInformation* external);

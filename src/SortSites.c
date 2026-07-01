@@ -28,10 +28,6 @@
 
 #include "geneid.h"
 
-/* Maximum allowed number of sites  */
-extern long NUMSITES;
-
-
 /* Struct for a node (list): pointer to site and to next node */
 struct siteitem 
 {
@@ -69,9 +65,9 @@ void UpdateSiteList(struct siteitem** p, site* InputSite)
 
 /* Sort all of predicted sites by placing them in an array of lists */
 /* corresponding every list to a beginning position for predicted sites */
-void SortSites(site* Sites, long numSites,  site* sortedSites,     
+void SortSites(site* Sites, long numSites, site** psortedSites, long* pcap,
                long l1, long l2)
-{ 
+{
   struct siteitem **SiteList, *q;
   long i;
   long pos;
@@ -82,7 +78,9 @@ void SortSites(site* Sites, long numSites,  site* sortedSites,
   long right;
 /*   long room; */
 /*   char mess[MAXSTRING]; */
-  long HowMany;
+  /* Growable scratch buffer (grows on demand; see GrowSiteArray) */
+  site* sortedSites = *psortedSites;
+  long cap = *pcap;
 
   /* 0. Creating the array for sorting: 1 - Length of fragment */
   left = l1;
@@ -115,7 +113,6 @@ void SortSites(site* Sites, long numSites,  site* sortedSites,
   n = 0;
 
   /* 3. Traversing the table extracting the sites sorted by left position */
-  HowMany = FSORT*NUMSITES;
   /* for (i=0, n=0; i<l; i++) */
   for (i=0; i<l+10; i++)
     {
@@ -124,6 +121,7 @@ void SortSites(site* Sites, long numSites,  site* sortedSites,
       while (q != NULL)
 		{
 		  /* Save the extracted site */
+		  GrowSiteArray(&sortedSites,&cap, n+1);
 
 		  sortedSites[n].Position = q->Site->Position;
 		  sortedSites[n].Score = q->Site->Score;
@@ -136,19 +134,22 @@ void SortSites(site* Sites, long numSites,  site* sortedSites,
 		  strcpy(sortedSites[n].subtype,q->Site->subtype);
 		  strcpy(sortedSites[n].type,q->Site->type);
 		  n++;
-		  if (n >= HowMany)
-			printError("Too many predicted sites: increase FSORT parameter");
-	  
+
 		  q=q->nexitem;
 		}
 
 	  /* Free chained items in the processed list q */
-	  FreeSiteItems(SiteList[i]);       
+	  FreeSiteItems(SiteList[i]);
 	}
 
   /* Free empty array */
   free(SiteList);
-  for (i=0; i<numSites; i++) 
+
+  /* Hand back the (possibly grown) scratch buffer and its capacity */
+  *psortedSites = sortedSites;
+  *pcap = cap;
+
+  for (i=0; i<numSites; i++)
     {  
       Sites[i].Position = sortedSites[i].Position;
       Sites[i].Score = sortedSites[i].Score ;

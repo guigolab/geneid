@@ -257,15 +257,34 @@ exonGFF* RequestMemorySortExons()
 site* RequestMemorySortSites()
 {
   site *sites;
-  long HowMany;
 
-  /* Sorting Exons */
-  HowMany = NUMSITES * FSORT;
+  /* Start small; SortSites grows this on demand (see GrowSiteArray), so it
+     is no longer reserved at NUMSITES*FSORT up front nor capped. */
   if ((sites =
-       (site*) calloc(HowMany, sizeof(site)))  == NULL)
+       (site*) calloc(INITSITESORT, sizeof(site)))  == NULL)
     printError("Not enough memory: table to sort sites");
 
   return(sites);
+}
+
+/* Grow a site array *buf to hold at least `need` entries. Doubles the
+   capacity, preserves existing contents, and zeroes the new entries (the
+   array was originally calloc'd, so unfilled slots must stay zeroed). */
+void GrowSiteArray(site** buf, long* cap, long need)
+{
+  long ncap;
+  site* tmp;
+
+  if (need <= *cap)
+    return;
+  ncap = (*cap > 0) ? *cap : 1;
+  while (ncap < need)
+    ncap *= 2;
+  if ((tmp = (site*) realloc(*buf, ncap * sizeof(site))) == NULL)
+    printError("Not enough memory: growing site array");
+  memset(tmp + *cap, 0, (ncap - *cap) * sizeof(site));
+  *buf = tmp;
+  *cap = ncap;
 }
 
 /* Allocating memory for input evidences (annotations) */
