@@ -106,23 +106,10 @@ to compile geneid.
 
 This will generate the geneid executable file within the bin/ subdirectory. 
 
-** Memory profiles
-
-geneid sizes its working arrays at compile time. How much memory it
-reserves can be selected with the MEM build option:
-
->make             (MEM=auto, the default: detect this machine's RAM and
-                   pick a profile -- low <16 GB, medium <48 GB, high >=48 GB)
->make MEM=low     smaller arrays (~ the original geneid sizing)
->make MEM=medium  ~13 GB reserved on a large, dense genome
->make MEM=high    maximum headroom for very large / prediction-dense genomes
->make print-mem   show the selected profile and the detected RAM
-
-Run "make clean" before switching profiles. Reserved memory is virtual:
-actual resident usage stays far lower (a few GB) thanks to lazy
-allocation. Note that MEM=auto inspects the machine you COMPILE on -- if
-you build and run on different machines (e.g. a cluster), pass an explicit
-MEM=low|medium|high matching the machine geneid will run on.
+geneid's working arrays now grow on demand, so memory follows the data and
+there is nothing to size at compile time -- just "make" (the older
+MEM=low|medium|high build profiles are gone). Resident memory scales with
+the input and stays modest (a few GB even on a large, dense genome).
 
 Type:
 >geneid -h 

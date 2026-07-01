@@ -51,24 +51,19 @@ A. DEFINITIONS
 #define EVIDENCE  "evidence"           
 
 /* -------------------------------------------------------------------------
- * MEMORY PROFILE (build-time tunable)
- * The six constants below dominate the amount of memory geneid reserves
- * (mostly via NUMEXONS = LENGTHSi/REXONS and the FSORT multiplier). The
- * values here are the DEFAULT ("medium") profile, sized for ~16-24 GB
- * machines (~13 GB reserved on a large dense genome). Each is wrapped in
- * #ifndef so the Makefile can override it on the compiler command line:
- *     make MEM=low     (smaller arrays, ~5 GB; may be tight on dense genomes)
- *     make             (medium, the defaults below)
- *     make MEM=high    (max headroom, ~45 GB reserved; lazy, RSS stays low)
- * Do not raise FSORT/REXONS independently without checking: the exon-sort
- * table must hold the sum of all per-type build arrays (~8.2 x NUMEXONS),
- * so FSORT should stay >= ~9.
+ * These constants used to be a build-time "memory profile": geneid reserved
+ * fixed-size arrays up front (NUMSITES/NUMEXONS x FSORT, the per-type build
+ * arrays, the dumpster, ...), and the Makefile tuned them with -D to trade
+ * memory for capacity. All of those arrays now GROW ON DEMAND, so there is no
+ * profile to pick and nothing here is a correctness ceiling any more. What is
+ * left are just derivation constants: LENGTHSi (the fragment window -- an
+ * algorithmic parameter, not a memory knob) and the R* ratios that still feed
+ * NUMSITES/NUMEXONS/MAXBACKUP* in SetRatios (used for the dumpster hash size,
+ * the "backup active" flag, and beggar.c's -B estimate).
  * ---------------------------------------------------------------------- */
 
 /* Length of every processed fragment       */
-#ifndef LENGTHSi
 #define LENGTHSi 500000
-#endif
 
 /* Overlap between 2 fragments              */
 #define OVERLAP 10000
@@ -80,22 +75,16 @@ A. DEFINITIONS
 /* #define RU12SITES 6   */
 
 /* One exon per L / REXONS bp  (divisor: smaller -> more exon headroom) */
-#ifndef REXONS
 #define REXONS 0.75
-#endif
 
 /* /\* One U12 intron-flanking exon per L / RU12EXONS bp               *\/ */
 /* #define RU12EXONS 6  */
 
 /* Estimated amount of backup signals (divisor: smaller -> more backup) */
-#ifndef RBSITES
 #define RBSITES 75
-#endif
 
 /* Estimated amount of backup exons   (divisor: smaller -> more backup) */
-#ifndef RBEXONS
 #define RBEXONS 125
-#endif
 
 /* Ratios for every exon type               */
 #define RFIRST 3
@@ -105,15 +94,8 @@ A. DEFINITIONS
 #define RORF   4
 #define RUTR   0.5
 
-/* Total number of exons/fragment (exon-sort factor; keep >= ~9) */
-#ifndef FSORT
+/* Exon-sort table factor (only used now by beggar.c's -B estimate) */
 #define FSORT 12
-#endif
-
-/* Number of exons to save every fragment   */
-#ifndef FDARRAY
-#define FDARRAY 10
-#endif
 
 /* Basic values (in addition to ratios)     */
 #define BASEVALUESITES_SHORT 100000

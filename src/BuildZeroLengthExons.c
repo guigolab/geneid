@@ -31,8 +31,6 @@
 
 /* Sequence is used to save information to prevent Stop codons in frame */
 /* Maximum allowed number of generic exons (divided by RINTER) */
-/* extern long NUMEXONS; */
-extern long MAXBACKUPSITES;
 extern int RSS;
 extern float RSSDON;
 extern float RSSACC;

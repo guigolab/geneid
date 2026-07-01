@@ -31,8 +31,6 @@
 
 /* Maximum allowed number of generic exons (divided by RTERMI) */
 /* Sequence is used to save information to prevent Stop codons in frame */
-/* extern long NUMEXONS; */
-extern long MAXBACKUPSITES;
 
 long BuildTerminalExons (site *Acceptor, long nAcceptors, 
                          site *Stop, long nStops,
