@@ -729,12 +729,18 @@ packGenes* RequestMemoryGenes()
   /* Memory for the array of sorting by donor functions (one per class) */
   if ((pg->d = (exonGFF* **)calloc(MAXENTRY, sizeof(exonGFF* *))) == NULL)
     printError("Not enough memory: set of d-arrays (sort by donor)");
-  
-  /* Memory for every sorting function (alone) */
-  for(aux=0; aux < MAXENTRY; aux++) 
-    if ((pg->d[aux] = (exonGFF* *)calloc(FDARRAY * NUMEXONS, sizeof(exonGFF*))) == NULL)
+
+  /* Per-class capacity of the d-arrays (grown on demand by BuildSort) */
+  if ((pg->dcap = (long *)calloc(MAXENTRY, sizeof(long))) == NULL)
+    printError("Not enough memory: d-array capacities");
+
+  /* Memory for every sorting function (alone): starts small, grows on demand */
+  for(aux=0; aux < MAXENTRY; aux++) {
+    pg->dcap[aux] = INITDARRAY;
+    if ((pg->d[aux] = (exonGFF* *)calloc(pg->dcap[aux], sizeof(exonGFF*))) == NULL)
       printError("Not enough memory: sort-by-donor functions");
-  
+  }
+
   if ((pg->km = (long *)calloc(MAXENTRY, sizeof(long))) == NULL)
     printError("Not enough memory: total counters of sort-by-donor functions");
 

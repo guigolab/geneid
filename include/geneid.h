@@ -183,6 +183,11 @@ A. DEFINITIONS
 /* reservation and the "decrease RSITES" hard errors are gone.                */
 #define INITSITES 4096
 
+/* Initial capacity of each growable sort-by-donor array (packGenes->d[class], */
+/* filled by BuildSort). Grows on demand, replacing the FDARRAY*NUMEXONS       */
+/* reservation (and an unchecked overflow).                                   */
+#define INITDARRAY 256
+
 /* Maximum number of isochores              */
 #define MAXISOCHORES 4           
 
@@ -613,6 +618,7 @@ typedef struct s_packGenes
   exonGFF* Ghost;
   exonGFF* GOptim;
   exonGFF* **d;
+  long* dcap;   /* allocated capacity of each d[class] (grown by BuildSort) */
   long* km;
   long* je;
 } packGenes;
@@ -1053,8 +1059,8 @@ void SwitchFramesDb(packGenes* pg, int nclass);
 
 void UndoFrames(exonGFF *e, long n);
 
-void BuildSort(dict *D, int nc[], int ne[], int UC[][MAXENTRY], 
-               int DE[][MAXENTRY], int nclass, long km[], 
+void BuildSort(dict *D, int nc[], int ne[], int UC[][MAXENTRY],
+               int DE[][MAXENTRY], int nclass, long km[], long dcap[],
 	       exonGFF* **d, exonGFF *E, long nexons);
 
 void PrintSite(site *s, int type, char Name[], int Strand,
