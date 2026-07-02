@@ -4,6 +4,7 @@ import pytest
 
 from geneid_train.stats.sites import (
     log_ratio,
+    log_ratio_zero_order,
     mask_invariant_dinuc,
     position_matrix,
     read_matrix,
@@ -82,6 +83,32 @@ def test_donor_log_ratio_matches_reference():
     assert worst < 1e-3, f"max deviation {worst}"
 
 
+def test_log_ratio_zero_order_natural_masking():
+    # freq==0 -> -9999 (never observed); freq==1 -> 0 (invariant); else log ratio
+    site = {(4, "A"): 1.0, (4, "C"): 0.0, (7, "G"): 0.4}
+    bg = {(4, "A"): 0.3, (4, "C"): 0.2, (7, "G"): 0.2}
+    out = log_ratio_zero_order(site, bg)
+    assert out[(4, "A")] == 0.0
+    assert out[(4, "C")] == -9999.0
+    assert out[(7, "G")] == pytest.approx(math.log(0.4 / 0.2))
+
+
+@pytest.mark.integration
+@pytest.mark.skipif(REF is None, reason="set GENEID_TRAIN_REFDIR to the train_geneid dir")
+def test_start_order0_masking_matches_reference_shape():
+    """Order-0 (Start) profile: no explicit masking step -- the ATG anchor falls
+    out naturally from exact 0/1 raw frequencies (no pseudocounts). The reference
+    log-ratio's 0 / -9999 cells are exactly where our raw frequency is 1 / 0,
+    independent of the background model used."""
+    seqs = [ln.split()[1].strip() for ln in open(REF / f"{SP}.canonical.start.tbl")]
+    site = position_matrix(seqs, order=0, pcount=0.0)
+    ref = read_matrix(REF / f"{SP}.canonical.start-log.order-0-matrix")
+    zero_cells = {k for k, v in ref.items() if v == 0.0}
+    masked_cells = {k for k, v in ref.items() if v == -9999.0}
+    assert zero_cells == {k for k, v in site.items() if v == 1.0}
+    assert masked_cells == {k for k, v in site.items() if v == 0.0}
+
+
 def test_mask_invariant_dinuc_donor():
     # profile positions 3/4/5 carry the invariant GT
     m = {(3, "AG"): 1.5, (3, "AA"): 1.5, (4, "GT"): 2.0, (4, "AA"): 2.0,
@@ -106,6 +133,21 @@ def test_full_donor_profile_matches_param():
     bg = read_matrix(REF / f"{SP}_background.info.di-matrix")
     prof = mask_invariant_dinuc(submatrix(log_ratio(site, bg), 29, 36), 3, 4, 5, "GT")
     ref = read_matrix(REF / f"{SP}.canonical.donor-log-info.di-matrix")  # == param Donor_profile
+    assert set(prof) == set(ref)
+    worst = max(abs(prof[k] - ref[k]) for k in ref)
+    assert worst < 1e-3, f"max deviation {worst}"
+
+
+@pytest.mark.integration
+@pytest.mark.skipif(REF is None, reason="set GENEID_TRAIN_REFDIR to the train_geneid dir")
+def test_full_acceptor_profile_matches_param():
+    """Same pipeline as the donor test, with the AG anchor at acceptor positions
+    27/28/29 (the reference run's automatically-selected window [1,30])."""
+    seqs = [ln.split("\t")[1].strip() for ln in open(REF / f"{SP}.canonical.acceptor.tbl")]
+    site = position_matrix(seqs, order=1)
+    bg = read_matrix(REF / f"{SP}_background.info.di-matrix")
+    prof = mask_invariant_dinuc(submatrix(log_ratio(site, bg), 2, 31), 27, 28, 29, "AG")
+    ref = read_matrix(REF / f"{SP}.canonical.acceptor-log-info.di-matrix")
     assert set(prof) == set(ref)
     worst = max(abs(prof[k] - ref[k]) for k in ref)
     assert worst < 1e-3, f"max deviation {worst}"

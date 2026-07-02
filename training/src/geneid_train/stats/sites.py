@@ -29,6 +29,8 @@ Matrix = dict[tuple[int, str], float]
 
 _ACGT = frozenset("ACGT")
 
+MASK = -9999.0  # geneid sentinel for a forbidden PWM cell
+
 # Dirichlet pseudocount per k+1-tuple, matching legacy Getkmatrix.awk. Every
 # oligo gets +PCOUNT and every prefix +4*PCOUNT, so unobserved oligos still get a
 # defined (non-zero) probability and every position has a complete matrix.
@@ -72,6 +74,29 @@ def position_matrix(seqs: Iterable[str], order: int = 1, pcount: float = PCOUNT)
     return out
 
 
+def log_ratio_zero_order(site: Matrix, background: Matrix) -> Matrix:
+    """Log-ratio for order-0 (single-nucleotide) profiles, matching legacy
+    ``logratio_zero_order.awk``.
+
+    Order-0 site matrices are built with no pseudocounts (see ``position_matrix``
+    with ``pcount=0``), so a base that never occurs at a position has an exact raw
+    frequency of 0 -- and a base that occurs at every site has frequency exactly
+    1. Those two cases are special-cased to -9999 / 0 rather than computing
+    ``log(0/bg)`` or ``log(1/bg)``; this is what naturally masks an invariant
+    position (e.g. the A of ATG) without a separate explicit masking step.
+    """
+    out: Matrix = {}
+    for key, fg in site.items():
+        bg = background.get(key) or background.get((1, key[1]))
+        if fg == 0:
+            out[key] = MASK
+        elif fg == 1:
+            out[key] = 0.0
+        elif bg:
+            out[key] = math.log(fg / bg)
+    return out
+
+
 def log_ratio(site: Matrix, background: Matrix) -> Matrix:
     """Natural-log ratio of a site matrix against a background matrix, per cell.
 
@@ -87,9 +112,6 @@ def log_ratio(site: Matrix, background: Matrix) -> Matrix:
         if bg:
             out[(pos, oligo)] = math.log(fg / bg)
     return out
-
-
-MASK = -9999.0  # geneid sentinel for a forbidden PWM cell
 
 
 def submatrix(matrix: Matrix, start: int, end: int) -> Matrix:
@@ -130,11 +152,22 @@ def mask_invariant_dinuc(matrix: Matrix, st: int, nd: int, rd: int, anchor: str)
 
 
 def read_matrix(path: str | Path) -> Matrix:
-    """Read a geneid ``.di-matrix`` / profile-style file: ``<pos> <oligo> <value>``."""
+    """Read a geneid ``.di-matrix`` / profile-style file.
+
+    Accepts either column order: ``<pos> <oligo> <value>`` (the profile / order>=1
+    ``.di-matrix`` convention) or ``<oligo> <pos> <value>`` (the legacy order-0
+    ``*.order-0-matrix`` files use base-first columns)."""
     out: Matrix = {}
     with open(path) as fh:
         for line in fh:
             parts = line.split()
-            if len(parts) >= 3 and parts[0].isdigit():
-                out[(int(parts[0]), parts[1])] = float(parts[2])
+            if len(parts) < 3:
+                continue
+            if parts[0].isdigit():
+                pos, oligo = int(parts[0]), parts[1]
+            elif parts[1].isdigit():
+                oligo, pos = parts[0], int(parts[1])
+            else:
+                continue
+            out[(pos, oligo)] = float(parts[2])
     return out
