@@ -43,6 +43,11 @@ class GeneModel:
     def is_multiexonic(self) -> bool:
         return len(self.exons) > 1
 
+    @property
+    def coding_length(self) -> int:
+        """Total CDS length in nt (sum of exon lengths) — no genome needed."""
+        return sum(e.end - e.start + 1 for e in self.exons)
+
     def cds(self, genome: Mapping[str, str]) -> str:
         """Spliced CDS in 5'->3' translation orientation."""
         chrom = genome[self.seqid]
@@ -107,6 +112,32 @@ def build_models(records: Iterable[GffRecord], cds_type: str = "CDS") -> list[Ge
             )
         )
     return models
+
+
+def gene_of_transcript(records: Iterable[GffRecord]) -> dict[str, str]:
+    """Map transcript id -> gene id from mRNA/transcript records' Parent."""
+    out: dict[str, str] = {}
+    for r in records:
+        if r.type in ("mRNA", "transcript") and r.id:
+            out[r.id] = r.parents[0] if r.parents else r.id
+    return out
+
+
+def collapse_isoforms(
+    models: Iterable[GeneModel], records: Iterable[GffRecord]
+) -> list[GeneModel]:
+    """Keep one representative model (longest CDS) per gene.
+
+    Must run before ``filter_non_overlapping``: sibling isoforms overlap and would
+    otherwise eliminate each other. Genes are resolved via transcript->gene Parent
+    links; a model whose transcript has no gene record is treated as its own gene.
+    """
+    tx2gene = gene_of_transcript(records)
+    by_gene: dict[str, list[GeneModel]] = {}
+    for m in models:
+        gene = tx2gene.get(m.gene_id, m.gene_id)
+        by_gene.setdefault(gene, []).append(m)
+    return [max(ms, key=lambda x: x.coding_length) for ms in by_gene.values()]
 
 
 # ---- filters --------------------------------------------------------------

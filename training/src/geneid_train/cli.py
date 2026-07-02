@@ -16,6 +16,7 @@ from .core.gff import GffRecord, read_gff3, write_gff3
 from .core.param import Param
 from .prepare.base import (
     build_models,
+    collapse_isoforms,
     filter_complete,
     filter_min_protein,
     filter_non_overlapping,
@@ -62,7 +63,8 @@ def _cmd_convert(args: argparse.Namespace) -> int:
 
 
 def _cmd_classify(args: argparse.Namespace) -> int:
-    models = build_models(read_gff3(args.gff))
+    records = read_gff3(args.gff)
+    models = collapse_isoforms(build_models(records), records)
     if not models:
         sys.stderr.write("no CDS-grouped gene models found in GFF3\n")
         return 1
@@ -84,11 +86,15 @@ def _cmd_classify(args: argparse.Namespace) -> int:
 
 def _cmd_prepare(args: argparse.Namespace) -> int:
     genome = read_fasta(args.fastas)
-    models = build_models(read_gff3(args.gff))
-    print(f"input models:      {len(models)}")
+    records = read_gff3(args.gff)
+    models = build_models(records)
     if not models:
-        sys.stderr.write("no CDS-grouped gene models found in GFF\n")
+        sys.stderr.write("no CDS-grouped gene models found in GFF3\n")
         return 1
+    print(f"transcripts:       {len(models)}")
+    if not args.no_collapse:
+        models = collapse_isoforms(models, records)
+        print(f"genes (collapsed): {len(models)}")
     print(f"  multi-exonic:    {sum(m.is_multiexonic for m in models)}")
 
     kept = filter_complete(models, genome)
@@ -144,6 +150,10 @@ def build_parser() -> argparse.ArgumentParser:
     p_prep.add_argument("--fastas", required=True, help="genomic multi-FASTA")
     p_prep.add_argument("--min-aa", type=int, default=100, help="minimum protein length (aa)")
     p_prep.add_argument("--flank", type=int, default=1000, help="flank nt for locus extraction")
+    p_prep.add_argument(
+        "--no-collapse", action="store_true",
+        help="keep every transcript instead of one representative (longest) per gene",
+    )
     p_prep.add_argument(
         "--results", help="output path prefix; writes validated.{gff,cds.fa,prot.fa}"
     )
