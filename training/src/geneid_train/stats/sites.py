@@ -22,6 +22,7 @@ from __future__ import annotations
 import math
 from collections import defaultdict
 from collections.abc import Iterable
+from dataclasses import dataclass
 from itertools import product
 from pathlib import Path
 
@@ -149,6 +150,143 @@ def mask_invariant_dinuc(matrix: Matrix, st: int, nd: int, rd: int, anchor: str)
         else:
             out[(pos, oligo)] = v
     return out
+
+
+# --- boundary selection (replaces frequency.awk / information.awk / BitScoreGraph) ---
+
+# Per-site defaults from the legacy driver (geneidTRAINer1_3.pl): the anchor
+# ``offset`` seed, the information-content threshold (bits) above which a position
+# joins the profile window, and the raw-position clip range the info graph is
+# restricted to before selection.
+SITE_DEFAULTS: dict[str, dict] = {
+    "donor": {"offset": 30, "info_thresh": 0.15, "clip": (25, 38)},
+    "acceptor": {"offset": 30, "info_thresh": 0.04, "clip": (2, 33)},
+    "start": {"offset": 30, "info_thresh": 0.15, "clip": (25, 37)},
+    "branch": {"offset": 32, "info_thresh": 0.30, "clip": (28, 41)},
+}
+
+
+def frequency(seqs: Iterable[str]) -> dict[tuple[int, str], float]:
+    """Per-position single-nucleotide frequencies (replaces ``frequency.awk`` k=1).
+
+    Returns ``{(pos, base): count/total}`` with 1-based positions. Unlike
+    :func:`position_matrix`, a non-ACGT character masks only its own column at
+    that position (not the whole window), and the denominator is the per-position
+    count of valid ACGT observations. No pseudocounts.
+    """
+    seqs = [s.upper() for s in seqs]
+    if not seqs:
+        return {}
+    length = min(len(s) for s in seqs)
+    counts: dict[tuple[int, str], int] = defaultdict(int)
+    totals: dict[int, int] = defaultdict(int)
+    for s in seqs:
+        for i in range(1, length + 1):
+            base = s[i - 1]
+            if base in _ACGT:
+                counts[(i, base)] += 1
+                totals[i] += 1
+    out: dict[tuple[int, str], float] = {}
+    for pos in range(1, length + 1):
+        tot = totals.get(pos, 0)
+        for base in "ACGT":
+            out[(pos, base)] = counts.get((pos, base), 0) / tot if tot else 0.0
+    return out
+
+
+def info_content(
+    site: dict[tuple[int, str], float], background: dict[tuple[int, str], float]
+) -> dict[int, float]:
+    """Per-position information content in bits (replaces ``information.awk`` k=1).
+
+    ``info[pos] = sum_base p*log2(p/bg)`` over the four nucleotides, where ``p`` is
+    the site frequency and ``bg`` the background frequency; a term is dropped when
+    either ``p`` or ``bg`` is zero. This is the relative entropy of the site vs
+    background distribution at each position — the quantity the boundary selector
+    thresholds on.
+    """
+    out: dict[int, float] = defaultdict(float)
+    positions = {pos for pos, _ in site}
+    for pos in positions:
+        for base in "ACGT":
+            p = site.get((pos, base), 0.0)
+            bg = background.get((pos, base), 0.0)
+            if p > 0 and bg > 0:
+                out[pos] += p * math.log(p / bg) / math.log(2)
+    return dict(out)
+
+
+@dataclass(frozen=True)
+class SiteWindow:
+    """A selected profile window plus the invariant-dinucleotide anchor columns.
+
+    ``start``/``end`` are raw (pre-submatrix) positions passed to :func:`submatrix`;
+    ``length`` is the resulting profile length. ``st``/``nd``/``rd`` are the
+    profile-local (1-based, post-renumber) columns overlapping the invariant
+    splice/start motif, ready for :func:`mask_invariant_dinuc`; they are ``None``
+    for order-0 profiles, which carry no dinucleotide anchor.
+    """
+
+    start: int
+    end: int
+    offset: int
+    length: int
+    st: int | None
+    nd: int | None
+    rd: int | None
+
+
+def select_window(
+    info: dict[int, float],
+    *,
+    site: str,
+    order: int,
+    offset: int | None = None,
+    info_thresh: float | None = None,
+    clip: tuple[int, int] | None = None,
+) -> SiteWindow:
+    """Select the profile window and anchor columns from per-position info content.
+
+    Reproduces the legacy ``BitScoreGraph`` + post-processing in the Perl driver:
+    seed the candidate set with the anchor's flanking positions (``offset-1`` and
+    ``offset+1``), add every clipped position whose info content exceeds
+    ``info_thresh``, then take ``start = min`` (floored at 1) and ``end = max``.
+    The offset is then renumbered into profile-local coordinates and the
+    site-specific anchor columns are derived from it.
+
+    ``site`` is one of ``donor``/``acceptor``/``start``/``branch``; the remaining
+    keyword args default to :data:`SITE_DEFAULTS` for that site.
+    """
+    d = SITE_DEFAULTS.get(site, {})
+    if offset is None:
+        offset = d["offset"]
+    if info_thresh is None:
+        info_thresh = d["info_thresh"]
+    if clip is None:
+        clip = d["clip"]
+    lo, hi = clip
+
+    candidates = {offset - 1, offset + 1}
+    for pos, bits in info.items():
+        if lo <= pos <= hi and bits > info_thresh:
+            candidates.add(pos)
+    start = max(1, min(candidates))
+    end = max(candidates)
+
+    # renumber the anchor offset into the submatrix's 1-based coordinates
+    off = offset - order
+    end = end - order
+    off = off - start + 1
+
+    st = nd = rd = None
+    if site == "donor" and order >= 1:
+        st, nd, rd = off + 2, off + 3, off + 4
+    elif site == "acceptor" and order >= 1:
+        st, nd, rd = off - 1, off, off + 1
+    elif site == "start" and order >= 2:
+        st, nd, rd = off - 2, off - 1, off
+
+    return SiteWindow(start, end, off, end - start + 1, st, nd, rd)
 
 
 def read_matrix(path: str | Path) -> Matrix:
