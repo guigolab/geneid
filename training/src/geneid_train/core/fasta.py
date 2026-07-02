@@ -38,6 +38,18 @@ def read_fasta(path: str | Path) -> dict[str, str]:
     return out
 
 
+def read_fasta_subset(path: str | Path, ids: set[str], upper: bool = True) -> dict[str, str]:
+    """Read only the sequences whose id is in ``ids`` (memory-friendly for large
+    genomes). Stops early once every requested id is found."""
+    out: dict[str, str] = {}
+    for name, seq in iter_fasta(path):
+        if name in ids:
+            out[name] = seq.upper() if upper else seq
+            if len(out) == len(ids):
+                break
+    return out
+
+
 def write_fasta(records: Mapping[str, str], path: str | Path, width: int = 60) -> None:
     with open(path, "w") as fh:
         for name, seq in records.items():

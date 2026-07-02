@@ -11,7 +11,7 @@ import sys
 
 from . import __version__
 from .core.convert import gff2_to_gff3, gtf_to_gff3
-from .core.fasta import read_fasta, write_fasta
+from .core.fasta import read_fasta, read_fasta_subset, write_fasta
 from .core.gff import GffRecord, read_gff3, write_gff3
 from .core.param import Param
 from .prepare.base import (
@@ -20,6 +20,7 @@ from .prepare.base import (
     filter_min_protein,
     filter_non_overlapping,
 )
+from .prepare.classify import classify_report
 
 _U12_MARKERS = ("U12_Splice_Score_Threshold", "U12_Branch_point_profile")
 
@@ -57,6 +58,27 @@ def _cmd_convert(args: argparse.Namespace) -> int:
         raise ValueError(args.from_)
     write_gff3(records, args.output)
     print(f"wrote {len(records)} GFF3 records to {args.output}")
+    return 0
+
+
+def _cmd_classify(args: argparse.Namespace) -> int:
+    models = build_models(read_gff3(args.gff))
+    if not models:
+        sys.stderr.write("no CDS-grouped gene models found in GFF3\n")
+        return 1
+    genome = read_fasta_subset(args.fastas, {m.seqid for m in models})
+    rep = classify_report(models, genome, min_sites=args.min_sites)
+    print(f"models={rep.n_models} multi-exonic={rep.n_multiexonic} introns={rep.n_introns}")
+    top_d = list(rep.donor_counts.items())[:5]
+    top_a = list(rep.acceptor_counts.items())[:5]
+    print("top donor dinucs:    " + ", ".join(f"{d}={n}" for d, n in top_d))
+    print("top acceptor dinucs: " + ", ".join(f"{a}={n}" for a, n in top_a))
+    print("\nsplice classes:")
+    for c in rep.classes:
+        frac = f"{100 * c.fraction:.2f}%" if c.count >= 0 else "  -  "
+        cnt = str(c.count) if c.count >= 0 else "?"
+        print(f"  {c.name:12} {cnt:>6} {frac:>7}  -> {c.recommendation}")
+        print(f"               profile: {c.profile}")
     return 0
 
 
@@ -126,6 +148,16 @@ def build_parser() -> argparse.ArgumentParser:
         "--results", help="output path prefix; writes validated.{gff,cds.fa,prot.fa}"
     )
     p_prep.set_defaults(func=_cmd_prepare)
+
+    p_cls = sub.add_parser(
+        "classify", help="tally intron splice classes (GT-AG/GC-AG/AT-AC) and recommend profiles"
+    )
+    p_cls.add_argument("--gff", required=True, help="GFF3 of CDS features (Parent = transcript)")
+    p_cls.add_argument("--fastas", required=True, help="genomic multi-FASTA")
+    p_cls.add_argument(
+        "--min-sites", type=int, default=50, help="min sites to train a rare-class profile de novo"
+    )
+    p_cls.set_defaults(func=_cmd_classify)
 
     p_conv = sub.add_parser("convert", help="convert GFF2 or GTF annotation to canonical GFF3")
     p_conv.add_argument("--from", dest="from_", required=True, choices=["gff2", "gtf"])
