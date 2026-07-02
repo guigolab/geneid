@@ -1,16 +1,39 @@
-"""Minimal GFF2 reader/writer using geneid's coordinate conventions.
+"""GFF3 reader/writer — the tool's one canonical annotation format.
 
-geneid consumes GFF2: nine tab-separated columns, 1-based inclusive coordinates,
-with the ninth column (``group``) naming the gene a feature belongs to. Training
-input is typically CDS features grouped by gene id. We keep the group column as a
-raw string and expose the primary id (its first token, quotes stripped).
+geneid-train ingests GFF3 exclusively (it is the most robust flavor). Other
+flavors (GFF2, GTF) are handled by explicit converters in ``core.convert``, never
+parsed directly by the pipeline. Coordinates are 1-based inclusive, matching GFF3
+and geneid conventions.
+
+CDS features are grouped into transcripts by their ``Parent`` attribute.
 """
 
 from __future__ import annotations
 
 from collections.abc import Iterable, Iterator
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
+
+
+def parse_attributes(col9: str) -> dict[str, str]:
+    """Parse a GFF3 column-9 ``key=value;key=value`` string into a dict.
+
+    Order is preserved (dict insertion order). Percent-decoding is intentionally
+    not applied; ids in practice are already safe tokens.
+    """
+    attrs: dict[str, str] = {}
+    for field_ in col9.strip().split(";"):
+        field_ = field_.strip()
+        if not field_:
+            continue
+        key, sep, value = field_.partition("=")
+        if sep:
+            attrs[key.strip()] = value.strip()
+    return attrs
+
+
+def format_attributes(attrs: dict[str, str]) -> str:
+    return ";".join(f"{k}={v}" for k, v in attrs.items())
 
 
 @dataclass
@@ -20,15 +43,19 @@ class GffRecord:
     type: str
     start: int  # 1-based inclusive
     end: int  # 1-based inclusive
-    score: str  # kept as string; often "." or a float
+    score: str  # "." or a float, kept as string
     strand: str  # "+", "-", or "."
-    frame: str  # "0", "1", "2", or "."
-    group: str
+    phase: str  # "0", "1", "2", or "."  (GFF3 calls col 8 "phase")
+    attributes: dict[str, str] = field(default_factory=dict)
 
     @property
-    def gene_id(self) -> str:
-        tok = self.group.split()[0] if self.group.split() else self.group
-        return tok.strip().strip('"').strip("'")
+    def id(self) -> str | None:
+        return self.attributes.get("ID")
+
+    @property
+    def parents(self) -> list[str]:
+        raw = self.attributes.get("Parent")
+        return raw.split(",") if raw else []
 
     def to_line(self) -> str:
         return "\t".join(
@@ -40,21 +67,20 @@ class GffRecord:
                 str(self.end),
                 self.score,
                 self.strand,
-                self.frame,
-                self.group,
+                self.phase,
+                format_attributes(self.attributes),
             ]
         )
 
 
-def iter_gff(path: str | Path) -> Iterator[GffRecord]:
+def iter_gff3(path: str | Path) -> Iterator[GffRecord]:
     with open(path) as fh:
         for line in fh:
             if not line.strip() or line.startswith("#"):
                 continue
             f = line.rstrip("\n").split("\t")
             if len(f) < 8:
-                raise ValueError(f"malformed GFF line ({len(f)} cols): {line!r}")
-            group = f[8] if len(f) > 8 else ""
+                raise ValueError(f"malformed GFF3 line ({len(f)} cols): {line!r}")
             yield GffRecord(
                 seqid=f[0],
                 source=f[1],
@@ -63,16 +89,18 @@ def iter_gff(path: str | Path) -> Iterator[GffRecord]:
                 end=int(f[4]),
                 score=f[5],
                 strand=f[6],
-                frame=f[7],
-                group=group,
+                phase=f[7],
+                attributes=parse_attributes(f[8]) if len(f) > 8 else {},
             )
 
 
-def read_gff(path: str | Path) -> list[GffRecord]:
-    return list(iter_gff(path))
+def read_gff3(path: str | Path) -> list[GffRecord]:
+    return list(iter_gff3(path))
 
 
-def write_gff(records: Iterable[GffRecord], path: str | Path) -> None:
+def write_gff3(records: Iterable[GffRecord], path: str | Path, header: bool = True) -> None:
     with open(path, "w") as fh:
+        if header:
+            fh.write("##gff-version 3\n")
         for rec in records:
             fh.write(rec.to_line() + "\n")

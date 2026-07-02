@@ -4,7 +4,12 @@ from geneid_train.core.fasta import (
     write_fasta,
     write_tbl,
 )
-from geneid_train.core.gff import GffRecord, read_gff, write_gff
+from geneid_train.core.gff import (
+    GffRecord,
+    parse_attributes,
+    read_gff3,
+    write_gff3,
+)
 
 
 def test_fasta_roundtrip_and_header_token(tmp_path):
@@ -24,22 +29,32 @@ def test_tbl_roundtrip(tmp_path):
     assert read_tbl(p) == recs
 
 
-def test_gff_roundtrip_and_gene_id(tmp_path):
-    p = tmp_path / "s.gff"
+def test_gff3_read_and_attributes(tmp_path):
+    p = tmp_path / "s.gff3"
     p.write_text(
-        "chr1\tsrc\tCDS\t11\t16\t.\t+\t0\tgene1\n"
-        "chr1\tsrc\tCDS\t27\t35\t.\t+\t0\tgene1\n"
+        "##gff-version 3\n"
+        "chr1\tsrc\tCDS\t11\t16\t.\t+\t0\tID=t1.cds1;Parent=t1\n"
+        "chr1\tsrc\tCDS\t27\t35\t.\t+\t0\tID=t1.cds2;Parent=t1\n"
     )
-    recs = read_gff(p)
+    recs = read_gff3(p)
     assert len(recs) == 2
-    assert recs[0].gene_id == "gene1"
+    assert recs[0].id == "t1.cds1"
+    assert recs[0].parents == ["t1"]
     assert recs[0].start == 11 and recs[0].end == 16
-    out = tmp_path / "out.gff"
-    write_gff(recs, out)
-    assert out.read_text() == p.read_text()
 
 
-def test_gff_gene_id_is_bare_group_token():
-    # geneid training GFF2 uses the bare gene id (optionally quoted) as the group.
-    assert GffRecord("c", "s", "CDS", 1, 9, ".", "+", "0", "abc").gene_id == "abc"
-    assert GffRecord("c", "s", "CDS", 1, 9, ".", "+", "0", '"abc"').gene_id == "abc"
+def test_gff3_roundtrip(tmp_path):
+    recs = [
+        GffRecord("chr1", "src", "CDS", 11, 16, ".", "+", "0", {"ID": "t1.cds1", "Parent": "t1"}),
+    ]
+    out = tmp_path / "out.gff3"
+    write_gff3(recs, out)
+    reread = read_gff3(out)
+    assert reread[0].to_line() == recs[0].to_line()
+
+
+def test_parse_attributes_multi_parent():
+    attrs = parse_attributes("ID=c1;Parent=t1,t2")
+    assert attrs == {"ID": "c1", "Parent": "t1,t2"}
+    rec = GffRecord("c", "s", "CDS", 1, 9, ".", "+", "0", attrs)
+    assert rec.parents == ["t1", "t2"]

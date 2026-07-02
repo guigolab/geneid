@@ -45,6 +45,14 @@ The only compiled dependency that remains is the `geneid` predictor itself.
 | Input front-ends | BUSCO **and** RNA-seq/TransDecoder, built in parallel on a shared core |
 | Correctness stance | Redesign freely — legacy output is a *reference*, not a byte-repro gate |
 
+**Annotation format: GFF3 only.** The tool ingests **GFF3 exclusively** as its
+canonical internal format (the most robust flavor). CDS features are grouped into
+transcripts by their `Parent` attribute. Other flavors (GFF2, GTF) are handled by
+explicit converters in `core/convert.py` (`geneid-train convert --from gff2|gtf`),
+which re-emit a well-formed gene→mRNA→CDS hierarchy; the pipeline itself never
+parses them directly. Parsing geneid's own GFF prediction output is a separate
+concern handled at the `engine.py` boundary.
+
 **Two hard constraints survive "redesign freely":**
 
 1. **The `.param` file format is frozen.** The compiled `geneid` binary parses it,
@@ -70,7 +78,8 @@ training/
     config.py             # YAML run config + defaults, seed handling
     core/
       param.py            # Param model: read/write geneid .param (format authority)
-      gff.py              # GFF2/GFF3 read/write, geneid coordinate conventions
+      gff.py              # GFF3 read/write (the one canonical annotation format)
+      convert.py          # GFF2 / GTF -> canonical GFF3 (the only on-ramp for other flavors)
       fasta.py            # FASTA + tbl I/O (replaces FastaToTbl/TblToFasta)
       seq.py              # translation, ORF/completeness checks, reverse-complement
     prepare/

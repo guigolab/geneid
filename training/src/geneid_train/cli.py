@@ -10,8 +10,9 @@ import argparse
 import sys
 
 from . import __version__
+from .core.convert import gff2_to_gff3, gtf_to_gff3
 from .core.fasta import read_fasta, write_fasta
-from .core.gff import read_gff, write_gff
+from .core.gff import GffRecord, read_gff3, write_gff3
 from .core.param import Param
 from .prepare.base import (
     build_models,
@@ -46,9 +47,22 @@ def _cmd_param_info(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_convert(args: argparse.Namespace) -> int:
+    lines = open(args.input).readlines()
+    if args.from_ == "gff2":
+        records = gff2_to_gff3(lines)
+    elif args.from_ == "gtf":
+        records = gtf_to_gff3(lines)
+    else:  # pragma: no cover - argparse restricts choices
+        raise ValueError(args.from_)
+    write_gff3(records, args.output)
+    print(f"wrote {len(records)} GFF3 records to {args.output}")
+    return 0
+
+
 def _cmd_prepare(args: argparse.Namespace) -> int:
     genome = read_fasta(args.fastas)
-    models = build_models(read_gff(args.gff))
+    models = build_models(read_gff3(args.gff))
     print(f"input models:      {len(models)}")
     if not models:
         sys.stderr.write("no CDS-grouped gene models found in GFF\n")
@@ -64,23 +78,23 @@ def _cmd_prepare(args: argparse.Namespace) -> int:
 
     if args.results:
         recs = [r for m in kept for r in _model_records(m)]
-        write_gff(recs, f"{args.results}.validated.gff")
+        write_gff3(recs, f"{args.results}.validated.gff3")
         write_fasta({m.gene_id: m.cds(genome) for m in kept}, f"{args.results}.validated.cds.fa")
         write_fasta(
             {m.gene_id: m.protein(genome).rstrip("*") for m in kept},
             f"{args.results}.validated.prot.fa",
         )
-        print(f"wrote:             {args.results}.validated.{{gff,cds.fa,prot.fa}}")
+        print(f"wrote:             {args.results}.validated.{{gff3,cds.fa,prot.fa}}")
     return 0
 
 
-def _model_records(model):
-    from .core.gff import GffRecord
-
+def _model_records(model) -> list[GffRecord]:
     return [
-        GffRecord(model.seqid, "geneid_train", "CDS", e.start, e.end, ".", model.strand,
-                  e.frame, model.gene_id)
-        for e in model.exons
+        GffRecord(
+            model.seqid, "geneid_train", "CDS", e.start, e.end, ".", model.strand, e.phase,
+            {"ID": f"{model.gene_id}.cds{i}", "Parent": model.gene_id},
+        )
+        for i, e in enumerate(model.exons, start=1)
     ]
 
 
@@ -104,7 +118,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_prep = sub.add_parser(
         "prepare", help="build a validated training set from a GFF + genomic FASTA"
     )
-    p_prep.add_argument("--gff", required=True, help="GFF2 of CDS features grouped by gene id")
+    p_prep.add_argument("--gff", required=True, help="GFF3 of CDS features (Parent = transcript)")
     p_prep.add_argument("--fastas", required=True, help="genomic multi-FASTA")
     p_prep.add_argument("--min-aa", type=int, default=100, help="minimum protein length (aa)")
     p_prep.add_argument("--flank", type=int, default=1000, help="flank nt for locus extraction")
@@ -112,6 +126,12 @@ def build_parser() -> argparse.ArgumentParser:
         "--results", help="output path prefix; writes validated.{gff,cds.fa,prot.fa}"
     )
     p_prep.set_defaults(func=_cmd_prepare)
+
+    p_conv = sub.add_parser("convert", help="convert GFF2 or GTF annotation to canonical GFF3")
+    p_conv.add_argument("--from", dest="from_", required=True, choices=["gff2", "gtf"])
+    p_conv.add_argument("input", help="input annotation file (GFF2 or GTF)")
+    p_conv.add_argument("output", help="output GFF3 path")
+    p_conv.set_defaults(func=_cmd_convert)
 
     for name, desc in _STUBS.items():
         sp = sub.add_parser(name, help=desc)

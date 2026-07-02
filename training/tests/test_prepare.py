@@ -17,8 +17,8 @@ GENOME = {"chr1": CHROM}
 
 def _gene1_records():
     return [
-        GffRecord("chr1", "s", "CDS", 11, 16, ".", "+", "0", "gene1"),
-        GffRecord("chr1", "s", "CDS", 27, 35, ".", "+", "0", "gene1"),
+        GffRecord("chr1", "s", "CDS", 11, 16, ".", "+", "0", {"ID": "c1", "Parent": "gene1"}),
+        GffRecord("chr1", "s", "CDS", 27, 35, ".", "+", "0", {"ID": "c2", "Parent": "gene1"}),
     ]
 
 

@@ -26,5 +26,14 @@ geneid-train param-info ../param/human1iso.param
 geneid-train param-info ../param/drosophila.U12.070102.param   # U12-aware: yes
 ```
 
-The pipeline subcommands (`prepare`, `train`, `evaluate`, `jackknife`) are
-stubs at this phase and report which phase implements them.
+Build a validated training set from a GFF3 annotation + genomic FASTA:
+
+```bash
+# other flavors go through the converter first (GFF3 is the only ingested format)
+geneid-train convert --from gff2 annotation.gff2 annotation.gff3
+geneid-train prepare --gff annotation.gff3 --fastas genome.fa --min-aa 100 --results out
+```
+
+`convert` accepts `--from gff2` or `--from gtf`. The remaining subcommands
+(`train`, `evaluate`, `jackknife`) are stubs at this phase and report which phase
+implements them.

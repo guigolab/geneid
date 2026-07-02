@@ -21,7 +21,7 @@ from ..core.seq import STANDARD, GeneticCode, revcomp
 class Exon:
     start: int  # 1-based inclusive
     end: int  # 1-based inclusive
-    frame: str = "."
+    phase: str = "."
 
 
 @dataclass
@@ -75,30 +75,32 @@ class GeneModel:
 
 
 def build_models(records: Iterable[GffRecord], cds_type: str = "CDS") -> list[GeneModel]:
-    """Group CDS features by gene id into GeneModels.
+    """Group CDS features into GeneModels by their GFF3 ``Parent`` (transcript id).
 
-    Records whose ``type`` differs from ``cds_type`` are ignored. Raises if a gene
-    has features on mixed seqids or strands.
+    Records whose ``type`` differs from ``cds_type`` are ignored. Raises if a
+    transcript has features on mixed seqids or strands, or a CDS lacks a Parent.
     """
     grouped: dict[str, list[GffRecord]] = {}
     for rec in records:
         if rec.type != cds_type:
             continue
-        grouped.setdefault(rec.gene_id, []).append(rec)
+        if not rec.parents:
+            raise ValueError(f"CDS {rec.id or rec.to_line()!r} has no Parent attribute")
+        grouped.setdefault(rec.parents[0], []).append(rec)
 
     models: list[GeneModel] = []
-    for gene_id, recs in grouped.items():
+    for tx_id, recs in grouped.items():
         seqids = {r.seqid for r in recs}
         strands = {r.strand for r in recs}
         if len(seqids) != 1:
-            raise ValueError(f"gene {gene_id!r} spans multiple seqids: {sorted(seqids)}")
+            raise ValueError(f"transcript {tx_id!r} spans multiple seqids: {sorted(seqids)}")
         if len(strands) != 1:
-            raise ValueError(f"gene {gene_id!r} has mixed strands: {sorted(strands)}")
+            raise ValueError(f"transcript {tx_id!r} has mixed strands: {sorted(strands)}")
         recs_sorted = sorted(recs, key=lambda r: r.start)
-        exons = [Exon(r.start, r.end, r.frame) for r in recs_sorted]
+        exons = [Exon(r.start, r.end, r.phase) for r in recs_sorted]
         models.append(
             GeneModel(
-                gene_id=gene_id,
+                gene_id=tx_id,
                 seqid=recs_sorted[0].seqid,
                 strand=recs_sorted[0].strand,
                 exons=exons,
@@ -180,9 +182,9 @@ def extract_locus(
             end=e.end - shift,
             score=".",
             strand=model.strand,
-            frame=e.frame,
-            group=model.gene_id,
+            phase=e.phase,
+            attributes={"ID": f"{model.gene_id}.cds{i}", "Parent": model.gene_id},
         )
-        for e in model.exons
+        for i, e in enumerate(model.exons, start=1)
     ]
     return Locus(gene_id=model.gene_id, seq=seq, records=recs)
