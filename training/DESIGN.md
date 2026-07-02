@@ -45,6 +45,25 @@ The only compiled dependency that remains is the `geneid` predictor itself.
 | Input front-ends | BUSCO **and** RNA-seq/TransDecoder, built in parallel on a shared core |
 | Correctness stance | Redesign freely — legacy output is a *reference*, not a byte-repro gate |
 
+**Defaults (Tyler, 2026-07-02):**
+
+- **Single isochore by default.** Isochore modelling was essentially a human-only
+  practice; on non-model organisms it needs more data and more training effort, so
+  CNAG stopped doing it. Multi-isochore support stays as an optional/experimental
+  path but is deprioritized.
+- **Genome masking:** *prediction* must run on the masked genome; *training* does
+  not require masking (unmasked is fine). Training candidates are already
+  repeat-filtered upstream, so masking mainly affects flanks — either genome works
+  for the training step.
+
+**Annotation format: GFF3 only.** The tool ingests **GFF3 exclusively** as its
+canonical internal format (the most robust flavor). CDS features are grouped into
+transcripts by their `Parent` attribute. Other flavors (GFF2, GTF) are handled by
+explicit converters in `core/convert.py` (`geneid-train convert --from gff2|gtf`),
+which re-emit a well-formed gene→mRNA→CDS hierarchy; the pipeline itself never
+parses them directly. Parsing geneid's own GFF prediction output is a separate
+concern handled at the `engine.py` boundary.
+
 **Two hard constraints survive "redesign freely":**
 
 1. **The `.param` file format is frozen.** The compiled `geneid` binary parses it,
@@ -56,6 +75,44 @@ The only compiled dependency that remains is the `geneid` predictor itself.
 
 The north-star metric is **held-out SN/SP equal-to-or-better than the current Perl
 pipeline** on the test species, not identical intermediate numbers.
+
+### Optional splice-class profiles (GC donors, U12)
+
+geneid natively reads separate profiles for the full splice taxonomy —
+`U2gta_Donor_profile` (bulk GT-AG), `U2gcag_Donor_profile` (GC-AG), the U12 donor/
+acceptor/branch trio, `Poly_Pyrimidine_Tract_profile`, etc. (exact keywords in
+§4). These are **optional**: the legacy trainer emitted only the generic
+`Donor_profile`/`Acceptor_profile`, so geneid was categorically blind to GC-AG and
+U12 introns.
+
+The same optional treatment applies to the **U2 branch-point + poly-pyrimidine
+tract** profiles (`Branch_point_profile`, `Poly_Pyrimidine_Tract_profile`) — these
+are not a rare dinucleotide class (they're trainable from all U2 introns) but are
+especially valuable for **fungal** genomes; reference/transplant source is
+`param/human.070606.u2branch.ppt.param`. Unified rule for **every** optional
+auxiliary profile (GC donor, U2 BP+PPT, the U12 trio(s), finer U2 gtg/gty donors):
+**always train it, then include it only if it improves held-out F1 or SN/SP.**
+Inclusion is decided at the optimize/evaluate stage (a train-and-test toggle), not
+at `classify` — which only does the dinucleotide rare-class tally.
+
+Design stance (Tyler, 2026-07-02): building these profiles is about **coverage,
+not necessarily global accuracy**. Adding a rare-class profile sometimes *lowers*
+overall SN/SP, but it lets geneid predict that class at all instead of leaving it
+out categorically. Therefore the trainer:
+
+- builds each optional class only when there are enough examples (else offers to
+  **transplant** an existing cross-taxa profile — U12 params generalize well; the
+  reference U12 source is `param/human3isoU12.param`, lifting the U12 profiles from
+  isochore 1 as `convertParam2U12.pl` does. Note `human.070606.u2branch.ppt.param`
+  is U2 branch/PPT, **not** U12);
+- honours geneid's rule that a U12 subtype activates only if its **full
+  donor+acceptor+branch trio** is present;
+- treats each optional class as a toggle and **reports held-out SN/SP with vs.
+  without it**, so the choice to include it is an informed, per-species decision
+  rather than an unconditional default.
+
+`prepare`/`classify` report donor-dinucleotide (GT/GC/AT) and U2/U12 candidate
+tallies up front to drive the train-de-novo-vs-transplant-vs-omit decision.
 
 ## 3. Architecture
 
@@ -70,7 +127,8 @@ training/
     config.py             # YAML run config + defaults, seed handling
     core/
       param.py            # Param model: read/write geneid .param (format authority)
-      gff.py              # GFF2/GFF3 read/write, geneid coordinate conventions
+      gff.py              # GFF3 read/write (the one canonical annotation format)
+      convert.py          # GFF2 / GTF -> canonical GFF3 (the only on-ramp for other flavors)
       fasta.py            # FASTA + tbl I/O (replaces FastaToTbl/TblToFasta)
       seq.py              # translation, ORF/completeness checks, reverse-complement
     prepare/
