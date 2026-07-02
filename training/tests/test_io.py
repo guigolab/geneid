@@ -22,6 +22,15 @@ def test_fasta_roundtrip_and_header_token(tmp_path):
     assert read_fasta(out) == recs
 
 
+def test_fasta_reads_gzip_transparently(tmp_path):
+    import gzip
+
+    p = tmp_path / "s.fa.gz"
+    with gzip.open(p, "wt") as fh:
+        fh.write(">chr1\nACGTACGT\n>chr2\nTTTT\n")
+    assert read_fasta(p) == {"chr1": "ACGTACGT", "chr2": "TTTT"}
+
+
 def test_tbl_roundtrip(tmp_path):
     recs = {"a": "ACGT", "b": "TTTTGGGG"}
     p = tmp_path / "s.tbl"

@@ -7,16 +7,30 @@ that format for interoperability but treat plain dicts as the in-memory currency
 
 from __future__ import annotations
 
+import gzip
+import io
 from collections.abc import Iterator, Mapping
 from pathlib import Path
 
 
+def open_text(path: str | Path) -> io.TextIOBase:
+    """Open a text file, transparently decompressing gzip (detected by magic
+    bytes, so a mislabeled or extensionless ``.gz`` still works)."""
+    with open(path, "rb") as fh:
+        magic = fh.read(2)
+    if magic == b"\x1f\x8b":
+        return gzip.open(path, "rt")
+    return open(path)
+
+
 def iter_fasta(path: str | Path) -> Iterator[tuple[str, str]]:
     """Yield ``(id, sequence)`` pairs. The id is the first whitespace-delimited
-    token of the header (matching how geneid's tools key sequences)."""
+    token of the header (matching how geneid's tools key sequences).
+
+    Gzip-compressed FASTA (``.fa.gz``) is read transparently."""
     name: str | None = None
     chunks: list[str] = []
-    with open(path) as fh:
+    with open_text(path) as fh:
         for line in fh:
             if line.startswith(">"):
                 if name is not None:
