@@ -2,7 +2,13 @@ import math
 
 import pytest
 
-from geneid_train.stats.sites import log_ratio, position_matrix, read_matrix
+from geneid_train.stats.sites import (
+    log_ratio,
+    mask_invariant_dinuc,
+    position_matrix,
+    read_matrix,
+    submatrix,
+)
 
 from .conftest import ref_dir
 
@@ -73,4 +79,33 @@ def test_donor_log_ratio_matches_reference():
     shared = set(ours) & set(ref)
     assert len(shared) > 100
     worst = max(abs(ours[k] - ref[k]) for k in shared)
+    assert worst < 1e-3, f"max deviation {worst}"
+
+
+def test_mask_invariant_dinuc_donor():
+    # profile positions 3/4/5 carry the invariant GT
+    m = {(3, "AG"): 1.5, (3, "AA"): 1.5, (4, "GT"): 2.0, (4, "AA"): 2.0,
+         (5, "TA"): 0.7, (5, "AA"): 0.7, (6, "AA"): -0.3}
+    out = mask_invariant_dinuc(m, st=3, nd=4, rd=5, anchor="GT")
+    assert out[(3, "AG")] == 0.0 and out[(3, "AA")] == -9999.0  # ends in G -> 0
+    assert out[(4, "GT")] == 0.0 and out[(4, "AA")] == -9999.0  # == GT -> 0
+    assert out[(5, "TA")] == 0.7 and out[(5, "AA")] == -9999.0  # starts T -> keep
+    assert out[(6, "AA")] == -0.3  # untouched
+
+
+@pytest.mark.integration
+@pytest.mark.skipif(REF is None, reason="set GENEID_TRAIN_REFDIR to the train_geneid dir")
+def test_full_donor_profile_matches_param():
+    """End-to-end: donor site sequences -> the trained param's Donor_profile block.
+
+    Window [29,36] and GT anchor at profile positions 3/4/5 are the values the
+    reference run selected; boundary selection lands them automatically later.
+    """
+    seqs = [ln.split("\t")[1].strip() for ln in open(REF / f"{SP}.canonical.donor.tbl")]
+    site = position_matrix(seqs, order=1)
+    bg = read_matrix(REF / f"{SP}_background.info.di-matrix")
+    prof = mask_invariant_dinuc(submatrix(log_ratio(site, bg), 29, 36), 3, 4, 5, "GT")
+    ref = read_matrix(REF / f"{SP}.canonical.donor-log-info.di-matrix")  # == param Donor_profile
+    assert set(prof) == set(ref)
+    worst = max(abs(prof[k] - ref[k]) for k in ref)
     assert worst < 1e-3, f"max deviation {worst}"

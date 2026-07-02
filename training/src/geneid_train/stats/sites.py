@@ -89,6 +89,46 @@ def log_ratio(site: Matrix, background: Matrix) -> Matrix:
     return out
 
 
+MASK = -9999.0  # geneid sentinel for a forbidden PWM cell
+
+
+def submatrix(matrix: Matrix, start: int, end: int) -> Matrix:
+    """Restrict to positions [start, end] and renumber them to 1..(end-start+1),
+    matching the legacy ``submatrix.awk``."""
+    return {
+        (pos - start + 1, oligo): v for (pos, oligo), v in matrix.items() if start <= pos <= end
+    }
+
+
+def mask_invariant_dinuc(matrix: Matrix, st: int, nd: int, rd: int, anchor: str) -> Matrix:
+    """Apply the invariant splice-dinucleotide constraint to an order-1 profile
+    (replaces preparedimatrix{donor,acceptor}4parameter.awk).
+
+    ``anchor`` is the invariant dinucleotide ("GT" for donors, "AG" for acceptors)
+    sitting at profile positions ``nd``/``nd+1``. Across the three order-1 columns
+    overlapping it:
+
+    - ``st`` (=nd-1): cell kept as ``0`` if its oligo ends in anchor[0], else masked
+    - ``nd``:         cell kept as ``0`` if its oligo == anchor, else masked
+    - ``rd`` (=nd+1): cell keeps its log value if its oligo starts with anchor[1],
+      else masked
+
+    Every other cell keeps its log-ratio value.
+    """
+    a, b = anchor[0], anchor[1]
+    out: Matrix = {}
+    for (pos, oligo), v in matrix.items():
+        if pos == st:
+            out[(pos, oligo)] = 0.0 if oligo.endswith(a) else MASK
+        elif pos == nd:
+            out[(pos, oligo)] = 0.0 if oligo == anchor else MASK
+        elif pos == rd:
+            out[(pos, oligo)] = v if oligo.startswith(b) else MASK
+        else:
+            out[(pos, oligo)] = v
+    return out
+
+
 def read_matrix(path: str | Path) -> Matrix:
     """Read a geneid ``.di-matrix`` / profile-style file: ``<pos> <oligo> <value>``."""
     out: Matrix = {}
