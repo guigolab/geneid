@@ -138,3 +138,86 @@ def train_u12_profile(
     """
     site = position_matrix(seqs, order=order)
     return submatrix(log_ratio(site, background), start, end)
+
+
+# --- branch-point location ---------------------------------------------------
+#
+# The IAOD fastas don't mark the branch adenosine, and it sits at a variable
+# distance from the 3' acceptor, so it can't be read off a fixed position. But
+# the U12 branch motif is strongly conserved, so we seed with a cross-taxa U12
+# branch PWM (e.g. geneid's U12_Branch_point_profile), score every candidate
+# window in the acceptor-upstream region, and take the best — a bootstrap that
+# both locates the branch and yields aligned windows to retrain the profile.
+
+
+@dataclass
+class BranchHit:
+    """A located branch point: score, distance of the anchor base from the
+    acceptor (last intron base), and the aligned window used for retraining."""
+
+    score: float
+    distance: int
+    window: str
+
+
+def score_window(window: str, pwm: Matrix, order: int) -> float:
+    """Sum of the order-k log-ratio values of ``window`` against a profile PWM
+    (positions 1..len keyed by the ``order+1``-mer starting at each position).
+    Windows with a non-ACGT base score ``-inf`` so they are never chosen."""
+    length = max(p for p, _ in pwm)
+    total = 0.0
+    for pos in range(1, length + 1):
+        oligo = window[pos - 1 : pos - 1 + order + 1]
+        if len(oligo) < order + 1 or set(oligo) - set("ACGT"):
+            return float("-inf")
+        total += pwm.get((pos, oligo), 0.0)
+    return total
+
+
+def locate_branch(
+    seq: str,
+    pwm: Matrix,
+    *,
+    order: int,
+    offset: int,
+    acc_context: int = 50,
+    min_dist: int = 7,
+) -> BranchHit | None:
+    """Find the best-scoring branch window in the acceptor-upstream region of an
+    intron. ``offset`` is the profile position of the branch anchor base; the
+    returned ``distance`` is that base's distance from the last intron base.
+    Scans windows whose anchor lies in ``[min_dist, acc_context]`` from the
+    acceptor. Returns ``None`` if the intron is too short."""
+    length = max(p for p, _ in pwm)
+    win_len = length + order  # bases needed for `length` order-k positions
+    n = len(seq)
+    best: BranchHit | None = None
+    # window start s (0-based); anchor base is at s + (offset-1)
+    lo = n - acc_context
+    hi = n - min_dist - (length - offset)
+    for s in range(max(0, lo), min(hi, n - win_len) + 1):
+        window = seq[s : s + win_len]
+        sc = score_window(window, pwm, order)
+        if sc == float("-inf"):
+            continue
+        anchor = s + (offset - 1)
+        dist = n - anchor
+        if best is None or sc > best.score:
+            best = BranchHit(sc, dist, window)
+    return best
+
+
+def locate_branches(
+    introns: Iterable[U12Intron], pwm: Matrix, *, order: int, offset: int,
+    acc_context: int = 50, min_dist: int = 7,
+) -> list[BranchHit]:
+    """Locate the branch point in each intron; skips introns with no valid hit."""
+    hits = []
+    for it in introns:
+        h = locate_branch(
+            it.seq, pwm, order=order, offset=offset,
+            acc_context=acc_context, min_dist=min_dist,
+        )
+        if h is not None:
+            hits.append(h)
+    return hits

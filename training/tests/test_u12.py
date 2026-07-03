@@ -9,7 +9,9 @@ from geneid_train.prepare.u12 import (
     consensus,
     donor_windows,
     load_u12_introns,
+    locate_branch,
     parse_iaod_fasta,
+    score_window,
     train_u12_profile,
 )
 from geneid_train.stats.sites import MASK, position_matrix
@@ -77,6 +79,23 @@ def test_train_u12_profile_is_unclamped():
     assert max(p for p, _ in prof) == 6
 
 
+def test_score_window_sums_positions_and_rejects_non_acgt():
+    pwm = {(1, "AC"): 1.0, (2, "CG"): 2.0, (3, "GT"): 3.0}  # order 1, len 3
+    assert score_window("ACGT", pwm, 1) == 6.0
+    assert score_window("ACNT", pwm, 1) == float("-inf")
+
+
+def test_locate_branch_finds_planted_motif():
+    # a PWM that strongly prefers an AAAA anchor; plant it in the branch region
+    pwm = {(1, "AA"): 5.0, (2, "AA"): 5.0, (3, "AA"): 5.0}
+    seq = "C" * 30 + "AAAA" + "C" * 8  # len 42; AAAA at index 30..33
+    hit = locate_branch(seq, pwm, order=1, offset=2, acc_context=20, min_dist=3)
+    assert hit is not None
+    assert hit.window == "AAAA"
+    assert hit.score == 15.0
+    assert hit.distance == 42 - (30 + 1)  # anchor = start + offset-1
+
+
 # ---- real IAOD data (opt-in) ------------------------------------------------
 
 U12DIR = os.environ.get("GENEID_TRAIN_U12DIR")
@@ -92,3 +111,25 @@ def test_iaod_pooled_consensus_is_u12():
     # the canonical U12 5' splice sites must emerge from the pooled set
     assert consensus(donor_windows(groups["gtag"], 8), 8) == "GTATCCTT"
     assert consensus(donor_windows(groups["atac"], 8), 8) == "ATATCCTT"
+
+
+_U12_PARAM = "/Users/talioto/repositories/geneid_fresh/param/human3isoU12.param"
+
+
+@pytest.mark.integration
+@pytest.mark.skipif(
+    not U12DIR or not os.path.exists(_U12_PARAM),
+    reason="set GENEID_TRAIN_U12DIR and provide human3isoU12.param",
+)
+def test_branch_location_sharpens_u12_consensus():
+    from geneid_train.core.param import Param
+    from geneid_train.prepare.u12 import locate_branches
+
+    pr = Param.read(_U12_PARAM).profile("U12_Branch_point_profile")
+    pwm = {(pos, oligo): val for pos, oligo, val in pr.rows}
+    gtag = by_subtype(load_u12_introns(sorted(glob.glob(f"{U12DIR}/*_U12.fasta"))))["gtag"]
+    hits = locate_branches(gtag, pwm, order=2, offset=9, acc_context=50, min_dist=7)
+    assert len(hits) > 3000
+    # aligned windows collapse to the conserved U12 branch motif (CCTT..AC)
+    cons = consensus([h.window for h in hits], 14)
+    assert "CCTT" in cons and "AC" in cons
