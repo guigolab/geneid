@@ -45,10 +45,15 @@ A. DEFINITIONS
 *************************************************************************/
 
 /* The name of the game                     */
+/* VERSION/SITES/EXONS are the GFF source-column tags geneid writes for
+   predicted genes/sites/exons; they track the minor version. GENEID_RELEASE
+   is the human-facing release string (patch level) shown in the usage banner
+   and credits -- keep it as the single source so they cannot drift again.   */
 #define VERSION   "geneid_v1.5"
 #define SITES     "geneid_v1.5"
-#define EXONS     "geneid_v1.4"       
-#define EVIDENCE  "evidence"           
+#define EXONS     "geneid_v1.5"
+#define GENEID_RELEASE "geneid v1.5.1"
+#define EVIDENCE  "evidence"
 
 /* -------------------------------------------------------------------------
  * These constants used to be a build-time "memory profile": geneid reserved
