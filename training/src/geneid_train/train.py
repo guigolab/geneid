@@ -94,12 +94,18 @@ def train(
     *,
     background: tuple[Matrix, Matrix] | None = None,
     seed: int = 0,
+    u12: bool = False,
 ) -> str:
     """Train a geneid parameter file from complete, filtered gene ``models``.
 
     ``background`` may be supplied as ``(freq, dimatrix)`` to make a run fully
     deterministic (and to validate against a reference background); otherwise it
     is sampled from the genome.
+
+    When ``u12`` is set, the bundled pan-taxon U12 (minor-spliceosome) profile
+    trio is spliced in, so geneid can predict U12-type introns (run with ``-U``).
+    A single genome rarely has enough U12 introns to train these, so they are
+    IAOD-derived and shipped with the package (see ``param.u12``).
     """
     if not models:
         raise ValueError("no gene models to train on")
@@ -138,6 +144,12 @@ def train(
 
     lo, hi = intron_range([len(s) for s in intron_seqs])
 
+    u12_sections = None
+    if u12:
+        from .param.u12 import load_bundled_u12
+
+        u12_sections = load_bundled_u12()
+
     return assemble_param(
         species=species,
         start_profile=start_lines,
@@ -148,4 +160,5 @@ def train(
         markov_transition=format_markov_matrix(trans_logs),
         intron_range=format_range(lo, hi),
         intergenic_range="200:Infinity",
+        u12=u12_sections,
     )

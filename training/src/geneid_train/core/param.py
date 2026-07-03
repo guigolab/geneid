@@ -146,6 +146,20 @@ class Param:
         ending = "\n" if block.raw[di].endswith("\n") else ""
         block.raw[di] = f"{value}{ending}"
 
+    def insert_text_before(self, keyword: str, text: str, index: int = 0) -> None:
+        """Insert one or more whole sections (raw ``text``, keyword header + data
+        lines, ending in a newline) immediately before the ``index``-th occurrence
+        of section ``keyword``.
+
+        Used to splice optional profiles (e.g. the U12 trio) into the fixed slot
+        geneid's parser expects — the U12/branch profiles must precede the
+        required ``Acceptor_profile`` / ``Donor_profile`` they extend.
+        """
+        target = self._find(keyword, index)
+        pos = self._blocks.index(target)
+        new_blocks = Param.from_text(text)._blocks
+        self._blocks[pos:pos] = new_blocks
+
     def replace_block_data(self, keyword: str, new_lines: list[str], index: int = 0) -> None:
         """Replace a section's data lines with ``new_lines`` (each without a
         trailing newline), keeping the keyword line and any leading/trailing

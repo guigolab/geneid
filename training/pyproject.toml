@@ -22,7 +22,7 @@ geneid-train = "geneid_train.cli:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-geneid_train = ["data/*.param"]
+geneid_train = ["data/*.param", "data/*.NOTICE"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

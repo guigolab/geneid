@@ -18,6 +18,7 @@ from __future__ import annotations
 from importlib.resources import files
 
 from ..core.param import Param
+from .u12 import U12Sections
 
 
 def load_template() -> str:
@@ -37,10 +38,15 @@ def assemble_param(
     intron_range: str,
     intergenic_range: str,
     template: str | None = None,
+    u12: U12Sections | None = None,
 ) -> str:
     """Build a full geneid param. Profile/Markov args are geneid-format data
     lines (from ``stats.sites.format_profile`` / ``stats.coding.format_markov_matrix``);
-    ``intron_range``/``intergenic_range`` are ``min:max`` tokens."""
+    ``intron_range``/``intergenic_range`` are ``min:max`` tokens.
+
+    When ``u12`` is given, the minor-spliceosome profile trio is spliced in before
+    the required acceptor/donor profiles so geneid enables U12 splice prediction.
+    """
     p = Param.from_text(template if template is not None else load_template())
 
     p.replace_block_data("Start_profile", start_profile)
@@ -50,6 +56,13 @@ def assemble_param(
     p.set_scalar("Markov_order", markov_order)
     p.replace_block_data("Markov_Initial_probability_matrix", markov_initial)
     p.replace_block_data("Markov_Transition_probability_matrix", markov_transition)
+
+    if u12 is not None:
+        # order matters only in that each optional profile must precede the fixed
+        # profile it extends (geneid reads optional profiles until it hits the
+        # required Acceptor_profile / Donor_profile — see ReadProfileSpliceSites)
+        p.insert_text_before("Acceptor_profile", u12.acceptor_side)
+        p.insert_text_before("Donor_profile", u12.donor_side)
 
     text = p.to_text()
     text = text.replace("@INTRON_RANGE@", intron_range)

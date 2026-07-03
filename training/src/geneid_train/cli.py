@@ -209,7 +209,7 @@ def _cmd_train(args: argparse.Namespace) -> int:
         sys.stderr.write("no models survived filtering\n")
         return 1
     try:
-        param_text = train(models, genome, args.species, seed=args.seed)
+        param_text = train(models, genome, args.species, seed=args.seed, u12=args.u12)
     except NotImplementedError as exc:
         sys.stderr.write(f"geneid-train train: {exc}\n")
         return 2
@@ -282,6 +282,11 @@ def build_parser() -> argparse.ArgumentParser:
     p_train.add_argument("--min-aa", type=int, default=100, help="minimum protein length (aa)")
     p_train.add_argument(
         "--seed", type=int, default=0, help="RNG seed for background sampling (reproducibility)"
+    )
+    p_train.add_argument(
+        "--u12",
+        action="store_true",
+        help="include bundled U12 (minor-spliceosome) profiles so geneid -U predicts U12 introns",
     )
     p_train.set_defaults(func=_cmd_train)
 
