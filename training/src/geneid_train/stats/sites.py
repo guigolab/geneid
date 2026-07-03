@@ -289,6 +289,34 @@ def select_window(
     return SiteWindow(start, end, off, end - start + 1, st, nd, rd)
 
 
+def _fmt(value: float) -> str:
+    """Format a matrix value as geneid does: 6 significant figures, integers bare."""
+    if value == int(value):
+        return str(int(value))
+    return f"{value:g}"
+
+
+def profile_header(window: SiteWindow, order: int, cutoff: float = -7.0) -> list[str]:
+    """The geneid profile header ``len offset cutoff order [a b]`` for a window.
+
+    Order>=1 profiles carry the trailing ``0 1`` pair (the dinucleotide-context
+    flags geneid expects); order-0 profiles omit it.
+    """
+    fields = [window.length, window.offset, cutoff, order]
+    if order >= 1:
+        fields += [0, 1]
+    return [_fmt(float(f)) for f in fields]
+
+
+def format_profile(matrix: Matrix, header: list[str]) -> list[str]:
+    """Render a site profile as geneid param lines: a header line, the standard
+    comment, then ``pos oligo value`` rows sorted by position then oligo."""
+    lines = [" ".join(header), "# Transition probabilities at every position"]
+    for (pos, oligo), v in sorted(matrix.items()):
+        lines.append(f"{pos} {oligo} {_fmt(v)}")
+    return lines
+
+
 def read_matrix(path: str | Path) -> Matrix:
     """Read a geneid ``.di-matrix`` / profile-style file.
 

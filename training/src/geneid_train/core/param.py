@@ -146,6 +146,21 @@ class Param:
         ending = "\n" if block.raw[di].endswith("\n") else ""
         block.raw[di] = f"{value}{ending}"
 
+    def replace_block_data(self, keyword: str, new_lines: list[str], index: int = 0) -> None:
+        """Replace a section's data lines with ``new_lines`` (each without a
+        trailing newline), keeping the keyword line and any leading/trailing
+        comment or blank lines. Used to swap in a freshly trained profile or
+        Markov matrix while preserving the file's structure around it.
+        """
+        block = self._find(keyword, index)
+        di = block.data_line_indices()
+        if not di:
+            raise ValueError(f"section {keyword!r} has no data to replace")
+        first, last = di[0], di[-1]
+        head = block.raw[:first]
+        tail = block.raw[last + 1 :]
+        block.raw = head + [ln + "\n" for ln in new_lines] + tail
+
     @property
     def num_isochores(self) -> int:
         return int(self.scalar("number_of_isochores"))
