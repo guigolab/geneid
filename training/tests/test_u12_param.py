@@ -10,7 +10,9 @@ import pytest
 from geneid_train.core.param import Param, Profile
 from geneid_train.param.u12 import (
     DONOR_SIDE,
+    donor_loglik,
     load_bundled_u12,
+    load_u12_donor_model,
     overlay_profile,
     partition_sections,
     register_shift,
@@ -84,6 +86,26 @@ def test_bundled_u12_loads_and_has_full_trio():
     idx = branch_hdr.index("U12_Branch_point_profile")
     fields = branch_hdr[idx + 1].split()
     assert len(fields) == 10  # len offset cutoff order a b acc_context min_dist opt_dist pen_scale
+
+
+def test_donor_loglik_sums_position_logs():
+    import math
+
+    freq = {(1, "A"): 0.5, (2, "C"): 0.25}
+    # exact match: log(0.5+eps) + log(0.25+eps)
+    got = donor_loglik("AC", freq, 2, pseudo=0.0)
+    assert abs(got - (math.log(0.5) + math.log(0.25))) < 1e-9
+
+
+def test_bundled_u12_donor_model_is_gtatcctt():
+    freq, length, floor = load_u12_donor_model()
+    assert length >= 8
+    # the U12 5' consensus GTATCCTT must be the per-position argmax of the PWM
+    consensus = "".join(
+        max("ACGT", key=lambda b: freq.get((pos, b), 0.0)) for pos in range(1, 9)
+    )
+    assert consensus == "GTATCCTT"
+    assert floor < 0  # a log-likelihood floor
 
 
 # ---- end-to-end: geneid actually enables U12 from the bundled profiles -------

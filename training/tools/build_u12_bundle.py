@@ -24,7 +24,7 @@ import glob
 from pathlib import Path
 
 from geneid_train.core.param import Param
-from geneid_train.param.u12 import build_u12_sections
+from geneid_train.param.u12 import build_u12_scoring, build_u12_sections
 from geneid_train.prepare.u12 import by_subtype, load_u12_introns
 
 _NOTICE = """\
@@ -89,6 +89,16 @@ def main() -> None:
     (outdir / "U12_PROFILES.NOTICE").write_text(_NOTICE)
     print(f"wrote {param_path}")
     print(f"wrote {outdir / 'U12_PROFILES.NOTICE'}")
+
+    # the U12-vs-U2 donor scoring model used by classify's GT-AG screen
+    scoring_header = (
+        "# U12 GT-AG donor frequency PWM + calibration floor for the U12-vs-U2\n"
+        "# classify screen (see geneid_train.param.u12 / prepare.classify).\n"
+        "# IAOD-derived (CC-BY, see U12_PROFILES.NOTICE). Regenerate via build_u12_bundle.py.\n"
+    )
+    scoring_path = outdir / "u12_scoring.param"
+    scoring_path.write_text(scoring_header + build_u12_scoring(introns))
+    print(f"wrote {scoring_path}")
 
 
 if __name__ == "__main__":

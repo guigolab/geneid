@@ -29,6 +29,7 @@ This is the Stage-1 bundle: pan-taxon IAOD signal on a correct geneid geometry.
 
 from __future__ import annotations
 
+import math
 from collections.abc import Sequence
 from dataclasses import dataclass
 
@@ -41,7 +42,68 @@ from ..prepare.u12 import (
     locate_branches,
     markov_background,
 )
-from ..stats.sites import Matrix, log_ratio, position_matrix, submatrix
+from ..stats.sites import Matrix, frequency, log_ratio, position_matrix, submatrix
+
+# --- U12 donor scoring model (for the U12-vs-U2 classify screen) --------------
+#
+# classify.detect_u12_gtag separates U12 GT-AG introns from bulk U2 GT-AG by a
+# log-likelihood-ratio of the intron's 5' donor window under a U12 donor frequency
+# PWM (bundled here, IAOD-derived) vs a U2 donor PWM trained from the genome's own
+# GT-AG introns. This is an ORDER-0 frequency PWM (not the geneid log-odds param):
+# a likelihood ratio needs P(base) under each model, and the distinctive U12 5'SS
+# (GTATCCTT) makes even an order-0 donor a strong discriminator.
+DONOR_SCORE_LEN = 10  # first N intronic bases scored (covers the GTATCCTT motif)
+_LL_PSEUDO = 1e-3  # smoothing so an unseen base doesn't send the log-likelihood to -inf
+
+
+def donor_loglik(window: str, freq: Matrix, length: int, *, pseudo: float = _LL_PSEUDO) -> float:
+    """Order-0 log-likelihood of ``window`` under a per-position base-frequency PWM
+    ``freq`` (keyed ``(pos, base)``): ``sum_pos log(freq[pos, base] + pseudo)``. The
+    same function scores both the U12 (bundled) and U2 (genome-trained) donor PWMs,
+    so their difference is a clean U12-vs-U2 log-likelihood ratio."""
+    total = 0.0
+    for pos in range(1, length + 1):
+        base = window[pos - 1]
+        total += math.log(freq.get((pos, base), 0.0) + pseudo)
+    return total
+
+
+def train_donor_freq(introns: Sequence[U12Intron], subtype: str, length: int) -> Matrix:
+    """Per-position base frequencies of the first ``length`` intronic bases of the
+    ``subtype`` U12 donors — the U12 donor scoring PWM."""
+    return frequency(donor_windows(by_subtype(introns)[subtype], length))
+
+
+def build_u12_scoring(
+    introns: Sequence[U12Intron], *, length: int = DONOR_SCORE_LEN, floor_pct: float = 5.0
+) -> str:
+    """Render the bundled U12 donor scoring model: the GT-AG donor frequency PWM
+    plus a calibration ``floor`` = the ``floor_pct``-th percentile of the donor
+    log-likelihood over the known IAOD U12 donors. An intron whose U12 donor score
+    is below this floor is not U12-like even if it beats its U2 score (the floor
+    that suppresses cryptic/U2 false positives)."""
+    freq = train_donor_freq(introns, "gtag", length)
+    gtag = by_subtype(introns)["gtag"]
+    ll = sorted(donor_loglik(w, freq, length) for w in donor_windows(gtag, length))
+    floor = ll[int(floor_pct / 100 * len(ll))] if ll else 0.0
+    lines = [f"U12gtag_Donor_freq\n{length} 0"]
+    for pos in range(1, length + 1):
+        for base in "ACGT":
+            lines.append(f"{pos} {base} {freq.get((pos, base), 0.0):g}")
+    return "\n".join(lines) + "\n" + f"U12gtag_Donor_floor\n{floor:g}\n"
+
+
+def load_u12_donor_model() -> tuple[Matrix, int, float]:
+    """Load the bundled U12 GT-AG donor scoring model: ``(freq PWM, length, floor)``."""
+    from importlib.resources import files
+
+    text = files("geneid_train").joinpath("data/u12_scoring.param").read_text()
+    p = Param.from_text(text)
+    prof = p.profile("U12gtag_Donor_freq")
+    length = int(prof.header[0])
+    freq: Matrix = {(pos, base): v for pos, base, v in prof.rows}
+    floor = float(p.scalar("U12gtag_Donor_floor"))
+    return freq, length, floor
 
 # The reference U12 profiles whose geometry we inherit. Acceptor-side profiles
 # are emitted before ``Acceptor_profile``; donor-side before ``Donor_profile``.
@@ -208,13 +270,24 @@ def partition_sections(text: str) -> U12Sections:
     return U12Sections("".join(acc), "".join(don))
 
 
+def _bundled_text() -> str:
+    from importlib.resources import files
+
+    return files("geneid_train").joinpath("data/u12_profiles.param").read_text()
+
+
 def load_bundled_u12() -> U12Sections:
     """Load the pan-taxon U12 profiles bundled with the package (derived from the
     IAOD U12 intron set — see ``data/U12_PROFILES.NOTICE``)."""
-    from importlib.resources import files
+    return partition_sections(_bundled_text())
 
-    text = files("geneid_train").joinpath("data/u12_profiles.param").read_text()
-    return partition_sections(text)
+
+def bundled_scoring_profiles() -> dict[str, Profile]:
+    """The bundled U12 profiles as :class:`Profile` objects, keyed by section name
+    — used to bootstrap-score a genome's own GT-AG introns for likely U12 members
+    (:mod:`geneid_train.prepare.classify`)."""
+    p = Param.from_text(_bundled_text())
+    return {name: p.profile(name) for name in (*ACCEPTOR_SIDE, *DONOR_SIDE)}
 
 
 def _train_side(windows: Sequence[str], order: int) -> Matrix:

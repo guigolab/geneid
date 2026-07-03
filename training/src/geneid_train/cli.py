@@ -65,7 +65,10 @@ def _cmd_classify(args: argparse.Namespace) -> int:
         sys.stderr.write("no CDS-grouped gene models found in GFF3\n")
         return 1
     genome = read_fasta_subset(args.fastas, {m.seqid for m in models})
-    rep = classify_report(models, genome, min_sites=args.min_sites)
+    rep = classify_report(
+        models, genome, min_sites=args.min_sites,
+        bootstrap_u12=not args.no_u12_bootstrap, u12_floor=args.u12_floor,
+    )
     print(f"models={rep.n_models} multi-exonic={rep.n_multiexonic} introns={rep.n_introns}")
     top_d = list(rep.donor_counts.items())[:5]
     top_a = list(rep.acceptor_counts.items())[:5]
@@ -77,6 +80,15 @@ def _cmd_classify(args: argparse.Namespace) -> int:
         cnt = str(c.count) if c.count >= 0 else "?"
         print(f"  {c.name:12} {cnt:>6} {frac:>7}  -> {c.recommendation}")
         print(f"               profile: {c.profile}")
+    if rep.u12_gtag is not None:
+        e = rep.u12_gtag
+        top = ", ".join(f"{s:.1f}" for s in e.top_margins)
+        print(
+            f"\nU12 GT-AG screen (U12-vs-U2 donor, not a calibrated count): "
+            f"{e.n_candidates}/{e.n_scored} GT-AG introns score more U12 than U2 "
+            f"(margin >= {e.margin:g}, U12 floor >= {e.floor:.2f})"
+        )
+        print(f"  top U12-minus-U2 donor log-likelihood: {top}")
     return 0
 
 
@@ -281,6 +293,15 @@ def build_parser() -> argparse.ArgumentParser:
     p_cls.add_argument("--fastas", required=True, help="genomic multi-FASTA")
     p_cls.add_argument(
         "--min-sites", type=int, default=50, help="min sites to train a rare-class profile de novo"
+    )
+    p_cls.add_argument(
+        "--u12-floor", type=float, default=None,
+        help="absolute U12 donor log-likelihood floor for the U12-vs-U2 GT-AG screen "
+             "(default: the bundled calibration floor)",
+    )
+    p_cls.add_argument(
+        "--no-u12-bootstrap", action="store_true",
+        help="skip the U12 GT-AG branch-model bootstrap scoring",
     )
     p_cls.set_defaults(func=_cmd_classify)
 
