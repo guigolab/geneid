@@ -110,6 +110,12 @@ float EvidenceFactor = 1;
 float U12_SPLICE_SCORE_THRESH = -1000;
 float U12_EXON_SCORE_THRESH = -1000;
 
+/* Weight applied to the U2 branch-point score when it is added to the acceptor
+   score (see BuildAcceptors.c). Default 1 preserves the historical behaviour; a
+   param file may set it to 0 so the branch is scored and reported (bp_score /
+   bp_pos in the GFF) without contributing to the splice-site score. */
+float BRANCH_SCORE_WEIGHT = 1;
+
 /* Detection of recursive splice sites */
 float RSSMARKOVSCORE = 0;
 float RSSDON = RDT;
