@@ -126,6 +126,24 @@ def _cmd_evaluate(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_optimize(args: argparse.Namespace) -> int:
+    from .optimize import optimize
+
+    base = open(args.param).read()
+    opt_text, results = optimize(
+        base, args.eval_fastas, args.eval_gff,
+        geneid_bin=args.geneid, workers=args.workers,
+    )
+    best = results[0]
+    with open(args.output, "w") as fh:
+        fh.write(opt_text)
+    print(f"grid points evaluated: {len(results)}")
+    print(f"best eWF={best.ewf:g} oWF={best.owf:g} -> "
+          f"SNSP={best.accuracy.snsp:.4f} SNSPg={best.accuracy.snspg:.4f}")
+    print(f"wrote optimized parameter file: {args.output}")
+    return 0
+
+
 def _cmd_train(args: argparse.Namespace) -> int:
     from .train import train
 
@@ -218,6 +236,17 @@ def build_parser() -> argparse.ArgumentParser:
         "--seed", type=int, default=0, help="RNG seed for background sampling (reproducibility)"
     )
     p_train.set_defaults(func=_cmd_train)
+
+    p_opt = sub.add_parser(
+        "optimize", help="grid-search exon/site weights against a held-out set (maximise SNSP)"
+    )
+    p_opt.add_argument("--param", required=True, help="base trained .param file")
+    p_opt.add_argument("--eval-fastas", required=True, help="held-out locus FASTA (gp format)")
+    p_opt.add_argument("--eval-gff", required=True, help="held-out annotation GFF (gp convention)")
+    p_opt.add_argument("--output", required=True, help="output optimized .param path")
+    p_opt.add_argument("--geneid", default="geneid", help="path to the geneid binary")
+    p_opt.add_argument("--workers", type=int, default=4, help="parallel geneid runs")
+    p_opt.set_defaults(func=_cmd_optimize)
 
     p_eval = sub.add_parser(
         "evaluate", help="score a prediction GFF against an annotation GFF (SN/SP)"

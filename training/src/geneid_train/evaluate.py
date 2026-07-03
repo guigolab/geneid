@@ -173,8 +173,9 @@ def finalize(t: Totals) -> Accuracy:
     fp = t.cds_pred - t.tp
     fn = t.cds_real - t.tp
     tn = rn - fp
+    # CC needs a real sequence length (rn, pn > 0); guard degenerate/missing lengths
     denom = t.cds_real * rn * t.cds_pred * pn
-    cc = ((t.tp * tn) - (fn * fp)) / math.sqrt(denom) if denom > 0 else 0.0
+    cc = ((t.tp * tn) - (fn * fp)) / math.sqrt(denom) if rn > 0 and pn > 0 and denom > 0 else 0.0
     sne = _safe_div(t.tpe, t.exr)
     spe = _safe_div(t.tpe, t.exp)
     sng = _safe_div(t.tpg, t.ger)
