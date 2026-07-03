@@ -76,6 +76,29 @@ concern handled at the `engine.py` boundary.
 The north-star metric is **held-out SN/SP equal-to-or-better than the current Perl
 pipeline** on the test species, not identical intermediate numbers.
 
+### Start-site scoring is weak by nature -- lean on coding potential, keep it swappable
+
+Start-codon PWMs carry little information (confirmed empirically on xgXerMont:
+order 0, the weakest profile class geneid supports) -- ATG context alone is a
+poor discriminator. Two design consequences (Tyler, 2026-07-02):
+
+- **Training data strategy:** rather than training the start profile to sharply
+  separate real starts from decoys, treat every in-frame ATG in a training CDS as
+  a start candidate and let the coding-potential (Markov) model carry the real
+  discriminating weight; the start profile stays a weak prior on top, not the
+  decision-maker. This matches how geneid's own gene assembly already combines
+  site + coding scores -- it just means the *trainer* shouldn't over-invest in
+  making the start PWM discriminative.
+- **Architecture:** keep each site class (start/donor/acceptor/branch) behind a
+  swappable scorer interface rather than hard-wiring the Markov/PWM math as the
+  only option. The near-term implementation is the Markov/PWM pipeline in
+  `stats/sites.py`; a future start-site scorer (e.g. a small NN) should be able to
+  slot in without changing `stats/model.py`, `optimize.py`, or `evaluate.py` --
+  those only need a profile object (or an external score), not the estimation
+  method that produced it. Do not build this abstraction speculatively ahead of
+  need; keep the interface narrow enough that swapping is possible when it
+  actually comes up.
+
 ### Optional splice-class profiles (GC donors, U12)
 
 geneid natively reads separate profiles for the full splice taxonomy —
