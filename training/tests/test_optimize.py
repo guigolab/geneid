@@ -5,7 +5,16 @@ import pytest
 
 from geneid_train.core.param import Param
 from geneid_train.evaluate import Accuracy
-from geneid_train.optimize import GridResult, _frange, apply_weights, optimize
+from geneid_train.optimize import (
+    GridResult,
+    WeightPoint,
+    _frange,
+    accuracy_key,
+    apply_weight_point,
+    apply_weights,
+    optimize,
+    uniform_point,
+)
 
 from .conftest import ref_dir
 
@@ -48,6 +57,34 @@ def test_grid_result_sort_prefers_higher_snsp_then_tiebreaks():
     assert results[2] is b
 
 
+def test_accuracy_key_orders_by_snsp_then_snspg():
+    assert accuracy_key(_acc(0.80)) < accuracy_key(_acc(0.70))
+    assert accuracy_key(_acc(0.80, snspg=0.5)) < accuracy_key(_acc(0.80, snspg=0.4))
+
+
+def test_uniform_point_sets_all_types_equal():
+    p = uniform_point(-3.5, 0.3)
+    assert p.ewf == (-3.5, -3.5, -3.5, -3.5)
+    assert p.owf == (0.3, 0.3, 0.3, 0.3)
+
+
+def test_weight_point_with_value_is_immutable_single_change():
+    p = uniform_point(-4.0, 0.3)
+    q = p.with_value("ewf", 2, -2.0)  # Terminal only
+    assert q.ewf == (-4.0, -4.0, -2.0, -4.0)
+    assert p.ewf == (-4.0, -4.0, -4.0, -4.0)  # original untouched
+    assert q.owf == p.owf
+
+
+def test_apply_weight_point_per_type_columns_preserve_utr():
+    p = Param.from_text(_MINI_PARAM)
+    apply_weight_point(p, WeightPoint((-1, -2, -3, -4), (0.1, 0.2, 0.3, 0.4)))
+    assert p.vector("Exon_weights") == ["-1", "-2", "-3", "-4", "0"]  # UTR 0 kept
+    assert p.vector("Exon_factor") == ["0.1", "0.2", "0.3", "0.4"]
+    # Site_factor = 1 - owf per type, trailing UTR 0.6 preserved
+    assert p.vector("Site_factor") == ["0.9", "0.8", "0.7", "0.6", "0.6"]
+
+
 # ---- end-to-end with a real geneid binary -----------------------------------
 
 REF = ref_dir()
@@ -80,3 +117,28 @@ def test_optimize_runs_grid_and_selects_best():
     p = Param.from_text(opt_text)
     assert p.vector("Exon_weights")[0] == f"{best.ewf:g}"
     assert p.vector("Exon_factor")[0] == f"{best.owf:g}"
+
+
+@pytest.mark.integration
+@pytest.mark.skipif(
+    REF is None or not Path(GENEID).exists(),
+    reason="needs GENEID_TRAIN_REFDIR and a geneid binary (GENEID_BIN)",
+)
+def test_coordinate_descent_beats_or_matches_uniform_seed():
+    from geneid_train.optimize import coordinate_descent
+
+    sp = "Xerocrassa_montserratensis"
+    base = (REF / f"{sp}.geneid.param").read_text()
+    fasta = str(REF / f"{sp}.eval.gp.fa")
+    gff = str(REF / f"{sp}.eval.gp.gff")
+    seed = uniform_point(-4.5, 0.35)
+    opt_text, best, history = coordinate_descent(
+        base, fasta, gff, geneid_bin=GENEID, init=seed,
+        ewf_values=[-4.5], owf_values=[0.30, 0.35], workers=2, max_rounds=1,
+    )
+    # descent only ever accepts improvements over the seed, so best >= seed
+    assert best.accuracy.snsp >= history[0].accuracy.snsp
+    assert len(best.point.ewf) == 4 and len(best.point.owf) == 4
+    # optimised param carries the per-type owf (First may differ from the rest)
+    p = Param.from_text(opt_text)
+    assert p.vector("Exon_factor") == [f"{o:g}" for o in best.point.owf]

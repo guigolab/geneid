@@ -8,21 +8,34 @@ the best exon-level ``SNSP`` (tie-broken by gene ``SNSPg``, nucleotide ``CC``,
 then fewest missing/wrong exons — the legacy ``sorteval`` order) wins, and its
 weights are written into the optimised parameter file.
 
-Only the default eWF×oWF grid is implemented (matching the reference run); the
-branch/U12 acceptor-context + min-branch axes are left for the U12 work.
+Two search strategies are available:
+
+- :func:`optimize` — the legacy uniform grid over a single ``(eWF, oWF)`` applied
+  to all exon types (fast, good for a coarse starting point).
+- :func:`coordinate_descent` — refines the four exon types (First/Internal/
+  Terminal/Single) *independently*: the Exon_weights / Exon_factor / Site_factor
+  columns exist to be tuned per type, so this walks the 8-dimensional space one
+  coordinate at a time. Seed it with :func:`uniform_point` from a coarse grid.
+
+The branch/U12 acceptor-context + min-branch axes are left for the U12 work.
 """
 
 from __future__ import annotations
 
+import itertools
 import shutil
 import subprocess
 import tempfile
 from concurrent.futures import ThreadPoolExecutor
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 
 from .core.param import Param
 from .evaluate import Accuracy, evaluate_files
+
+# the four exon types tuned independently (columns 0-3 of Exon_weights /
+# Exon_factor / Site_factor; column 4, where present, is UTR and is left alone)
+EXON_TYPES = ("First", "Internal", "Terminal", "Single")
 
 # default grid bounds from the legacy driver (init, final, step)
 DEFAULT_EWF = (-4.5, -2.5, 0.5)
@@ -73,6 +86,12 @@ def run_geneid(geneid_bin: str, param_path: str, fasta: str) -> str:
     return "\n".join(kept) + "\n"
 
 
+def accuracy_key(a: Accuracy) -> tuple:
+    """Ranking key: exon SNSP desc, then gene SNSPg desc, nucleotide CC desc,
+    fewest missing then wrong exons (the legacy ``sorteval`` order)."""
+    return (-a.snsp, -a.snspg, -a.cc, a.ra_me, a.ra_we)
+
+
 @dataclass
 class GridResult:
     ewf: float
@@ -80,9 +99,7 @@ class GridResult:
     accuracy: Accuracy
 
     def sort_key(self) -> tuple:
-        a = self.accuracy
-        # SNSP desc, SNSPg desc, CC desc, raME asc, raWE asc  (legacy sorteval)
-        return (-a.snsp, -a.snspg, -a.cc, a.ra_me, a.ra_we)
+        return accuracy_key(self.accuracy)
 
 
 def _score_point(
@@ -130,3 +147,128 @@ def optimize(
     param = Param.from_text(base_param_text)
     apply_weights(param, best.ewf, best.owf)
     return param.to_text(), results
+
+
+# --- per-exon-type coordinate-descent optimisation ---------------------------
+
+
+@dataclass(frozen=True)
+class WeightPoint:
+    """Per-exon-type exon weights (``ewf``) and factors (``owf``), ordered
+    First, Internal, Terminal, Single. ``Exon_factor`` takes ``owf`` and
+    ``Site_factor`` takes ``1 - owf`` per type, mirroring the uniform search."""
+
+    ewf: tuple[float, float, float, float]
+    owf: tuple[float, float, float, float]
+
+    def with_value(self, axis: str, idx: int, value: float) -> WeightPoint:
+        vals = list(getattr(self, axis))
+        vals[idx] = value
+        return replace(self, **{axis: tuple(vals)})
+
+
+def uniform_point(ewf: float, owf: float) -> WeightPoint:
+    """A WeightPoint with every exon type set to the same ``ewf``/``owf`` — the
+    starting point equivalent to the uniform grid's result."""
+    return WeightPoint((ewf,) * 4, (owf,) * 4)
+
+
+def _set_columns(param: Param, keyword: str, values: tuple[float, ...]) -> None:
+    """Set columns 0..len(values)-1 of every occurrence of a vector section,
+    preserving trailing columns (e.g. the UTR column)."""
+    count = sum(1 for k in param.keywords() if k == keyword)
+    for i in range(count):
+        old = param.vector(keyword, index=i)
+        new = [f"{v:g}" for v in values] + old[len(values):]
+        param.set_scalar(keyword, " ".join(new), index=i)
+
+
+def apply_weight_point(param: Param, point: WeightPoint) -> None:
+    """Write a per-type WeightPoint into Exon_weights / Exon_factor / Site_factor."""
+    _set_columns(param, "Exon_weights", point.ewf)
+    _set_columns(param, "Exon_factor", point.owf)
+    _set_columns(param, "Site_factor", tuple(round(1 - o, 6) for o in point.owf))
+
+
+@dataclass
+class CDResult:
+    point: WeightPoint
+    accuracy: Accuracy
+
+
+def _score_weight_point(
+    base_text: str, point: WeightPoint, geneid_bin: str,
+    fasta: str, gff: str, workdir: Path, tag: str,
+) -> Accuracy:
+    param = Param.from_text(base_text)
+    apply_weight_point(param, point)
+    ptmp = workdir / f"p_{tag}.param"
+    param.write(ptmp)
+    pred = workdir / f"pred_{tag}.gff"
+    pred.write_text(run_geneid(geneid_bin, str(ptmp), fasta))
+    return evaluate_files(str(pred), gff)
+
+
+def coordinate_descent(
+    base_param_text: str,
+    eval_fasta: str,
+    eval_gff: str,
+    *,
+    geneid_bin: str = "geneid",
+    init: WeightPoint | None = None,
+    ewf_values: list[float] | None = None,
+    owf_values: list[float] | None = None,
+    workers: int = 4,
+    max_rounds: int = 3,
+) -> tuple[str, CDResult, list[CDResult]]:
+    """Refine per-exon-type weights by coordinate descent, maximising held-out
+    exon SNSP. Each of the 8 coordinates (4 eWF + 4 oWF) is line-searched in turn
+    (its candidate values run in parallel) holding the others fixed; rounds repeat
+    until no coordinate improves or ``max_rounds`` is reached.
+
+    Returns ``(optimised_param_text, best CDResult, history of improvements)``.
+    Seed with :func:`uniform_point` from a coarse :func:`optimize` for a good start.
+    """
+    bin_path = shutil.which(geneid_bin) or geneid_bin
+    ewf_values = ewf_values if ewf_values is not None else _frange(*DEFAULT_EWF)
+    owf_values = owf_values if owf_values is not None else _frange(*DEFAULT_OWF)
+    point = init if init is not None else uniform_point(-4.0, 0.30)
+
+    counter = itertools.count()
+    with tempfile.TemporaryDirectory() as td:
+        workdir = Path(td)
+
+        def score(p: WeightPoint) -> Accuracy:
+            return _score_weight_point(
+                base_param_text, p, bin_path, eval_fasta, eval_gff, workdir,
+                str(next(counter)),
+            )
+
+        best_acc = score(point)
+        history = [CDResult(point, best_acc)]
+        for _ in range(max_rounds):
+            improved = False
+            for axis, values in (("ewf", ewf_values), ("owf", owf_values)):
+                for idx in range(4):
+                    trials = [
+                        point.with_value(axis, idx, v)
+                        for v in values
+                        if v != getattr(point, axis)[idx]
+                    ]
+                    if not trials:
+                        continue
+                    with ThreadPoolExecutor(max_workers=workers) as pool:
+                        accs = list(pool.map(score, trials))
+                    candidates = [(point, best_acc)] + list(zip(trials, accs))
+                    candidates.sort(key=lambda c: accuracy_key(c[1]))
+                    best_point, best_of = candidates[0]
+                    if best_point != point:
+                        point, best_acc = best_point, best_of
+                        improved = True
+                        history.append(CDResult(point, best_acc))
+            if not improved:
+                break
+
+    param = Param.from_text(base_param_text)
+    apply_weight_point(param, point)
+    return param.to_text(), CDResult(point, best_acc), history

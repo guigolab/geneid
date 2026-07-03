@@ -152,7 +152,7 @@ def _cmd_evaluate(args: argparse.Namespace) -> int:
 
 
 def _cmd_optimize(args: argparse.Namespace) -> int:
-    from .optimize import optimize
+    from .optimize import coordinate_descent, optimize, uniform_point
 
     base = open(args.param).read()
     opt_text, results = optimize(
@@ -160,11 +160,23 @@ def _cmd_optimize(args: argparse.Namespace) -> int:
         geneid_bin=args.geneid, workers=args.workers,
     )
     best = results[0]
+    print(f"uniform grid: {len(results)} points, best eWF={best.ewf:g} oWF={best.owf:g} "
+          f"-> SNSP={best.accuracy.snsp:.4f}")
+
+    if args.per_type:
+        # refine the four exon types independently, seeded from the uniform best
+        opt_text, cd, history = coordinate_descent(
+            base, args.eval_fastas, args.eval_gff, geneid_bin=args.geneid,
+            init=uniform_point(best.ewf, best.owf), workers=args.workers,
+        )
+        types = "First/Internal/Terminal/Single"
+        print(f"per-type refine ({len(history)} improving steps) -> "
+              f"SNSP={cd.accuracy.snsp:.4f}")
+        print(f"  eWF [{types}] = {cd.point.ewf}")
+        print(f"  oWF [{types}] = {cd.point.owf}")
+
     with open(args.output, "w") as fh:
         fh.write(opt_text)
-    print(f"grid points evaluated: {len(results)}")
-    print(f"best eWF={best.ewf:g} oWF={best.owf:g} -> "
-          f"SNSP={best.accuracy.snsp:.4f} SNSPg={best.accuracy.snspg:.4f}")
     print(f"wrote optimized parameter file: {args.output}")
     return 0
 
@@ -271,6 +283,11 @@ def build_parser() -> argparse.ArgumentParser:
     p_opt.add_argument("--output", required=True, help="output optimized .param path")
     p_opt.add_argument("--geneid", default="geneid", help="path to the geneid binary")
     p_opt.add_argument("--workers", type=int, default=4, help="parallel geneid runs")
+    p_opt.add_argument(
+        "--per-type", action="store_true",
+        help="after the uniform grid, refine First/Internal/Terminal/Single weights "
+             "independently by coordinate descent",
+    )
     p_opt.set_defaults(func=_cmd_optimize)
 
     p_jk = sub.add_parser(
