@@ -158,16 +158,28 @@ def _cmd_optimize(args: argparse.Namespace) -> int:
     types = "First/Internal/Terminal/Single"
 
     if args.strategy == "global":
+        from .optimize import SearchSpace
+
         # Latin-hypercube global sampling + compass-search refinement (per type)
+        space = SearchSpace()
+        if getattr(args, "tune_branch", False):
+            branch = "U12_Branch_point_profile"
+            if branch in Param.from_text(base).keywords():
+                space = SearchSpace(branch_profiles=(branch,))
+            else:
+                print(f"note: --tune-branch ignored (no {branch} in {args.param})")
         opt_text, res = global_optimize(
             base, args.eval_fastas, args.eval_gff,
-            geneid_bin=args.geneid, n_samples=args.samples, workers=args.workers,
-            seed=args.seed,
+            geneid_bin=args.geneid, space=space, n_samples=args.samples,
+            workers=args.workers, seed=args.seed,
         )
         print(f"global search: {res.n_evaluations} evals, {len(res.history)} improving moves "
               f"-> SNSP={res.accuracy.snsp:.4f}")
         print(f"  eWF [{types}] = {tuple(round(x, 3) for x in res.point.ewf)}")
         print(f"  oWF [{types}] = {tuple(round(x, 3) for x in res.point.owf)}")
+        for name, kn in res.branch:
+            print(f"  {name}: acc_context={kn.acc_context} min_dist={kn.min_dist} "
+                  f"opt_dist={kn.opt_dist} pen_scale={kn.pen_scale:g}")
     else:
         opt_text, results = optimize(
             base, args.eval_fastas, args.eval_gff,
@@ -306,6 +318,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p_opt.add_argument("--samples", type=int, default=32, help="global: LHS sample count")
     p_opt.add_argument("--seed", type=int, default=0, help="global: LHS RNG seed")
+    p_opt.add_argument(
+        "--tune-branch", action="store_true",
+        help="global: also tune the U12 branch-distance knobs (acc_context/min_dist/"
+             "opt_dist/pen_scale) if the param has a U12_Branch_point_profile",
+    )
     p_opt.set_defaults(func=_cmd_optimize)
 
     p_jk = sub.add_parser(

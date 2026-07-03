@@ -6,6 +6,8 @@ import pytest
 from geneid_train.core.param import Param
 from geneid_train.evaluate import Accuracy
 from geneid_train.optimize import (
+    BRANCH_BOUNDS,
+    BranchKnobs,
     GridResult,
     SearchSpace,
     WeightPoint,
@@ -15,6 +17,7 @@ from geneid_train.optimize import (
     apply_weights,
     latin_hypercube,
     optimize,
+    set_branch_knobs,
     uniform_point,
 )
 
@@ -106,6 +109,31 @@ def test_searchspace_decode_and_clip():
     point = space.decode(v)
     assert point.ewf == (-6.0, 0.0, -3, -4)
     assert point.owf == (0.7, 0.1, 0.3, 0.4)
+
+
+def test_set_branch_knobs_preserves_head_and_clamps_opt_dist():
+    p = Param.from_text("U12_Branch_point_profile\n12 9 2.5 2 0 1 50 7 17 6\n1 AAA 0\n")
+    set_branch_knobs(p, "U12_Branch_point_profile", BranchKnobs(45, 8, 20, 5.0))
+    hdr = p.vector("U12_Branch_point_profile")
+    # len/offset/cutoff/order/a/b preserved; knobs replaced
+    assert hdr[:6] == ["12", "9", "2.5", "2", "0", "1"]
+    assert hdr[6:] == ["45", "8", "20", "5"]
+    # opt_dist is clamped so acc_context - offset - opt_dist stays positive:
+    # acc_context 40, offset 9 -> opt_dist must be < 31
+    set_branch_knobs(p, "U12_Branch_point_profile", BranchKnobs(40, 8, 99, 5.0))
+    assert p.vector("U12_Branch_point_profile")[8] == "30"
+
+
+def test_searchspace_branch_axes_appended_and_decoded():
+    space = SearchSpace(branch_profiles=("U12_Branch_point_profile",))
+    b = space.bounds()
+    assert len(b) == 12  # 8 weights + 4 branch axes
+    assert b[8:] == list(BRANCH_BOUNDS)
+    v = [-4] * 4 + [0.3] * 4 + [45.4, 7.6, 18.2, 6.0]
+    assert space.decode(v).ewf == (-4, -4, -4, -4)  # branch dims don't leak into owf
+    (name, kn), = space.decode_branch(v)
+    assert name == "U12_Branch_point_profile"
+    assert (kn.acc_context, kn.min_dist, kn.opt_dist) == (45, 8, 18)  # rounded to int
 
 
 def test_apply_weight_point_per_type_columns_preserve_utr():
