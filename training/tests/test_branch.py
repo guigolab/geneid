@@ -58,6 +58,30 @@ def test_distances_cluster_at_the_plant():
     assert knobs.opt_dist == expected
 
 
+def test_branch_profile_emission_format():
+    from geneid_train.stats.branch import (
+        BranchDistances,
+        branch_profile_lines,
+        branch_profile_section,
+        branch_weight_scalar,
+    )
+
+    wins = _planted(n=100, motif="TACTAAC")
+    model = fit_branch_em(wins, width=7)
+    knobs = BranchDistances(acc_context=46, min_dist=5, opt_dist=27)
+    lines = branch_profile_lines(model, knobs)
+    # header: len offset cutoff order a b acc_context min_dist opt_dist pen_scale
+    assert lines[0].split() == ["7", "5", "-20", "0", "0", "1", "46", "5", "27", "6"]
+    assert lines[1].startswith("#")
+    rows = {(int(p), b): float(v) for p, b, v in (ln.split() for ln in lines[2:])}
+    assert len(rows) == 7 * 4  # every position x base
+    # the invariant branch-A column is strongly positive (log-odds of A >> others)
+    assert rows[(6, "A")] > rows[(6, "C")] and rows[(6, "A")] > rows[(6, "G")]
+    # section + scalar wrappers
+    assert branch_profile_section(model, knobs).startswith("Branch_point_profile\n")
+    assert branch_weight_scalar(0) == "Branch_point_score_weight\n0\n"
+
+
 def test_branch_windows_excludes_ag_and_is_adaptive():
     # intron: donor GT ... branch region ... acceptor AG
     intron = "GT" + "C" * 30 + "TACTAAC" + "CCCC" + "AG"

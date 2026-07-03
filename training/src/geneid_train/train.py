@@ -95,6 +95,8 @@ def train(
     background: tuple[Matrix, Matrix] | None = None,
     seed: int = 0,
     u12: bool = False,
+    u2_branch: bool = False,
+    branch_weight: float = 0.0,
 ) -> str:
     """Train a geneid parameter file from complete, filtered gene ``models``.
 
@@ -106,6 +108,12 @@ def train(
     trio is spliced in, so geneid can predict U12-type introns (run with ``-U``).
     A single genome rarely has enough U12 introns to train these, so they are
     IAOD-derived and shipped with the package (see ``param.u12``).
+
+    When ``u2_branch`` is set, a U2 ``Branch_point_profile`` is discovered from the
+    genome's own introns by EM (``stats.branch``), its distance knobs set from the
+    observed branch positions, and spliced in with ``Branch_point_score_weight``
+    (default 0 = the branch is scored and reported, ``bp_score``/``bp_pos``, without
+    contributing to splice-site selection).
     """
     if not models:
         raise ValueError("no gene models to train on")
@@ -150,7 +158,7 @@ def train(
 
         u12_sections = load_bundled_u12()
 
-    return assemble_param(
+    param_text = assemble_param(
         species=species,
         start_profile=start_lines,
         acceptor_profile=acceptor_lines,
@@ -162,3 +170,35 @@ def train(
         intergenic_range="200:Infinity",
         u12=u12_sections,
     )
+
+    if u2_branch:
+        param_text = _add_u2_branch(param_text, models, genome, branch_weight)
+
+    return param_text
+
+
+def _add_u2_branch(
+    param_text: str, models: Sequence[GeneModel], genome: Mapping[str, str], weight: float
+) -> str:
+    """Discover the U2 branch point (EM), then splice its Branch_point_profile +
+    score-weight scalar into an assembled param."""
+    from .core.param import Param
+    from .stats.branch import (
+        branch_distances,
+        branch_profile_section,
+        branch_weight_scalar,
+        branch_windows,
+        distance_knobs,
+        fit_branch_em,
+    )
+
+    windows = branch_windows(models, genome)
+    if not windows:
+        return param_text
+    model = fit_branch_em(windows)
+    knobs = distance_knobs(branch_distances(windows, model), offset=model.anchor)
+
+    p = Param.from_text(param_text)
+    p.insert_text_before("Acceptor_profile", branch_profile_section(model, knobs))
+    p.insert_text_before("Exon_weights", branch_weight_scalar(weight))
+    return p.to_text()

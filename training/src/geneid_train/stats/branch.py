@@ -267,3 +267,56 @@ def distance_knobs(distances: Sequence[int], *, offset: int = BRANCH_A) -> Branc
     hi = max(pct(0.95), opt)
     acc = max(hi + 5, offset + opt + 1)
     return BranchDistances(acc_context=acc, min_dist=lo, opt_dist=opt)
+
+
+# --- emit the geneid Branch_point_profile ------------------------------------
+#
+# geneid's U2 branch profile header is `len offset cutoff order a b acc_context
+# min_dist opt_dist pen_scale` (readparam ReadProfile). We emit an order-0 log-odds
+# PWM: offset = the branch-A index (so geneid's PositionBP lands on the branch A),
+# order 0, and the distance knobs come from distance_knobs() — set from the data,
+# not searched. The score contribution is governed separately by the param scalar
+# Branch_point_score_weight (see geneid BuildAcceptors.c); default 0 = the branch
+# is scored and reported (bp_score/bp_pos) without affecting splice-site selection.
+
+BRANCH_CUTOFF = -20.0  # permissive: let the branch always be located/reported
+BRANCH_PEN_SCALE = 6  # quadratic distance-penalty scale (geneid default)
+
+
+def _fmt(v: float) -> str:
+    return str(int(v)) if v == int(v) else f"{v:g}"
+
+
+def branch_profile_lines(
+    model: BranchModel,
+    knobs: BranchDistances,
+    *,
+    cutoff: float = BRANCH_CUTOFF,
+    pen_scale: int = BRANCH_PEN_SCALE,
+) -> list[str]:
+    """geneid ``Branch_point_profile`` data lines: the header then per-position
+    ``pos base log-odds`` rows (order-0 log-ratio of the motif PWM vs background)."""
+    import math
+
+    header = [
+        model.width, model.anchor, cutoff, 0, 0, 1,
+        knobs.acc_context, knobs.min_dist, knobs.opt_dist, pen_scale,
+    ]
+    lines = [" ".join(_fmt(float(x)) for x in header),
+             "# Transition probabilities at every position"]
+    for pos in range(model.width):
+        for base in _ACGT:
+            lo = math.log(model.pwm[pos][base] / model.background[base])
+            lines.append(f"{pos + 1} {base} {_fmt(round(lo, 6))}")
+    return lines
+
+
+def branch_profile_section(model: BranchModel, knobs: BranchDistances, **kw) -> str:
+    """The full ``Branch_point_profile`` section text, ready to splice in before
+    ``Acceptor_profile`` (via :meth:`Param.insert_text_before`)."""
+    return "Branch_point_profile\n" + "\n".join(branch_profile_lines(model, knobs, **kw)) + "\n"
+
+
+def branch_weight_scalar(weight: float) -> str:
+    """The optional ``Branch_point_score_weight`` scalar section (0 = report-only)."""
+    return f"Branch_point_score_weight\n{_fmt(weight)}\n"
