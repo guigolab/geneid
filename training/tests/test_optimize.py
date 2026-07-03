@@ -7,11 +7,13 @@ from geneid_train.core.param import Param
 from geneid_train.evaluate import Accuracy
 from geneid_train.optimize import (
     GridResult,
+    SearchSpace,
     WeightPoint,
     _frange,
     accuracy_key,
     apply_weight_point,
     apply_weights,
+    latin_hypercube,
     optimize,
     uniform_point,
 )
@@ -74,6 +76,36 @@ def test_weight_point_with_value_is_immutable_single_change():
     assert q.ewf == (-4.0, -4.0, -2.0, -4.0)
     assert p.ewf == (-4.0, -4.0, -4.0, -4.0)  # original untouched
     assert q.owf == p.owf
+
+
+def test_latin_hypercube_stratified_and_in_bounds():
+    bounds = [(-6.0, 0.0), (0.1, 0.7)]
+    pts = latin_hypercube(bounds, n=10, seed=3)
+    assert len(pts) == 10
+    for d, (lo, hi) in enumerate(bounds):
+        col = sorted(p[d] for p in pts)
+        assert all(lo <= x <= hi for x in col)
+        # one sample per stratum: each of the 10 equal bins holds exactly one point
+        width = (hi - lo) / 10
+        bins = {min(9, int((x - lo) / width)) for x in col}
+        assert len(bins) == 10
+
+
+def test_latin_hypercube_seed_reproducible():
+    b = [(-6.0, 0.0), (0.1, 0.7)]
+    assert latin_hypercube(b, 8, seed=5) == latin_hypercube(b, 8, seed=5)
+    assert latin_hypercube(b, 8, seed=5) != latin_hypercube(b, 8, seed=6)
+
+
+def test_searchspace_decode_and_clip():
+    space = SearchSpace(ewf_bounds=(-6.0, 0.0), owf_bounds=(0.1, 0.7))
+    assert space.bounds() == [(-6.0, 0.0)] * 4 + [(0.1, 0.7)] * 4
+    # out-of-box values are clipped per axis
+    v = space.clip([-9, 1, -3, -4, 0.9, 0.0, 0.3, 0.4])
+    assert v == [-6.0, 0.0, -3, -4, 0.7, 0.1, 0.3, 0.4]
+    point = space.decode(v)
+    assert point.ewf == (-6.0, 0.0, -3, -4)
+    assert point.owf == (0.7, 0.1, 0.3, 0.4)
 
 
 def test_apply_weight_point_per_type_columns_preserve_utr():
@@ -142,3 +174,32 @@ def test_coordinate_descent_beats_or_matches_uniform_seed():
     # optimised param carries the per-type owf (First may differ from the rest)
     p = Param.from_text(opt_text)
     assert p.vector("Exon_factor") == [f"{o:g}" for o in best.point.owf]
+
+
+@pytest.mark.integration
+@pytest.mark.skipif(
+    REF is None or not Path(GENEID).exists(),
+    reason="needs GENEID_TRAIN_REFDIR and a geneid binary (GENEID_BIN)",
+)
+def test_global_optimize_returns_valid_result():
+    from geneid_train.optimize import SearchSpace, global_optimize
+
+    sp = "Xerocrassa_montserratensis"
+    base = (REF / f"{sp}.geneid.param").read_text()
+    fasta = str(REF / f"{sp}.eval.gp.fa")
+    gff = str(REF / f"{sp}.eval.gp.gff")
+    # tiny sample + small eval budget keep the test quick
+    opt_text, res = global_optimize(
+        base, fasta, gff, geneid_bin=GENEID, space=SearchSpace((-5.0, -2.0), (0.2, 0.5)),
+        n_samples=4, step=(1.0, 0.1), min_step=(0.5, 0.05), workers=4, seed=1, max_evals=24,
+    )
+    # LHS(4) + at least one compass sweep; a sweep adds 2*ndim at once so the
+    # budget is a soft cap (it stops checking at max_evals, not mid-sweep)
+    assert res.n_evaluations >= 4
+    assert 0.0 <= res.accuracy.snsp <= 1.0
+    assert len(res.point.ewf) == 4 and len(res.point.owf) == 4
+    # every weight stays inside the search box
+    assert all(-5.0 <= e <= -2.0 for e in res.point.ewf)
+    assert all(0.2 <= o <= 0.5 for o in res.point.owf)
+    p = Param.from_text(opt_text)
+    assert p.vector("Exon_weights")[:4] == [f"{e:g}" for e in res.point.ewf]
