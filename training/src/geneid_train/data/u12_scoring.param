@@ -1,0 +1,47 @@
+# U12 GT-AG donor frequency PWM + calibration floor for the U12-vs-U2
+# classify screen (see geneid_train.param.u12 / prepare.classify).
+# IAOD-derived (CC-BY, see U12_PROFILES.NOTICE). Regenerate via build_u12_bundle.py.
+U12gtag_Donor_freq
+10 0
+1 A 0
+1 C 0
+1 G 1
+1 T 0
+2 A 0
+2 C 0
+2 G 0
+2 T 1
+3 A 0.998437
+3 C 0.000284131
+3 G 0.000852394
+3 T 0.000426197
+4 A 0
+4 C 0.00127859
+4 G 0.000142066
+4 T 0.998579
+5 A 0
+5 C 0.999858
+5 G 0
+5 T 0.000142066
+6 A 0.000142066
+6 C 0.968888
+6 G 0
+6 T 0.0309703
+7 A 0.0146328
+7 C 0.00781361
+7 G 0.00269925
+7 T 0.974854
+8 A 0.0333854
+8 C 0.0697542
+8 G 0.0468817
+8 T 0.849979
+9 A 0.0910641
+9 C 0.225316
+9 G 0.095326
+9 T 0.588294
+10 A 0.223753
+10 C 0.248047
+10 G 0.17332
+10 T 0.35488
+U12gtag_Donor_floor
+-6.84047

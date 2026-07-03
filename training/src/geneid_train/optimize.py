@@ -17,7 +17,11 @@ Two search strategies are available:
   columns exist to be tuned per type, so this walks the 8-dimensional space one
   coordinate at a time. Seed it with :func:`uniform_point` from a coarse grid.
 
-The branch/U12 acceptor-context + min-branch axes are left for the U12 work.
+- :func:`global_optimize` — Latin-hypercube exploration + compass-search
+  refinement over the 8-D per-type weight box (:class:`SearchSpace`). When the
+  search space names branch profiles, four branch-distance axes per profile
+  (acc_context / min_dist / opt_dist / pen_scale) are appended, so the U12 (or
+  U2) branch knobs are tuned by the same search.
 """
 
 from __future__ import annotations
@@ -191,6 +195,51 @@ def apply_weight_point(param: Param, point: WeightPoint) -> None:
     _set_columns(param, "Site_factor", tuple(round(1 - o, 6) for o in point.owf))
 
 
+# --- branch-point distance knobs (U12 / U2 branch profiles) ------------------
+#
+# A branch-point profile header is ``len offset cutoff order a b acc_context
+# min_dist opt_dist pen_scale`` (readparam.c ReadProfile). The last four fields
+# are the distance knobs geneid uses to score the branch: it scans the window
+# [acc-acc_context, acc-min_dist] upstream of the acceptor for the best branch,
+# subtracting a quadratic penalty ``pen_scale * ((|d-opt_dist| / (acc_context -
+# offset - opt_dist))**2)`` (BuildAcceptors.c ComputeU2BranchProfile). The legacy
+# optimiser only gridded acc_context and min_dist; opt_dist and pen_scale were
+# left at defaults — this exposes all four to the same search.
+
+
+@dataclass(frozen=True)
+class BranchKnobs:
+    """The four branch-point distance parameters of a branch profile header."""
+
+    acc_context: int
+    min_dist: int
+    opt_dist: int
+    pen_scale: float
+
+
+def set_branch_knobs(param: Param, profile: str, knobs: BranchKnobs) -> None:
+    """Rewrite the distance knobs (fields 6-9) of every occurrence of a branch
+    ``profile`` header, preserving len/offset/cutoff/order/a/b. ``opt_dist`` is
+    clamped so geneid's penalty denominator ``acc_context - offset - opt_dist``
+    stays positive."""
+    count = sum(1 for k in param.keywords() if k == profile)
+    for i in range(count):
+        block = param._find(profile, i)
+        di = block.first_data_index()
+        if di is None:
+            continue
+        fields = block.raw[di].split()
+        # ensure the 6 leading fields exist (a=0, b=1 defaults if a bare header)
+        while len(fields) < 6:
+            fields.append("0" if len(fields) == 4 else "1")
+        offset = int(float(fields[1]))
+        opt = min(knobs.opt_dist, knobs.acc_context - offset - 1)
+        head = fields[:6]
+        tail = [str(knobs.acc_context), str(knobs.min_dist), str(opt), f"{knobs.pen_scale:g}"]
+        ending = "\n" if block.raw[di].endswith("\n") else ""
+        block.raw[di] = " ".join(head + tail) + ending
+
+
 @dataclass
 class CDResult:
     point: WeightPoint
@@ -200,9 +249,12 @@ class CDResult:
 def _score_weight_point(
     base_text: str, point: WeightPoint, geneid_bin: str,
     fasta: str, gff: str, workdir: Path, tag: str,
+    branch: tuple[tuple[str, BranchKnobs], ...] = (),
 ) -> Accuracy:
     param = Param.from_text(base_text)
     apply_weight_point(param, point)
+    for name, knobs in branch:
+        set_branch_knobs(param, name, knobs)
     ptmp = workdir / f"p_{tag}.param"
     param.write(ptmp)
     pred = workdir / f"pred_{tag}.gff"
@@ -278,22 +330,49 @@ def coordinate_descent(
 # --- global search + local refinement over the per-type weight box -----------
 
 
+# default bounds for the four branch-distance axes (acc_context, min_dist,
+# opt_dist, pen_scale). Chosen so the penalty denominator (acc_context - offset -
+# opt_dist, offset ~9) stays positive across the whole box: min acc_context 40 >
+# 9 + max opt_dist 25. Legacy gridded only acc_context 40-70 and min_dist 7-9.
+BRANCH_BOUNDS: tuple[tuple[float, float], ...] = (
+    (40.0, 70.0),  # acc_context
+    (5.0, 12.0),   # min_dist
+    (10.0, 25.0),  # opt_dist
+    (2.0, 10.0),   # pen_scale
+)
+
+
 @dataclass
 class SearchSpace:
-    """The box the global search explores: per-type eWF and oWF bounds. A point
-    is a flat 8-vector ``[ewf0..3, owf0..3]`` decoded to a :class:`WeightPoint`."""
+    """The box the global search explores. The first 8 axes are the per-type eWF
+    and oWF weights (decoded to a :class:`WeightPoint`). When ``branch_profiles``
+    is non-empty, four more axes per profile — acc_context, min_dist, opt_dist,
+    pen_scale — are appended and decoded to :class:`BranchKnobs`, so the U12 (or
+    U2) branch-distance knobs are tuned by the same search."""
 
     ewf_bounds: tuple[float, float] = (-6.0, 0.0)
     owf_bounds: tuple[float, float] = (0.10, 0.70)
+    branch_profiles: tuple[str, ...] = ()
+    branch_bounds: tuple[tuple[float, float], ...] = BRANCH_BOUNDS
 
     def bounds(self) -> list[tuple[float, float]]:
-        return [self.ewf_bounds] * 4 + [self.owf_bounds] * 4
+        base = [self.ewf_bounds] * 4 + [self.owf_bounds] * 4
+        return base + list(self.branch_bounds) * len(self.branch_profiles)
 
     def clip(self, v: list[float]) -> list[float]:
         return [min(hi, max(lo, x)) for x, (lo, hi) in zip(v, self.bounds())]
 
     def decode(self, v: list[float]) -> WeightPoint:
-        return WeightPoint(tuple(v[:4]), tuple(round(x, 6) for x in v[4:]))
+        return WeightPoint(tuple(v[:4]), tuple(round(x, 6) for x in v[4:8]))
+
+    def decode_branch(self, v: list[float]) -> tuple[tuple[str, BranchKnobs], ...]:
+        """Decode the branch axes (v[8:]) into ``(profile, BranchKnobs)`` pairs;
+        empty when no branch profiles are being tuned."""
+        out = []
+        for j, name in enumerate(self.branch_profiles):
+            a, m, o, p = v[8 + 4 * j : 12 + 4 * j]
+            out.append((name, BranchKnobs(round(a), round(m), round(o), round(p, 3))))
+        return tuple(out)
 
 
 def latin_hypercube(bounds: list[tuple[float, float]], n: int, seed: int = 0) -> list[list[float]]:
@@ -316,16 +395,7 @@ class SearchResult:
     accuracy: Accuracy
     n_evaluations: int = 0
     history: list[CDResult] = field(default_factory=list)
-
-
-def _score_vector(
-    base_text: str, space: SearchSpace, v: list[float], geneid_bin: str,
-    fasta: str, gff: str, workdir: Path, tag: str,
-) -> tuple[list[float], Accuracy]:
-    acc = _score_weight_point(
-        base_text, space.decode(space.clip(v)), geneid_bin, fasta, gff, workdir, tag
-    )
-    return v, acc
+    branch: tuple[tuple[str, BranchKnobs], ...] = ()
 
 
 def global_optimize(
@@ -338,6 +408,8 @@ def global_optimize(
     n_samples: int = 32,
     step: tuple[float, float] = (1.0, 0.1),
     min_step: tuple[float, float] = (0.125, 0.0125),
+    branch_step: float = 2.0,
+    branch_min_step: float = 0.5,
     workers: int = 4,
     seed: int = 0,
     max_evals: int = 400,
@@ -345,12 +417,13 @@ def global_optimize(
     """Global Latin-hypercube exploration followed by compass-search refinement.
 
     ``n_samples`` points are drawn over :class:`SearchSpace` and scored in
-    parallel; the best seeds a pattern search that probes each of the 8 axes at
-    ``±step`` (eWF, oWF steps), moving to the best neighbour and halving the step
-    when a full sweep fails to improve, until the step drops below ``min_step``
-    or the ``max_evals`` geneid-run budget is spent. Ranking is held-out exon
-    SNSP (:func:`accuracy_key`). Returns the optimised param text and a
-    :class:`SearchResult` (best point, accuracy, eval count).
+    parallel; the best seeds a pattern search that probes each axis at ``±step``
+    (eWF, oWF steps; ``branch_step`` for any branch-distance axes), moving to the
+    best neighbour and halving the step when a full sweep fails to improve, until
+    every step drops below its ``min_step`` or the ``max_evals`` geneid-run budget
+    is spent. Ranking is held-out exon SNSP (:func:`accuracy_key`). Returns the
+    optimised param text and a :class:`SearchResult` (best weights, branch knobs,
+    accuracy, eval count).
     """
     bin_path = shutil.which(geneid_bin) or geneid_bin
     space = space or SearchSpace()
@@ -362,9 +435,11 @@ def global_optimize(
         workdir = Path(td)
 
         def score(v: list[float]) -> Accuracy:
+            cv = space.clip(v)
             return _score_weight_point(
-                base_param_text, space.decode(space.clip(v)), bin_path,
+                base_param_text, space.decode(cv), bin_path,
                 eval_fasta, eval_gff, workdir, str(next(counter)),
+                branch=space.decode_branch(cv),
             )
 
         def score_many(vs: list[list[float]]) -> list[Accuracy]:
@@ -380,8 +455,9 @@ def global_optimize(
         history = [CDResult(space.decode(space.clip(best_v)), best_acc)]
 
         # --- local: compass (pattern) search with step halving ---
-        cur_step = [step[0]] * 4 + [step[1]] * 4
-        min_s = [min_step[0]] * 4 + [min_step[1]] * 4
+        n_branch = len(bounds) - 8
+        cur_step = [step[0]] * 4 + [step[1]] * 4 + [branch_step] * n_branch
+        min_s = [min_step[0]] * 4 + [min_step[1]] * 4 + [branch_min_step] * n_branch
         while evals < max_evals and any(cur_step[d] >= min_s[d] for d in range(len(bounds))):
             neighbours = []
             for d in range(len(bounds)):
@@ -402,7 +478,11 @@ def global_optimize(
             else:
                 cur_step = [s / 2 for s in cur_step]  # contract and refine
 
-    point = space.decode(space.clip(best_v))
+    best_v = space.clip(best_v)
+    point = space.decode(best_v)
+    branch = space.decode_branch(best_v)
     param = Param.from_text(base_param_text)
     apply_weight_point(param, point)
-    return param.to_text(), SearchResult(point, best_acc, evals, history)
+    for name, knobs in branch:
+        set_branch_knobs(param, name, knobs)
+    return param.to_text(), SearchResult(point, best_acc, evals, history, branch)

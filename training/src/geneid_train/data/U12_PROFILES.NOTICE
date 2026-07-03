@@ -1,0 +1,20 @@
+Bundled U12 (minor-spliceosome) splice profiles
+===============================================
+
+The file `u12_profiles.param` contains geneid U12gtag / U12atac donor, acceptor
+and branch-point position-weight arrays. Their VALUES are derived from the pooled
+U12-type intron set of the Intron Annotation and Orthology Database (IAOD):
+
+    Moyer DC, Larue GE, Hershberger CE, Roy SW, Padgett RA.
+    "Comprehensive database and evolutionary dynamics of U12-type introns."
+    Nucleic Acids Research 48(13):7066-7078, 2020. doi:10.1093/nar/gkaa464
+    https://introndb.lerner.ccf.org
+
+IAOD is distributed under CC-BY; these derived PWMs are redistributed under the
+same license with attribution to the authors above.
+
+The profile GEOMETRY (length / offset / cutoff / order / score factors and the
+branch-point distance parameters) is inherited from geneid's reference U12
+parameter set (human3isoU12.param); the IAOD-derived PWM values are registered
+onto that geometry (see geneid_train.param.u12). Positions outside the IAOD
+intron-only window are left neutral (0).
