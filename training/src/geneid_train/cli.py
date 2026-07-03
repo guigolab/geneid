@@ -26,7 +26,6 @@ from .prepare.classify import classify_report
 _U12_MARKERS = ("U12_Splice_Score_Threshold", "U12_Branch_point_profile")
 
 _STUBS = {
-    "evaluate": "score a .param against held-out gene models, U2/U12-aware (phase 5)",
     "jackknife": "leave-group-out cross-validation of a training set (phase 7)",
 }
 
@@ -112,6 +111,18 @@ def _cmd_prepare(args: argparse.Namespace) -> int:
             f"{args.results}.validated.prot.fa",
         )
         print(f"wrote:             {args.results}.validated.{{gff3,cds.fa,prot.fa}}")
+    return 0
+
+
+def _cmd_evaluate(args: argparse.Namespace) -> int:
+    from .evaluate import evaluate_files
+
+    a = evaluate_files(args.predictions, args.annotations)
+    print("level        SN     SP     combined")
+    print(f"nucleotide  {a.sn:6.3f} {a.sp:6.3f}   CC={a.cc:.3f}")
+    print(f"exon        {a.sne:6.3f} {a.spe:6.3f}   SNSP={a.snsp:.3f}")
+    print(f"gene        {a.sng:6.3f} {a.spg:6.3f}   SNSPg={a.snspg:.3f}")
+    print(f"raME={a.ra_me:.3f} raWE={a.ra_we:.3f}")
     return 0
 
 
@@ -207,6 +218,13 @@ def build_parser() -> argparse.ArgumentParser:
         "--seed", type=int, default=0, help="RNG seed for background sampling (reproducibility)"
     )
     p_train.set_defaults(func=_cmd_train)
+
+    p_eval = sub.add_parser(
+        "evaluate", help="score a prediction GFF against an annotation GFF (SN/SP)"
+    )
+    p_eval.add_argument("predictions", help="geneid prediction GFF (typed CDS exons)")
+    p_eval.add_argument("annotations", help="annotation GFF in gp convention (per-locus info line)")
+    p_eval.set_defaults(func=_cmd_evaluate)
 
     p_conv = sub.add_parser("convert", help="convert GFF2 or GTF annotation to canonical GFF3")
     p_conv.add_argument("--from", dest="from_", required=True, choices=["gff2", "gtf"])
