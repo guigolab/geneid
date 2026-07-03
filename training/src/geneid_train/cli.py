@@ -26,7 +26,6 @@ from .prepare.classify import classify_report
 _U12_MARKERS = ("U12_Splice_Score_Threshold", "U12_Branch_point_profile")
 
 _STUBS = {
-    "train": "estimate site + coding models and assemble a .param file (phases 3-4)",
     "evaluate": "score a .param against held-out gene models, U2/U12-aware (phase 5)",
     "jackknife": "leave-group-out cross-validation of a training set (phase 7)",
 }
@@ -116,6 +115,33 @@ def _cmd_prepare(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_train(args: argparse.Namespace) -> int:
+    from .train import train
+
+    genome = read_fasta(args.fastas)
+    records = read_gff3(args.gff)
+    models = collapse_isoforms(build_models(records), records)
+    if not models:
+        sys.stderr.write("no CDS-grouped gene models found in GFF3\n")
+        return 1
+    models = filter_non_overlapping(
+        filter_min_protein(filter_complete(models, genome), genome, args.min_aa)
+    )
+    sys.stderr.write(f"training on {len(models)} complete, non-overlapping gene models\n")
+    if not models:
+        sys.stderr.write("no models survived filtering\n")
+        return 1
+    try:
+        param_text = train(models, genome, args.species, seed=args.seed)
+    except NotImplementedError as exc:
+        sys.stderr.write(f"geneid-train train: {exc}\n")
+        return 2
+    with open(args.output, "w") as fh:
+        fh.write(param_text)
+    print(f"wrote parameter file: {args.output}")
+    return 0
+
+
 def _model_records(model) -> list[GffRecord]:
     return [
         GffRecord(
@@ -168,6 +194,19 @@ def build_parser() -> argparse.ArgumentParser:
         "--min-sites", type=int, default=50, help="min sites to train a rare-class profile de novo"
     )
     p_cls.set_defaults(func=_cmd_classify)
+
+    p_train = sub.add_parser(
+        "train", help="estimate site + coding models and assemble a geneid .param file"
+    )
+    p_train.add_argument("--gff", required=True, help="GFF3 of CDS features (Parent = transcript)")
+    p_train.add_argument("--fastas", required=True, help="genomic multi-FASTA")
+    p_train.add_argument("--species", required=True, help="species name for the param header")
+    p_train.add_argument("--output", required=True, help="output .param path")
+    p_train.add_argument("--min-aa", type=int, default=100, help="minimum protein length (aa)")
+    p_train.add_argument(
+        "--seed", type=int, default=0, help="RNG seed for background sampling (reproducibility)"
+    )
+    p_train.set_defaults(func=_cmd_train)
 
     p_conv = sub.add_parser("convert", help="convert GFF2 or GTF annotation to canonical GFF3")
     p_conv.add_argument("--from", dest="from_", required=True, choices=["gff2", "gtf"])
