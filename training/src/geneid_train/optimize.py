@@ -23,11 +23,12 @@ The branch/U12 acceptor-context + min-branch axes are left for the U12 work.
 from __future__ import annotations
 
 import itertools
+import random
 import shutil
 import subprocess
 import tempfile
 from concurrent.futures import ThreadPoolExecutor
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 
 from .core.param import Param
@@ -272,3 +273,136 @@ def coordinate_descent(
     param = Param.from_text(base_param_text)
     apply_weight_point(param, point)
     return param.to_text(), CDResult(point, best_acc), history
+
+
+# --- global search + local refinement over the per-type weight box -----------
+
+
+@dataclass
+class SearchSpace:
+    """The box the global search explores: per-type eWF and oWF bounds. A point
+    is a flat 8-vector ``[ewf0..3, owf0..3]`` decoded to a :class:`WeightPoint`."""
+
+    ewf_bounds: tuple[float, float] = (-6.0, 0.0)
+    owf_bounds: tuple[float, float] = (0.10, 0.70)
+
+    def bounds(self) -> list[tuple[float, float]]:
+        return [self.ewf_bounds] * 4 + [self.owf_bounds] * 4
+
+    def clip(self, v: list[float]) -> list[float]:
+        return [min(hi, max(lo, x)) for x, (lo, hi) in zip(v, self.bounds())]
+
+    def decode(self, v: list[float]) -> WeightPoint:
+        return WeightPoint(tuple(v[:4]), tuple(round(x, 6) for x in v[4:]))
+
+
+def latin_hypercube(bounds: list[tuple[float, float]], n: int, seed: int = 0) -> list[list[float]]:
+    """``n`` Latin-hypercube samples over the box (one stratified draw per axis)."""
+    rng = random.Random(seed)
+    dims = len(bounds)
+    pts = [[0.0] * dims for _ in range(n)]
+    for d, (lo, hi) in enumerate(bounds):
+        strata = list(range(n))
+        rng.shuffle(strata)
+        for i in range(n):
+            u = (strata[i] + rng.random()) / n
+            pts[i][d] = lo + u * (hi - lo)
+    return pts
+
+
+@dataclass
+class SearchResult:
+    point: WeightPoint
+    accuracy: Accuracy
+    n_evaluations: int = 0
+    history: list[CDResult] = field(default_factory=list)
+
+
+def _score_vector(
+    base_text: str, space: SearchSpace, v: list[float], geneid_bin: str,
+    fasta: str, gff: str, workdir: Path, tag: str,
+) -> tuple[list[float], Accuracy]:
+    acc = _score_weight_point(
+        base_text, space.decode(space.clip(v)), geneid_bin, fasta, gff, workdir, tag
+    )
+    return v, acc
+
+
+def global_optimize(
+    base_param_text: str,
+    eval_fasta: str,
+    eval_gff: str,
+    *,
+    geneid_bin: str = "geneid",
+    space: SearchSpace | None = None,
+    n_samples: int = 32,
+    step: tuple[float, float] = (1.0, 0.1),
+    min_step: tuple[float, float] = (0.125, 0.0125),
+    workers: int = 4,
+    seed: int = 0,
+    max_evals: int = 400,
+) -> tuple[str, SearchResult]:
+    """Global Latin-hypercube exploration followed by compass-search refinement.
+
+    ``n_samples`` points are drawn over :class:`SearchSpace` and scored in
+    parallel; the best seeds a pattern search that probes each of the 8 axes at
+    ``±step`` (eWF, oWF steps), moving to the best neighbour and halving the step
+    when a full sweep fails to improve, until the step drops below ``min_step``
+    or the ``max_evals`` geneid-run budget is spent. Ranking is held-out exon
+    SNSP (:func:`accuracy_key`). Returns the optimised param text and a
+    :class:`SearchResult` (best point, accuracy, eval count).
+    """
+    bin_path = shutil.which(geneid_bin) or geneid_bin
+    space = space or SearchSpace()
+    bounds = space.bounds()
+    counter = itertools.count()
+    evals = 0
+
+    with tempfile.TemporaryDirectory() as td:
+        workdir = Path(td)
+
+        def score(v: list[float]) -> Accuracy:
+            return _score_weight_point(
+                base_param_text, space.decode(space.clip(v)), bin_path,
+                eval_fasta, eval_gff, workdir, str(next(counter)),
+            )
+
+        def score_many(vs: list[list[float]]) -> list[Accuracy]:
+            with ThreadPoolExecutor(max_workers=workers) as pool:
+                return list(pool.map(score, vs))
+
+        # --- global: Latin-hypercube sampling ---
+        samples = latin_hypercube(bounds, n_samples, seed)
+        accs = score_many(samples)
+        evals += len(samples)
+        best_v, best_acc = min(zip(samples, accs), key=lambda p: accuracy_key(p[1]))
+        best_v = list(best_v)
+        history = [CDResult(space.decode(space.clip(best_v)), best_acc)]
+
+        # --- local: compass (pattern) search with step halving ---
+        cur_step = [step[0]] * 4 + [step[1]] * 4
+        min_s = [min_step[0]] * 4 + [min_step[1]] * 4
+        while evals < max_evals and any(cur_step[d] >= min_s[d] for d in range(len(bounds))):
+            neighbours = []
+            for d in range(len(bounds)):
+                if cur_step[d] < min_s[d]:
+                    continue
+                for sign in (+1, -1):
+                    nb = list(best_v)
+                    nb[d] = nb[d] + sign * cur_step[d]
+                    neighbours.append(space.clip(nb))
+            n_accs = score_many(neighbours)
+            evals += len(neighbours)
+            cand_v, cand_acc = min(
+                zip(neighbours, n_accs), key=lambda p: accuracy_key(p[1])
+            )
+            if accuracy_key(cand_acc) < accuracy_key(best_acc):
+                best_v, best_acc = list(cand_v), cand_acc
+                history.append(CDResult(space.decode(best_v), best_acc))
+            else:
+                cur_step = [s / 2 for s in cur_step]  # contract and refine
+
+    point = space.decode(space.clip(best_v))
+    param = Param.from_text(base_param_text)
+    apply_weight_point(param, point)
+    return param.to_text(), SearchResult(point, best_acc, evals, history)
