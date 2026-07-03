@@ -300,3 +300,63 @@ the round-tripped file.
   serve as regression references.
 - `make install` (editable + dev deps) / `make test` / `make lint` / `make fmt`
   (ruff). No network required to run the unit suite.
+
+## 8. U2 branch-point discovery (PLANNED — not yet implemented)
+
+**Status.** Design only. The U12 branch/donor/acceptor trio already ships (bundled,
+IAOD-derived; `param/u12.py`) and the U12-vs-U2 donor screen is in `classify.py`.
+This section is the plan for the *U2* branch-point (+ PPT) profiles, which are
+trained **per genome** from that genome's own introns.
+
+**Motivation.** The U2 `Branch_point_profile` (+ `Poly_Pyrimidine_Tract_profile`)
+was historically discovered by hand with MEME — find the motif, search it, train a
+PWM. The goal is to automate that as a self-supervised step that runs by default
+and is **included only when it improves held-out accuracy** (§2 "Optional
+splice-class profiles" toggle). Strongly-conserved-branch genomes (fungi) are the
+clearest win; but since our genome portfolio is mostly non-fungal, the design
+targets the **generic, degenerate-branch case** first (see engine choice below).
+
+**What NOT to do.** Do *not* port BPP (Zhang et al. 2017, `github.com/zhqingit/BPP`)
+as a tool. BPP is tuned to the *hard, degenerate human* branch problem and is
+human-specific in ways that would actively mislead elsewhere: fixed offset windows
+(BPS 21–34, background 187–200, PPT 3–16 nt upstream of the 3′SS) that **do not fit
+short fungal introns**; a motif seeded from human U2 snRNP and trained on ~223k
+human introns; and a PPT model (half the BPP score) explicitly co-evolved with
+human U2AF65. Take only the *idea* — an EM mixture to discover a branch motif
+without labels — and train everything on the target genome.
+
+**Pipeline (`stats/branch.py`, new).**
+
+1. **Adaptive search window.** Per U2 intron, scan the acceptor-upstream region
+   defined *relative to intron length* with AG-exclusion (from the 3′SS back to the
+   first upstream AG beyond a small gap), capped by the intron's own length so short
+   introns still fit. No hardcoded human offsets.
+2. **EM mixture, self-trained.** Two components — a branch-motif PWM (~7 nt,
+   branch-A anchored) vs an intronic background — fit by EM over the candidate
+   windows. **Seed** the motif from the *universal* U2-snRNA-complementary consensus
+   (branch-A pairing → `yUNAy`/TACTAAC-like), **not** human weights; **train** only
+   on the target genome so the result is species-appropriate. EM converges sharply
+   for conserved (fungal) branches and still yields a usable model when degenerate.
+   Chosen over a consensus/Hamming-to-U2-complement shortcut (Kupfer 2004) because
+   the generic degenerate case covers most of our genomes; the conserved case is the
+   easy sub-case EM also handles.
+3. **Branch location + distances from data.** EM assigns each intron's branch-A;
+   the branch header's `acc_context` / `min_dist` / `opt_dist` are set from
+   *percentiles of the discovered branch-A→3′SS distances* (short for fungi, longer
+   elsewhere) — not searched. This supersedes tuning branch *distance* in the
+   optimiser; `optimize --tune-branch` is demoted to optional `pen_scale`-only
+   refinement (`pen_scale` is not directly observable).
+4. **PPT — deferred.** Because the PPT is species-specific and weak/inessential in
+   fungi, model it later as a separate, independently-gated stage
+   (`Poly_Pyrimidine_Tract_profile`); v1 is branch-PWM only.
+5. **Emit + gate.** Reuse `param.u12`'s acceptor-side insertion for
+   `Branch_point_profile`; assemble with vs without it and keep it only if held-out
+   exon SNSP improves (`evaluate.py` / `jackknife.py`). Discovery runs by default;
+   inclusion is earned and self-correcting across genome types.
+
+**Validation.** Primary working test = **xgXerMont** (already wired end-to-end; a
+metazoan with a degenerate U2 branch — exercises the generic EM path): check that
+EM recovers a sensible branch consensus and the toggle behaves. This is a *weak*
+positive control (a snail's branches aren't independently characterised); a genome
+with **known/characterised U2 branch points** (e.g. a small fungal genome with the
+sharp TACTAAC motif) is wanted for a stronger sanity check — TBD which.

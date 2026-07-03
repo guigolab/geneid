@@ -233,7 +233,10 @@ def _cmd_train(args: argparse.Namespace) -> int:
         sys.stderr.write("no models survived filtering\n")
         return 1
     try:
-        param_text = train(models, genome, args.species, seed=args.seed, u12=args.u12)
+        param_text = train(
+            models, genome, args.species, seed=args.seed, u12=args.u12,
+            u2_branch=args.u2_branch, branch_weight=args.branch_weight,
+        )
     except NotImplementedError as exc:
         sys.stderr.write(f"geneid-train train: {exc}\n")
         return 2
@@ -320,6 +323,16 @@ def build_parser() -> argparse.ArgumentParser:
         "--u12",
         action="store_true",
         help="include bundled U12 (minor-spliceosome) profiles so geneid -U predicts U12 introns",
+    )
+    p_train.add_argument(
+        "--u2-branch",
+        action="store_true",
+        help="discover a U2 Branch_point_profile from the genome's introns (EM) and include it",
+    )
+    p_train.add_argument(
+        "--branch-weight", type=float, default=0.0,
+        help="Branch_point_score_weight: contribution of the branch score to the acceptor "
+             "score (default 0 = scored and reported via bp_score/bp_pos but not counted)",
     )
     p_train.set_defaults(func=_cmd_train)
 
