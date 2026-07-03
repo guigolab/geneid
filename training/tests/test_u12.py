@@ -10,6 +10,7 @@ from geneid_train.prepare.u12 import (
     donor_windows,
     load_u12_introns,
     locate_branch,
+    markov_background,
     parse_iaod_fasta,
     score_window,
     train_u12_profile,
@@ -77,6 +78,23 @@ def test_train_u12_profile_is_unclamped():
     assert all(v != MASK for v in prof.values())  # nothing clamped (unlike U2)
     # positions renumbered to 1..(end-start+1)
     assert max(p for p, _ in prof) == 6
+
+
+def test_markov_background_is_position_independent_conditional():
+    bg = markov_background(["ACGT", "ACGT"], order=1)
+    assert bg[(1, "AC")] == 1.0  # A always followed by C
+    assert bg[(1, "AA")] == 0.0
+    # keyed only at position 1 (so log_ratio broadcasts it)
+    assert all(pos == 1 for pos, _ in bg)
+
+
+def test_retrained_profile_discriminates_signal_from_background():
+    # a strong donor-like set vs a flat background: the real motif must outscore
+    # a non-motif window under the trained log-odds profile
+    signal = ["GTATCCTTAC", "GTATCCTTAG", "GTGTCCTTAC", "GTATCCTTAA", "GTATCCTTAT"]
+    bg = markov_background(["ACGTACGTACGT" * 3, "TGCATGCATGCA" * 3], order=1)
+    prof = train_u12_profile(signal, bg, order=1, start=1, end=8)
+    assert score_window("GTATCCTTA", prof, 1) > score_window("ACGTACGTA", prof, 1)
 
 
 def test_score_window_sums_positions_and_rejects_non_acgt():

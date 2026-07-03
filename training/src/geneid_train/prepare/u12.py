@@ -123,6 +123,34 @@ def consensus(seqs: Sequence[str], n: int, *, from_end: bool = False) -> str:
     return "".join(c.most_common(1)[0][0] if c else "N" for c in cols)
 
 
+def markov_background(seqs: Iterable[str], order: int) -> Matrix:
+    """A position-independent order-k background: the pooled P(base | prefix) over
+    all ``seqs``, keyed at position 1 so :func:`log_ratio` broadcasts it across
+    every profile position. This is the null the U12 profiles are scored against
+    (generic intronic composition), analogous to the genome background used for
+    the U2 profiles."""
+    from collections import defaultdict
+
+    counts: dict[str, int] = defaultdict(int)
+    prefix_counts: dict[str, int] = defaultdict(int)
+    for s in seqs:
+        s = s.upper()
+        for i in range(len(s) - order):
+            oligo = s[i : i + order + 1]
+            if set(oligo) - set("ACGT"):
+                continue
+            counts[oligo] += 1
+            prefix_counts[oligo[:order]] += 1
+    from itertools import product
+
+    out: Matrix = {}
+    for pre in ("".join(p) for p in product("ACGT", repeat=order)):
+        denom = prefix_counts.get(pre, 0)
+        for base in "ACGT":
+            out[(1, pre + base)] = counts.get(pre + base, 0) / denom if denom else 0.0
+    return out
+
+
 def train_u12_profile(
     seqs: Sequence[str],
     background: Matrix,
