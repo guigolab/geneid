@@ -107,9 +107,18 @@ def test_train_end_to_end_produces_valid_param():
     assert "@" not in text  # every sentinel filled
 
     p = Param.from_text(text)
-    assert p.scalar("Markov_order") == "5"
     for kw in ("Start_profile", "Acceptor_profile", "Donor_profile"):
         assert p.profile(kw).rows
+
+    # Markov_order must agree with the matrix oligo widths (regression: a small
+    # training set picks order 4, and the matrices must be built at that order,
+    # else geneid rejects the file)
+    order = int(p.scalar("Markov_order"))
+    lines = text.splitlines()
+    init_i = lines.index("Markov_Initial_probability_matrix")
+    trans_i = lines.index("Markov_Transition_probability_matrix")
+    assert len(lines[init_i + 1].split()[0]) == order  # initial oligo = order-mer
+    assert len(lines[trans_i + 1].split()[0]) == order + 1  # transition = (order+1)-mer
     assert p.has("Markov_Initial_probability_matrix")
     assert p.has("Markov_Transition_probability_matrix")
     gm = "".join(p._find("General_Gene_Model").raw)

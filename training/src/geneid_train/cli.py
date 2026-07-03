@@ -25,9 +25,7 @@ from .prepare.classify import classify_report
 
 _U12_MARKERS = ("U12_Splice_Score_Threshold", "U12_Branch_point_profile")
 
-_STUBS = {
-    "jackknife": "leave-group-out cross-validation of a training set (phase 7)",
-}
+_STUBS: dict[str, str] = {}
 
 
 def _cmd_param_info(args: argparse.Namespace) -> int:
@@ -111,6 +109,33 @@ def _cmd_prepare(args: argparse.Namespace) -> int:
             f"{args.results}.validated.prot.fa",
         )
         print(f"wrote:             {args.results}.validated.{{gff3,cds.fa,prot.fa}}")
+    return 0
+
+
+def _cmd_jackknife(args: argparse.Namespace) -> int:
+    from .evaluate import read_annotation_gff
+    from .jackknife import jackknife
+
+    genome = read_fasta(args.fastas)
+    records = read_gff3(args.gff)
+    models = collapse_isoforms(build_models(records), records)
+    models = filter_non_overlapping(
+        filter_min_protein(filter_complete(models, genome), genome, args.min_aa)
+    )
+    if not models:
+        sys.stderr.write("no models survived filtering\n")
+        return 1
+    locus_fasta = read_fasta(args.eval_fastas)
+    annotations = read_annotation_gff(args.eval_gff)
+    weights = (args.ewf, args.owf) if args.ewf is not None and args.owf is not None else None
+    acc = jackknife(
+        models, genome, args.species, locus_fasta, annotations,
+        geneid_bin=args.geneid, folds=args.folds, weights=weights,
+    )
+    print(f"{args.folds}-fold cross-validation ({len(models)} models):")
+    print(f"nucleotide  SN={acc.sn:.3f} SP={acc.sp:.3f} CC={acc.cc:.3f}")
+    print(f"exon        SNe={acc.sne:.3f} SPe={acc.spe:.3f} SNSP={acc.snsp:.3f}")
+    print(f"gene        SNg={acc.sng:.3f} SPg={acc.spg:.3f} SNSPg={acc.snspg:.3f}")
     return 0
 
 
@@ -247,6 +272,21 @@ def build_parser() -> argparse.ArgumentParser:
     p_opt.add_argument("--geneid", default="geneid", help="path to the geneid binary")
     p_opt.add_argument("--workers", type=int, default=4, help="parallel geneid runs")
     p_opt.set_defaults(func=_cmd_optimize)
+
+    p_jk = sub.add_parser(
+        "jackknife", help="leave-group-out cross-validation of a training set"
+    )
+    p_jk.add_argument("--gff", required=True, help="training GFF3 of CDS features")
+    p_jk.add_argument("--fastas", required=True, help="genomic multi-FASTA (for training)")
+    p_jk.add_argument("--species", required=True, help="species name")
+    p_jk.add_argument("--eval-fastas", required=True, help="per-locus prediction FASTA (gp format)")
+    p_jk.add_argument("--eval-gff", required=True, help="per-locus annotation GFF (gp convention)")
+    p_jk.add_argument("--geneid", default="geneid", help="path to the geneid binary")
+    p_jk.add_argument("--folds", type=int, default=10, help="number of cross-validation folds")
+    p_jk.add_argument("--min-aa", type=int, default=100, help="minimum protein length (aa)")
+    p_jk.add_argument("--ewf", type=float, help="optimized exon weight to apply per fold")
+    p_jk.add_argument("--owf", type=float, help="optimized exon factor to apply per fold")
+    p_jk.set_defaults(func=_cmd_jackknife)
 
     p_eval = sub.add_parser(
         "evaluate", help="score a prediction GFF against an annotation GFF (SN/SP)"

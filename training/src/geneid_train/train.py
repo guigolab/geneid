@@ -127,8 +127,14 @@ def train(
 
     cds_seqs = [m.cds(genome) for m in models]
     intron_seqs = [s for m in models for s in m.intron_seqs(genome)]
-    init_logs, trans_logs, cbases, nbases = derive_coding_potential(cds_seqs, intron_seqs)
+    # pick the Markov order from the data size FIRST, then build matrices at that
+    # order so Markov_order and the matrix oligo widths always agree
+    cbases = sum(len(s) for s in cds_seqs)
+    nbases = sum(len(s) for s in intron_seqs)
     _, transition_order = choose_orders(cbases, nbases)
+    init_logs, trans_logs, _, _ = derive_coding_potential(
+        cds_seqs, intron_seqs, transition_order
+    )
 
     lo, hi = intron_range([len(s) for s in intron_seqs])
 
