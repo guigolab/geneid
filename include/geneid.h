@@ -52,7 +52,7 @@ A. DEFINITIONS
 #define VERSION   "geneid_v1.5"
 #define SITES     "geneid_v1.5"
 #define EXONS     "geneid_v1.5"
-#define GENEID_RELEASE "geneid v1.5.1"
+#define GENEID_RELEASE "geneid v1.5.2"
 #define EVIDENCE  "evidence"
 
 /* -------------------------------------------------------------------------
