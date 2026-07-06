@@ -359,6 +359,10 @@ A. DEFINITIONS
 #define sExon_weights "Exon_weights"
 #define sU12_EXON_WEIGHT "U12_Exon_weight"
 
+/* Optional weight on the U2 branch-point score's contribution to the acceptor
+   score (0 = report-only; default 1) */
+#define sBRANCH_SCORE_WEIGHT "Branch_point_score_weight"
+
 /* Header evidence factor and weight */
 #define sEVIDENCEF "Evidence_Factor"
 #define sEVIDENCEW "Evidence_Exon_Weight"

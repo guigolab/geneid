@@ -1,0 +1,122 @@
+# geneid parameter file: synthetic mini fixture (U12-aware)
+# Comment lines must start with '#'
+
+# Non-homology penalty
+NO_SCORE
+0
+
+# Number of isochores
+number_of_isochores
+1
+
+# PARAMETERS FROM ISOCHORE 1
+
+# %GC
+boundaries_of_isochore
+0 100
+
+# Exons score: cutoffs
+Absolute_cutoff_exons
+-15 -15 -15 -15
+
+Coding_cutoff_oligos
+-10 -15 -15 -15
+
+# Exon score: factors
+Site_factor
+0.70 0.70 0.70 0.70
+
+Exon_factor
+0.30 0.30 0.30 0.30
+
+HSP_factor
+1.0 1.0 1.0 1.0
+
+RSS_Markov_Score
+20
+
+RSS_Donor_Score_Cutoff
+4
+
+RSS_Acceptor_Score_Cutoff
+4
+
+U12_Splice_Score_Threshold
+10
+
+U12_Exon_Score_Threshold
+8
+
+U12_Exon_weight
+-3
+
+Exon_weights
+-4.50 -4.50 -4.50 -4.50
+
+# Site prediction: Position Weight Arrays
+# Length, Offset, Cutoff and Order (Markov model)
+Start_profile
+3 1 -2 0
+1 A 0.100000
+1 C -0.200000
+1 G 0.050000
+1 T -0.010000
+2 A 0.300000
+2 C -0.400000
+2 G 0.120000
+2 T -0.030000
+3 A 0.200000
+3 C -0.150000
+3 G 0.080000
+3 T -0.060000
+
+Donor_profile
+2 0 -3 0
+1 A -0.500000
+1 C -0.400000
+1 G 0.900000
+1 T -0.600000
+2 A -0.700000
+2 C -0.800000
+2 G -0.900000
+2 T 0.950000
+
+Stop_profile
+2 0 -4 0
+1 A 0.100000
+1 C 0.100000
+1 G 0.100000
+1 T 0.100000
+2 A 0.100000
+2 C 0.100000
+2 G 0.100000
+2 T 0.100000
+
+# Exon prediction: Markov model
+Markov_order
+1
+
+Markov_Initial_probability_matrix
+A 0 0 -1.400000
+C 1 0 -1.050000
+G 2 0 -1.690000
+T 3 0 -1.180000
+
+Markov_Transition_probability_matrix
+AA 0 0 -0.500000
+AC 1 0 -0.600000
+AG 2 0 -0.700000
+AT 3 0 -0.800000
+
+# Donors per acceptor to build exons
+maximum_number_of_donors_per_acceptor_site
+7
+
+# GENE MODEL: Rules about gene assembling (GenAmic)
+General_Gene_Model
+# INTRAgenic connections
+First+:Internal+                Internal+:Terminal+             40:35000 block
+Terminal-:Internal-             First-:Internal-                40:35000 blockr
+# BEGINNING and END of prediction
+Begin+                          First+:Internal+:Terminal+:Single+ 0:Infinity
+First+:Internal+:Terminal+:Single+               End+              0:Infinity

@@ -42,6 +42,7 @@ extern int SGE;
 extern int PAS;
 extern int BKGD_SUBTRACT_FLANK_LENGTH;
 extern short SPLICECLASSES;
+extern float BRANCH_SCORE_WEIGHT;
 extern float U12_SPLICE_SCORE_THRESH;
 extern float U12_EXON_SCORE_THRESH;
 extern float U12EW;
@@ -775,6 +776,18 @@ void ReadIsochore(FILE* RootFile, gparam* gp)
 
 		  sprintf(mess,"U12_EXON_SCORE_THRESH: \t%9.2f",
 				  U12_EXON_SCORE_THRESH);
+		  printMess(mess);
+	}
+	 /* Optional: BRANCH_SCORE_WEIGHT, scales how much the U2 branch-point score
+	    contributes to the acceptor score. 0 = branch scored and reported
+	    (bp_score/bp_pos) but not counted toward the splice-site score. */
+	if(!strcasecmp(header,sBRANCH_SCORE_WEIGHT)){
+		  readLine(RootFile,line);
+		  if ((sscanf(line,"%f\n", &(BRANCH_SCORE_WEIGHT)))!=1)
+			printError("Wrong format: Branch_point_score_weight value (number/type)");
+
+		  sprintf(mess,"BRANCH_SCORE_WEIGHT: \t%9.2f",
+				  BRANCH_SCORE_WEIGHT);
 		  printMess(mess);
 	}
 	 /* Optional: U12_EXON_WEIGHT, an additional exon weight that applies to exons flanking U12 introns */

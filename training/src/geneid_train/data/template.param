@@ -1,0 +1,126 @@
+# geneid parameter file: @SPECIES@
+# Comment lines must start with '#'
+
+# Non-homology penalty
+NO_SCORE
+0
+
+# Number of isochores
+number_of_isochores
+1
+
+# PARAMETERS FROM ISOCHORE 1
+
+# %GC
+boundaries_of_isochore
+0 100
+
+# Exons score: cutoffs
+Absolute_cutoff_exons
+-150 -150 -150 -150 0
+
+Coding_cutoff_oligos
+-100 -150 -150 -150
+
+# Exon score: factors
+Site_factor
+0.6 0.6 0.6 0.6 0.6
+
+Exon_factor
+0.4 0.4 0.4 0.4
+
+HSP_factor
+1 1 1 1 1
+
+Evidence_Factor
+1
+
+Evidence_Weight
+0
+
+RSS_Markov_Score
+5.0
+
+RSS_Donor_Score_Cutoff
+3.5
+
+RSS_Acceptor_Score_Cutoff
+3.5
+
+Exon_weights
+-4 -4 -4 -4 0
+
+# Site prediction: Position Weight Arrays
+# Length, Offset, Cutoff and Order (Markov model)
+Start_profile
+@START_PROFILE@
+
+Acceptor_profile
+@ACCEPTOR_PROFILE@
+
+Donor_profile
+@DONOR_PROFILE@
+
+Stop_profile
+4 0 -9999 0
+# Transition probabilities at every position
+1 A 0
+1 C 0
+1 G 0
+1 T 0
+2 A -9999
+2 C -9999
+2 G -9999
+2 T 0
+3 A 0
+3 C -9999
+3 G 0
+3 T -9999
+4 A 0
+4 C -9999
+4 G 0
+4 T -9999
+
+# Exon prediction: Markov model
+# Initial probabilities at every codon position
+Markov_order
+@MARKOV_ORDER@
+Markov_Initial_probability_matrix
+@MARKOV_INITIAL@
+
+# Transition probabilities at every codon position
+Markov_Transition_probability_matrix
+@MARKOV_TRANSITION@
+
+# Donors per acceptor to build exons
+maximum_number_of_donors_per_acceptor_site
+5
+
+# GENE MODEL: Rules about gene assembling (GenAmic)
+General_Gene_Model
+# INTRAgenic connections
+First+:Internal+                           Internal+:Terminal+                        @INTRON_RANGE@        
+Internal-:Terminal-                        First-:Internal-                           @INTRON_RANGE@        
+First+                                     Intron+                                    1:1                    
+Internal+                                  Intron+                                    1:1                    
+Intron+                                    Internal+                                  1:1                    
+Intron+                                    Terminal+                                  1:1                    
+Intron-                                    First-                                     1:1                    
+Internal-                                  Intron-                                    1:1                    
+Intron-                                    Internal-                                  1:1                    
+Terminal-                                  Intron-                                    1:1                    
+# External features
+Promoter+                                  First+:Single+                             50:4000                
+First-:Single-                             Promoter-                                  50:4000                
+Terminal+:Single+                          aataaa+                                    50:4000                
+aataaa-                                    Terminal-:Single-                          50:4000                
+# INTERgenic connections
+aataaa+:Terminal+:Single+                  Single+:First+:Promoter+                   @INTERGENIC_RANGE@           
+aataaa+:Terminal+:Single+                  aataaa-:Terminal-:Single-                  @INTERGENIC_RANGE@           
+Single-:First-:Promoter-                   aataaa-:Terminal-:Single-                  @INTERGENIC_RANGE@           
+Single-:First-:Promoter-                   Single+:First+:Promoter+                   @INTERGENIC_RANGE@           
+# BEGINNING and END of prediction
+Begin+                                     First+:Internal+:Terminal+:Single+         0:Infinity             
+Begin-                                     First-:Internal-:Terminal-:Single-         0:Infinity             
+First+:Internal+:Terminal+:Single+         End+                                       0:Infinity             
+First-:Internal-:Terminal-:Single-         End-                                       0:Infinity             

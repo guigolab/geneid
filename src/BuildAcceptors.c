@@ -35,6 +35,7 @@ extern int UTR;
 /* Additional profiles */
 extern int BP;
 extern int PPT;
+extern float BRANCH_SCORE_WEIGHT;
 float ComputeU2BranchProfile(char* s,
 			     long positionAcc,
 			     long limitRight,
@@ -220,7 +221,7 @@ long  BuildAcceptors(char* s,
 	    /* For the time being, we will not use the BP or PPT scores */
 	    /* if (scoreBP > 0){score = score + scoreBP;} */ /* + scorePPT */
 	    scoreAcc = score;
-	    score = score + scoreBP;
+	    score = score + BRANCH_SCORE_WEIGHT * scoreBP;
 	    score = p->afactor + (p->bfactor * score); 
 	    if(UTR){
 	      score = score + PeakEdgeScore(is + p->order,Strand,external,l1,l2,6);
@@ -280,7 +281,7 @@ long  BuildAcceptors(char* s,
 		  
 	    /* if (scoreBP > 0){score = score + scoreBP;} */ /* + scorePPT */
 	    scoreAcc = score;
-	    score = score + scoreBP;
+	    score = score + BRANCH_SCORE_WEIGHT * scoreBP;
 	    score = p->afactor + (p->bfactor * score); 
 	    if(UTR){
 	      score = score + PeakEdgeScore(left + is + p->offset,Strand,external,l1,l2,6);
@@ -334,7 +335,7 @@ long  BuildAcceptors(char* s,
 		  
 	    /* if (scoreBP > 0){score = score + scoreBP;} */ /* + scorePPT */
 	    scoreAcc = score;
-	    score = score + scoreBP;
+	    score = score + BRANCH_SCORE_WEIGHT * scoreBP;
 	    score = p->afactor + (p->bfactor * score); 
 	    if(UTR){
 	      score = score + PeakEdgeScore(left + is + p->offset,Strand,external,l1,l2,6);
@@ -391,7 +392,7 @@ long  BuildAcceptors(char* s,
 		  
 	    /* if (scoreBP > 0){score = score + scoreBP;} */ /* + scorePPT */
 	    scoreAcc = score;
-	    score = score + scoreBP;
+	    score = score + BRANCH_SCORE_WEIGHT * scoreBP;
 	    score = p->afactor + (p->bfactor * score); 
 	    if(UTR){
 	      score = score + PeakEdgeScore(left + is + p->offset,Strand,external,l1,l2,6);

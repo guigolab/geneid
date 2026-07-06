@@ -1,0 +1,153 @@
+import glob
+import os
+
+import pytest
+
+from geneid_train.prepare.u12 import (
+    acceptor_windows,
+    by_subtype,
+    consensus,
+    donor_windows,
+    load_u12_introns,
+    locate_branch,
+    markov_background,
+    parse_iaod_fasta,
+    score_window,
+    train_u12_profile,
+)
+from geneid_train.stats.sites import MASK, position_matrix
+
+_FIXTURE = (
+    ">Homo sapiens|1|+|100|210|110|2|5\n"
+    "GTATCCTTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACAG\n"
+    ">Homo sapiens|1|-|300|410|110|1|6\n"
+    "GTATCCTTTTGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTTTTTTCAG\n"
+    ">Zea mays|3|+|1|60|59|1|1\n"
+    "ATATCCTTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTATAC\n"
+    ">Odd sp|4|+|1|20|19|1|1\n"
+    "GCACGTACGTACGTACGTGG\n"
+)
+
+
+def _write(tmp_path):
+    p = tmp_path / "X_U12.fasta"
+    p.write_text(_FIXTURE)
+    return p
+
+
+def test_parse_iaod_fasta_headers_and_seq(tmp_path):
+    introns = parse_iaod_fasta(_write(tmp_path))
+    assert len(introns) == 4
+    a = introns[0]
+    assert a.species == "Homo sapiens" and a.chrom == "1" and a.strand == "+"
+    assert a.start == 100 and a.end == 210
+    assert a.seq.startswith("GTATCCTT") and a.seq.endswith("AG")
+
+
+def test_subtype_classification():
+    from geneid_train.prepare.u12 import U12Intron
+
+    assert U12Intron("GT" + "A" * 10 + "AG").subtype == "gtag"
+    assert U12Intron("AT" + "A" * 10 + "AC").subtype == "atac"
+    assert U12Intron("GC" + "A" * 10 + "GG").subtype == "other"
+
+
+def test_by_subtype_and_windows(tmp_path):
+    introns = load_u12_introns([_write(tmp_path)])
+    groups = by_subtype(introns)
+    assert len(groups["gtag"]) == 2  # two GT-AG
+    assert len(groups["atac"]) == 1
+    assert len(groups["other"]) == 1
+    dw = donor_windows(groups["gtag"], 8)
+    assert dw == ["GTATCCTT", "GTATCCTT"]
+    aw = acceptor_windows(groups["gtag"], 3)
+    assert all(w.endswith("AG") for w in aw)
+
+
+def test_consensus_first_and_last():
+    assert consensus(["GTATCCTTAA", "GTATCCTTAA"], 8) == "GTATCCTT"
+    assert consensus(["CCCCAG", "TTTTAG"], 2, from_end=True) == "AG"
+
+
+def test_train_u12_profile_is_unclamped():
+    # a U12 donor-like set; the terminal dinucleotide must NOT be masked to -9999
+    seqs = ["GTATCCTTAC", "GTATCCTTAG", "GTGTCCTTAC", "GTATCCTTAA"]
+    bg = position_matrix(["ACGT" * 10, "TGCA" * 10, "GATC" * 10], order=1)
+    prof = train_u12_profile(seqs, bg, order=1, start=1, end=6)
+    assert prof  # non-empty
+    assert all(v != MASK for v in prof.values())  # nothing clamped (unlike U2)
+    # positions renumbered to 1..(end-start+1)
+    assert max(p for p, _ in prof) == 6
+
+
+def test_markov_background_is_position_independent_conditional():
+    bg = markov_background(["ACGT", "ACGT"], order=1)
+    assert bg[(1, "AC")] == 1.0  # A always followed by C
+    assert bg[(1, "AA")] == 0.0
+    # keyed only at position 1 (so log_ratio broadcasts it)
+    assert all(pos == 1 for pos, _ in bg)
+
+
+def test_retrained_profile_discriminates_signal_from_background():
+    # a strong donor-like set vs a flat background: the real motif must outscore
+    # a non-motif window under the trained log-odds profile
+    signal = ["GTATCCTTAC", "GTATCCTTAG", "GTGTCCTTAC", "GTATCCTTAA", "GTATCCTTAT"]
+    bg = markov_background(["ACGTACGTACGT" * 3, "TGCATGCATGCA" * 3], order=1)
+    prof = train_u12_profile(signal, bg, order=1, start=1, end=8)
+    assert score_window("GTATCCTTA", prof, 1) > score_window("ACGTACGTA", prof, 1)
+
+
+def test_score_window_sums_positions_and_rejects_non_acgt():
+    pwm = {(1, "AC"): 1.0, (2, "CG"): 2.0, (3, "GT"): 3.0}  # order 1, len 3
+    assert score_window("ACGT", pwm, 1) == 6.0
+    assert score_window("ACNT", pwm, 1) == float("-inf")
+
+
+def test_locate_branch_finds_planted_motif():
+    # a PWM that strongly prefers an AAAA anchor; plant it in the branch region
+    pwm = {(1, "AA"): 5.0, (2, "AA"): 5.0, (3, "AA"): 5.0}
+    seq = "C" * 30 + "AAAA" + "C" * 8  # len 42; AAAA at index 30..33
+    hit = locate_branch(seq, pwm, order=1, offset=2, acc_context=20, min_dist=3)
+    assert hit is not None
+    assert hit.window == "AAAA"
+    assert hit.score == 15.0
+    assert hit.distance == 42 - (30 + 1)  # anchor = start + offset-1
+
+
+# ---- real IAOD data (opt-in) ------------------------------------------------
+
+U12DIR = os.environ.get("GENEID_TRAIN_U12DIR")
+
+
+@pytest.mark.integration
+@pytest.mark.skipif(not U12DIR, reason="set GENEID_TRAIN_U12DIR to a dir of *_U12.fasta files")
+def test_iaod_pooled_consensus_is_u12():
+    introns = load_u12_introns(sorted(glob.glob(f"{U12DIR}/*_U12.fasta")))
+    assert len(introns) > 5000
+    groups = by_subtype(introns)
+    assert len(groups["gtag"]) > 3000 and len(groups["atac"]) > 500
+    # the canonical U12 5' splice sites must emerge from the pooled set
+    assert consensus(donor_windows(groups["gtag"], 8), 8) == "GTATCCTT"
+    assert consensus(donor_windows(groups["atac"], 8), 8) == "ATATCCTT"
+
+
+_U12_PARAM = "/Users/talioto/repositories/geneid_fresh/param/human3isoU12.param"
+
+
+@pytest.mark.integration
+@pytest.mark.skipif(
+    not U12DIR or not os.path.exists(_U12_PARAM),
+    reason="set GENEID_TRAIN_U12DIR and provide human3isoU12.param",
+)
+def test_branch_location_sharpens_u12_consensus():
+    from geneid_train.core.param import Param
+    from geneid_train.prepare.u12 import locate_branches
+
+    pr = Param.read(_U12_PARAM).profile("U12_Branch_point_profile")
+    pwm = {(pos, oligo): val for pos, oligo, val in pr.rows}
+    gtag = by_subtype(load_u12_introns(sorted(glob.glob(f"{U12DIR}/*_U12.fasta"))))["gtag"]
+    hits = locate_branches(gtag, pwm, order=2, offset=9, acc_context=50, min_dist=7)
+    assert len(hits) > 3000
+    # aligned windows collapse to the conserved U12 branch motif (CCTT..AC)
+    cons = consensus([h.window for h in hits], 14)
+    assert "CCTT" in cons and "AC" in cons
