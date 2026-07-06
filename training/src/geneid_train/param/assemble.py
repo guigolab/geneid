@@ -39,13 +39,22 @@ def assemble_param(
     intergenic_range: str,
     template: str | None = None,
     u12: U12Sections | None = None,
+    u12_splice_thresh: float = 9.0,
+    u12_exon_thresh: float = 8.0,
 ) -> str:
     """Build a full geneid param. Profile/Markov args are geneid-format data
     lines (from ``stats.sites.format_profile`` / ``stats.coding.format_markov_matrix``);
     ``intron_range``/``intergenic_range`` are ``min:max`` tokens.
 
     When ``u12`` is given, the minor-spliceosome profile trio is spliced in before
-    the required acceptor/donor profiles so geneid enables U12 splice prediction.
+    the required acceptor/donor profiles so geneid enables U12 splice prediction,
+    and the ``U12_Splice_Score_Threshold`` / ``U12_Exon_Score_Threshold`` gates are
+    emitted. Those thresholds are essential: without them geneid uses its −1000
+    default, which accepts almost any GT-AG intron as U12 (≈6.5% mislabeled on
+    xgXerMont vs a plausible <0.5%). The default (9, human value; drosophila uses
+    10) is deliberately conservative — U12 is hard to train without a large
+    genome-specific set, so we favour precision and let homology/RNA-seq recover
+    false negatives later. A SUPER_1 sweep: threshold 8→0.41%, 9≈0.1-0.2%, 10→0.03%.
     """
     p = Param.from_text(template if template is not None else load_template())
 
@@ -63,6 +72,13 @@ def assemble_param(
         # required Acceptor_profile / Donor_profile — see ReadProfileSpliceSites)
         p.insert_text_before("Acceptor_profile", u12.acceptor_side)
         p.insert_text_before("Donor_profile", u12.donor_side)
+        # the U12 acceptance-score gates (read in the optional-scalar block before
+        # Exon_weights) — without them geneid mass-mislabels U2 GT-AG as U12
+        p.insert_text_before(
+            "Exon_weights",
+            f"U12_Splice_Score_Threshold\n{u12_splice_thresh:g}\n"
+            f"U12_Exon_Score_Threshold\n{u12_exon_thresh:g}\n",
+        )
 
     text = p.to_text()
     text = text.replace("@INTRON_RANGE@", intron_range)

@@ -235,6 +235,7 @@ def _cmd_train(args: argparse.Namespace) -> int:
     try:
         param_text = train(
             models, genome, args.species, seed=args.seed, u12=args.u12,
+            u12_splice_thresh=args.u12_splice_thresh, u12_exon_thresh=args.u12_exon_thresh,
             u2_branch=args.u2_branch, branch_weight=args.branch_weight,
         )
     except NotImplementedError as exc:
@@ -323,6 +324,15 @@ def build_parser() -> argparse.ArgumentParser:
         "--u12",
         action="store_true",
         help="include bundled U12 (minor-spliceosome) profiles so geneid -U predicts U12 introns",
+    )
+    p_train.add_argument(
+        "--u12-splice-thresh", type=float, default=9.0,
+        help="U12_Splice_Score_Threshold: min combined U12 donor+acceptor score to accept a "
+             "U12 join (default 9, conservative; reference U12 params; lower over-calls U12)",
+    )
+    p_train.add_argument(
+        "--u12-exon-thresh", type=float, default=8.0,
+        help="U12_Exon_Score_Threshold: min combined exon score for a U12 join (default 8)",
     )
     p_train.add_argument(
         "--u2-branch",
