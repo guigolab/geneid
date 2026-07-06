@@ -189,7 +189,7 @@ def fit_branch_em(
             z = sum(odds)
             if z <= 0:
                 continue
-            for j, o in zip(starts, odds):
+            for j, o in zip(starts, odds, strict=True):
                 gamma = o / z
                 for m in range(width):
                     counts[m][codes[j + m]] += gamma
@@ -202,7 +202,7 @@ def fit_branch_em(
         if delta < tol:
             break
 
-    pwm_dicts = [dict(zip(_ACGT, col)) for col in pwm]
+    pwm_dicts = [dict(zip(_ACGT, col, strict=True)) for col in pwm]
     return BranchModel(pwm_dicts, background, width, anchor, require_anchor)
 
 

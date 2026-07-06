@@ -61,7 +61,7 @@ class GeneModel:
     def introns(self) -> list[tuple[int, int]]:
         """Genomic (start, end) of each intron, ascending. Empty if single-exon."""
         out = []
-        for prev, nxt in zip(self.exons, self.exons[1:]):
+        for prev, nxt in zip(self.exons, self.exons[1:], strict=False):
             out.append((prev.end + 1, nxt.start - 1))
         return out
 

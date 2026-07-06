@@ -7,7 +7,7 @@ name = "geneid-train"
 version = "0.0.1"
 description = "Pure-Python training pipeline for the geneid gene predictor (U2/U12-aware)"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = { text = "GPL-3.0-or-later" }
 authors = [{ name = "Tyler Alioto" }]
 dependencies = []

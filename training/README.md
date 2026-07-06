@@ -5,19 +5,56 @@ with first-class U2/U12 intron support. Replaces the legacy Perl/AWK/C training
 scripts. See [DESIGN.md](DESIGN.md) for the full plan and the frozen `.param`
 format spec.
 
-Status: **Phase 1** — package scaffold, CLI surface, and the `.param`
-read/write core (byte-identical round-trip).
+Status: **working end-to-end.** From a GFF3 annotation + genome it trains a
+complete geneid `.param` — splice/start site profiles, the coding Markov model,
+the gene model, and optional U12 and U2 branch-point profiles — and also
+`optimize`s the exon weights, `evaluate`s predictions (SN/SP), and runs
+`jackknife` cross-validation. See [DESIGN.md](DESIGN.md) for details.
 
-## Dev cycle
+## Setup
+
+`geneid-train` is **pure Python with no third-party runtime dependencies** — just
+the standard library. There is nothing to compile and no wheels to build, so
+setup is only "get a recent Python and install."
+
+**Requirement: Python ≥ 3.10.** Check with `python3 --version`. On macOS the
+system `python3` is usually 3.9 — install a newer one (`brew install python@3.12`,
+or use pyenv) and point the commands below at it with `PYTHON=python3.12`.
+
+### One-command setup (recommended)
+
+From this `training/` directory:
 
 ```bash
-cd training
-make install     # editable install + dev deps (pytest, ruff) into your env
+make venv                    # if python3 is already >= 3.10
+make venv PYTHON=python3.12  # otherwise, point at a 3.10+ interpreter
+```
+
+That creates an isolated `./.venv`, upgrades pip, and installs `geneid-train`
+(editable) plus the dev tools. **Nothing to activate** — the other targets
+auto-detect `./.venv`:
+
+```bash
 make test        # fast unit suite
-make test-all    # also round-trips every real param/*.param in the repo
+make test-all    # also round-trips every real param/*.param in the repo (slower, opt-in)
 make lint        # ruff check
 make fmt         # ruff format
 ```
+
+Run the CLI directly with `./.venv/bin/geneid-train --help`, or `source
+.venv/bin/activate` first and just call `geneid-train`.
+
+### Installing into your own environment
+
+Already have a virtualenv/conda env on Python ≥ 3.10? Skip `make venv` and install
+into the active environment instead:
+
+```bash
+make install     # pip install --upgrade pip && pip install -e ".[dev]"
+```
+
+If you try to install under Python < 3.10, pip stops with a clear
+`requires a different Python` error rather than failing mysteriously later.
 
 ## Try it
 
@@ -34,6 +71,25 @@ geneid-train convert --from gff2 annotation.gff2 annotation.gff3
 geneid-train prepare --gff annotation.gff3 --fastas genome.fa --min-aa 100 --results out
 ```
 
-`convert` accepts `--from gff2` or `--from gtf`. The remaining subcommands
-(`train`, `evaluate`, `jackknife`) are stubs at this phase and report which phase
-implements them.
+`convert` accepts `--from gff2` or `--from gtf` (GFF3 is the only ingested format).
+
+Train a parameter file, then tune and evaluate it:
+
+```bash
+# GFF3 annotation + genome -> a complete geneid .param
+geneid-train train --gff annotation.gff3 --fastas genome.fa \
+    --species Genus_species --output Genus_species.param [--u12] [--u2-branch]
+
+# grid/search the exon weights against a held-out set
+geneid-train optimize --param Genus_species.param \
+    --eval-fastas eval.fa --eval-gff eval.gff3 --output Genus_species.optimized.param
+
+# SN/SP of predictions vs annotation, and leave-group-out cross-validation
+geneid-train evaluate predictions.gff annotation.gff
+geneid-train jackknife --gff annotation.gff3 --fastas genome.fa \
+    --species Genus_species --eval-fastas eval.fa --eval-gff eval.gff3
+```
+
+`optimize`, `evaluate`, and `jackknife` need a compiled `geneid` binary on your
+`PATH` (or pass `--geneid /path/to/geneid`); build it from the repo root with
+`make`.

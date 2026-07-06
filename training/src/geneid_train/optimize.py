@@ -312,7 +312,7 @@ def coordinate_descent(
                         continue
                     with ThreadPoolExecutor(max_workers=workers) as pool:
                         accs = list(pool.map(score, trials))
-                    candidates = [(point, best_acc)] + list(zip(trials, accs))
+                    candidates = [(point, best_acc)] + list(zip(trials, accs, strict=True))
                     candidates.sort(key=lambda c: accuracy_key(c[1]))
                     best_point, best_of = candidates[0]
                     if best_point != point:
@@ -360,7 +360,7 @@ class SearchSpace:
         return base + list(self.branch_bounds) * len(self.branch_profiles)
 
     def clip(self, v: list[float]) -> list[float]:
-        return [min(hi, max(lo, x)) for x, (lo, hi) in zip(v, self.bounds())]
+        return [min(hi, max(lo, x)) for x, (lo, hi) in zip(v, self.bounds(), strict=True)]
 
     def decode(self, v: list[float]) -> WeightPoint:
         return WeightPoint(tuple(v[:4]), tuple(round(x, 6) for x in v[4:8]))
@@ -450,7 +450,7 @@ def global_optimize(
         samples = latin_hypercube(bounds, n_samples, seed)
         accs = score_many(samples)
         evals += len(samples)
-        best_v, best_acc = min(zip(samples, accs), key=lambda p: accuracy_key(p[1]))
+        best_v, best_acc = min(zip(samples, accs, strict=True), key=lambda p: accuracy_key(p[1]))
         best_v = list(best_v)
         history = [CDResult(space.decode(space.clip(best_v)), best_acc)]
 
@@ -470,7 +470,7 @@ def global_optimize(
             n_accs = score_many(neighbours)
             evals += len(neighbours)
             cand_v, cand_acc = min(
-                zip(neighbours, n_accs), key=lambda p: accuracy_key(p[1])
+                zip(neighbours, n_accs, strict=True), key=lambda p: accuracy_key(p[1])
             )
             if accuracy_key(cand_acc) < accuracy_key(best_acc):
                 best_v, best_acc = list(cand_v), cand_acc
