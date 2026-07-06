@@ -362,6 +362,13 @@ A. DEFINITIONS
    score (0 = report-only; default 1) */
 #define sBRANCH_SCORE_WEIGHT "Branch_point_score_weight"
 
+/* Optional soft intron-length model: a log-normal (mu,sigma) over ln(intron
+   length), and the weight (lambda) on the smooth length-dependent penalty it
+   drives in genamic. lambda default 0 = off (backward compatible), so the model
+   can be carried in a param yet stay inert until it is turned on. */
+#define sINTRON_LENGTH_MODEL "Intron_length_model"
+#define sINTRON_LENGTH_WEIGHT "Intron_length_score_weight"
+
 /* Header evidence factor and weight */
 #define sEVIDENCEF "Evidence_Factor"
 #define sEVIDENCEW "Evidence_Exon_Weight"

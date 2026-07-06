@@ -41,6 +41,7 @@ def assemble_param(
     u12: U12Sections | None = None,
     u12_splice_thresh: float = 9.0,
     u12_exon_thresh: float = 8.0,
+    intron_length_model: tuple[float, float] | None = None,
 ) -> str:
     """Build a full geneid param. Profile/Markov args are geneid-format data
     lines (from ``stats.sites.format_profile`` / ``stats.coding.format_markov_matrix``);
@@ -78,6 +79,18 @@ def assemble_param(
             "Exon_weights",
             f"U12_Splice_Score_Threshold\n{u12_splice_thresh:g}\n"
             f"U12_Exon_Score_Threshold\n{u12_exon_thresh:g}\n",
+        )
+
+    if intron_length_model is not None:
+        # Soft intron-length penalty: the log-normal (mu, sigma) over ln(length)
+        # plus its weight (lambda). The weight is emitted at 0 = off, so the model
+        # is carried but inert until the optimizer (or a user) turns it on; geneid
+        # reads both in the optional-scalar block before Exon_weights.
+        mu, sigma = intron_length_model
+        p.insert_text_before(
+            "Exon_weights",
+            f"Intron_length_model\n{mu:.6g} {sigma:.6g}\n"
+            f"Intron_length_score_weight\n0\n",
         )
 
     text = p.to_text()

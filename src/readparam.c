@@ -42,6 +42,9 @@ extern int PAS;
 extern int BKGD_SUBTRACT_FLANK_LENGTH;
 extern short SPLICECLASSES;
 extern float BRANCH_SCORE_WEIGHT;
+extern float INTRON_LENGTH_MU;
+extern float INTRON_LENGTH_SIGMA;
+extern float INTRON_LENGTH_WEIGHT;
 extern float U12_SPLICE_SCORE_THRESH;
 extern float U12_EXON_SCORE_THRESH;
 extern float U12EW;
@@ -787,6 +790,29 @@ void ReadIsochore(FILE* RootFile, gparam* gp)
 
 		  sprintf(mess,"BRANCH_SCORE_WEIGHT: \t%9.2f",
 				  BRANCH_SCORE_WEIGHT);
+		  printMess(mess);
+	}
+	 /* Optional: Intron_length_model, the log-normal (mu sigma) over ln(intron
+	    length) that drives the soft length penalty in genamic (see
+	    INTRON_LENGTH_WEIGHT). Two floats on one line. */
+	if(!strcasecmp(header,sINTRON_LENGTH_MODEL)){
+		  readLine(RootFile,line);
+		  if ((sscanf(line,"%f %f\n", &(INTRON_LENGTH_MU), &(INTRON_LENGTH_SIGMA)))!=2)
+			printError("Wrong format: Intron_length_model (mu sigma)");
+
+		  sprintf(mess,"INTRON_LENGTH_MODEL: \tmu=%9.2f sigma=%9.2f",
+				  INTRON_LENGTH_MU, INTRON_LENGTH_SIGMA);
+		  printMess(mess);
+	}
+	 /* Optional: Intron_length_score_weight (lambda), how strongly the soft
+	    intron-length penalty counts in genamic. 0 = off (default). */
+	if(!strcasecmp(header,sINTRON_LENGTH_WEIGHT)){
+		  readLine(RootFile,line);
+		  if ((sscanf(line,"%f\n", &(INTRON_LENGTH_WEIGHT)))!=1)
+			printError("Wrong format: Intron_length_score_weight value (number/type)");
+
+		  sprintf(mess,"INTRON_LENGTH_WEIGHT: \t%9.2f",
+				  INTRON_LENGTH_WEIGHT);
 		  printMess(mess);
 	}
 	 /* Optional: U12_EXON_WEIGHT, an additional exon weight that applies to exons flanking U12 introns */
