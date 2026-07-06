@@ -218,7 +218,7 @@ int main (int argc, char *argv[])
   
   /* 0.c. Read setup options */
   readargv(argc,argv,ParamFile,SequenceFile,ExonsFile,HSPFile,GenePrefix);
-  printRes("\n\n\t\t\t** Running geneid 1.4 2003 geneid@crg.es **\n\n");
+  printRes("\n\n\t\t\t** Running " GENEID_RELEASE " geneid@crg.es **\n\n");
 
   /* 0.d. Prediction of DNA sequence length to request memory */
   LengthSequence = analizeFile(SequenceFile);
