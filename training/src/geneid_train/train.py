@@ -95,6 +95,8 @@ def train(
     background: tuple[Matrix, Matrix] | None = None,
     seed: int = 0,
     u12: bool = False,
+    u12_splice_thresh: float = 9.0,
+    u12_exon_thresh: float = 8.0,
     u2_branch: bool = False,
     branch_weight: float = 0.0,
 ) -> str:
@@ -169,6 +171,8 @@ def train(
         intron_range=format_range(lo, hi),
         intergenic_range="200:Infinity",
         u12=u12_sections,
+        u12_splice_thresh=u12_splice_thresh,
+        u12_exon_thresh=u12_exon_thresh,
     )
 
     if u2_branch:

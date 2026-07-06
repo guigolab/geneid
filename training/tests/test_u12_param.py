@@ -72,6 +72,35 @@ def test_partition_routes_by_profile_name():
     assert "U12gtag_Donor_profile" in DONOR_SIDE  # routing set drives partition
 
 
+def test_assemble_emits_u12_score_thresholds_before_exon_weights():
+    from geneid_train.param.assemble import assemble_param
+
+    stub = ["1 A 0"]
+    txt = assemble_param(
+        species="X", start_profile=stub, acceptor_profile=stub, donor_profile=stub,
+        markov_order=1, markov_initial=stub, markov_transition=stub,
+        intron_range="40:80000", intergenic_range="200:Infinity",
+        u12=load_bundled_u12(),  # defaults: splice 9, exon 8
+    )
+    lines = txt.splitlines()
+    assert lines[lines.index("U12_Splice_Score_Threshold") + 1] == "9"
+    assert lines[lines.index("U12_Exon_Score_Threshold") + 1] == "8"
+    # geneid reads these gates in the optional-scalar block before Exon_weights
+    assert txt.index("U12_Splice_Score_Threshold") < txt.index("Exon_weights")
+
+
+def test_no_u12_thresholds_when_u12_absent():
+    from geneid_train.param.assemble import assemble_param
+
+    stub = ["1 A 0"]
+    txt = assemble_param(
+        species="X", start_profile=stub, acceptor_profile=stub, donor_profile=stub,
+        markov_order=1, markov_initial=stub, markov_transition=stub,
+        intron_range="40:80000", intergenic_range="200:Infinity",
+    )
+    assert "U12_Splice_Score_Threshold" not in txt
+
+
 def test_bundled_u12_loads_and_has_full_trio():
     sec = load_bundled_u12()
     acc_names = ("U12_Branch_point_profile", "U12gtag_Acceptor_profile", "U12atac_Acceptor_profile")
