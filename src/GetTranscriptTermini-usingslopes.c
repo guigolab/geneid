@@ -4,7 +4,7 @@
 *                                                                        *
 *   Stop codons prediction by using Position Weighted arrays             *
 *                                                                        *
-*   This file is part of the geneid 1.4 distribution                     *
+*   This file is part of the geneid distribution                         *
 *                                                                        *
 *     Copyright (C) 2006 - Enrique BLANCO GARCIA                         *
 *                          Roderic GUIGO SERRA                           *
@@ -25,7 +25,6 @@
 *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.             *
 *************************************************************************/
 
-/*  $Id: GetTranscriptTermini-usingslopes.c,v 1.3 2011-01-13 11:06:16 talioto Exp $  */
 
 #include "geneid.h"
 

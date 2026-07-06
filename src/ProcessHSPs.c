@@ -3,7 +3,7 @@
 *   Module: ProcessHSPs                                                  *
 *                                                                        *
 *                                                                        *
-*   This file is part of the geneid 1.4 distribution                     *
+*   This file is part of the geneid distribution                         *
 *                                                                        *
 *     Copyright (C) 2006 - Enrique BLANCO GARCIA                         *
 *                          Roderic GUIGO SERRA                           *
