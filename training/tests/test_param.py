@@ -49,7 +49,7 @@ def test_set_scalar_is_surgical(mini_param_path: Path):
     before = text.splitlines()
     after = out.splitlines()
     assert len(before) == len(after)
-    diff = [(a, b) for a, b in zip(before, after) if a != b]
+    diff = [(a, b) for a, b in zip(before, after, strict=True) if a != b]
     assert diff == [("0", "-5")]
     # and the change parses back
     assert Param.from_text(out).scalar("NO_SCORE") == "-5"
