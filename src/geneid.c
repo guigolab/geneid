@@ -115,6 +115,15 @@ float U12_EXON_SCORE_THRESH = -1000;
    bp_pos in the GFF) without contributing to the splice-site score. */
 float BRANCH_SCORE_WEIGHT = 1;
 
+/* Soft intron-length model (log-normal over ln(intron length)) emitted by
+   geneid-train, plus the weight (lambda) on the smooth length-dependent penalty
+   it drives on intron-spanning joins in genamic -- a soft replacement for the
+   hard gene-model max distance. lambda default 0 leaves the penalty OFF, so the
+   mu/sigma below are inert unless a param sets Intron_length_score_weight > 0. */
+float INTRON_LENGTH_MU = 0;
+float INTRON_LENGTH_SIGMA = 0;
+float INTRON_LENGTH_WEIGHT = 0;
+
 /* Detection of recursive splice sites */
 float RSSMARKOVSCORE = 0;
 float RSSDON = RDT;

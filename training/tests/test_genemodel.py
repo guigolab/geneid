@@ -1,6 +1,12 @@
+import math
+
 import pytest
 
-from geneid_train.stats.genemodel import format_range, intron_range
+from geneid_train.stats.genemodel import (
+    format_range,
+    intron_length_model,
+    intron_range,
+)
 
 from .conftest import ref_dir
 
@@ -19,6 +25,31 @@ def test_intron_range_short_below_cap():
 def test_format_range():
     assert format_range(40.0, "Infinity") == "40:Infinity"
     assert format_range(24.75, 25394.023) == "24.75:25394.023"
+
+
+def test_intron_length_model_recovers_lognormal_params():
+    # Draw ln(length) from a fixed grid so mu/sigma are exactly the mean/pop-sd of
+    # those logs; the fit must recover them.
+    log_vals = [4.0, 5.0, 6.0, 7.0, 8.0]
+    lengths = [round(math.exp(v)) for v in log_vals]
+    mu, sigma = intron_length_model(lengths)
+    logs = [math.log(n) for n in lengths]
+    exp_mu = sum(logs) / len(logs)
+    exp_sigma = math.sqrt(sum((x - exp_mu) ** 2 for x in logs) / len(logs))
+    assert mu == pytest.approx(exp_mu)
+    assert sigma == pytest.approx(exp_sigma)
+
+
+def test_intron_length_model_constant_lengths_zero_sigma():
+    mu, sigma = intron_length_model([2000, 2000, 2000])
+    assert mu == pytest.approx(math.log(2000))
+    assert sigma == pytest.approx(0.0)
+
+
+def test_intron_length_model_ignores_nonpositive_and_empty():
+    assert intron_length_model([]) == (0.0, 0.0)
+    # non-positive lengths (shouldn't occur) are filtered, not crash on log(0)
+    assert intron_length_model([0, -5]) == (0.0, 0.0)
 
 
 REF = ref_dir()

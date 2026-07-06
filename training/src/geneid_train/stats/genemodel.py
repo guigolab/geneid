@@ -7,6 +7,7 @@ connections, the intergenic range gates gene-to-gene connections.
 
 from __future__ import annotations
 
+import math
 from collections.abc import Sequence
 
 
@@ -49,6 +50,31 @@ def intron_range(
     if hi > long_cap:
         hi = float(long_cap)
     return lo, hi
+
+
+def intron_length_model(intron_lengths: Sequence[int]) -> tuple[float, float]:
+    """Fit a log-normal to intron lengths; return ``(mu, sigma)`` in log space.
+
+    These are the maximum-likelihood log-normal parameters — ``mu`` = mean and
+    ``sigma`` = population standard deviation of ``ln(length)``. They are emitted
+    into the param's ``Intron_length_model`` section, where geneid uses them for a
+    smooth, length-dependent intron score penalty: a *soft* replacement for the
+    hard gene-model ``max`` gate (see ``intron_range``). Introns near the typical
+    length sit near the distribution mode and are essentially unpenalised; the
+    penalty grows only in the long tail. Intron lengths are strongly right-skewed,
+    so a log-normal fits far better than a normal on the raw lengths.
+
+    The paired penalty *weight* (``Intron_length_score_weight``) defaults to 0 in
+    geneid, so emitting this model is backward-compatible until the weight is
+    turned on (by the optimizer or by hand).
+    """
+    logs = [math.log(n) for n in intron_lengths if n > 0]
+    n = len(logs)
+    if n == 0:
+        return 0.0, 0.0
+    mu = sum(logs) / n
+    var = sum((x - mu) ** 2 for x in logs) / n
+    return mu, math.sqrt(var)
 
 
 def format_range(lo: float, hi: float | str) -> str:

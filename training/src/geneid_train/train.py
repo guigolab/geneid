@@ -16,7 +16,7 @@ from .prepare.base import GeneModel
 from .prepare.sites import collect_sites
 from .stats.background import from_genome
 from .stats.coding import choose_orders, derive_coding_potential, format_markov_matrix
-from .stats.genemodel import format_range, intron_range
+from .stats.genemodel import format_range, intron_length_model, intron_range
 from .stats.sites import (
     Matrix,
     format_profile,
@@ -152,7 +152,9 @@ def train(
         cds_seqs, intron_seqs, transition_order
     )
 
-    lo, hi = intron_range([len(s) for s in intron_seqs])
+    intron_lens = [len(s) for s in intron_seqs]
+    lo, hi = intron_range(intron_lens)
+    il_model = intron_length_model(intron_lens)
 
     u12_sections = None
     if u12:
@@ -170,6 +172,7 @@ def train(
         markov_transition=format_markov_matrix(trans_logs),
         intron_range=format_range(lo, hi),
         intergenic_range="200:Infinity",
+        intron_length_model=il_model,
         u12=u12_sections,
         u12_splice_thresh=u12_splice_thresh,
         u12_exon_thresh=u12_exon_thresh,
