@@ -24,13 +24,25 @@ def test_format_range():
 REF = ref_dir()
 
 
+def test_intron_range_max_is_p999_skew_robust():
+    # a right-skewed set: bulk small + a long tail. mean+3sd would sit far above
+    # the bulk; p99.9 tracks the actual tail and excludes ~0.1%.
+    lens = [1000] * 999 + [90000]
+    lo, hi = intron_range(lens)
+    over = sum(1 for x in lens if x > hi)
+    assert over <= 1  # at most the top ~0.1% excluded
+    assert hi <= 100_000
+
+
 @pytest.mark.integration
 @pytest.mark.skipif(REF is None, reason="set GENEID_TRAIN_REFDIR to the train_geneid dir")
-def test_intron_range_matches_reference():
+def test_intron_range_reference_spans_long_tail():
     name = "Xerocrassa_montserratensis.train.intron.tbl"
     lens = [len(ln.split("\t")[1].strip()) for ln in open(REF / name)]
     lo, hi = intron_range(lens)
-    # reference gene model uses 24.75:25394.023; lo is exact, hi matches to <1 bp
-    # (the last-decimal difference is float-printing noise on a coarse bound)
     assert lo == 24.75
-    assert abs(hi - 25394.023) < 1.0
+    # the p99.9 max spans the skewed long tail -> well above the legacy mean+3sd
+    # (~25394) that clipped ~1.8% of real introns, and under the 100 kb safety cap
+    assert hi > 25394
+    assert hi <= 100_000
+    assert sum(1 for x in lens if x > hi) <= len(lens) // 1000 + 1

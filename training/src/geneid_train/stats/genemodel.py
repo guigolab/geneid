@@ -7,16 +7,21 @@ connections, the intergenic range gates gene-to-gene connections.
 
 from __future__ import annotations
 
-import math
 from collections.abc import Sequence
 
 
-def _mean_sd(values: Sequence[float]) -> tuple[float, float]:
-    """Mean and *population* standard deviation (matches geneidCEGMA::average)."""
-    n = len(values)
-    mean = sum(values) / n
-    var = sum((v - mean) ** 2 for v in values) / n
-    return mean, math.sqrt(var)
+def _percentile(values: Sequence[float], q: float) -> float:
+    """The ``q`` quantile (0..1) by linear interpolation between order statistics."""
+    s = sorted(values)
+    n = len(s)
+    if n == 1:
+        return float(s[0])
+    idx = q * (n - 1)
+    lo = int(idx)
+    frac = idx - lo
+    if lo + 1 < n:
+        return s[lo] + frac * (s[lo + 1] - s[lo])
+    return float(s[lo])
 
 
 def intron_range(
@@ -24,19 +29,23 @@ def intron_range(
     *,
     short_cap: int = 40,
     long_cap: int = 100_000,
+    max_quantile: float = 0.999,
 ) -> tuple[float, float]:
     """Return ``(min_intron, max_intron)`` for the gene model.
 
-    ``min = 0.75 * shortest_intron`` capped at ``short_cap`` (40); ``max =
-    mean + 3*sd`` capped at ``long_cap`` (100000) — the legacy WriteStatsFile
-    heuristic.
+    ``min = 0.75 * shortest_intron`` capped at ``short_cap`` (40). ``max`` is the
+    ``max_quantile`` (default p99.9) of the intron lengths, capped at ``long_cap``
+    (100000). Intron lengths are strongly right-skewed, so the legacy
+    ``mean + 3*sd`` heuristic clips a real long tail (e.g. ~1.8% of introns on
+    xgXerMont) — and geneid cannot span an intron longer than this max, so a too-low
+    value fragments long-intron genes into separate models. A high percentile spans
+    essentially all real introns while staying under the safety cap.
     """
     shortest = min(intron_lengths)
     lo = shortest * 0.75
     if lo > short_cap:
         lo = float(short_cap)
-    mean, sd = _mean_sd(list(intron_lengths))
-    hi = mean + 3 * sd
+    hi = _percentile(list(intron_lengths), max_quantile)
     if hi > long_cap:
         hi = float(long_cap)
     return lo, hi
