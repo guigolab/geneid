@@ -1,7 +1,6 @@
 
 *.o
-param/.DS_Store
-scripts/.DS_Store
+.DS_Store
 
 # Local build artifacts. The whole bin/ dir is build output: geneid is built
 # by `make`, not tracked (it was committed by accident long ago, was macOS-
@@ -14,3 +13,17 @@ scripts/.DS_Store
 # scratch run outputs (the committed suite lives in test/regression/)
 /test/*.gff3
 /test/*.log
+
+# Large local data drops used only to BUILD test fixtures (whole genomes +
+# their annotations). Never track these -- only small derived slices belong in
+# the repo, to keep samples/ lean. Covers e.g. GRCh38.primary_assembly.genome.fa.gz,
+# gencode.v*.*.gff3.gz, and the xgXerMont training genome.
+/samples/*.primary_assembly.*
+/samples/gencode.*
+/samples/xgXerMont*
+/samples/*.genome.fa
+/samples/*.genome.fa.gz
+
+# Legacy training source material + example genomes (24 GB, local reference
+# only, harvested from into the Python `training/` package). Never track.
+/geneid_training/
