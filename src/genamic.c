@@ -67,6 +67,36 @@ extern int GENEID;
 extern int RSS;
 extern float U12_SPLICE_SCORE_THRESH;
 extern float U12_EXON_SCORE_THRESH;
+/* Soft intron-length model + its penalty weight (read in readparam.c, defined in
+   geneid.c). All default 0, which leaves the length penalty OFF and this DP
+   byte-for-byte the original. */
+extern float INTRON_LENGTH_WEIGHT;
+extern float INTRON_LENGTH_MU;
+extern float INTRON_LENGTH_SIGMA;
+
+/* Soft, one-sided log-normal intron-length penalty (natural-log units), anchored
+   to 0 at the distribution mode so short/typical introns pay nothing and only the
+   long right tail is charged. Returns the rise in negative-log-density relative to
+   the mode for lengths beyond it (0 at or below the mode); the caller scales it by
+   INTRON_LENGTH_WEIGHT. The mode is exp(mu - sigma^2), so the "at/below the mode"
+   test is done in log space (ln len <= mu - sigma^2) and no exp() is needed. With
+   no model (sigma <= 0) it is identically 0. */
+static double IntronLengthPenalty(long len)
+{
+  double mu = INTRON_LENGTH_MU;
+  double sigma = INTRON_LENGTH_SIGMA;
+  double lx, z, nll, nllMode;
+
+  if (sigma <= 0.0 || len <= 0)
+    return 0.0;
+  lx = log((double) len);
+  if (lx <= mu - sigma * sigma)          /* at or below the log-normal mode */
+    return 0.0;
+  z = lx - mu;
+  nll     = lx + (z * z) / (2.0 * sigma * sigma);   /* -log density (up to a const) */
+  nllMode = mu - (sigma * sigma) / 2.0;             /* the same, evaluated at the mode */
+  return nll - nllMode;
+}
 
 /* E        exons to assemble, sorted by acceptor position (in/out: filled
  *          with GeneScore/PreviousExon chains on return)
@@ -86,6 +116,9 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
   char mess[MAXSTRING];
   int current_exon_is_u12 = 0; /* is the current exon's acceptor a U12 (minor spliceosome) site? */
   int thresholdmet = 1;        /* does the candidate join clear the U2/U12 score threshold (see step 2c)? */
+  float ilenPenalty;           /* soft intron-length penalty charged to the chosen predecessor's join (0 when off) */
+  exonGFF* savedGa;            /* DP-cell champion parked while a penalised predecessor is temporarily substituted */
+  int penalize;                /* is the soft intron-length penalty active for this join? */
 
   /* 0. Starting process ... */
   printMess("-- Running gene assembling (genamic) --");
@@ -259,6 +292,61 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 		  }
 		pg->je[etype] = j; /* remember the cursor for the next call */
 
+		/* Soft intron-length penalty (feature #1, Stage 2). When enabled
+		   (INTRON_LENGTH_WEIGHT > 0) and this join spans a real bounded
+		   intron -- a finite MaxDist rule and a coding current exon, not an
+		   explicit intron feature -- the best predecessor is no longer just
+		   the highest-GeneScore one: a closer (shorter-intron) predecessor
+		   can win once the length penalty is charged. Re-select the
+		   predecessor for this (frame,spliceclass) DP cell by scanning the
+		   in-[MinDist,MaxDist] window and maximizing
+		   GeneScore - INTRON_LENGTH_WEIGHT*penalty(intron length), keeping the
+		   winner's penalty (ilenPenalty) to subtract from the join score
+		   below. The chosen predecessor is parked in the DP cell for the
+		   duration of the join and restored right after (see below), so the
+		   max-GeneScore invariant the carried-forward Ga relies on for later
+		   exons is left untouched. This is the exact O(window) reference; with
+		   the weight 0 (default) none of it runs and the DP is unchanged. */
+		ilenPenalty = 0;
+		savedGa = NULL;
+		penalize = (INTRON_LENGTH_WEIGHT > 0 && MaxDist != INFI &&
+			    strcmp((E+i)->Type,sINTRON) &&
+			    strcmp((E+i)->Type,sUTRINTRON) &&
+			    strcmp((E+i)->Type,sUTR5INTRON) &&
+			    strcmp((E+i)->Type,sUTR3INTRON));
+		if (penalize)
+		  {
+		    exonGFF* bestPred = pg->Ghost;
+		    float bestVal = -(float)INFI;
+		    for (j2 = j-1;
+			 j2 >= 0 && j2 < pg->km[etype] &&
+			 ((pg->d[etype][j2]->Donor->Position + pg->d[etype][j2]->offset2)
+			  >=
+			  ((E+i)->Acceptor->Position + (E+i)->offset1)
+			  + ((E+i)->evidence - pg->d[etype][j2]->evidence)
+			  - MaxDist);
+			 j2--)
+		      {
+			if (pg->d[etype][j2]->Remainder == frame &&
+			    pg->d[etype][j2]->Donor->class == spliceclass)
+			  {
+			    long ilen =
+			      ((E+i)->Acceptor->Position + (E+i)->offset1)
+			      + ((E+i)->evidence - pg->d[etype][j2]->evidence)
+			      - (pg->d[etype][j2]->Donor->Position + pg->d[etype][j2]->offset2);
+			    float pen = INTRON_LENGTH_WEIGHT * (float) IntronLengthPenalty(ilen);
+			    if (pg->d[etype][j2]->GeneScore - pen > bestVal)
+			      {
+				bestVal = pg->d[etype][j2]->GeneScore - pen;
+				bestPred = pg->d[etype][j2];
+				ilenPenalty = pen;
+			      }
+			  }
+		      }
+		    savedGa = pg->Ga[etype][frame][spliceclass];
+		    pg->Ga[etype][frame][spliceclass] = bestPred;
+		  }
+
 		/* 2c. Assembling the exon with the best compatible gene before it */
 		/* Verify group rules if there are evidence exons (annotations) */
 		/* If this exon's acceptor is a minor (U12) site being joined to a
@@ -304,7 +392,7 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 		if ((!(strcmp(pg->Ga[etype][frame][spliceclass]->Group,(E+i)->Group))
 		     || gp->block[etype] == NONBLOCK)
 		    &&
-		    ((pg->Ga[etype][frame][spliceclass]->GeneScore + (E+i)->Score) > (E+i)->GeneScore)
+		    ((pg->Ga[etype][frame][spliceclass]->GeneScore - ilenPenalty + (E+i)->Score) > (E+i)->GeneScore)
 		    &&
 		    (thresholdmet) 
 		    )
@@ -314,7 +402,7 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 		       join across a codon boundary): just inherit the predecessor's
 		       split-codon flags unchanged rather than merging them. */
 		    if (!strcmp((E+i)->Type,sINTRON)||!strcmp((E+i)->Type,sUTRINTRON)||!strcmp((E+i)->Type,sUTR5INTRON)||!strcmp((E+i)->Type,sUTR3INTRON)){			    
-		      (E+i)->GeneScore = pg->Ga[etype][frame][spliceclass]->GeneScore + (E+i)->Score;
+		      (E+i)->GeneScore = pg->Ga[etype][frame][spliceclass]->GeneScore - ilenPenalty + (E+i)->Score;
 		      (E+i)->PreviousExon = pg->Ga[etype][frame][spliceclass];
 		      (E+i)->lValue = pg->Ga[etype][frame][spliceclass]->lValue;
 		      (E+i)->rValue = pg->Ga[etype][frame][spliceclass]->rValue;
@@ -325,7 +413,7 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 			 carry over Frame/Remainder since this exon added none of
 			 its own. */
 		      {if (RSS && ((E+i)->Donor->Position == (E+i)->Acceptor->Position -1)){
-			  (E+i)->GeneScore = pg->Ga[etype][frame][spliceclass]->GeneScore + (E+i)->Score;
+			  (E+i)->GeneScore = pg->Ga[etype][frame][spliceclass]->GeneScore - ilenPenalty + (E+i)->Score;
 			  (E+i)->PreviousExon = pg->Ga[etype][frame][spliceclass];
 			  (E+i)->Frame = pg->Ga[etype][frame][spliceclass]->Frame;
 			  (E+i)->Remainder = pg->Ga[etype][frame][spliceclass]->Remainder;
@@ -362,13 +450,18 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 			       }
 			     else
 			       {
-				 (E+i)->GeneScore = pg->Ga[etype][frame][spliceclass]->GeneScore + (E+i)->Score;
+				 (E+i)->GeneScore = pg->Ga[etype][frame][spliceclass]->GeneScore - ilenPenalty + (E+i)->Score;
 				 (E+i)->PreviousExon = pg->Ga[etype][frame][spliceclass];
 			       }
 			   }
 		       }
 		      }
 		  }
+		/* Restore the DP cell's max-GeneScore champion parked above, so the
+		   carried-forward Ga is exactly what it would have been without the
+		   penalty (only the join score for THIS exon used the substitute). */
+		if (penalize)
+		  pg->Ga[etype][frame][spliceclass] = savedGa;
 	      }
 
 	    /* Updating the best gene assembled so far for the whole locus:
