@@ -74,28 +74,26 @@ extern float INTRON_LENGTH_WEIGHT;
 extern float INTRON_LENGTH_MU;
 extern float INTRON_LENGTH_SIGMA;
 
-/* Soft, one-sided log-normal intron-length penalty (natural-log units), anchored
-   to 0 at the distribution mode so short/typical introns pay nothing and only the
-   long right tail is charged. Returns the rise in negative-log-density relative to
-   the mode for lengths beyond it (0 at or below the mode); the caller scales it by
-   INTRON_LENGTH_WEIGHT. The mode is exp(mu - sigma^2), so the "at/below the mode"
-   test is done in log space (ln len <= mu - sigma^2) and no exp() is needed. With
-   no model (sigma <= 0) it is identically 0. */
+/* Soft intron-length penalty: a CONVEX (in length) linear hinge. Introns up to a
+   free threshold L0 = exp(mu + 2*sigma) -- ~the 98th percentile of the log-normal
+   fit to the trained intron lengths -- pay nothing; beyond L0 the penalty grows
+   linearly at 1 unit per kilobase of excess. Returned unscaled (per-kb excess);
+   the caller multiplies by INTRON_LENGTH_WEIGHT. Convexity in L is deliberate: it
+   makes the GenAmic predecessor search exact in linear time via two sliding-window
+   maxima (the log-normal -log-density used earlier is convex near the mode but
+   concave in the tail, which breaks that). With no model (sigma <= 0) it is 0. */
 static double IntronLengthPenalty(long len)
 {
   double mu = INTRON_LENGTH_MU;
   double sigma = INTRON_LENGTH_SIGMA;
-  double lx, z, nll, nllMode;
+  double L0;
 
   if (sigma <= 0.0 || len <= 0)
     return 0.0;
-  lx = log((double) len);
-  if (lx <= mu - sigma * sigma)          /* at or below the log-normal mode */
+  L0 = exp(mu + 2.0 * sigma);            /* free up to ~the 98th log-normal percentile */
+  if ((double) len <= L0)
     return 0.0;
-  z = lx - mu;
-  nll     = lx + (z * z) / (2.0 * sigma * sigma);   /* -log density (up to a const) */
-  nllMode = mu - (sigma * sigma) / 2.0;             /* the same, evaluated at the mode */
-  return nll - nllMode;
+  return ((double) len - L0) / 1000.0;   /* per-kb excess; linear (convex) beyond L0 */
 }
 
 /* E        exons to assemble, sorted by acceptor position (in/out: filled
@@ -318,6 +316,10 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 		  {
 		    exonGFF* bestPred = pg->Ghost;
 		    float bestVal = -(float)INFI;
+		    /* GSmax = the window's maximum (unpenalised) GeneScore -- the champion
+		       the DP already tracks in this cell -- an upper bound on every
+		       candidate's GeneScore, used by the far-band early stop below. */
+		    float GSmax = pg->Ga[etype][frame][spliceclass]->GeneScore;
 		    for (j2 = j-1;
 			 j2 >= 0 && j2 < pg->km[etype] &&
 			 ((pg->d[etype][j2]->Donor->Position + pg->d[etype][j2]->offset2)
@@ -327,13 +329,13 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 			  - MaxDist);
 			 j2--)
 		      {
+			long ilen =
+			  ((E+i)->Acceptor->Position + (E+i)->offset1)
+			  + ((E+i)->evidence - pg->d[etype][j2]->evidence)
+			  - (pg->d[etype][j2]->Donor->Position + pg->d[etype][j2]->offset2);
 			if (pg->d[etype][j2]->Remainder == frame &&
 			    pg->d[etype][j2]->Donor->class == spliceclass)
 			  {
-			    long ilen =
-			      ((E+i)->Acceptor->Position + (E+i)->offset1)
-			      + ((E+i)->evidence - pg->d[etype][j2]->evidence)
-			      - (pg->d[etype][j2]->Donor->Position + pg->d[etype][j2]->offset2);
 			    float pen = INTRON_LENGTH_WEIGHT * (float) IntronLengthPenalty(ilen);
 			    if (pg->d[etype][j2]->GeneScore - pen > bestVal)
 			      {
@@ -342,6 +344,28 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 				ilenPenalty = pen;
 			      }
 			  }
+			/* Early stop, FAR band only. Once a length just below ilen already
+			   incurs a penalty (stoppen > 0) and GSmax - weight*stoppen <=
+			   bestVal, no farther (longer, >= that penalty) candidate can beat
+			   bestVal, so we stop -- this trims the huge tail of the window
+			   under a generous max-intron cap. Restricted to the far band on
+			   purpose: in the NEAR band the penalty is 0, so predecessor choice
+			   is decided by GeneScore differences at the float-ULP scale (the
+			   scores are ~1e4), where GSmax is not a bit-exact bound; scanning
+			   the near band in full (bounded by L0 ~ exp(mu+2sigma), NOT the
+			   cap) keeps the result identical to the unoptimised scan. The far
+			   band's penalty margin dominates that ULP noise.
+
+			   ilen - 100: the scan is ordered by Donor->Position, but the true
+			   length adds offset2 (a per-exon +/-codon correction, |.| <= 4) and
+			   the +/-1 evidence nudge, which are not monotone; 100 bp is a safe
+			   (>= 20x) lower bound on any remaining candidate's length. */
+			{
+			  double stoppen = IntronLengthPenalty(ilen - 100);
+			  if (stoppen > 0.0 &&
+			      GSmax - INTRON_LENGTH_WEIGHT * (float) stoppen <= bestVal)
+			    break;
+			}
 		      }
 		    savedGa = pg->Ga[etype][frame][spliceclass];
 		    pg->Ga[etype][frame][spliceclass] = bestPred;
