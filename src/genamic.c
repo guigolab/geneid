@@ -316,6 +316,10 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 		  {
 		    exonGFF* bestPred = pg->Ghost;
 		    float bestVal = -(float)INFI;
+		    /* GSmax = the window's maximum (unpenalised) GeneScore -- the champion
+		       the DP already tracks in this cell -- an upper bound on every
+		       candidate's GeneScore, used by the far-band early stop below. */
+		    float GSmax = pg->Ga[etype][frame][spliceclass]->GeneScore;
 		    for (j2 = j-1;
 			 j2 >= 0 && j2 < pg->km[etype] &&
 			 ((pg->d[etype][j2]->Donor->Position + pg->d[etype][j2]->offset2)
@@ -325,13 +329,13 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 			  - MaxDist);
 			 j2--)
 		      {
+			long ilen =
+			  ((E+i)->Acceptor->Position + (E+i)->offset1)
+			  + ((E+i)->evidence - pg->d[etype][j2]->evidence)
+			  - (pg->d[etype][j2]->Donor->Position + pg->d[etype][j2]->offset2);
 			if (pg->d[etype][j2]->Remainder == frame &&
 			    pg->d[etype][j2]->Donor->class == spliceclass)
 			  {
-			    long ilen =
-			      ((E+i)->Acceptor->Position + (E+i)->offset1)
-			      + ((E+i)->evidence - pg->d[etype][j2]->evidence)
-			      - (pg->d[etype][j2]->Donor->Position + pg->d[etype][j2]->offset2);
 			    float pen = INTRON_LENGTH_WEIGHT * (float) IntronLengthPenalty(ilen);
 			    if (pg->d[etype][j2]->GeneScore - pen > bestVal)
 			      {
@@ -340,6 +344,28 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 				ilenPenalty = pen;
 			      }
 			  }
+			/* Early stop, FAR band only. Once a length just below ilen already
+			   incurs a penalty (stoppen > 0) and GSmax - weight*stoppen <=
+			   bestVal, no farther (longer, >= that penalty) candidate can beat
+			   bestVal, so we stop -- this trims the huge tail of the window
+			   under a generous max-intron cap. Restricted to the far band on
+			   purpose: in the NEAR band the penalty is 0, so predecessor choice
+			   is decided by GeneScore differences at the float-ULP scale (the
+			   scores are ~1e4), where GSmax is not a bit-exact bound; scanning
+			   the near band in full (bounded by L0 ~ exp(mu+2sigma), NOT the
+			   cap) keeps the result identical to the unoptimised scan. The far
+			   band's penalty margin dominates that ULP noise.
+
+			   ilen - 100: the scan is ordered by Donor->Position, but the true
+			   length adds offset2 (a per-exon +/-codon correction, |.| <= 4) and
+			   the +/-1 evidence nudge, which are not monotone; 100 bp is a safe
+			   (>= 20x) lower bound on any remaining candidate's length. */
+			{
+			  double stoppen = IntronLengthPenalty(ilen - 100);
+			  if (stoppen > 0.0 &&
+			      GSmax - INTRON_LENGTH_WEIGHT * (float) stoppen <= bestVal)
+			    break;
+			}
 		      }
 		    savedGa = pg->Ga[etype][frame][spliceclass];
 		    pg->Ga[etype][frame][spliceclass] = bestPred;
