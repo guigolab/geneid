@@ -173,13 +173,19 @@ def _cmd_optimize(args: argparse.Namespace) -> int:
         from .optimize import SearchSpace
 
         # Latin-hypercube global sampling + compass-search refinement (per type)
-        space = SearchSpace()
+        keywords = Param.from_text(base).keywords()
+        branch_profiles: tuple[str, ...] = ()
         if getattr(args, "tune_branch", False):
             branch = "U12_Branch_point_profile"
-            if branch in Param.from_text(base).keywords():
-                space = SearchSpace(branch_profiles=(branch,))
+            if branch in keywords:
+                branch_profiles = (branch,)
             else:
                 print(f"note: --tune-branch ignored (no {branch} in {args.param})")
+        tune_il = getattr(args, "tune_intron_length", False)
+        if tune_il and "Intron_length_score_weight" not in keywords:
+            print(f"note: --tune-intron-length ignored (no Intron_length_model in {args.param})")
+            tune_il = False
+        space = SearchSpace(branch_profiles=branch_profiles, tune_intron_length=tune_il)
         opt_text, res = global_optimize(
             base, args.eval_fastas, args.eval_gff,
             geneid_bin=args.geneid, space=space, n_samples=args.samples,
@@ -192,6 +198,8 @@ def _cmd_optimize(args: argparse.Namespace) -> int:
         for name, kn in res.branch:
             print(f"  {name}: acc_context={kn.acc_context} min_dist={kn.min_dist} "
                   f"opt_dist={kn.opt_dist} pen_scale={kn.pen_scale:g}")
+        if res.intron_length_weight is not None:
+            print(f"  Intron_length_score_weight (lambda) = {res.intron_length_weight:g}")
     else:
         opt_text, results = optimize(
             base, args.eval_fastas, args.eval_gff,
@@ -366,6 +374,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--tune-branch", action="store_true",
         help="global: also tune the U12 branch-distance knobs (acc_context/min_dist/"
              "opt_dist/pen_scale) if the param has a U12_Branch_point_profile",
+    )
+    p_opt.add_argument(
+        "--tune-intron-length", action="store_true",
+        help="global: also tune the soft intron-length penalty weight "
+             "(Intron_length_score_weight) if the param has an Intron_length_model",
     )
     p_opt.set_defaults(func=_cmd_optimize)
 

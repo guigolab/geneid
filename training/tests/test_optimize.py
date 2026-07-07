@@ -18,6 +18,7 @@ from geneid_train.optimize import (
     latin_hypercube,
     optimize,
     set_branch_knobs,
+    set_intron_length_weight,
     uniform_point,
 )
 
@@ -134,6 +135,39 @@ def test_searchspace_branch_axes_appended_and_decoded():
     (name, kn), = space.decode_branch(v)
     assert name == "U12_Branch_point_profile"
     assert (kn.acc_context, kn.min_dist, kn.opt_dist) == (45, 8, 18)  # rounded to int
+
+
+def test_set_intron_length_weight_sets_scalar():
+    p = Param.from_text("Intron_length_model\n7.2 1.5\nIntron_length_score_weight\n0\n")
+    set_intron_length_weight(p, 0.75)
+    assert p.scalar("Intron_length_score_weight") == "0.75"
+
+
+def test_set_intron_length_weight_noop_when_absent():
+    # a param without the section is left untouched (older params predate the feature)
+    p = Param.from_text(_MINI_PARAM)
+    set_intron_length_weight(p, 1.5)  # must not raise
+    assert "Intron_length_score_weight" not in p.keywords()
+
+
+def test_searchspace_intron_length_axis_appended_and_decoded():
+    space = SearchSpace(tune_intron_length=True)
+    b = space.bounds()
+    assert len(b) == 9  # 8 weights + 1 lambda axis
+    assert b[8] == space.intron_length_bounds
+    v = [-4] * 4 + [0.3] * 4 + [1.234]
+    assert space.decode(v).owf == (0.3, 0.3, 0.3, 0.3)  # lambda doesn't leak into owf
+    assert space.decode_intron_length(v) == 1.234
+    assert SearchSpace().decode_intron_length(v) is None  # off by default
+
+
+def test_searchspace_branch_and_intron_length_axes_order():
+    space = SearchSpace(branch_profiles=("U12_Branch_point_profile",), tune_intron_length=True)
+    assert len(space.bounds()) == 13  # 8 weights + 4 branch + 1 lambda
+    v = [-4] * 4 + [0.3] * 4 + [45.0, 8.0, 18.0, 6.0] + [0.9]
+    (name, kn), = space.decode_branch(v)  # branch axes still read from v[8:12]
+    assert kn.acc_context == 45
+    assert space.decode_intron_length(v) == 0.9  # lambda is the last axis
 
 
 def test_apply_weight_point_per_type_columns_preserve_utr():

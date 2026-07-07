@@ -240,6 +240,19 @@ def set_branch_knobs(param: Param, profile: str, knobs: BranchKnobs) -> None:
         block.raw[di] = " ".join(head + tail) + ending
 
 
+# --- soft intron-length penalty weight (lambda) ------------------------------
+INTRON_LENGTH_WEIGHT_KEY = "Intron_length_score_weight"
+
+
+def set_intron_length_weight(param: Param, weight: float) -> None:
+    """Set the ``Intron_length_score_weight`` scalar (lambda) — the strength of the
+    soft intron-length penalty geneid applies in GenAmic (0 = off). No-op if the
+    param carries no such section (i.e. no ``Intron_length_model``), so it stays
+    safe on params that predate the feature."""
+    if any(k == INTRON_LENGTH_WEIGHT_KEY for k in param.keywords()):
+        param.set_scalar(INTRON_LENGTH_WEIGHT_KEY, f"{weight:g}")
+
+
 @dataclass
 class CDResult:
     point: WeightPoint
@@ -250,11 +263,14 @@ def _score_weight_point(
     base_text: str, point: WeightPoint, geneid_bin: str,
     fasta: str, gff: str, workdir: Path, tag: str,
     branch: tuple[tuple[str, BranchKnobs], ...] = (),
+    intron_length_weight: float | None = None,
 ) -> Accuracy:
     param = Param.from_text(base_text)
     apply_weight_point(param, point)
     for name, knobs in branch:
         set_branch_knobs(param, name, knobs)
+    if intron_length_weight is not None:
+        set_intron_length_weight(param, intron_length_weight)
     ptmp = workdir / f"p_{tag}.param"
     param.write(ptmp)
     pred = workdir / f"pred_{tag}.gff"
@@ -348,16 +364,23 @@ class SearchSpace:
     and oWF weights (decoded to a :class:`WeightPoint`). When ``branch_profiles``
     is non-empty, four more axes per profile — acc_context, min_dist, opt_dist,
     pen_scale — are appended and decoded to :class:`BranchKnobs`, so the U12 (or
-    U2) branch-distance knobs are tuned by the same search."""
+    U2) branch-distance knobs are tuned by the same search. When
+    ``tune_intron_length`` is set, one final axis — the soft intron-length penalty
+    weight (lambda) — is appended after the branch axes."""
 
     ewf_bounds: tuple[float, float] = (-6.0, 0.0)
     owf_bounds: tuple[float, float] = (0.10, 0.70)
     branch_profiles: tuple[str, ...] = ()
     branch_bounds: tuple[tuple[float, float], ...] = BRANCH_BOUNDS
+    tune_intron_length: bool = False
+    intron_length_bounds: tuple[float, float] = (0.0, 2.0)
 
     def bounds(self) -> list[tuple[float, float]]:
         base = [self.ewf_bounds] * 4 + [self.owf_bounds] * 4
-        return base + list(self.branch_bounds) * len(self.branch_profiles)
+        b = base + list(self.branch_bounds) * len(self.branch_profiles)
+        if self.tune_intron_length:
+            b = b + [self.intron_length_bounds]
+        return b
 
     def clip(self, v: list[float]) -> list[float]:
         return [min(hi, max(lo, x)) for x, (lo, hi) in zip(v, self.bounds(), strict=True)]
@@ -366,13 +389,20 @@ class SearchSpace:
         return WeightPoint(tuple(v[:4]), tuple(round(x, 6) for x in v[4:8]))
 
     def decode_branch(self, v: list[float]) -> tuple[tuple[str, BranchKnobs], ...]:
-        """Decode the branch axes (v[8:]) into ``(profile, BranchKnobs)`` pairs;
+        """Decode the branch axes (v[8:8+4*n]) into ``(profile, BranchKnobs)`` pairs;
         empty when no branch profiles are being tuned."""
         out = []
         for j, name in enumerate(self.branch_profiles):
             a, m, o, p = v[8 + 4 * j : 12 + 4 * j]
             out.append((name, BranchKnobs(round(a), round(m), round(o), round(p, 3))))
         return tuple(out)
+
+    def decode_intron_length(self, v: list[float]) -> float | None:
+        """The soft intron-length penalty weight (lambda), the last axis; ``None``
+        when it is not being tuned."""
+        if not self.tune_intron_length:
+            return None
+        return round(v[8 + 4 * len(self.branch_profiles)], 4)
 
 
 def latin_hypercube(bounds: list[tuple[float, float]], n: int, seed: int = 0) -> list[list[float]]:
@@ -396,6 +426,7 @@ class SearchResult:
     n_evaluations: int = 0
     history: list[CDResult] = field(default_factory=list)
     branch: tuple[tuple[str, BranchKnobs], ...] = ()
+    intron_length_weight: float | None = None
 
 
 def global_optimize(
@@ -410,6 +441,8 @@ def global_optimize(
     min_step: tuple[float, float] = (0.125, 0.0125),
     branch_step: float = 2.0,
     branch_min_step: float = 0.5,
+    ilen_step: float = 0.25,
+    ilen_min_step: float = 0.03125,
     workers: int = 4,
     seed: int = 0,
     max_evals: int = 400,
@@ -440,6 +473,7 @@ def global_optimize(
                 base_param_text, space.decode(cv), bin_path,
                 eval_fasta, eval_gff, workdir, str(next(counter)),
                 branch=space.decode_branch(cv),
+                intron_length_weight=space.decode_intron_length(cv),
             )
 
         def score_many(vs: list[list[float]]) -> list[Accuracy]:
@@ -455,9 +489,12 @@ def global_optimize(
         history = [CDResult(space.decode(space.clip(best_v)), best_acc)]
 
         # --- local: compass (pattern) search with step halving ---
-        n_branch = len(bounds) - 8
-        cur_step = [step[0]] * 4 + [step[1]] * 4 + [branch_step] * n_branch
-        min_s = [min_step[0]] * 4 + [min_step[1]] * 4 + [branch_min_step] * n_branch
+        n_branch = 4 * len(space.branch_profiles)
+        n_ilen = 1 if space.tune_intron_length else 0
+        cur_step = ([step[0]] * 4 + [step[1]] * 4
+                    + [branch_step] * n_branch + [ilen_step] * n_ilen)
+        min_s = ([min_step[0]] * 4 + [min_step[1]] * 4
+                 + [branch_min_step] * n_branch + [ilen_min_step] * n_ilen)
         while evals < max_evals and any(cur_step[d] >= min_s[d] for d in range(len(bounds))):
             neighbours = []
             for d in range(len(bounds)):
@@ -481,8 +518,11 @@ def global_optimize(
     best_v = space.clip(best_v)
     point = space.decode(best_v)
     branch = space.decode_branch(best_v)
+    il_weight = space.decode_intron_length(best_v)
     param = Param.from_text(base_param_text)
     apply_weight_point(param, point)
     for name, knobs in branch:
         set_branch_knobs(param, name, knobs)
-    return param.to_text(), SearchResult(point, best_acc, evals, history, branch)
+    if il_weight is not None:
+        set_intron_length_weight(param, il_weight)
+    return param.to_text(), SearchResult(point, best_acc, evals, history, branch, il_weight)
