@@ -74,28 +74,26 @@ extern float INTRON_LENGTH_WEIGHT;
 extern float INTRON_LENGTH_MU;
 extern float INTRON_LENGTH_SIGMA;
 
-/* Soft, one-sided log-normal intron-length penalty (natural-log units), anchored
-   to 0 at the distribution mode so short/typical introns pay nothing and only the
-   long right tail is charged. Returns the rise in negative-log-density relative to
-   the mode for lengths beyond it (0 at or below the mode); the caller scales it by
-   INTRON_LENGTH_WEIGHT. The mode is exp(mu - sigma^2), so the "at/below the mode"
-   test is done in log space (ln len <= mu - sigma^2) and no exp() is needed. With
-   no model (sigma <= 0) it is identically 0. */
+/* Soft intron-length penalty: a CONVEX (in length) linear hinge. Introns up to a
+   free threshold L0 = exp(mu + 2*sigma) -- ~the 98th percentile of the log-normal
+   fit to the trained intron lengths -- pay nothing; beyond L0 the penalty grows
+   linearly at 1 unit per kilobase of excess. Returned unscaled (per-kb excess);
+   the caller multiplies by INTRON_LENGTH_WEIGHT. Convexity in L is deliberate: it
+   makes the GenAmic predecessor search exact in linear time via two sliding-window
+   maxima (the log-normal -log-density used earlier is convex near the mode but
+   concave in the tail, which breaks that). With no model (sigma <= 0) it is 0. */
 static double IntronLengthPenalty(long len)
 {
   double mu = INTRON_LENGTH_MU;
   double sigma = INTRON_LENGTH_SIGMA;
-  double lx, z, nll, nllMode;
+  double L0;
 
   if (sigma <= 0.0 || len <= 0)
     return 0.0;
-  lx = log((double) len);
-  if (lx <= mu - sigma * sigma)          /* at or below the log-normal mode */
+  L0 = exp(mu + 2.0 * sigma);            /* free up to ~the 98th log-normal percentile */
+  if ((double) len <= L0)
     return 0.0;
-  z = lx - mu;
-  nll     = lx + (z * z) / (2.0 * sigma * sigma);   /* -log density (up to a const) */
-  nllMode = mu - (sigma * sigma) / 2.0;             /* the same, evaluated at the mode */
-  return nll - nllMode;
+  return ((double) len - L0) / 1000.0;   /* per-kb excess; linear (convex) beyond L0 */
 }
 
 /* E        exons to assemble, sorted by acceptor position (in/out: filled
