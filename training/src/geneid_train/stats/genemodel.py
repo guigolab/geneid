@@ -31,6 +31,7 @@ def intron_range(
     short_cap: int = 40,
     long_cap: int = 100_000,
     max_quantile: float = 0.999,
+    max_intron: float | None = None,
 ) -> tuple[float, float]:
     """Return ``(min_intron, max_intron)`` for the gene model.
 
@@ -41,11 +42,19 @@ def intron_range(
     xgXerMont) — and geneid cannot span an intron longer than this max, so a too-low
     value fragments long-intron genes into separate models. A high percentile spans
     essentially all real introns while staying under the safety cap.
+
+    ``max_intron``, when given, overrides the percentile/``long_cap`` computation
+    and is used directly as the max. That is the intended setting alongside the
+    soft intron-length penalty (``Intron_length_model``): the hard max becomes a
+    generous *safety bound* (e.g. 500 kb for human, which admits all but the ~9-35
+    longest introns) while the smooth penalty — not a cliff — grades the long ones.
     """
     shortest = min(intron_lengths)
     lo = shortest * 0.75
     if lo > short_cap:
         lo = float(short_cap)
+    if max_intron is not None:
+        return lo, float(max_intron)
     hi = _percentile(list(intron_lengths), max_quantile)
     if hi > long_cap:
         hi = float(long_cap)

@@ -99,6 +99,7 @@ def train(
     u12_exon_thresh: float = 8.0,
     u2_branch: bool = False,
     branch_weight: float = 0.0,
+    max_intron: float | None = None,
 ) -> str:
     """Train a geneid parameter file from complete, filtered gene ``models``.
 
@@ -153,7 +154,7 @@ def train(
     )
 
     intron_lens = [len(s) for s in intron_seqs]
-    lo, hi = intron_range(intron_lens)
+    lo, hi = intron_range(intron_lens, max_intron=max_intron)
     il_model = intron_length_model(intron_lens)
 
     u12_sections = None

@@ -40,6 +40,15 @@ def test_intron_length_model_recovers_lognormal_params():
     assert sigma == pytest.approx(exp_sigma)
 
 
+def test_intron_range_max_intron_override():
+    lens = [1000] * 999 + [90000]
+    lo, hi = intron_range(lens, max_intron=500_000)
+    assert hi == 500000.0  # used directly, bypassing the p99.9/long_cap path
+    lo2, hi2 = intron_range(lens)  # default is the (much lower) p99.9 estimate
+    assert hi2 < hi
+    assert lo == lo2  # min is unaffected by the override
+
+
 def test_intron_length_model_constant_lengths_zero_sigma():
     mu, sigma = intron_length_model([2000, 2000, 2000])
     assert mu == pytest.approx(math.log(2000))

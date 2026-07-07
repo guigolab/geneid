@@ -237,6 +237,7 @@ def _cmd_train(args: argparse.Namespace) -> int:
             models, genome, args.species, seed=args.seed, u12=args.u12,
             u12_splice_thresh=args.u12_splice_thresh, u12_exon_thresh=args.u12_exon_thresh,
             u2_branch=args.u2_branch, branch_weight=args.branch_weight,
+            max_intron=args.max_intron,
         )
     except NotImplementedError as exc:
         sys.stderr.write(f"geneid-train train: {exc}\n")
@@ -317,6 +318,12 @@ def build_parser() -> argparse.ArgumentParser:
     p_train.add_argument("--species", required=True, help="species name for the param header")
     p_train.add_argument("--output", required=True, help="output .param path")
     p_train.add_argument("--min-aa", type=int, default=100, help="minimum protein length (aa)")
+    p_train.add_argument(
+        "--max-intron", type=float, default=None,
+        help="override the gene-model max intron length (bp) instead of the p99.9 estimate; "
+             "use a generous safety bound alongside the soft intron-length penalty "
+             "(e.g. 500000 for human)",
+    )
     p_train.add_argument(
         "--seed", type=int, default=0, help="RNG seed for background sampling (reproducibility)"
     )
