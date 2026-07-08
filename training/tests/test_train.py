@@ -123,3 +123,4 @@ def test_train_end_to_end_produces_valid_param():
     assert p.has("Markov_Transition_probability_matrix")
     gm = "".join(p._find("General_Gene_Model").raw)
     assert "200:Infinity" in gm  # intergenic range injected
+    assert ":500000" in gm  # fixed 500 kb max-intron default (not the p99.9 estimate)
