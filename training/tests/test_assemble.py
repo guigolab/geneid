@@ -92,10 +92,29 @@ def test_assemble_param_injects_intron_length_model():
         template=_tiny_template() + "Exon_weights\n1 1 1 1\n",
         intron_length_model=(7.5, 1.25),
     )
-    # model + its (off-by-default) weight land as an optional block before Exon_weights
+    # model + its weight land as an optional block before Exon_weights; the weight
+    # defaults to 0.5 (penalty ON)
     assert "Intron_length_model\n7.5 1.25\n" in out
-    assert "Intron_length_score_weight\n0\n" in out
+    assert "Intron_length_score_weight\n0.5\n" in out
     assert out.index("Intron_length_model") < out.index("Exon_weights")
+
+
+def test_assemble_param_intron_length_weight_override():
+    kw = dict(
+        species="Testus_specius",
+        start_profile=["8 3 -7 0", "1 A 0.5"],
+        acceptor_profile=["30 28 -7 1 0 1", "1 AA 0.1"],
+        donor_profile=["8 1 -7 1 0 1", "1 AA 0.2"],
+        markov_order=5,
+        markov_initial=["AAAAA 0 0 -0.5"],
+        markov_transition=["AAAAAA 0 0 -0.8"],
+        intron_range="24.75:25394.023",
+        intergenic_range="200:Infinity",
+        template=_tiny_template() + "Exon_weights\n1 1 1 1\n",
+        intron_length_model=(7.5, 1.25),
+    )
+    assert "Intron_length_score_weight\n0\n" in assemble_param(**kw, intron_length_weight=0)
+    assert "Intron_length_score_weight\n1.5\n" in assemble_param(**kw, intron_length_weight=1.5)
 
 
 def test_assemble_param_omits_intron_length_model_when_absent():

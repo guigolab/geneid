@@ -17,6 +17,7 @@ from .prepare.sites import collect_sites
 from .stats.background import from_genome
 from .stats.coding import choose_orders, derive_coding_potential, format_markov_matrix
 from .stats.genemodel import (
+    DEFAULT_INTRON_LENGTH_WEIGHT,
     DEFAULT_MAX_INTRON,
     format_range,
     intron_length_model,
@@ -105,6 +106,7 @@ def train(
     u2_branch: bool = False,
     branch_weight: float = 0.0,
     max_intron: float | None = DEFAULT_MAX_INTRON,
+    intron_length_weight: float = DEFAULT_INTRON_LENGTH_WEIGHT,
 ) -> str:
     """Train a geneid parameter file from complete, filtered gene ``models``.
 
@@ -128,6 +130,10 @@ def train(
     penalty grading long introns, the hard max is only a generous safety bound and
     no longer needs to be estimated per genome. Pass an explicit value to widen or
     tighten that bound; pass ``None`` to fall back to the data-driven p99.9 estimate.
+
+    ``intron_length_weight`` is the soft-penalty strength (lambda) emitted with the
+    intron-length model; it defaults to ``DEFAULT_INTRON_LENGTH_WEIGHT`` (0.5 = the
+    penalty is ON). Pass 0 to carry the model but leave the penalty off.
     """
     if not models:
         raise ValueError("no gene models to train on")
@@ -185,6 +191,7 @@ def train(
         intron_range=format_range(lo, hi),
         intergenic_range="200:Infinity",
         intron_length_model=il_model,
+        intron_length_weight=intron_length_weight,
         u12=u12_sections,
         u12_splice_thresh=u12_splice_thresh,
         u12_exon_thresh=u12_exon_thresh,
