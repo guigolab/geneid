@@ -37,6 +37,13 @@ CASES=(
   "morc_u12|param/human3isoU12.param|-3UnDTA -j 36315000 -k 36380000|samples/chr21.fa"
   # rnaseq: RNA-seq evidence -- intron junctions (-R), expression coverage (-S), UTRs (-u)
   "rnaseq|param/human.rnaseq.param|-3U -u -R samples/ENCFF001.1.MORC.introns.gff -S samples/ENCFF001.1.MORC.stranded.expression.shuffled.gff -j 36315000 -k 36380000|samples/chr21.fa"
+  # human_intron: soft intron-length penalty on a 250kb Red-masked chr14 slice
+  # (GRCh38 chr14:67,900,000-68,150,000, RAD51B locus). The param is chr12-trained
+  # and carries Intron_length_model 7.1788 1.51411 with weight 0.2 (feature ON) and
+  # a generous 500kb gene-model cap. With the penalty on, two far-band introns
+  # (>27kb: 48.6kb + 29.0kb) are penalized away vs weight 0, so this case exercises
+  # and pins the convex-hinge penalty + far-band fast-DP path (introns printed via -n).
+  "human_intron|param/human.chr12.intron_length.param|-3Un|samples/human.chr14.longintron.fasta"
 )
 
 # chr21 cases need the unzipped fasta; derive it from the tracked .gz on demand

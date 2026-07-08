@@ -25,6 +25,7 @@ Exit status is non-zero if any case fails, so it can gate a commit/PR.
 | `human` | human3iso (3 isochores) | example1.fa | Isochore selection + protein/cDNA/tDNA on the documented example |
 | `morc_u12` | human3isoU12 | chr21 MORC3 locus | U12 intron prediction (`-3UnDTA`); the MORC3 gene has two real U12 introns |
 | `rnaseq` | human.rnaseq | chr21 MORC3 locus | RNA-seq evidence: intron junctions (`-R`), expression coverage (`-S`), UTRs (`-u`) |
+| `human_intron` | human.chr12.intron_length (weight 0.2) | Red-masked chr14 250kb slice | Soft intron-length penalty: two far-band introns (>27kb) are penalized away vs weight 0, pinning the convex-hinge penalty + far-band fast-DP path (`-3Un`) |
 
 The `morc_u12` and `rnaseq` cases mirror the documented MORC3 workflow from
 the Current Protocols geneid chapter (Alioto et al.). They restrict
@@ -37,10 +38,12 @@ processing to the locus with `-j 36315000 -k 36380000`, which keeps each run
 from the tracked `samples/GRCh38.chr21.fa.gz` (the same `gunzip` step the
 chapter describes). All other inputs (params, example1.fa, the snake
 fragment + its param, the `longprot` 155 kb window cut from SUPER_1
-(~199.14-199.30 Mb), and the MORC evidence GFFs) are tracked.
+(~199.14-199.30 Mb), the `human_intron` 250 kb Red-masked chr14 slice
+(GRCh38 chr14:67,900,000-68,150,000) + its chr12-trained param, and the
+MORC evidence GFFs) are tracked.
 
 ## Guarantee
 
 At each refactoring step the goldens must stay byte-identical (modulo the
-`# date` line) and the build must stay AddressSanitizer-clean. All four
+`# date` line) and the build must stay AddressSanitizer-clean. All
 cases are deterministic across runs once the date line is stripped.
