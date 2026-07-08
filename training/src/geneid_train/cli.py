@@ -22,6 +22,7 @@ from .prepare.base import (
     filter_non_overlapping,
 )
 from .prepare.classify import classify_report
+from .stats.genemodel import DEFAULT_MAX_INTRON
 
 _U12_MARKERS = ("U12_Splice_Score_Threshold", "U12_Branch_point_profile")
 
@@ -327,10 +328,10 @@ def build_parser() -> argparse.ArgumentParser:
     p_train.add_argument("--output", required=True, help="output .param path")
     p_train.add_argument("--min-aa", type=int, default=100, help="minimum protein length (aa)")
     p_train.add_argument(
-        "--max-intron", type=float, default=None,
-        help="override the gene-model max intron length (bp) instead of the p99.9 estimate; "
-             "use a generous safety bound alongside the soft intron-length penalty "
-             "(e.g. 500000 for human)",
+        "--max-intron", type=float, default=DEFAULT_MAX_INTRON,
+        help="gene-model max intron length (bp); defaults to a fixed 500000 safety bound "
+             "for every genome, leaving the soft intron-length penalty to grade long "
+             "introns. Pass a value to widen/tighten it (e.g. 1000000 for a large genome)",
     )
     p_train.add_argument(
         "--seed", type=int, default=0, help="RNG seed for background sampling (reproducibility)"

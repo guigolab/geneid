@@ -10,6 +10,13 @@ from __future__ import annotations
 import math
 from collections.abc import Sequence
 
+# Default gene-model max intron length (bp). Fixed and genome-independent: with the
+# soft intron-length penalty (``Intron_length_model``) doing the real length tuning
+# via its weight, the hard max only needs to be a generous safety bound. 500 kb
+# admits all but a handful of the longest human introns; smaller genomes never
+# approach it, so the penalty weight -- not this cap -- controls effective length.
+DEFAULT_MAX_INTRON = 500_000
+
 
 def _percentile(values: Sequence[float], q: float) -> float:
     """The ``q`` quantile (0..1) by linear interpolation between order statistics."""

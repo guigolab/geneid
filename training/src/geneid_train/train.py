@@ -16,7 +16,12 @@ from .prepare.base import GeneModel
 from .prepare.sites import collect_sites
 from .stats.background import from_genome
 from .stats.coding import choose_orders, derive_coding_potential, format_markov_matrix
-from .stats.genemodel import format_range, intron_length_model, intron_range
+from .stats.genemodel import (
+    DEFAULT_MAX_INTRON,
+    format_range,
+    intron_length_model,
+    intron_range,
+)
 from .stats.sites import (
     Matrix,
     format_profile,
@@ -99,7 +104,7 @@ def train(
     u12_exon_thresh: float = 8.0,
     u2_branch: bool = False,
     branch_weight: float = 0.0,
-    max_intron: float | None = None,
+    max_intron: float | None = DEFAULT_MAX_INTRON,
 ) -> str:
     """Train a geneid parameter file from complete, filtered gene ``models``.
 
@@ -117,6 +122,12 @@ def train(
     observed branch positions, and spliced in with ``Branch_point_score_weight``
     (default 0 = the branch is scored and reported, ``bp_score``/``bp_pos``, without
     contributing to splice-site selection).
+
+    ``max_intron`` sets the gene-model hard max intron length and defaults to
+    ``DEFAULT_MAX_INTRON`` (500 kb) for every genome: with the soft intron-length
+    penalty grading long introns, the hard max is only a generous safety bound and
+    no longer needs to be estimated per genome. Pass an explicit value to widen or
+    tighten that bound; pass ``None`` to fall back to the data-driven p99.9 estimate.
     """
     if not models:
         raise ValueError("no gene models to train on")
