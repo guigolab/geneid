@@ -124,3 +124,5 @@ def test_train_end_to_end_produces_valid_param():
     gm = "".join(p._find("General_Gene_Model").raw)
     assert "200:Infinity" in gm  # intergenic range injected
     assert ":500000" in gm  # fixed 500 kb max-intron default (not the p99.9 estimate)
+    assert "Intron_length_model" in text  # soft intron-length model emitted
+    assert "Intron_length_score_weight\n0.5\n" in text  # penalty ON by default (weight 0.5)

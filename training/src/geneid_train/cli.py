@@ -22,7 +22,7 @@ from .prepare.base import (
     filter_non_overlapping,
 )
 from .prepare.classify import classify_report
-from .stats.genemodel import DEFAULT_MAX_INTRON
+from .stats.genemodel import DEFAULT_INTRON_LENGTH_WEIGHT, DEFAULT_MAX_INTRON
 
 _U12_MARKERS = ("U12_Splice_Score_Threshold", "U12_Branch_point_profile")
 
@@ -246,7 +246,7 @@ def _cmd_train(args: argparse.Namespace) -> int:
             models, genome, args.species, seed=args.seed, u12=args.u12,
             u12_splice_thresh=args.u12_splice_thresh, u12_exon_thresh=args.u12_exon_thresh,
             u2_branch=args.u2_branch, branch_weight=args.branch_weight,
-            max_intron=args.max_intron,
+            max_intron=args.max_intron, intron_length_weight=args.intron_length_weight,
         )
     except NotImplementedError as exc:
         sys.stderr.write(f"geneid-train train: {exc}\n")
@@ -332,6 +332,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="gene-model max intron length (bp); defaults to a fixed 500000 safety bound "
              "for every genome, leaving the soft intron-length penalty to grade long "
              "introns. Pass a value to widen/tighten it (e.g. 1000000 for a large genome)",
+    )
+    p_train.add_argument(
+        "--intron-length-weight", type=float, default=DEFAULT_INTRON_LENGTH_WEIGHT,
+        help="soft intron-length penalty strength (lambda); defaults to 0.5 (penalty ON). "
+             "Pass 0 to emit the intron-length model but leave the penalty off, or tune it "
+             "per genome with `optimize --tune-intron-length`",
     )
     p_train.add_argument(
         "--seed", type=int, default=0, help="RNG seed for background sampling (reproducibility)"

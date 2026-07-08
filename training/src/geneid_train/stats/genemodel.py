@@ -17,6 +17,18 @@ from collections.abc import Sequence
 # approach it, so the penalty weight -- not this cap -- controls effective length.
 DEFAULT_MAX_INTRON = 500_000
 
+# Default soft intron-length penalty weight (lambda), emitted into
+# ``Intron_length_score_weight``. Nonzero => the penalty is ON out of the box, so
+# the generous 500 kb hard cap does not admit unpenalised long introns. 0.5 was
+# picked from a weight sweep on human, snake and xgXerMont: it prunes the great
+# majority of the (almost entirely spurious) ab-initio introns beyond L0 with no
+# sensitivity cost, while keeping the real long introns that a weight >= 1 starts
+# to remove. Real long introns are best recovered via -R evidence, which bypasses
+# the penalty, so a moderately aggressive default is safe. Tunable per genome via
+# ``optimize --tune-intron-length``.
+DEFAULT_INTRON_LENGTH_WEIGHT = 0.5
+
+
 
 def _percentile(values: Sequence[float], q: float) -> float:
     """The ``q`` quantile (0..1) by linear interpolation between order statistics."""

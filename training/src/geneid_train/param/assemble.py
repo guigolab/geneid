@@ -18,6 +18,7 @@ from __future__ import annotations
 from importlib.resources import files
 
 from ..core.param import Param
+from ..stats.genemodel import DEFAULT_INTRON_LENGTH_WEIGHT
 from .u12 import U12Sections
 
 
@@ -42,6 +43,7 @@ def assemble_param(
     u12_splice_thresh: float = 9.0,
     u12_exon_thresh: float = 8.0,
     intron_length_model: tuple[float, float] | None = None,
+    intron_length_weight: float = DEFAULT_INTRON_LENGTH_WEIGHT,
 ) -> str:
     """Build a full geneid param. Profile/Markov args are geneid-format data
     lines (from ``stats.sites.format_profile`` / ``stats.coding.format_markov_matrix``);
@@ -83,14 +85,14 @@ def assemble_param(
 
     if intron_length_model is not None:
         # Soft intron-length penalty: the log-normal (mu, sigma) over ln(length)
-        # plus its weight (lambda). The weight is emitted at 0 = off, so the model
-        # is carried but inert until the optimizer (or a user) turns it on; geneid
-        # reads both in the optional-scalar block before Exon_weights.
+        # plus its weight (lambda). The weight defaults to DEFAULT_INTRON_LENGTH_WEIGHT
+        # (0.5 = ON); pass 0 to carry the model inert. geneid reads both in the
+        # optional-scalar block before Exon_weights.
         mu, sigma = intron_length_model
         p.insert_text_before(
             "Exon_weights",
             f"Intron_length_model\n{mu:.6g} {sigma:.6g}\n"
-            f"Intron_length_score_weight\n0\n",
+            f"Intron_length_score_weight\n{intron_length_weight:g}\n",
         )
 
     text = p.to_text()
