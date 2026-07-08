@@ -44,6 +44,11 @@ CASES=(
   # (>27kb: 48.6kb + 29.0kb) are penalized away vs weight 0, so this case exercises
   # and pins the convex-hinge penalty + far-band fast-DP path (introns printed via -n).
   "human_intron|param/human.chr12.intron_length.param|-3Un|samples/human.chr14.longintron.fasta"
+  # human_intron_multifrag: same soft intron-length penalty on a 550kb slice (chr14
+  # 67,700,000-68,250,000) -- >500kb (LENGTHSi) so it is processed in TWO fragments,
+  # exercising the near-band deque's cross-fragment maintenance in BackupArrayD (the
+  # deque-index rebase/expiry) that the single-fragment human_intron case does not.
+  "human_intron_multifrag|param/human.chr12.intron_length.param|-3Un|samples/human.chr14.longintron.multifrag.fasta"
 )
 
 # chr21 cases need the unzipped fasta; derive it from the tracked .gz on demand

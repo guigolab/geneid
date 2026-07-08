@@ -268,6 +268,10 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 		  {
 		    remainder = pg->d[etype][j]->Remainder;
 		    dclass = pg->d[etype][j]->Donor->class;
+		    /* Feature #1: record this newly-folded exon in its cell's near-band
+		       max-deque (only when the penalty is on -- otherwise never queried). */
+		    if (INTRON_LENGTH_WEIGHT > 0)
+		      dqPushBack(&pg->dq[etype][remainder][dclass], j, pg->d[etype]);
 		    if ((frame == remainder && spliceclass == dclass &&
 			 ((pg->d[etype][j]->Donor->Position 
 			   + pg->d[etype][j]->offset2)
@@ -320,53 +324,82 @@ void genamic(exonGFF* E, long nExons, packGenes* pg, gparam* gp)
 		       the DP already tracks in this cell -- an upper bound on every
 		       candidate's GeneScore, used by the far-band early stop below. */
 		    float GSmax = pg->Ga[etype][frame][spliceclass]->GeneScore;
-		    for (j2 = j-1;
-			 j2 >= 0 && j2 < pg->km[etype] &&
-			 ((pg->d[etype][j2]->Donor->Position + pg->d[etype][j2]->offset2)
-			  >=
-			  ((E+i)->Acceptor->Position + (E+i)->offset1)
-			  + ((E+i)->evidence - pg->d[etype][j2]->evidence)
-			  - MaxDist);
-			 j2--)
-		      {
-			long ilen =
-			  ((E+i)->Acceptor->Position + (E+i)->offset1)
-			  + ((E+i)->evidence - pg->d[etype][j2]->evidence)
-			  - (pg->d[etype][j2]->Donor->Position + pg->d[etype][j2]->offset2);
-			if (pg->d[etype][j2]->Remainder == frame &&
-			    pg->d[etype][j2]->Donor->class == spliceclass)
-			  {
-			    float pen = INTRON_LENGTH_WEIGHT * (float) IntronLengthPenalty(ilen);
-			    if (pg->d[etype][j2]->GeneScore - pen > bestVal)
-			      {
-				bestVal = pg->d[etype][j2]->GeneScore - pen;
-				bestPred = pg->d[etype][j2];
-				ilenPenalty = pen;
-			      }
-			  }
-			/* Early stop, FAR band only. Once a length just below ilen already
-			   incurs a penalty (stoppen > 0) and GSmax - weight*stoppen <=
-			   bestVal, no farther (longer, >= that penalty) candidate can beat
-			   bestVal, so we stop -- this trims the huge tail of the window
-			   under a generous max-intron cap. Restricted to the far band on
-			   purpose: in the NEAR band the penalty is 0, so predecessor choice
-			   is decided by GeneScore differences at the float-ULP scale (the
-			   scores are ~1e4), where GSmax is not a bit-exact bound; scanning
-			   the near band in full (bounded by L0 ~ exp(mu+2sigma), NOT the
-			   cap) keeps the result identical to the unoptimised scan. The far
-			   band's penalty margin dominates that ULP noise.
+		    /* Soft intron-length penalty predecessor search (feature #1), near-band
+		       FAST PATH -- exactly equivalent to the full-window scan it
+		       replaces (verified byte-identical) but O(log n + tail) not
+		       O(near band). Splits [MinDist,MaxDist] at a threshold TH:
+		       candidates with Donor->Position >= TH are GUARANTEED penalty-free
+		       (near band), and the per-cell monotone-max deque (fed by 2b and
+		       BackupArrayD) returns the best-GeneScore one in O(1). The rest
+		       (boundary zone + far band, Donor->Position < TH) are scanned
+		       downward with exact penalties + the far-band early stop -- a
+		       short tail. TH is anchored on the raw Acceptor->Position so it
+		       only RISES as the acceptor-sorted outer loop advances, keeping the
+		       deque front-pop monotone (a pop is permanent, never dropping a
+		       still-near candidate); DQGUARD (16 bp) absorbs the small offset1/
+		       offset2/evidence jitter so Donor->Position >= TH implies
+		       IntronLengthPenalty == 0. */
+		    {
+		      const long DQGUARD = 16;
+		      double L0 = (INTRON_LENGTH_SIGMA > 0.0)
+			? exp((double)INTRON_LENGTH_MU + 2.0*(double)INTRON_LENGTH_SIGMA)
+			: 1e18;   /* sigma<=0: penalty always 0 -> everything is "near" */
+		      double TH = (double)(E+i)->Acceptor->Position - L0 + (double)DQGUARD;
+		      idxDeque* q = &pg->dq[etype][frame][spliceclass];
+		      long lo = 0, hi = j, startj2;
 
-			   ilen - 100: the scan is ordered by Donor->Position, but the true
-			   length adds offset2 (a per-exon +/-codon correction, |.| <= 4) and
-			   the +/-1 evidence nudge, which are not monotone; 100 bp is a safe
-			   (>= 20x) lower bound on any remaining candidate's length. */
+		      /* Expire deque fronts that have left the guaranteed-near band
+			 (monotone in TH, so a pop is permanent and correct). */
+		      while (q->len > 0 &&
+			     (double) pg->d[etype][q->buf[q->head]]->Donor->Position < TH)
+			{ q->head++; q->len--; }
+		      /* Deque front = max-GeneScore guaranteed-near predecessor (pen 0). */
+		      if (q->len > 0)
 			{
-			  double stoppen = IntronLengthPenalty(ilen - 100);
-			  if (stoppen > 0.0 &&
-			      GSmax - INTRON_LENGTH_WEIGHT * (float) stoppen <= bestVal)
-			    break;
+			  bestPred = pg->d[etype][q->buf[q->head]];
+			  bestVal  = bestPred->GeneScore;
+			  ilenPenalty = 0;
 			}
-		      }
+
+		      /* Binary-search the first folded index with Donor->Position >= TH
+			 (d[etype] is sorted by Donor->Position); scan below it downward. */
+		      while (lo < hi)
+			{
+			  long mid = (lo + hi) / 2;
+			  if ((double) pg->d[etype][mid]->Donor->Position < TH) lo = mid + 1;
+			  else hi = mid;
+			}
+		      for (startj2 = lo - 1, j2 = startj2;
+			   j2 >= 0 && j2 < pg->km[etype] &&
+			   ((pg->d[etype][j2]->Donor->Position + pg->d[etype][j2]->offset2)
+			    >= ((E+i)->Acceptor->Position + (E+i)->offset1)
+			       + ((E+i)->evidence - pg->d[etype][j2]->evidence) - MaxDist);
+			   j2--)
+			{
+			  long ilen =
+			    ((E+i)->Acceptor->Position + (E+i)->offset1)
+			    + ((E+i)->evidence - pg->d[etype][j2]->evidence)
+			    - (pg->d[etype][j2]->Donor->Position + pg->d[etype][j2]->offset2);
+			  if (pg->d[etype][j2]->Remainder == frame &&
+			      pg->d[etype][j2]->Donor->class == spliceclass)
+			    {
+			      float pen = INTRON_LENGTH_WEIGHT * (float) IntronLengthPenalty(ilen);
+			      if (pg->d[etype][j2]->GeneScore - pen > bestVal)
+				{
+				  bestVal = pg->d[etype][j2]->GeneScore - pen;
+				  bestPred = pg->d[etype][j2];
+				  ilenPenalty = pen;
+				}
+			    }
+			  {
+			    double stoppen = IntronLengthPenalty(ilen - 100);
+			    if (stoppen > 0.0 &&
+				GSmax - INTRON_LENGTH_WEIGHT * (float) stoppen <= bestVal)
+			      break;
+			  }
+			}
+		    }
+
 		    savedGa = pg->Ga[etype][frame][spliceclass];
 		    pg->Ga[etype][frame][spliceclass] = bestPred;
 		  }

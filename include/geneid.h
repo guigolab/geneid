@@ -174,6 +174,9 @@ A. DEFINITIONS
 /* reservation (and an unchecked overflow).                                   */
 #define INITDARRAY 256
 
+/* Initial capacity of each near-band index-deque buffer (idxDeque; feature #1). */
+#define INITDQ 16
+
 /* Chunk size (entries) of the growable dumpster backup arrays (BackupGenes.c).*/
 /* Chunks are stable-address: allocated once, never moved, so backed-up        */
 /* exons/sites keep their pointers valid while the dumpster grows on demand.   */
@@ -646,6 +649,22 @@ typedef struct s_packExons
 /* The gene-assembly DP state, persisted across all fragments of one locus
    (reset only when moving to the next input sequence). See the header
    comment of genamic.c for how these are used together. */
+/* Monotone-max deque of pg->d[class] INDICES, used only by the soft
+   intron-length near-band fast path (feature #1). One per DP cell, parallel to
+   Ga[class][frame][spliceclass]. Holds indices (not exon pointers) because
+   BackupArrayD compacts d[] and replaces its entries with backup copies -- the
+   deque indices are shifted alongside it there. Indices are pushed in ascending
+   d-order (ascending Donor position) as 2b/BackupArrayD fold exons in; the buffer
+   keeps them with monotone-decreasing GeneScore front->back, so the front is the
+   max-GeneScore near-band predecessor. Stays empty when the penalty is off. */
+typedef struct s_idxDeque
+{
+  long* buf;   /* backing array of d[class] indices, live range buf[head .. head+len) */
+  long  head;  /* offset of the front element in buf */
+  long  len;   /* number of live elements */
+  long  cap;   /* allocated capacity of buf */
+} idxDeque;
+
 typedef struct s_packGenes
 {
   exonGFF* ***Ga;   /* Ga[class][frame][spliceclass]: best partial gene ending in that DP cell */
@@ -655,6 +674,7 @@ typedef struct s_packGenes
   long* dcap;       /* allocated capacity of each d[class] (grown by BuildSort) */
   long* km;         /* km[class]: number of exons currently in d[class] */
   long* je;         /* je[class]: how far d[class] has been folded into Ga so far (forward-only cursor) */
+  idxDeque*** dq;   /* dq[class][frame][spliceclass]: near-band max-deque parallel to Ga (feature #1) */
 } packGenes;
 
 typedef struct s_packEvidence
@@ -1049,6 +1069,10 @@ void BackupArrayD(packGenes* pg, long accSearch,
                   gparam* gp, packDump* dumpster);
 
 void cleanGenes(packGenes* pg, int nclass, packDump* dumpster);
+
+/* Near-band index-deque maintenance (feature #1): monotone-max push of d-index
+   `idx` (GeneScore read from d[idx]). Shared by genamic's 2b fold and BackupArrayD. */
+void dqPushBack(idxDeque* q, long idx, exonGFF** d);
 
 void cleanDumpHash(dumpHash *h);
 
