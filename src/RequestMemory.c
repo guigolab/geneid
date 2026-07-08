@@ -724,6 +724,20 @@ packGenes* RequestMemoryGenes()
       	
     }
 
+  /* 2b. Allocate the near-band index-deques, parallel to Ga (feature #1). Each
+     idxDeque is calloc-zeroed (buf=NULL, head=len=cap=0) = the empty state; the
+     backing buffers are grown lazily only when the intron-length penalty is on. */
+  if ((pg->dq = (idxDeque ***)calloc(MAXENTRY, sizeof(idxDeque **))) == NULL)
+    printError("Not enough memory: dq near-band deques");
+  for(aux=0; aux<MAXENTRY; aux++)
+    {
+      if ((pg->dq[aux] = (idxDeque **)calloc(FRAMES, sizeof(idxDeque *))) == NULL)
+        printError("Not enough memory: frames in dq near-band deques");
+      for(aux2=0; aux2 < FRAMES; aux2++)
+	if ((pg->dq[aux][aux2] = (idxDeque *)calloc(SPLICECLASSES, sizeof(idxDeque))) == NULL)
+	  printError("Not enough memory: splice classes in dq near-band deques");
+    }
+
   /* 3. Allocate memory space for the set of auxiliary arrays */
   /* Memory for the array of sorting by donor functions (one per class) */
   if ((pg->d = (exonGFF* **)calloc(MAXENTRY, sizeof(exonGFF* *))) == NULL)

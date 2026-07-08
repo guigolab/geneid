@@ -52,6 +52,46 @@
 extern long MAXBACKUPSITES, MAXBACKUPEXONS;
 /* The number of compatible splice classes */
 extern short SPLICECLASSES;
+/* Soft intron-length penalty weight (geneid.c); >0 turns the near-band deque on */
+extern float INTRON_LENGTH_WEIGHT;
+
+/* --- Near-band index-deque (feature #1) ---------------------------------------
+   A monotone-max deque of d[class] indices, one per DP cell (see idxDeque in
+   geneid.h). dqPushBack appends an index keeping the buffer's GeneScore
+   monotone-decreasing front->back, so the front is always the max-GeneScore
+   candidate in the deque; the soft intron-length near-band query reads the front
+   (after expiring out-of-band candidates) instead of re-scanning. Indices are
+   pushed in ascending d-order, so within-buffer indices stay ascending. */
+
+/* Make room for one more index at the tail, compacting or growing as needed. */
+static void dqEnsure(idxDeque* q)
+{
+  if (q->head + q->len < q->cap)
+    return;                                  /* room at the tail already */
+  if (q->head > 0)                           /* slide the live range to the front */
+    {
+      memmove(q->buf, q->buf + q->head, q->len * sizeof(long));
+      q->head = 0;
+      if (q->len < q->cap)
+	return;
+    }
+  q->cap = q->cap ? q->cap * 2 : INITDQ;     /* still full -> grow */
+  if ((q->buf = (long*) realloc(q->buf, q->cap * sizeof(long))) == NULL)
+    printError("Not enough memory: near-band deque buffer");
+}
+
+void dqPushBack(idxDeque* q, long idx, exonGFF** d)
+{
+  float gs = d[idx]->GeneScore;
+  /* Monotone-max: drop tail entries that this exon dominates (<= so that among
+     equal GeneScore the newest/highest-index survives -- matching the backward
+     scan's "keep the shortest intron on a tie" rule). */
+  while (q->len > 0 && d[q->buf[q->head + q->len - 1]]->GeneScore <= gs)
+    q->len--;
+  dqEnsure(q);
+  q->buf[q->head + q->len] = idx;
+  q->len++;
+}
 
 /* Return a stable-address pointer to exon backup slot i, allocating its chunk
    on first touch. Chunks are never moved (only the array of chunk pointers may
@@ -298,6 +338,10 @@ void BackupArrayD(packGenes* pg, long accSearch,
 
 		  if (pg->d[i][j]->GeneScore > pg->Ga[i][remainder][donorclass]->GeneScore)
 			pg->Ga[i][remainder][donorclass] = pg->d[i][j];
+		  /* Feature #1: this fold also feeds the near-band deque (like genamic's
+		     2b), so the next fragment sees these exons as near-band candidates. */
+		  if (INTRON_LENGTH_WEIGHT > 0)
+			dqPushBack(&pg->dq[i][remainder][donorclass], j, pg->d[i]);
 		  j++;
 		}
       jUpdate = j;
@@ -326,6 +370,24 @@ void BackupArrayD(packGenes* pg, long accSearch,
 		}
       pg->km[i] = pg->km[i] - jMaxdist;
       pg->je[i] = jUpdate - jMaxdist;
+
+      /* Feature #1: step 3 dropped d[i][0..jMaxdist) and shifted the survivors
+	 down by jMaxdist. Rebase this class's near-band deques the same way: pop
+	 any front indices that fell off (< jMaxdist), then shift the rest. */
+      if (INTRON_LENGTH_WEIGHT > 0 && jMaxdist > 0)
+	{
+	  int f, s;
+	  long k;
+	  for (f = 0; f < FRAMES; f++)
+	    for (s = 0; s < SPLICECLASSES; s++)
+	      {
+		idxDeque* q = &pg->dq[i][f][s];
+		while (q->len > 0 && q->buf[q->head] < jMaxdist)
+		  { q->head++; q->len--; }
+		for (k = 0; k < q->len; k++)
+		  q->buf[q->head + k] -= jMaxdist;
+	      }
+	}
     }
 
   sprintf(mess,"%ld d-genes saved(%ld real exons)",
@@ -348,6 +410,9 @@ void cleanGenes(packGenes* pg, int nclass, packDump* dumpster)
       for(aux2=0; aux2 < FRAMES; aux2++){
 	for(aux3=0; aux3 < SPLICECLASSES; aux3++){
 	  pg->Ga[aux][aux2][aux3] = pg->Ghost;
+	  /* Empty the near-band deque for this cell (keep its buffer for reuse) */
+	  pg->dq[aux][aux2][aux3].head = 0;
+	  pg->dq[aux][aux2][aux3].len  = 0;
 	}
       }
     }
