@@ -28,7 +28,7 @@ OBJECTS = $(OBJ)/BackupGenes.o $(OBJ)/PeakEdgeScore.o $(OBJ)/GetTranscriptTermin
 	$(OBJ)/ComputeStopInfo.o $(OBJ)/CookingGenes.o $(OBJ)/CorrectExon.o \
 	$(OBJ)/Dictionary.o $(OBJ)/DumpHash.o $(OBJ)/FetchSequence.o \
 	$(OBJ)/GetSitesWithProfile.o $(OBJ)/GetStopCodons.o $(OBJ)/Output.o \
-	$(OBJ)/PrintExons.o $(OBJ)/PrintSites.o $(OBJ)/ReadExonsGFF.o \
+	$(OBJ)/PrintExons.o $(OBJ)/PrintSites.o $(OBJ)/ReadExonsGFF.o $(OBJ)/ReadExonsBigBed.o $(OBJ)/bigbed.o \
 	$(OBJ)/ReadGeneModel.o $(OBJ)/ReadSequence.o $(OBJ)/ReadHSP.o $(OBJ)/RecomputePositions.o \
 	$(OBJ)/RequestMemory.o $(OBJ)/ProcessHSPs.o $(OBJ)/ScoreExons.o $(OBJ)/SearchEvidenceExons.o \
 	$(OBJ)/SetRatios.o $(OBJ)/SortExons.o $(OBJ)/SortSites.o $(OBJ)/SortHSPs.o $(OBJ)/SwitchFrames.o \
@@ -39,7 +39,7 @@ OBJECTS = $(OBJ)/BackupGenes.o $(OBJ)/PeakEdgeScore.o $(OBJ)/GetTranscriptTermin
 #######
 
 $(PRODUCT): $(BIN) $(OBJ) $(OBJ)/$(PROGRAM).o $(OBJECTS) $(HEADERS)
-	$(CC) $(OPTS) -o $(PRODUCT) $(OBJ)/$(PROGRAM).o $(OBJECTS) -lm
+	$(CC) $(OPTS) -o $(PRODUCT) $(OBJ)/$(PROGRAM).o $(OBJECTS) -lm -lz
 
 $(BIN) :
 	mkdir $(BIN); 
@@ -151,6 +151,12 @@ $(OBJ)/ReadGeneModel.o: $(CDIR)/ReadGeneModel.c $(HEADERS)
 
 $(OBJ)/ReadExonsGFF.o : $(CDIR)/ReadExonsGFF.c $(HEADERS)
 	$(CC) -c $(OPTS) $(CDIR)/ReadExonsGFF.c -o $(OBJ)/ReadExonsGFF.o
+
+$(OBJ)/bigbed.o : $(CDIR)/bigbed.c $(INCLUDE)/bigbed.h
+	$(CC) -c $(OPTS) $(CDIR)/bigbed.c -o $(OBJ)/bigbed.o
+
+$(OBJ)/ReadExonsBigBed.o : $(CDIR)/ReadExonsBigBed.c $(HEADERS) $(INCLUDE)/bigbed.h
+	$(CC) -c $(OPTS) $(CDIR)/ReadExonsBigBed.c -o $(OBJ)/ReadExonsBigBed.o
 
 $(OBJ)/ReadSequence.o : $(CDIR)/ReadSequence.c $(HEADERS)
 	$(CC) -c $(OPTS) $(CDIR)/ReadSequence.c -o $(OBJ)/ReadSequence.o

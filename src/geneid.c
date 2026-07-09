@@ -31,6 +31,7 @@
 
 
 #include "geneid.h"
+#include "bigbed.h"
 /* #include <mcheck.h> */
 
 /* geneid setup flags */
@@ -206,6 +207,8 @@ int main (int argc, char *argv[])
   int nIsochores; 
   int reading;
   int lastSplit;
+  BigBed* evBB = NULL;    /* non-NULL => -R evidence is a bigBed, queried per split */
+  long bbOwnedLo = 0;     /* upper acceptor bound owned by the previous fragment */
   char mess[MAXSTRING];
 
   
@@ -314,13 +317,21 @@ int main (int argc, char *argv[])
       /* A. Predicting signals, exons and genes in DNA sequences */
       /* A.1. Reading external information I: annotations */
       if (EVD)
-	{ 
-	  printMess("Reading evidence (annotations)...");
-	  external->nvExons = 
-	    ReadExonsGFF(ExonsFile, external, isochores[0]->D);
-	  sprintf(mess,"%ld annotations acquired from file\n", 
-		  external->nvExons); 
-	  printMess(mess);
+	{
+	  /* bbOpen validates the bigBed magic and returns NULL for a text GFF
+	     (whose first bytes are ASCII), so it doubles as the format sniff. */
+	  evBB = bbOpen(ExonsFile);
+	  if (evBB)
+	    printMess("Reading evidence from bigBed (per-split range queries)...");
+	  else
+	    {
+	      printMess("Reading evidence (annotations)...");
+	      external->nvExons =
+		ReadExonsGFF(ExonsFile, external, isochores[0]->D);
+	      sprintf(mess,"%ld annotations acquired from file\n",
+		      external->nvExons);
+	      printMess(mess);
+	    }
 	}
 	
       /* A.2. Reading external information II: homology information */
@@ -374,15 +385,21 @@ int main (int argc, char *argv[])
 
 	  if (EVD)
 	    {
-	      printMess("Select annotations");
-	      evidence = (packEvidence*) SelectEvidence(external,Locus);
-	      if (evidence == NULL)
-		sprintf(mess,"No information has been provided for %s\n",
-			Locus);
+	      if (evBB)
+		/* bigBed: no preload -- evidence[0] is filled per fragment below */
+		evidence = external->evidence[0];
 	      else
-		sprintf(mess,"Using %ld annotations in %s\n",
-			evidence->nvExons,Locus);
-	      printMess(mess);
+		{
+		  printMess("Select annotations");
+		  evidence = (packEvidence*) SelectEvidence(external,Locus);
+		  if (evidence == NULL)
+		    sprintf(mess,"No information has been provided for %s\n",
+			    Locus);
+		  else
+		    sprintf(mess,"Using %ld annotations in %s\n",
+			    evidence->nvExons,Locus);
+		  printMess(mess);
+		}
 	    }
 
 	  /* A.5. Processing sequence into several fragments if required */
@@ -411,6 +428,7 @@ int main (int argc, char *argv[])
 	  if ((LOW > 0)&&(LOW <= upperlimit)){
 	    lowerlimit = LOW - 1;
 	  }else{lowerlimit = 0;}
+	  bbOwnedLo = lowerlimit;   /* first fragment owns acceptors above this */
 	  l1 = lowerlimit;
 	  l2 = MIN(l1 + LENGTHSi-1,LengthSequence-1);
 	  l2 = MIN(l2,upperlimit);
@@ -484,16 +502,29 @@ int main (int argc, char *argv[])
 		{
 		  /* Searching evidence exons in this fragment */
 		  printMess("Searching annotations to be used in this fragment");
-		  SearchEvidenceExons(external,
-				      evidence, 
-				      (lastSplit)?l2:l2-OVERLAP);
-				  
-		  /* Unused annotations: out of range (info) */
-		  if (lastSplit)
+		  if (evBB)
 		    {
-		      sprintf(mess,"Leaving out last %ld evidences (out of range)",
-			      evidence->nvExons - external->i2vExons);
-		      printMess(mess);
+		      /* Per-split bigBed query. ownedHi mirrors SearchEvidenceExons'
+			 (l2 or l2-OVERLAP) bound in 1-based acceptor units, so each
+			 record is committed in exactly one fragment. */
+		      long ownedHi = ((lastSplit)?l2:l2-OVERLAP) + 1;
+		      ReadExonsBigBed(evBB, external, isochores[0]->D,
+				      Locus, l1, l2, bbOwnedLo, ownedHi);
+		      bbOwnedLo = ownedHi;
+		    }
+		  else
+		    {
+		      SearchEvidenceExons(external,
+					  evidence,
+					  (lastSplit)?l2:l2-OVERLAP);
+
+		      /* Unused annotations: out of range (info) */
+		      if (lastSplit)
+			{
+			  sprintf(mess,"Leaving out last %ld evidences (out of range)",
+				  evidence->nvExons - external->i2vExons);
+			  printMess(mess);
+			}
 		    }
 		}
 			 
@@ -529,8 +560,9 @@ int main (int argc, char *argv[])
 	      sprintf(mess,"Finished sorting %ld exons\n", nExons);  
 	      printMess(mess);
 			  
-	      /* Next block of annotations to be processed */
-	      if (EVD && evidence != NULL)
+	      /* Next block of annotations to be processed (GFF cursor only;
+		 the bigBed path re-sets the window per fragment). */
+	      if (EVD && evidence != NULL && !evBB)
 		SwitchCounters(external);
 
 	      /* B.4. Printing current fragment predictions (sites and exons) */

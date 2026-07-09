@@ -49,6 +49,11 @@ CASES=(
   # exercising the near-band deque's cross-fragment maintenance in BackupArrayD (the
   # deque-index rebase/expiry) that the single-fragment human_intron case does not.
   "human_intron_multifrag|param/human.chr12.intron_length.param|-3Un|samples/human.chr14.longintron.multifrag.fasta"
+  # human_intron_bb: bigBed -R evidence (per-split range query). The same two Intron
+  # junctions as a GFF -R would supply, delivered via bigBed; the routing waives the
+  # length penalty so both far-band introns (28.9kb + 48.6kb) are spanned. Exercises
+  # bbOpen->bbQuery->AddEvidenceExon end-to-end; byte-identical to the GFF -R result.
+  "human_intron_bb|param/human.chr12.intron_length.param|-3Un -R samples/human.chr14.longintron.introns.bb|samples/human.chr14.longintron.fasta"
 )
 
 # chr21 cases need the unzipped fasta; derive it from the tracked .gz on demand

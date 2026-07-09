@@ -1025,9 +1025,21 @@ int ReadSequence (FILE* seqfile, char* Sequence, char* nextLocus);
 
 long FetchSequence(char *s, char* r);
 
-long ReadExonsGFF (char *FileName, 
-		   packExternalInformation* external, 
+long ReadExonsGFF (char *FileName,
+		   packExternalInformation* external,
 		   dict* d);
+
+/* Shared evidence-feature commit used by both the GFF and bigBed readers. */
+void AddEvidenceExon(packExternalInformation* external, int a, dict* d,
+		     int* three, int acceptorclass, int donorclass,
+		     long* lastAcceptor, char* lineCopy);
+
+/* Per-fragment evidence ingest from a bigBed file (src/ReadExonsBigBed.c);
+   BigBed is defined in bigbed.h. Fills external->evidence[0] with the features
+   owned by this fragment and sets the i1/i2/ivExons window for SortExons. */
+struct BigBed;
+long ReadExonsBigBed(struct BigBed* bb, packExternalInformation* external, dict* d,
+		     char* Locus, long l1, long l2, long ownedLo, long ownedHi);
 
 void SwitchPositions(packExons *allExons);
 

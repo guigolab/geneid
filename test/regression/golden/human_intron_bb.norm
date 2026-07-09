@@ -1,0 +1,121 @@
+##gff-version 3
+# source-version: geneid_v1.5 -- geneid@crg.es
+##sequence-region human.chr14.longintron 1 250001
+# Optimal Gene Structure. 10 genes. Score = 225.61 
+# Gene 1 (Forward). 3 exons. 188 aa. Score = 3.37 
+human.chr14.longintron	geneid_v1.5	gene	22027	33189	3.37	+	.	ID=human.chr14.longintron_1;Name=human.chr14.longintron_1
+human.chr14.longintron	geneid_v1.5	mRNA	22027	33189	3.37	+	.	ID=mRNA_human.chr14.longintron_1;Parent=human.chr14.longintron_1
+human.chr14.longintron	geneid_v1.5	CDS	22027	22116	0.00	+	0	ID=cds_human.chr14.longintron_1;Parent=mRNA_human.chr14.longintron_1;Target=geneid_v1.5_predicted_protein_human.chr14.longintron_1 1 30;5_prime_partial=true;exon_type=Internal;acceptor_score=3.04;donor_score=1.06;coding_potential=3.87
+human.chr14.longintron	geneid_v1.5	exon	22027	22116	0.00	+	.	ID=exon_human.chr14.longintron_1.1;Parent=mRNA_human.chr14.longintron_1;5_prime_partial=true;acceptor_score=3.04;donor_score=1.06
+human.chr14.longintron	geneid_v1.5	intron	22117	32539	2.43	+	0	ID=intron_human.chr14.longintron_1.1;Parent=human.chr14.longintron_1;type=U2;subtype=GT-AG;donor_score=1.06;acceptor_score=3.81;acceptor_profile_score=3.81
+human.chr14.longintron	geneid_v1.5	CDS	32540	32588	1.74	+	0	ID=cds_human.chr14.longintron_1;Parent=mRNA_human.chr14.longintron_1;Target=geneid_v1.5_predicted_protein_human.chr14.longintron_1 31 47;exon_type=Internal;acceptor_score=3.81;donor_score=4.56;coding_potential=1.79
+human.chr14.longintron	geneid_v1.5	exon	32540	32588	1.74	+	.	ID=exon_human.chr14.longintron_1.2;Parent=mRNA_human.chr14.longintron_1;acceptor_score=3.81;donor_score=4.56
+human.chr14.longintron	geneid_v1.5	intron	32589	32764	2.85	+	1	ID=intron_human.chr14.longintron_1.2;Parent=human.chr14.longintron_1;type=U2;subtype=GT-AG;donor_score=4.56;acceptor_score=1.15;acceptor_profile_score=1.15
+human.chr14.longintron	geneid_v1.5	CDS	32765	33189	1.63	+	2	ID=cds_human.chr14.longintron_1;Parent=mRNA_human.chr14.longintron_1;Target=geneid_v1.5_predicted_protein_human.chr14.longintron_1 47 188;exon_type=Terminal;acceptor_score=1.15;coding_potential=12.35
+human.chr14.longintron	geneid_v1.5	exon	32765	33189	1.63	+	.	ID=exon_human.chr14.longintron_1.3;Parent=mRNA_human.chr14.longintron_1;acceptor_score=1.15
+###
+# Gene 2 (Reverse). 5 exons. 121 aa. Score = 202.12 
+human.chr14.longintron	geneid_v1.5	gene	33399	119837	202.12	-	.	ID=human.chr14.longintron_2;Name=human.chr14.longintron_2
+human.chr14.longintron	geneid_v1.5	mRNA	33399	119837	202.12	-	.	ID=mRNA_human.chr14.longintron_2;Parent=human.chr14.longintron_2
+human.chr14.longintron	geneid_v1.5	CDS	33399	33557	0.06	-	0	ID=cds_human.chr14.longintron_2;Parent=mRNA_human.chr14.longintron_2;Target=geneid_v1.5_predicted_protein_human.chr14.longintron_2 69 121;exon_type=Terminal;acceptor_score=1.30;coding_potential=8.21
+human.chr14.longintron	geneid_v1.5	exon	33399	33557	0.06	-	.	ID=exon_human.chr14.longintron_2.5;Parent=mRNA_human.chr14.longintron_2;acceptor_score=1.30
+human.chr14.longintron	geneid_v1.5	intron	33558	41726	1.60	-	0	ID=intron_human.chr14.longintron_2.4;Parent=human.chr14.longintron_2;type=U2;subtype=GT-AG;donor_score=1.91;acceptor_score=1.30;acceptor_profile_score=1.30
+human.chr14.longintron	geneid_v1.5	CDS	41727	41750	0.45	-	0	ID=cds_human.chr14.longintron_2;Parent=mRNA_human.chr14.longintron_2;Target=geneid_v1.5_predicted_protein_human.chr14.longintron_2 61 68;exon_type=Internal;acceptor_score=2.76;donor_score=1.91;coding_potential=4.13
+human.chr14.longintron	geneid_v1.5	exon	41727	41750	0.45	-	.	ID=exon_human.chr14.longintron_2.4;Parent=mRNA_human.chr14.longintron_2;acceptor_score=2.76;donor_score=1.91
+human.chr14.longintron	evidence	intron	41751	70730	100.00	-	0	ID=intron_human.chr14.longintron_2.3;Parent=human.chr14.longintron_2;type=U2;subtype=GT-AG;etype=Intron;donor_score=3.27;acceptor_score=2.76;acceptor_profile_score=2.76
+human.chr14.longintron	geneid_v1.5	CDS	70731	70789	0.48	-	2	ID=cds_human.chr14.longintron_2;Parent=mRNA_human.chr14.longintron_2;Target=geneid_v1.5_predicted_protein_human.chr14.longintron_2 41 60;exon_type=Internal;acceptor_score=2.28;donor_score=3.27;coding_potential=2.88
+human.chr14.longintron	geneid_v1.5	exon	70731	70789	0.48	-	.	ID=exon_human.chr14.longintron_2.3;Parent=mRNA_human.chr14.longintron_2;acceptor_score=2.28;donor_score=3.27
+human.chr14.longintron	evidence	intron	70790	119365	100.00	-	1	ID=intron_human.chr14.longintron_2.2;Parent=human.chr14.longintron_2;type=U2;subtype=GT-AG;etype=Intron;donor_score=1.72;acceptor_score=2.28;acceptor_profile_score=2.28
+human.chr14.longintron	geneid_v1.5	CDS	119366	119442	0.25	-	1	ID=cds_human.chr14.longintron_2;Parent=mRNA_human.chr14.longintron_2;Target=geneid_v1.5_predicted_protein_human.chr14.longintron_2 15 41;exon_type=Internal;acceptor_score=2.48;donor_score=1.72;coding_potential=4.34
+human.chr14.longintron	geneid_v1.5	exon	119366	119442	0.25	-	.	ID=exon_human.chr14.longintron_2.2;Parent=mRNA_human.chr14.longintron_2;acceptor_score=2.48;donor_score=1.72
+human.chr14.longintron	geneid_v1.5	intron	119443	119793	3.53	-	2	ID=intron_human.chr14.longintron_2.1;Parent=human.chr14.longintron_2;type=U2;subtype=GT-AG;donor_score=4.59;acceptor_score=2.48;acceptor_profile_score=2.48
+human.chr14.longintron	geneid_v1.5	CDS	119794	119837	0.88	-	0	ID=cds_human.chr14.longintron_2;Parent=mRNA_human.chr14.longintron_2;Target=geneid_v1.5_predicted_protein_human.chr14.longintron_2 1 15;exon_type=First;start_score=0.54;donor_score=4.59;coding_potential=4.51
+human.chr14.longintron	geneid_v1.5	exon	119794	119837	0.88	-	.	ID=exon_human.chr14.longintron_2.1;Parent=mRNA_human.chr14.longintron_2;donor_score=4.59
+###
+# Gene 3 (Reverse). 2 exons. 132 aa. Score = 3.71 
+human.chr14.longintron	geneid_v1.5	gene	128466	128922	3.71	-	.	ID=human.chr14.longintron_3;Name=human.chr14.longintron_3
+human.chr14.longintron	geneid_v1.5	mRNA	128466	128922	3.71	-	.	ID=mRNA_human.chr14.longintron_3;Parent=human.chr14.longintron_3
+human.chr14.longintron	geneid_v1.5	CDS	128466	128737	3.32	-	2	ID=cds_human.chr14.longintron_3;Parent=mRNA_human.chr14.longintron_3;Target=geneid_v1.5_predicted_protein_human.chr14.longintron_3 42 132;exon_type=Terminal;acceptor_score=4.86;coding_potential=11.01
+human.chr14.longintron	geneid_v1.5	exon	128466	128737	3.32	-	.	ID=exon_human.chr14.longintron_3.2;Parent=mRNA_human.chr14.longintron_3;acceptor_score=4.86
+human.chr14.longintron	geneid_v1.5	intron	128738	128798	2.84	-	1	ID=intron_human.chr14.longintron_3.1;Parent=human.chr14.longintron_3;type=U2;subtype=GT-AG;donor_score=0.81;acceptor_score=4.86;acceptor_profile_score=4.86
+human.chr14.longintron	geneid_v1.5	CDS	128799	128922	0.39	-	0	ID=cds_human.chr14.longintron_3;Parent=mRNA_human.chr14.longintron_3;Target=geneid_v1.5_predicted_protein_human.chr14.longintron_3 1 42;exon_type=First;start_score=3.47;donor_score=0.81;coding_potential=4.55
+human.chr14.longintron	geneid_v1.5	exon	128799	128922	0.39	-	.	ID=exon_human.chr14.longintron_3.1;Parent=mRNA_human.chr14.longintron_3;donor_score=0.81
+###
+# Gene 4 (Forward). 3 exons. 87 aa. Score = 1.47 
+human.chr14.longintron	geneid_v1.5	gene	133655	169210	1.47	+	.	ID=human.chr14.longintron_4;Name=human.chr14.longintron_4
+human.chr14.longintron	geneid_v1.5	mRNA	133655	169210	1.47	+	.	ID=mRNA_human.chr14.longintron_4;Parent=human.chr14.longintron_4
+human.chr14.longintron	geneid_v1.5	CDS	133655	133791	0.29	+	0	ID=cds_human.chr14.longintron_4;Parent=mRNA_human.chr14.longintron_4;Target=geneid_v1.5_predicted_protein_human.chr14.longintron_4 1 46;exon_type=First;start_score=0.82;donor_score=0.81;coding_potential=8.27
+human.chr14.longintron	geneid_v1.5	exon	133655	133791	0.29	+	.	ID=exon_human.chr14.longintron_4.1;Parent=mRNA_human.chr14.longintron_4;donor_score=0.81
+human.chr14.longintron	geneid_v1.5	intron	133792	150128	3.25	+	2	ID=intron_human.chr14.longintron_4.1;Parent=human.chr14.longintron_4;type=U2;subtype=GT-AG;donor_score=0.81;acceptor_score=5.68;acceptor_profile_score=5.68
+human.chr14.longintron	geneid_v1.5	CDS	150129	150198	1.72	+	1	ID=cds_human.chr14.longintron_4;Parent=mRNA_human.chr14.longintron_4;Target=geneid_v1.5_predicted_protein_human.chr14.longintron_4 46 69;exon_type=Internal;acceptor_score=5.68;donor_score=1.03;coding_potential=4.24
+human.chr14.longintron	geneid_v1.5	exon	150129	150198	1.72	+	.	ID=exon_human.chr14.longintron_4.2;Parent=mRNA_human.chr14.longintron_4;acceptor_score=5.68;donor_score=1.03
+human.chr14.longintron	geneid_v1.5	intron	150199	169156	2.48	+	0	ID=intron_human.chr14.longintron_4.2;Parent=human.chr14.longintron_4;type=U2;subtype=GT-AG;donor_score=1.03;acceptor_score=3.92;acceptor_profile_score=3.92
+human.chr14.longintron	geneid_v1.5	CDS	169157	169210	-0.54	+	0	ID=cds_human.chr14.longintron_4;Parent=mRNA_human.chr14.longintron_4;Target=geneid_v1.5_predicted_protein_human.chr14.longintron_4 70 87;exon_type=Terminal;acceptor_score=3.92;coding_potential=2.76
+human.chr14.longintron	geneid_v1.5	exon	169157	169210	-0.54	+	.	ID=exon_human.chr14.longintron_4.3;Parent=mRNA_human.chr14.longintron_4;acceptor_score=3.92
+###
+# Gene 5 (Reverse). 2 exons. 186 aa. Score = 6.53 
+human.chr14.longintron	geneid_v1.5	gene	174947	175537	6.53	-	.	ID=human.chr14.longintron_5;Name=human.chr14.longintron_5
+human.chr14.longintron	geneid_v1.5	mRNA	174947	175537	6.53	-	.	ID=mRNA_human.chr14.longintron_5;Parent=human.chr14.longintron_5
+human.chr14.longintron	geneid_v1.5	CDS	174947	175196	5.93	-	1	ID=cds_human.chr14.longintron_5;Parent=mRNA_human.chr14.longintron_5;Target=geneid_v1.5_predicted_protein_human.chr14.longintron_5 103 186;exon_type=Terminal;acceptor_score=4.55;coding_potential=17.99
+human.chr14.longintron	geneid_v1.5	exon	174947	175196	5.93	-	.	ID=exon_human.chr14.longintron_5.2;Parent=mRNA_human.chr14.longintron_5;acceptor_score=4.55
+human.chr14.longintron	geneid_v1.5	intron	175197	175229	1.49	-	2	ID=intron_human.chr14.longintron_5.1;Parent=human.chr14.longintron_5;type=U2;subtype=GT-AG;donor_score=-1.57;acceptor_score=4.55;acceptor_profile_score=4.55
+human.chr14.longintron	geneid_v1.5	CDS	175230	175537	0.60	-	0	ID=cds_human.chr14.longintron_5;Parent=mRNA_human.chr14.longintron_5;Target=geneid_v1.5_predicted_protein_human.chr14.longintron_5 1 103;exon_type=First;start_score=2.68;donor_score=-1.57;coding_potential=9.85
+human.chr14.longintron	geneid_v1.5	exon	175230	175537	0.60	-	.	ID=exon_human.chr14.longintron_5.1;Parent=mRNA_human.chr14.longintron_5;donor_score=-1.57
+###
+# Gene 6 (Reverse). 3 exons. 55 aa. Score = 2.12 
+human.chr14.longintron	geneid_v1.5	gene	176078	186583	2.12	-	.	ID=human.chr14.longintron_6;Name=human.chr14.longintron_6
+human.chr14.longintron	geneid_v1.5	mRNA	176078	186583	2.12	-	.	ID=mRNA_human.chr14.longintron_6;Parent=human.chr14.longintron_6
+human.chr14.longintron	geneid_v1.5	CDS	176078	176105	0.37	-	1	ID=cds_human.chr14.longintron_6;Parent=mRNA_human.chr14.longintron_6;Target=geneid_v1.5_predicted_protein_human.chr14.longintron_6 46 55;exon_type=Terminal;acceptor_score=5.32;coding_potential=2.95
+human.chr14.longintron	geneid_v1.5	exon	176078	176105	0.37	-	.	ID=exon_human.chr14.longintron_6.3;Parent=mRNA_human.chr14.longintron_6;acceptor_score=5.32
+human.chr14.longintron	geneid_v1.5	intron	176106	179981	3.86	-	2	ID=intron_human.chr14.longintron_6.2;Parent=human.chr14.longintron_6;type=U2;subtype=GT-AG;donor_score=2.40;acceptor_score=5.32;acceptor_profile_score=5.32
+human.chr14.longintron	geneid_v1.5	CDS	179982	180011	0.90	-	1	ID=cds_human.chr14.longintron_6;Parent=mRNA_human.chr14.longintron_6;Target=geneid_v1.5_predicted_protein_human.chr14.longintron_6 36 46;exon_type=Internal;acceptor_score=5.26;donor_score=2.40;coding_potential=0.77
+human.chr14.longintron	geneid_v1.5	exon	179982	180011	0.90	-	.	ID=exon_human.chr14.longintron_6.2;Parent=mRNA_human.chr14.longintron_6;acceptor_score=5.26;donor_score=2.40
+human.chr14.longintron	geneid_v1.5	intron	180012	186476	4.66	-	2	ID=intron_human.chr14.longintron_6.1;Parent=human.chr14.longintron_6;type=U2;subtype=GT-AG;donor_score=4.06;acceptor_score=5.26;acceptor_profile_score=5.26
+human.chr14.longintron	geneid_v1.5	CDS	186477	186583	0.85	-	0	ID=cds_human.chr14.longintron_6;Parent=mRNA_human.chr14.longintron_6;Target=geneid_v1.5_predicted_protein_human.chr14.longintron_6 1 36;exon_type=First;start_score=1.70;donor_score=4.06;coding_potential=3.48
+human.chr14.longintron	geneid_v1.5	exon	186477	186583	0.85	-	.	ID=exon_human.chr14.longintron_6.1;Parent=mRNA_human.chr14.longintron_6;donor_score=4.06
+###
+# Gene 7 (Forward). 6 exons. 196 aa. Score = 3.36 
+human.chr14.longintron	geneid_v1.5	gene	193905	218427	3.36	+	.	ID=human.chr14.longintron_7;Name=human.chr14.longintron_7
+human.chr14.longintron	geneid_v1.5	mRNA	193905	218427	3.36	+	.	ID=mRNA_human.chr14.longintron_7;Parent=human.chr14.longintron_7
+human.chr14.longintron	geneid_v1.5	CDS	193905	193970	-0.86	+	0	ID=cds_human.chr14.longintron_7;Parent=mRNA_human.chr14.longintron_7;Target=geneid_v1.5_predicted_protein_human.chr14.longintron_7 1 22;exon_type=First;start_score=0.21;donor_score=2.14;coding_potential=4.32
+human.chr14.longintron	geneid_v1.5	exon	193905	193970	-0.86	+	.	ID=exon_human.chr14.longintron_7.1;Parent=mRNA_human.chr14.longintron_7;donor_score=2.14
+human.chr14.longintron	geneid_v1.5	intron	193971	203990	3.64	+	0	ID=intron_human.chr14.longintron_7.1;Parent=human.chr14.longintron_7;type=U2;subtype=GT-AG;donor_score=2.14;acceptor_score=5.13;acceptor_profile_score=5.13
+human.chr14.longintron	geneid_v1.5	CDS	203991	204031	1.67	+	0	ID=cds_human.chr14.longintron_7;Parent=mRNA_human.chr14.longintron_7;Target=geneid_v1.5_predicted_protein_human.chr14.longintron_7 23 36;exon_type=Internal;acceptor_score=5.13;donor_score=2.30;coding_potential=3.02
+human.chr14.longintron	geneid_v1.5	exon	203991	204031	1.67	+	.	ID=exon_human.chr14.longintron_7.2;Parent=mRNA_human.chr14.longintron_7;acceptor_score=5.13;donor_score=2.30
+human.chr14.longintron	geneid_v1.5	intron	204032	206587	4.33	+	2	ID=intron_human.chr14.longintron_7.2;Parent=human.chr14.longintron_7;type=U2;subtype=GT-AG;donor_score=2.30;acceptor_score=6.37;acceptor_profile_score=6.37
+human.chr14.longintron	geneid_v1.5	CDS	206588	206636	-0.22	+	1	ID=cds_human.chr14.longintron_7;Parent=mRNA_human.chr14.longintron_7;Target=geneid_v1.5_predicted_protein_human.chr14.longintron_7 36 52;exon_type=Internal;acceptor_score=6.37;donor_score=1.85;coding_potential=-2.87
+human.chr14.longintron	geneid_v1.5	exon	206588	206636	-0.22	+	.	ID=exon_human.chr14.longintron_7.3;Parent=mRNA_human.chr14.longintron_7;acceptor_score=6.37;donor_score=1.85
+human.chr14.longintron	geneid_v1.5	intron	206637	215819	3.50	+	0	ID=intron_human.chr14.longintron_7.3;Parent=human.chr14.longintron_7;type=U2;subtype=GT-AG;donor_score=1.85;acceptor_score=5.15;acceptor_profile_score=5.15
+human.chr14.longintron	geneid_v1.5	CDS	215820	216113	1.82	+	0	ID=cds_human.chr14.longintron_7;Parent=mRNA_human.chr14.longintron_7;Target=geneid_v1.5_predicted_protein_human.chr14.longintron_7 53 150;exon_type=Internal;acceptor_score=5.15;donor_score=2.40;coding_potential=3.21
+human.chr14.longintron	geneid_v1.5	exon	215820	216113	1.82	+	.	ID=exon_human.chr14.longintron_7.4;Parent=mRNA_human.chr14.longintron_7;acceptor_score=5.15;donor_score=2.40
+human.chr14.longintron	geneid_v1.5	intron	216114	217537	3.40	+	0	ID=intron_human.chr14.longintron_7.4;Parent=human.chr14.longintron_7;type=U2;subtype=GT-AG;donor_score=2.40;acceptor_score=4.40;acceptor_profile_score=4.40
+human.chr14.longintron	geneid_v1.5	CDS	217538	217588	0.72	+	0	ID=cds_human.chr14.longintron_7;Parent=mRNA_human.chr14.longintron_7;Target=geneid_v1.5_predicted_protein_human.chr14.longintron_7 151 167;exon_type=Internal;acceptor_score=4.40;donor_score=4.18;coding_potential=-1.07
+human.chr14.longintron	geneid_v1.5	exon	217538	217588	0.72	+	.	ID=exon_human.chr14.longintron_7.5;Parent=mRNA_human.chr14.longintron_7;acceptor_score=4.40;donor_score=4.18
+human.chr14.longintron	geneid_v1.5	intron	217589	218340	4.43	+	0	ID=intron_human.chr14.longintron_7.5;Parent=human.chr14.longintron_7;type=U2;subtype=GT-AG;donor_score=4.18;acceptor_score=4.68;acceptor_profile_score=4.68
+human.chr14.longintron	geneid_v1.5	CDS	218341	218427	0.23	+	0	ID=cds_human.chr14.longintron_7;Parent=mRNA_human.chr14.longintron_7;Target=geneid_v1.5_predicted_protein_human.chr14.longintron_7 168 196;exon_type=Terminal;acceptor_score=4.68;coding_potential=3.57
+human.chr14.longintron	geneid_v1.5	exon	218341	218427	0.23	+	.	ID=exon_human.chr14.longintron_7.6;Parent=mRNA_human.chr14.longintron_7;acceptor_score=4.68
+###
+# Gene 8 (Reverse). 2 exons. 126 aa. Score = 1.23 
+human.chr14.longintron	geneid_v1.5	gene	225329	230096	1.23	-	.	ID=human.chr14.longintron_8;Name=human.chr14.longintron_8
+human.chr14.longintron	geneid_v1.5	mRNA	225329	230096	1.23	-	.	ID=mRNA_human.chr14.longintron_8;Parent=human.chr14.longintron_8
+human.chr14.longintron	geneid_v1.5	CDS	225329	225676	1.19	-	0	ID=cds_human.chr14.longintron_8;Parent=mRNA_human.chr14.longintron_8;Target=geneid_v1.5_predicted_protein_human.chr14.longintron_8 11 126;exon_type=Terminal;acceptor_score=6.38;coding_potential=3.42
+human.chr14.longintron	geneid_v1.5	exon	225329	225676	1.19	-	.	ID=exon_human.chr14.longintron_8.2;Parent=mRNA_human.chr14.longintron_8;acceptor_score=6.38
+human.chr14.longintron	geneid_v1.5	intron	225677	230066	5.69	-	0	ID=intron_human.chr14.longintron_8.1;Parent=human.chr14.longintron_8;type=U2;subtype=GT-AG;donor_score=5.00;acceptor_score=6.38;acceptor_profile_score=6.38
+human.chr14.longintron	geneid_v1.5	CDS	230067	230096	0.03	-	0	ID=cds_human.chr14.longintron_8;Parent=mRNA_human.chr14.longintron_8;Target=geneid_v1.5_predicted_protein_human.chr14.longintron_8 1 10;exon_type=First;start_score=-1.15;donor_score=5.00;coding_potential=4.31
+human.chr14.longintron	geneid_v1.5	exon	230067	230096	0.03	-	.	ID=exon_human.chr14.longintron_8.1;Parent=mRNA_human.chr14.longintron_8;donor_score=5.00
+###
+# Gene 9 (Reverse). 1 exons. 23 aa. Score = 0.40 
+human.chr14.longintron	geneid_v1.5	gene	239830	239898	0.40	-	.	ID=human.chr14.longintron_9;Name=human.chr14.longintron_9
+human.chr14.longintron	geneid_v1.5	mRNA	239830	239898	0.40	-	.	ID=mRNA_human.chr14.longintron_9;Parent=human.chr14.longintron_9
+human.chr14.longintron	geneid_v1.5	CDS	239830	239898	0.40	-	0	ID=cds_human.chr14.longintron_9;Parent=mRNA_human.chr14.longintron_9;Target=geneid_v1.5_predicted_protein_human.chr14.longintron_9 1 23;exon_type=Single;start_score=1.82;coding_potential=8.29
+human.chr14.longintron	geneid_v1.5	exon	239830	239898	0.40	-	.	ID=exon_human.chr14.longintron_9.1;Parent=mRNA_human.chr14.longintron_9;start_score=1.82
+###
+# Gene 10 (Forward). 2 exons. 61 aa. Score = 1.30 
+human.chr14.longintron	geneid_v1.5	gene	243378	243804	1.30	+	.	ID=human.chr14.longintron_10;Name=human.chr14.longintron_10
+human.chr14.longintron	geneid_v1.5	mRNA	243378	243804	1.30	+	.	ID=mRNA_human.chr14.longintron_10;Parent=human.chr14.longintron_10
+human.chr14.longintron	geneid_v1.5	CDS	243378	243462	1.03	+	0	ID=cds_human.chr14.longintron_10;Parent=mRNA_human.chr14.longintron_10;Target=geneid_v1.5_predicted_protein_human.chr14.longintron_10 1 29;exon_type=First;start_score=2.14;donor_score=1.59;coding_potential=6.98
+human.chr14.longintron	geneid_v1.5	exon	243378	243462	1.03	+	.	ID=exon_human.chr14.longintron_10.1;Parent=mRNA_human.chr14.longintron_10;donor_score=1.59
+human.chr14.longintron	geneid_v1.5	intron	243463	243706	2.97	+	1	ID=intron_human.chr14.longintron_10.1;Parent=human.chr14.longintron_10;type=U2;subtype=GT-AG;donor_score=1.59;acceptor_score=4.36;acceptor_profile_score=4.36
+human.chr14.longintron	geneid_v1.5	CDS	243707	243804	0.27	+	2	ID=cds_human.chr14.longintron_10;Parent=mRNA_human.chr14.longintron_10;Target=geneid_v1.5_predicted_protein_human.chr14.longintron_10 29 61;3_prime_partial=true;exon_type=Internal;acceptor_score=4.36;donor_score=0.88;coding_potential=2.83
+human.chr14.longintron	geneid_v1.5	exon	243707	243804	0.27	+	.	ID=exon_human.chr14.longintron_10.2;Parent=mRNA_human.chr14.longintron_10;3_prime_partial=true;acceptor_score=4.36;donor_score=0.88
+###
