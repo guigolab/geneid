@@ -27,6 +27,7 @@ Exit status is non-zero if any case fails, so it can gate a commit/PR.
 | `rnaseq` | human.rnaseq | chr21 MORC3 locus | RNA-seq evidence: intron junctions (`-R`), expression coverage (`-S`), UTRs (`-u`) |
 | `human_intron` | human.chr12.intron_length (weight 0.2) | Red-masked chr14 250kb slice | Soft intron-length penalty: two far-band introns (>27kb) are penalized away vs weight 0, pinning the convex-hinge penalty + far-band fast-DP path (`-3Un`) |
 | `human_intron_multifrag` | human.chr12.intron_length (weight 0.2) | Red-masked chr14 550kb slice | Same penalty on a >500kb (LENGTHSi) slice → two fragments, pinning the near-band deque's cross-fragment maintenance in `BackupArrayD` |
+| `human_intron_bb` | human.chr12.intron_length (weight 0.2) | Red-masked chr14 250kb slice + `-R` bigBed | bigBed `-R` evidence (per-split range query): the same two Intron junctions via bigBed span both far-band introns; exercises `bbOpen`→`bbQuery`→`AddEvidenceExon`, byte-identical to the GFF `-R` result |
 
 The `morc_u12` and `rnaseq` cases mirror the documented MORC3 workflow from
 the Current Protocols geneid chapter (Alioto et al.). They restrict
