@@ -472,6 +472,7 @@ packExternalInformation* RequestMemoryExternalInformation()
   p->bwPlus  = NULL;
   p->bwMinus = NULL;
   p->curLocus = NULL;
+  p->bam = NULL;   /* -S BAM handle: NULL until the -S ingest sniffs a BAM */
 
   return(p);
 }

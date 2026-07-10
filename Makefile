@@ -38,8 +38,23 @@ OBJECTS = $(OBJ)/BackupGenes.o $(OBJ)/PeakEdgeScore.o $(OBJ)/GetTranscriptTermin
 
 #######
 
+# BAM input via htslib is opt-in: `make WITH_HTSLIB=1` (needs htslib installed).
+# Point HTSLIB_PREFIX at the install prefix if it is not /usr/local (e.g.
+# /opt/homebrew on Apple Silicon). The default build stays htslib-free and its
+# output is byte-identical to before.
+HTSLIB_PREFIX ?= /usr/local
+ifdef WITH_HTSLIB
+OPTS += -DWITH_HTSLIB -I$(HTSLIB_PREFIX)/include
+HTSLIBS = -L$(HTSLIB_PREFIX)/lib -lhts
+OBJECTS += $(OBJ)/bamcov.o
+else
+HTSLIBS =
+endif
+
+#######
+
 $(PRODUCT): $(BIN) $(OBJ) $(OBJ)/$(PROGRAM).o $(OBJECTS) $(HEADERS)
-	$(CC) $(OPTS) -o $(PRODUCT) $(OBJ)/$(PROGRAM).o $(OBJECTS) -lm -lz
+	$(CC) $(OPTS) -o $(PRODUCT) $(OBJ)/$(PROGRAM).o $(OBJECTS) -lm -lz $(HTSLIBS)
 
 $(BIN) :
 	mkdir $(BIN); 
@@ -157,6 +172,9 @@ $(OBJ)/bigbed.o : $(CDIR)/bigbed.c $(INCLUDE)/bigbed.h
 
 $(OBJ)/bigwig.o : $(CDIR)/bigwig.c $(INCLUDE)/bigwig.h
 	$(CC) -c $(OPTS) $(CDIR)/bigwig.c -o $(OBJ)/bigwig.o
+
+$(OBJ)/bamcov.o : $(CDIR)/bamcov.c $(INCLUDE)/bamcov.h $(INCLUDE)/bigwig.h
+	$(CC) -c $(OPTS) $(CDIR)/bamcov.c -o $(OBJ)/bamcov.o
 
 $(OBJ)/ReadExonsBigBed.o : $(CDIR)/ReadExonsBigBed.c $(HEADERS) $(INCLUDE)/bigbed.h
 	$(CC) -c $(OPTS) $(CDIR)/ReadExonsBigBed.c -o $(OBJ)/ReadExonsBigBed.o
