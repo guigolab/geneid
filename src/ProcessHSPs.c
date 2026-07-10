@@ -220,7 +220,22 @@ void HSPScan(packExternalInformation* external,
 		}
 	}
 }
-/* Projection of HSPs: save the maximum for each nucleotide */
+/* Additive coverage accumulation, shared by the text RNA-seq path (ReadScan)
+   and, later, the frameless bigWig/BAM fill: summed depth is capped at COV,
+   while raw read support is tracked separately for the rpkm report. Extracted
+   verbatim from ReadScan so the -u -S path stays byte-identical. */
+static void CoverAdd(packExternalInformation* external, short x, long idx,
+                     float scoreHSP, float rawScore)
+{
+  if (external->sr[x][idx] == NO_SCORE)
+    external->sr[x][idx] = scoreHSP;
+  else
+    external->sr[x][idx] = MIN(external->sr[x][idx] + scoreHSP, COV);
+
+  external->readcount[x][idx] = external->readcount[x][idx] + rawScore;
+}
+
+/* Projection of RNA-seq reads: accumulate summed depth for each nucleotide */
 /* Requirement: HSPs must sorted by Position1 */
 void ReadScan(packExternalInformation* external,
 			 packHSP* hsp, 
@@ -271,12 +286,7 @@ void ReadScan(packExternalInformation* external,
 					  j <= hsp->sPairs[x][i]->Pos2 && j <l2;
 					  j++)
 					{
-					  if (external->sr[x][j-l1] == NO_SCORE){
-					    external->sr[x][j-l1] = scoreHSP;
-					  }else{
-					    external->sr[x][j-l1] = MIN(external->sr[x][j-l1]+scoreHSP,COV);
-					  }
-					  external->readcount[x][j-l1] = external->readcount[x][j-l1] + hsp->sPairs[x][i]->Score;
+					  CoverAdd(external, x, j-l1, scoreHSP, hsp->sPairs[x][i]->Score);
 					}
 				}
 			  
@@ -295,12 +305,7 @@ void ReadScan(packExternalInformation* external,
 					  j <= hsp->sPairs[x][i]->Pos2 && j <l2;
 					  j++)
 					{
-					  if (external->sr[x][j-l1] == NO_SCORE){
-					    external->sr[x][j-l1] = scoreHSP;
-					  }else{
-					    external->sr[x][j-l1] = MIN(external->sr[x][j-l1]+scoreHSP,COV);
-					  }
-					  external->readcount[x][j-l1] = external->readcount[x][j-l1] + hsp->sPairs[x][i]->Score;
+					  CoverAdd(external, x, j-l1, scoreHSP, hsp->sPairs[x][i]->Score);
 					}
 				}
 			  
@@ -321,12 +326,7 @@ void ReadScan(packExternalInformation* external,
 					  j <= hsp->sPairs[x][i]->Pos2 && j <= l2;
 					  j++)
 					{
-					  if (external->sr[x][j-l1] == NO_SCORE){
-					    external->sr[x][j-l1] = scoreHSP;
-					  }else{
-					    external->sr[x][j-l1] = MIN(external->sr[x][j-l1]+scoreHSP,COV);
-					  }
-					  external->readcount[x][j-l1] = external->readcount[x][j-l1] + hsp->sPairs[x][i]->Score;
+					  CoverAdd(external, x, j-l1, scoreHSP, hsp->sPairs[x][i]->Score);
 					}
 				}
 			}
@@ -371,12 +371,7 @@ void ReadScan(packExternalInformation* external,
 					  j < l2;
 					  j++)
 					{
-					  if (external->sr[x][j-l1] == NO_SCORE){
-					    external->sr[x][j-l1] = scoreHSP;
-					  }else{
-					    external->sr[x][j-l1] = MIN(external->sr[x][j-l1]+scoreHSP,COV);
-					  }
-					  external->readcount[x][j-l1] = external->readcount[x][j-l1] + hsp->sPairs[x][i]->Score;
+					  CoverAdd(external, x, j-l1, scoreHSP, hsp->sPairs[x][i]->Score);
 					}
 				}
 			  
@@ -394,12 +389,7 @@ void ReadScan(packExternalInformation* external,
 					  j <= hsp->sPairs[x][i]->Pos2 && j <l2;
 					  j++)
 					{
-					  if (external->sr[x][j-l1] == NO_SCORE){
-					    external->sr[x][j-l1] = scoreHSP;
-					  }else{
-					    external->sr[x][j-l1] = MIN(external->sr[x][j-l1]+scoreHSP,COV);
-					  }
-					  external->readcount[x][j-l1] = external->readcount[x][j-l1] + hsp->sPairs[x][i]->Score;
+					  CoverAdd(external, x, j-l1, scoreHSP, hsp->sPairs[x][i]->Score);
 					}
 				}
 			  
@@ -420,12 +410,7 @@ void ReadScan(packExternalInformation* external,
 					  j >= hsp->sPairs[x][i]->Pos1 && j >= l1;
 					  j--)
 					{
-					  if (external->sr[x][j-l1] == NO_SCORE){
-					    external->sr[x][j-l1] = scoreHSP;
-					  }else{
-					    external->sr[x][j-l1] = MIN(external->sr[x][j-l1]+scoreHSP,COV);
-					  }
-					  external->readcount[x][j-l1] = external->readcount[x][j-l1] + hsp->sPairs[x][i]->Score;
+					  CoverAdd(external, x, j-l1, scoreHSP, hsp->sPairs[x][i]->Score);
 					}
 				}
 			}
