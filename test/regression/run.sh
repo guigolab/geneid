@@ -54,6 +54,21 @@ CASES=(
   # length penalty so both far-band introns (28.9kb + 48.6kb) are spanned. Exercises
   # bbOpen->bbQuery->AddEvidenceExon end-to-end; byte-identical to the GFF -R result.
   "human_intron_bb|param/human.chr12.intron_length.param|-3Un -R samples/human.chr14.longintron.introns.bb|samples/human.chr14.longintron.fasta"
+  # --- assemble-only (-O) cases: feed pre-typed exons, skip ab initio prediction ---
+  # human_o: single-locus -O assembly of example1's own 8 exons (fast single-split).
+  # Guards the -O path's independent nExons accounting (was an uninitialized read).
+  "human_o|param/human3iso.param|-3n -O samples/example1.geneid.gff|samples/example1.fa"
+  # human_o_multilocus: -O over a 2-record FASTA with the same 8 exons under each
+  # locus -- guards multi-locus assembly (two genes, one per sequence).
+  "human_o_multilocus|param/human3iso.param|-3n -O samples/example1.2locus.geneid.gff|samples/example1.2locus.fa"
+  # morc_jo_u12: -J -O annotation-scoring + U12 typing over the whole chr21 (multi-
+  # split), forcing MORC3's 17 CDS exons. Guards (a) -U allowed under -O, (b) the
+  # multi-split -J classify walking the printed GOptim chain (2 U12 introns typed).
+  "morc_jo_u12|param/human3isoU12.param|-J -3nU -O samples/MORC.CDS.geneid.gff|samples/chr21.fa"
+  # morc_o_utr: -O -u UTR assembly over whole chr21, forcing MORC3's CDS + both UTR
+  # halves. Guards -u allowed under -O and the UTR-exon frame/remainder fix (the 3'
+  # UTR_Terminal_Half, whose length is not a multiple of 3, must not be dropped).
+  "morc_o_utr|param/human.rnaseq.param|-3nUu -O samples/MORC.UTR.geneid.gff|samples/chr21.fa"
 )
 
 # chr21 cases need the unzipped fasta; derive it from the tracked .gz on demand
