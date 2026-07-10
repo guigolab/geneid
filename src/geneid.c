@@ -50,6 +50,9 @@ int
   scanORF = 0,
   /* Input annotations or homology to protein information/reads to UTR prediction */
   EVD = 0, SRP = 0, UTR=0,
+  /* Annotation-scoring mode (-J): score the forced evidence splice sites under
+     the enabled profiles and classify each intron (report-only, no DP change) */
+  SCOREANNOT = 0,
   /* Output formats */
   GFF = 0, GFF3 = 0, X10 = 0, XML = 0, cDNA = 0, PSEQ = 0, tDNA = 0,
   /* Verbose flag (memory/processing information) */
@@ -304,6 +307,11 @@ int main (int argc, char *argv[])
       U12GTAG = 0;
       U12ATAC = 0;
     }
+  }else if (SCOREANNOT && !GENEID){
+    /* -J -O annotation scoring: keep the param's U12 profiles so introns can be
+       typed U12. Safe because -J scoring is report-only and runs AFTER genamic
+       (no ab-initio U12 building happens in the assembly-only path), and -U --
+       the usual U12 switch -- is disallowed alongside -O. */
   }else{
     U12GTAG = 0;
     U12ATAC = 0;
@@ -311,8 +319,11 @@ int main (int argc, char *argv[])
   /** 1. Allocating genes data structure (after the number of splice classes has been determined **/
   genes = (packGenes*) RequestMemoryGenes();
 
-  /** 3. Starting processing: complete or partial prediction ? **/
-  if (GENEID)
+  /** 3. Starting processing. This per-locus loop is SHARED between full
+     prediction and assemble-only (-O): when GENEID is off, the ab-initio
+     prediction (manager) is skipped and the exons come from the -O file via the
+     evidence path, while the multi-locus loop, isochore selection, gene
+     assembly and output are all inherited. **/
     {
       /* A. Predicting signals, exons and genes in DNA sequences */
       /* A.1. Reading external information I: annotations */
@@ -459,10 +470,12 @@ int main (int argc, char *argv[])
 	      sprintf(mess,"Selecting isochore %d", currentIsochore+COFFSET);
 	      printMess(mess);
 
-	      /* B.2. Prediction of sites and exons construction/filtering */
-	      if (FWD) 
+	      /* B.2. Prediction of sites and exons construction/filtering.
+		 Skipped entirely when GENEID is off (-O): the exons then come only
+		 from the evidence/-O file, merged below by SortExons. */
+	      if (GENEID && FWD)
 		{
-		  /* Forward strand predictions */ 
+		  /* Forward strand predictions */
 		  sprintf(mess,"Running FWD  %s: %ld - %ld", Locus,l1,l2);
 		  printMess(mess);
 		  manager(Sequence, LengthSequence, 
@@ -473,9 +486,9 @@ int main (int argc, char *argv[])
 			  isochores,nIsochores,
 			  GCInfo,&sortSites);
 		}      
-	      if (RVS) 
+	      if (GENEID && RVS)
 		{
-		  /* Reverse strand predictions */ 
+		  /* Reverse strand predictions */
 		  sprintf(mess,"Running Reverse  %s: %ld - %ld(%ld - %ld)", 
 			  Locus, LengthSequence-1 -l2, 
 			  LengthSequence-1 -l1,l1,l2);         
@@ -606,9 +619,19 @@ int main (int argc, char *argv[])
 	      lastSplit = (l2 == upperlimit);
 	    } /* processing next fragment */
 		  
+	  /* Annotation-scoring mode (-J): score + classify the evidence splice sites
+	     of the assembled best gene (genes->GOptim, the same chain OutputGene is
+	     about to print) for reporting. Runs AFTER all fragments are assembled, so
+	     it is strictly report-only (never affects the DP). Scoring the PRINTED
+	     chain -- not the loaded evidence -- is what keeps it correct on multi-split
+	     sequences, where the printed exons are dumpster deep-copies. Single
+	     isochore (isochores[0]). */
+	  if (SCOREANNOT && EVD && evidence != NULL)
+	    ScoreEvidenceSites(genes->GOptim, Sequence, RSequence, LengthSequence, isochores[0]);
+
 	  /* A.6. Full sequence processed: displaying best predicted gene */
 	  if (GENAMIC)
-	    {	      
+	    {
 	      /* Printing gene predictions */
 	      OutputGene(genes,
 			 (EVD && evidence != NULL)? 
@@ -631,53 +654,7 @@ int main (int argc, char *argv[])
 	  cleanAcc(m);
 	  strcpy(Locus,nextLocus);
 	} /* endwhile(reading): next sequence to be processed... */
-    } /*endifgeneid*/
-  else
-    {
-      /* B. Only assembling genes from input exons */
-      	  
-      /* B.0. Reading DNA sequence to make the translations */
-      /* open the Sequence File */
-      if ((seqfile = fopen(SequenceFile, "rb"))==NULL) 
-        printError("The Sequence file can not be open for read");
-      
-      printMess("Reading DNA sequence");
-      reading = IniReadSequence(seqfile,Locus);
-      if (reading != EOF)
-	{
-	  reading = ReadSequence(seqfile, Sequence, nextLocus);
-	  LengthSequence = FetchSequence(Sequence, RSequence);
-	}
-	  
-      /* Header Output */
-      OutputHeader(Locus, LengthSequence);
-      
-      /* B.1. Reading exons in GFF format */
-      printMess("Reading exonsGFF from file");
-      external->nvExons = 
-	ReadExonsGFF(ExonsFile, external, isochores[0]->D);
-      sprintf(mess,"%ld exons acquired from file\n", 
-	      external->nvExons); 
-      printMess(mess);
-	  
-      if (external->nSequences > 1)
-	{
-	  sprintf(mess,"Exons in more than one different locus were detected (%ld sequences)\n", external->nSequences);
-	  printError(mess);
-	}
-	  
-      if (external->nvExons > 0) 
-	{ 
-	  /* B.2. Calling to genamic for assembling the best gene */
-	  genamic(external->evidence[0]->vExons, 
-		  external->evidence[0]->nvExons, 
-		  genes, isochores[0]);  
-	}
-      
-      /* B.3. Printing gene predictions */
-      OutputGene(genes, external->evidence[0]->nvExons, 
-		 Locus, Sequence, isochores[0], dAA, GenePrefix);
-    } /* end only gene assembling from exons file */
+    } /* end shared per-locus processing (prediction and -O assemble-only) */
   
 
   /* 4. The End */

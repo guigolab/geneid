@@ -241,6 +241,13 @@ packExons* RequestMemoryExons()
   allExons->nUtr3InternalHalfExons = 0;
   allExons->nUtrTerminalHalfExons = 0;
   allExons->nUtrTerminalExons = 0;
+  /* Summary count of predicted exons: normally (re)set each fragment by manager()
+     (manager.c), but that runs only when GENEID prediction is on. Zero it here so
+     the assemble-only path (-O, prediction skipped) reads a defined value when it
+     forms nExons = allExons->nExons + allExons_r->nExons + evidence + artificials
+     (geneid.c). Without this, -O read an uninitialized nExons -- harmless on a
+     fresh (zeroed) heap but garbage under ASan, overrunning genamic/SwitchFrames. */
+  allExons->nExons = 0;
 
   return(allExons);
 }

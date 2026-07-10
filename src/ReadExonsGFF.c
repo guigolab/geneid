@@ -58,6 +58,21 @@ packEvidence* SelectEvidence(packExternalInformation* external,
   return(p);
 }
 
+/* True for the non-coding UTR EXON types (NOT the UTR intron types, which are
+   routed like introns). Ab initio BuildUTRExons assigns these Frame=0/Remainder=0
+   because a UTR carries no reading frame; a forced evidence UTR exon must match so
+   it folds into the same genamic DP cell the artificial Begin/End exons reach.
+   Otherwise the coding-remainder formula below gives a UTR exon whose length is
+   not a multiple of 3 a bogus non-zero Remainder, and it is silently dropped from
+   the assembled gene (observed: 3' UTR_Terminal_Half missing under -O -u). */
+static int isUTRExonType(const char* type)
+{
+  return !strcmp(type, sUTRFIRST)         || !strcmp(type, sUTRFIRSTHALF)     ||
+         !strcmp(type, sUTRINTERNAL)      || !strcmp(type, sUTR5INTERNALHALF) ||
+         !strcmp(type, sUTR3INTERNALHALF) || !strcmp(type, sUTRTERMINALHALF)  ||
+         !strcmp(type, sUTRTERMINAL);
+}
+
 /* Read annotations (exons) to improve or fixed some gene prediction */
 /* GFF format: tab "\t" is the field separator and # for comments */
 /* Commit one already-parsed evidence feature into external->evidence[a]: validate
@@ -166,11 +181,18 @@ void AddEvidenceExon(packExternalInformation* external, int a, dict* d,
 			/* Computing remainder from frame value for copies 1,2 */
 			if (!strcmp((external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->Type,sINTRON)){
 			  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->Remainder = (external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->Frame;
-			  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->Frame = 
+			  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->Frame =
 			    (3 - (external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->Remainder)%3;
 			  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->Remainder = (external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->Frame;
-			  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->Frame = 
+			  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->Frame =
 			    (3 - (external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->Remainder)%3;
+			}else if (isUTRExonType((external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->Type)){
+			  /* Non-coding UTR exon: frameless, like ab initio BuildUTRExons
+			     (all frame-copies collapse to the same frameless exon). */
+			  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->Frame = 0;
+			  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->Remainder = 0;
+			  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->Frame = 0;
+			  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 2)->Remainder = 0;
 			}else{
 			  (external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->Remainder = 
 			    ((3 - (((external->evidence[a]->vExons + external->evidence[a]->nvExons + 1)->Donor->Position - 
@@ -198,12 +220,16 @@ void AddEvidenceExon(packExternalInformation* external, int a, dict* d,
 		    /* Computing remainder from frame value */
 		    if (!strcmp((external->evidence[a]->vExons + external->evidence[a]->nvExons)->Type,sINTRON)){
 		      (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Remainder = (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Frame;
-		      (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Frame = 
+		      (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Frame =
 			(3 - (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Remainder)%3;
+		    }else if (isUTRExonType((external->evidence[a]->vExons + external->evidence[a]->nvExons)->Type)){
+		      /* Non-coding UTR exon: frameless, like ab initio BuildUTRExons. */
+		      (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Frame = 0;
+		      (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Remainder = 0;
 		    }else{
-		    (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Remainder = 
-		      ((3 - (((external->evidence[a]->vExons + external->evidence[a]->nvExons)->Donor->Position - 
-			      (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Acceptor->Position - 
+		    (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Remainder =
+		      ((3 - (((external->evidence[a]->vExons + external->evidence[a]->nvExons)->Donor->Position -
+			      (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Acceptor->Position -
 			      (external->evidence[a]->vExons + external->evidence[a]->nvExons)->Frame + 1)%3)) %3);
 		    }
 		    /* Evidence flag activated */
