@@ -215,6 +215,7 @@ int main (int argc, char *argv[])
   int reading;
   int lastSplit;
   BigBed* evBB = NULL;    /* non-NULL => -R evidence is a bigBed, queried per split */
+  BamCov* evBam = NULL;   /* non-NULL => -R evidence is a BAM (introns), per split */
   long bbOwnedLo = 0;     /* upper acceptor bound owned by the previous fragment */
   char mess[MAXSTRING];
 
@@ -333,11 +334,17 @@ int main (int argc, char *argv[])
       /* A.1. Reading external information I: annotations */
       if (EVD)
 	{
-	  /* bbOpen validates the bigBed magic and returns NULL for a text GFF
-	     (whose first bytes are ASCII), so it doubles as the format sniff. */
+	  /* bbOpen/bamOpen validate their file magic and return NULL for a text
+	     GFF (whose first bytes are ASCII), so they double as the format sniff:
+	     bigBed -> per-split records; BAM -> per-split spliced-read introns
+	     (WITH_HTSLIB build); otherwise the text annotation path. */
 	  evBB = bbOpen(ExonsFile);
 	  if (evBB)
 	    printMess("Reading evidence from bigBed (per-split range queries)...");
+#ifdef WITH_HTSLIB
+	  else if ((evBam = bamOpen(ExonsFile)) != NULL)
+	    printMess("Reading introns from BAM junctions (per-split range queries)...");
+#endif
 	  else
 	    {
 	      printMess("Reading evidence (annotations)...");
@@ -442,8 +449,8 @@ int main (int argc, char *argv[])
 
 	  if (EVD)
 	    {
-	      if (evBB)
-		/* bigBed: no preload -- evidence[0] is filled per fragment below */
+	      if (evBB || evBam)
+		/* bigBed / BAM: no preload -- evidence[0] is filled per fragment below */
 		evidence = external->evidence[0];
 	      else
 		{
@@ -561,14 +568,20 @@ int main (int argc, char *argv[])
 		{
 		  /* Searching evidence exons in this fragment */
 		  printMess("Searching annotations to be used in this fragment");
-		  if (evBB)
+		  if (evBB || evBam)
 		    {
-		      /* Per-split bigBed query. ownedHi mirrors SearchEvidenceExons'
+		      /* Per-split bigBed / BAM query. ownedHi mirrors SearchEvidenceExons'
 			 (l2 or l2-OVERLAP) bound in 1-based acceptor units, so each
 			 record is committed in exactly one fragment. */
 		      long ownedHi = ((lastSplit)?l2:l2-OVERLAP) + 1;
-		      ReadExonsBigBed(evBB, external, isochores[0]->D,
-				      Locus, l1, l2, bbOwnedLo, ownedHi);
+		      if (evBB)
+			ReadExonsBigBed(evBB, external, isochores[0]->D,
+					Locus, l1, l2, bbOwnedLo, ownedHi);
+#ifdef WITH_HTSLIB
+		      else
+			ReadIntronsBam(evBam, external, isochores[0]->D,
+				       Locus, l1, l2, bbOwnedLo, ownedHi);
+#endif
 		      bbOwnedLo = ownedHi;
 		    }
 		  else
@@ -619,9 +632,9 @@ int main (int argc, char *argv[])
 	      sprintf(mess,"Finished sorting %ld exons\n", nExons);  
 	      printMess(mess);
 			  
-	      /* Next block of annotations to be processed (GFF cursor only;
-		 the bigBed path re-sets the window per fragment). */
-	      if (EVD && evidence != NULL && !evBB)
+	      /* Next block of annotations to be processed (GFF cursor only; the
+		 bigBed/BAM paths re-set the window per fragment). */
+	      if (EVD && evidence != NULL && !evBB && !evBam)
 		SwitchCounters(external);
 
 	      /* B.4. Printing current fragment predictions (sites and exons) */
@@ -711,6 +724,8 @@ int main (int argc, char *argv[])
 #ifdef WITH_HTSLIB
   if (external->bam != NULL)
     bamClose(external->bam);
+  if (evBam != NULL)
+    bamClose(evBam);
 #endif
 
   /* 4. The End */

@@ -36,4 +36,17 @@ void bamClose(BamCov* bc);
 long bamCoverageQuery(BamCov* bc, const char* chrom, long start, long end,
                       bwIntervalCB cb, void* userData);
 
+/* Called once per spliced-read junction (a CIGAR N gap) overlapping the query.
+   start/end are the intron's 0-based half-open reference coordinates; strand is
+   the transcription strand from the read's XS tag ('+' or '-'). */
+typedef void (*bamJunctionCB)(long start, long end, char strand, void* userData);
+
+/* Invoke cb for every CIGAR-N junction of reads overlapping [start,end) on
+   `chrom`. Only reads carrying an XS strand tag contribute (a junction needs a
+   strand to become an intron); reads flagged unmapped/secondary/supplementary/
+   qcfail/dup are skipped. Returns the number of junctions reported, or -1 on
+   error; unknown chrom -> 0. */
+long bamJunctionQuery(BamCov* bc, const char* chrom, long start, long end,
+                      bamJunctionCB cb, void* userData);
+
 #endif

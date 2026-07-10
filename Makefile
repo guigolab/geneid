@@ -46,7 +46,7 @@ HTSLIB_PREFIX ?= /usr/local
 ifdef WITH_HTSLIB
 OPTS += -DWITH_HTSLIB -I$(HTSLIB_PREFIX)/include
 HTSLIBS = -L$(HTSLIB_PREFIX)/lib -lhts
-OBJECTS += $(OBJ)/bamcov.o
+OBJECTS += $(OBJ)/bamcov.o $(OBJ)/ReadIntronsBam.o
 else
 HTSLIBS =
 endif
@@ -175,6 +175,9 @@ $(OBJ)/bigwig.o : $(CDIR)/bigwig.c $(INCLUDE)/bigwig.h
 
 $(OBJ)/bamcov.o : $(CDIR)/bamcov.c $(INCLUDE)/bamcov.h $(INCLUDE)/bigwig.h
 	$(CC) -c $(OPTS) $(CDIR)/bamcov.c -o $(OBJ)/bamcov.o
+
+$(OBJ)/ReadIntronsBam.o : $(CDIR)/ReadIntronsBam.c $(HEADERS) $(INCLUDE)/bamcov.h
+	$(CC) -c $(OPTS) $(CDIR)/ReadIntronsBam.c -o $(OBJ)/ReadIntronsBam.o
 
 $(OBJ)/ReadExonsBigBed.o : $(CDIR)/ReadExonsBigBed.c $(HEADERS) $(INCLUDE)/bigbed.h
 	$(CC) -c $(OPTS) $(CDIR)/ReadExonsBigBed.c -o $(OBJ)/ReadExonsBigBed.o
