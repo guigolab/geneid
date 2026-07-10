@@ -37,6 +37,11 @@ CASES=(
   "morc_u12|param/human3isoU12.param|-3UnDTA -j 36315000 -k 36380000|samples/chr21.fa"
   # rnaseq: RNA-seq evidence -- intron junctions (-R), expression coverage (-S), UTRs (-u)
   "rnaseq|param/human.rnaseq.param|-3U -u -R samples/ENCFF001.1.MORC.introns.gff -S samples/ENCFF001.1.MORC.stranded.expression.shuffled.gff -j 36315000 -k 36380000|samples/chr21.fa"
+  # rnaseq_bw: same RNA-seq case but the -S expression coverage is delivered as two
+  # stranded bigWigs (plus.bw,minus.bw) via per-split range queries instead of the
+  # text GFF. Byte-identical to the rnaseq golden -> guards bwQuery -> FillCoverage ->
+  # HSPScan2 and the 0-based bigWig -> 1-based sr[] coordinate mapping on both strands.
+  "rnaseq_bw|param/human.rnaseq.param|-3U -u -R samples/ENCFF001.1.MORC.introns.gff -S samples/ENCFF001.1.MORC.stranded.plus.bw,samples/ENCFF001.1.MORC.stranded.minus.bw -j 36315000 -k 36380000|samples/chr21.fa"
   # human_intron: soft intron-length penalty on a 250kb Red-masked chr14 slice
   # (GRCh38 chr14:67,900,000-68,150,000, RAD51B locus). The param is chr12-trained
   # and carries Intron_length_model 7.1788 1.51411 with weight 0.2 (feature ON) and

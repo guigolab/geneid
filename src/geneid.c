@@ -32,6 +32,7 @@
 
 #include "geneid.h"
 #include "bigbed.h"
+#include "bigwig.h"
 /* #include <mcheck.h> */
 
 /* geneid setup flags */
@@ -345,14 +346,42 @@ int main (int argc, char *argv[])
 	    }
 	}
 	
-      /* A.2. Reading external information II: homology information */
+      /* A.2. Reading external information II: homology / RNA-seq coverage.
+	 -S plus.bw,minus.bw = stranded bigWig coverage; -S cov.bw = unstranded
+	 (both strands share one signal); otherwise the text HSP path (ReadHSP).
+	 bwOpen validates the bigWig magic, so it doubles as the format sniff. */
       if (SRP)
 	{
-	  printMess("Reading homology information...");
-	  external->nHSPs = ReadHSP(HSPFile, external);
-	  sprintf(mess,"%ld HSPs acquired from file",
-		  external->nHSPs);
-	  printMess(mess); 
+	  char* comma = strchr(HSPFile, ',');
+	  if (comma != NULL)
+	    {
+	      *comma = '\0';
+	      external->bwPlus  = bwOpen(HSPFile);
+	      external->bwMinus = bwOpen(comma + 1);
+	      *comma = ',';
+	      if (external->bwPlus == NULL || external->bwMinus == NULL)
+		printError("-S with two comma-separated files expects stranded bigWigs (plus.bw,minus.bw)");
+	    }
+	  else
+	    {
+	      external->bwPlus = bwOpen(HSPFile);
+	      external->bwMinus = external->bwPlus;   /* unstranded: same signal both strands */
+	    }
+
+	  if (external->bwPlus != NULL)
+	    {
+	      if (!UTR)
+		printError("bigWig -S coverage requires -u (RNA-seq/UTR mode)");
+	      printMess("Reading RNA-seq coverage from bigWig (per-split range queries)...");
+	    }
+	  else
+	    {
+	      printMess("Reading homology information...");
+	      external->nHSPs = ReadHSP(HSPFile, external);
+	      sprintf(mess,"%ld HSPs acquired from file",
+		      external->nHSPs);
+	      printMess(mess);
+	    }
 	}
 	  
       if (EVD || SRP)
@@ -379,8 +408,11 @@ int main (int argc, char *argv[])
           LengthSequence = FetchSequence(Sequence, RSequence);
 	  OutputHeader(Locus, LengthSequence);
 
+	  /* name of the current sequence, for the per-fragment bigWig query */
+	  external->curLocus = Locus;
+
 	  /* A.4. Prepare external information */
-	  if (SRP)
+	  if (SRP && external->bwPlus == NULL)   /* text HSP path only */
 	    {
 	      printMess("Select homology information");
 	      hsp = (packHSP*) SelectHSP(external, Locus, LengthSequence);
@@ -390,8 +422,8 @@ int main (int argc, char *argv[])
 	      else
 		sprintf(mess,"Using %ld HSPs in %s\n",
 			hsp->nTotalSegments,Locus);
-			  
-	      printMess(mess); 
+
+	      printMess(mess);
 	    }
 
 	  if (EVD)
@@ -657,9 +689,15 @@ int main (int argc, char *argv[])
     } /* end shared per-locus processing (prediction and -O assemble-only) */
   
 
+  /* Close bigWig coverage readers (if any). When unstranded, bwPlus==bwMinus. */
+  if (external->bwMinus != NULL && external->bwMinus != external->bwPlus)
+    bwClose(external->bwMinus);
+  if (external->bwPlus != NULL)
+    bwClose(external->bwPlus);
+
   /* 4. The End */
-  OutputTime();  
-  
+  OutputTime();
+
   exit(0);
   return(0);
 }

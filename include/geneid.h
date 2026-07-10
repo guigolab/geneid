@@ -700,6 +700,10 @@ typedef struct s_packHSP
   int visited;
 } packHSP;
 
+/* Opaque bigWig reader (include/bigwig.h); forward-declared here so the struct
+   below can hold handles without pulling the BBI header into every includer. */
+typedef struct BigWig BigWig;
+
 typedef struct s_packExternalInformation
 {
   dict* locusNames;
@@ -718,6 +722,14 @@ typedef struct s_packExternalInformation
   long* iSegments;
   float** sr;
   float** readcount;
+
+  /* -S RNA-seq coverage supplied as bigWig (per-split range queries) instead of
+     a text HSP file. bwPlus/bwMinus are the +/- strand signals (equal when the
+     signal is unstranded); both NULL => the text ReadHSP path is used. curLocus
+     names the sequence being processed, for the per-fragment bigWig query. */
+  BigWig* bwPlus;
+  BigWig* bwMinus;
+  char*   curLocus;
 } packExternalInformation;
 
 /* Hash-bucket entry identifying one already-backed-up exon (see DumpHash.c);
@@ -1232,6 +1244,16 @@ void ProcessHSPs(long l1,
                 int Strand,
 		packExternalInformation* external,
                 packHSP* hsp);
+
+/* bigWig counterpart of ProcessHSPs: fill sr[]/readcount[] for fragment [l1,l2]
+   of `Strand` from the per-split range query of external->bwPlus/bwMinus,
+   then run the step-2 accumulation. Used when -S is a bigWig (external->bwPlus
+   set) instead of a text HSP file. */
+void ProcessCoverageBigWig(long l1,
+                long l2,
+                int Strand,
+		packExternalInformation* external,
+                long LengthSequence);
 
 void ScoreExons(char *Sequence, 
                 packExons* allExons, 
