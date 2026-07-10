@@ -26,6 +26,9 @@
 
 #include "geneid.h"
 #include "bigwig.h"
+#ifdef WITH_HTSLIB
+#include "bamcov.h"
+#endif
 
 extern float MRM;
 extern int UTR;
@@ -595,6 +598,45 @@ void ProcessCoverageBigWig(long l1, long l2, int Strand,
 
   printMess("Preprocessing bigWig coverage: step 2");
   HSPScan2(external, NULL, Strand, l1, l2);
+}
+
+/* BAM counterpart of ProcessCoverageBigWig (see geneid.h). Identical shape --
+   query the current fragment, map/clip via covCollect + FillCoverageFrameless,
+   run step 2 -- with bamCoverageQuery in place of bwQuery. Unstranded: both
+   strands see the same per-base depth. */
+void ProcessCoverageBam(long l1, long l2, int Strand,
+                        packExternalInformation* external,
+                        long LengthSequence)
+{
+#ifdef WITH_HTSLIB
+  covBuf buf;
+  long gS, gE;   /* genomic half-open query range for this fragment */
+
+  buf.a = NULL; buf.n = 0; buf.cap = 0;
+  buf.strand = Strand; buf.L = LengthSequence;
+
+  if (Strand == FORWARD) {
+    gS = l1 - 1;
+    gE = l2 + 2;
+  } else {
+    gS = LengthSequence - 2 - l2;
+    gE = LengthSequence - l1 + 1;
+  }
+  if (gS < 0) gS = 0;
+
+  printMess("Preprocessing BAM coverage: step 1");
+  if (external->bam != NULL && external->curLocus != NULL)
+    bamCoverageQuery(external->bam, external->curLocus, gS, gE, covCollect, &buf);
+
+  FillCoverageFrameless(external, Strand, l1, l2, buf.a, buf.n);
+  free(buf.a);
+
+  printMess("Preprocessing BAM coverage: step 2");
+  HSPScan2(external, NULL, Strand, l1, l2);
+#else
+  (void) l1; (void) l2; (void) Strand; (void) external; (void) LengthSequence;
+  printError("BAM input requires building geneid with WITH_HTSLIB=1");
+#endif
 }
 
 

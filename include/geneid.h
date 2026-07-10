@@ -704,6 +704,11 @@ typedef struct s_packHSP
    below can hold handles without pulling the BBI header into every includer. */
 typedef struct BigWig BigWig;
 
+/* Opaque BAM coverage reader (include/bamcov.h, htslib-backed). Forward-declared
+   unconditionally so the struct/prototypes are stable; only set/used when geneid
+   is built WITH_HTSLIB, otherwise the handle stays NULL. */
+typedef struct BamCov BamCov;
+
 typedef struct s_packExternalInformation
 {
   dict* locusNames;
@@ -730,6 +735,10 @@ typedef struct s_packExternalInformation
   BigWig* bwPlus;
   BigWig* bwMinus;
   char*   curLocus;
+
+  /* -S RNA-seq coverage supplied as an indexed BAM (htslib, WITH_HTSLIB build);
+     NULL => not a BAM. Coverage is derived per fragment, unstranded. */
+  BamCov* bam;
 } packExternalInformation;
 
 /* Hash-bucket entry identifying one already-backed-up exon (see DumpHash.c);
@@ -1250,6 +1259,16 @@ void ProcessHSPs(long l1,
    then run the step-2 accumulation. Used when -S is a bigWig (external->bwPlus
    set) instead of a text HSP file. */
 void ProcessCoverageBigWig(long l1,
+                long l2,
+                int Strand,
+		packExternalInformation* external,
+                long LengthSequence);
+
+/* BAM counterpart of ProcessCoverageBigWig: same per-fragment sr[]/readcount[]
+   fill, sourced from an indexed BAM (external->bam) via htslib. Only does real
+   work in a WITH_HTSLIB build; a non-htslib build never sets external->bam so
+   this is never reached. */
+void ProcessCoverageBam(long l1,
                 long l2,
                 int Strand,
 		packExternalInformation* external,

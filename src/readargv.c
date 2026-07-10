@@ -96,7 +96,8 @@ void printHelp()
   printf("\t    intron as U2 or U12 (report-only; does not change the assembly). Best\n");
   printf("\t    used as -J -O <annotation> to score/type a provided gene structure\n");
   printf("\t-S  <HSP_filename>: Using information from protein sequence alignments to improve predictions\n");
-  printf("\t    RNA-seq coverage may instead be given as bigWig(s): -S plus.bw,minus.bw (stranded) or -S cov.bw (unstranded); requires -u\n\n");
+  printf("\t    RNA-seq coverage may instead be given as bigWig(s): -S plus.bw,minus.bw (stranded) or -S cov.bw (unstranded); requires -u\n");
+  printf("\t    or, in a WITH_HTSLIB build, as an indexed BAM: -S reads.bam (unstranded coverage; requires -u)\n\n");
   printf("\t-u: Turn on UTR prediction. Only valid with -S option: HSP/EST/short read ends are used to determine UTR ends\n");
   
   printf("\t-E: Add this value to the exon weight parameter (see parameter file)\n");

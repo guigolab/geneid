@@ -33,6 +33,9 @@
 #include "geneid.h"
 #include "bigbed.h"
 #include "bigwig.h"
+#ifdef WITH_HTSLIB
+#include "bamcov.h"
+#endif
 /* #include <mcheck.h> */
 
 /* geneid setup flags */
@@ -348,8 +351,9 @@ int main (int argc, char *argv[])
 	
       /* A.2. Reading external information II: homology / RNA-seq coverage.
 	 -S plus.bw,minus.bw = stranded bigWig coverage; -S cov.bw = unstranded
-	 (both strands share one signal); otherwise the text HSP path (ReadHSP).
-	 bwOpen validates the bigWig magic, so it doubles as the format sniff. */
+	 bigWig; -S reads.bam = indexed BAM coverage (WITH_HTSLIB build); otherwise
+	 the text HSP path (ReadHSP). bwOpen/bamOpen validate their file magic, so
+	 they double as the format sniff (a text HSP GFF matches neither). */
       if (SRP)
 	{
 	  char* comma = strchr(HSPFile, ',');
@@ -366,9 +370,19 @@ int main (int argc, char *argv[])
 	    {
 	      external->bwPlus = bwOpen(HSPFile);
 	      external->bwMinus = external->bwPlus;   /* unstranded: same signal both strands */
+#ifdef WITH_HTSLIB
+	      if (external->bwPlus == NULL)
+		external->bam = bamOpen(HSPFile);   /* not a bigWig: try an indexed BAM */
+#endif
 	    }
 
-	  if (external->bwPlus != NULL)
+	  if (external->bam != NULL)
+	    {
+	      if (!UTR)
+		printError("BAM -S coverage requires -u (RNA-seq/UTR mode)");
+	      printMess("Reading RNA-seq coverage from indexed BAM (per-split range queries)...");
+	    }
+	  else if (external->bwPlus != NULL)
 	    {
 	      if (!UTR)
 		printError("bigWig -S coverage requires -u (RNA-seq/UTR mode)");
@@ -694,6 +708,10 @@ int main (int argc, char *argv[])
     bwClose(external->bwMinus);
   if (external->bwPlus != NULL)
     bwClose(external->bwPlus);
+#ifdef WITH_HTSLIB
+  if (external->bam != NULL)
+    bamClose(external->bam);
+#endif
 
   /* 4. The End */
   OutputTime();
