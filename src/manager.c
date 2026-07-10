@@ -142,8 +142,11 @@ void  manager(char *Sequence,
 
   /* 0. Preprocss HSPs */
   if (SRP){
-    ProcessHSPs(l1, l2, Strand, 
-		external, hsp);
+    if (external->bwPlus != NULL)   /* -S is a bigWig: per-split coverage query */
+      ProcessCoverageBigWig(l1, l2, Strand, external, LengthSequence);
+    else
+      ProcessHSPs(l1, l2, Strand,
+		  external, hsp);
   }
 
   /* 1. Predicting splice sites of current split of DNA sequence */ 

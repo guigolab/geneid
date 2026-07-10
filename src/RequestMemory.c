@@ -468,6 +468,11 @@ packExternalInformation* RequestMemoryExternalInformation()
 	    }
 	}
 
+  /* -S bigWig coverage handles: NULL until the -S ingest sniffs a bigWig */
+  p->bwPlus  = NULL;
+  p->bwMinus = NULL;
+  p->curLocus = NULL;
+
   return(p);
 }
 

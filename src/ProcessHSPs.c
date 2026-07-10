@@ -25,6 +25,7 @@
 *************************************************************************/
 
 #include "geneid.h"
+#include "bigwig.h"
 
 extern float MRM;
 extern int UTR;
@@ -487,6 +488,113 @@ void ProcessHSPs(long l1,
 	  printMess("Preprocessing homology information: step 2");
 	  HSPScan2(external,hsp,Strand,l1,l2);
 	}
+}
+
+/* ------------------------------------------------------------------------- *
+ *  bigWig RNA-seq coverage: the same sr[]/readcount[] fill as the text       *
+ *  ReadScan path, but sourced from a per-fragment bigWig range query instead *
+ *  of the preloaded HSP list. Requires -u (readcount[] is UTR-allocated).    *
+ * ------------------------------------------------------------------------- */
+
+/* One coverage interval in the CURRENT strand's coordinate frame (genomic for
+   FORWARD, RSequence for REVERSE). */
+typedef struct { long s, e; float v; } covIv;
+
+/* Growable buffer + mapping context for the bwQuery callback. */
+typedef struct {
+  covIv* a;
+  long   n, cap;
+  int    strand;
+  long   L;          /* LengthSequence, for the REVERSE genomic<->RSequence flip */
+} covBuf;
+
+/* bwQuery reports genomic intervals [s,e) 0-based half-open; store each in the
+   1-based position frame the sr[] fill uses (the text HSP path stores GFF
+   1-based coords). FORWARD: 0-based [s,e) -> 1-based half-open [s+1, e+1).
+   REVERSE: the manager runs on RSequence, so genomic 1-based p maps to
+   RSequence coord L-p+1; genomic 0-based [s,e) = 1-based [s+1,e], which reverses
+   to RSequence 1-based [L-e+1, L-s], i.e. half-open [L-e+1, L-s+1). */
+static void covCollect(long s, long e, float v, void* ud)
+{
+  covBuf* b = (covBuf*) ud;
+  long rs, re;
+
+  if (b->strand == FORWARD) { rs = s + 1;        re = e + 1; }
+  else                      { rs = b->L - e + 1; re = b->L - s + 1; }
+
+  if (b->n == b->cap) {
+    b->cap = b->cap ? b->cap * 2 : 64;
+    b->a = (covIv*) realloc(b->a, b->cap * sizeof(covIv));
+    if (b->a == NULL) printError("Not enough memory: bigWig coverage buffer");
+  }
+  b->a[b->n].s = rs;
+  b->a[b->n].e = re;
+  b->a[b->n].v = v;
+  b->n++;
+}
+
+/* Fill sr[]/readcount[] over fragment [l1,l2] from a frameless coverage stream.
+   The signal has no reading frame, so it is replicated identically into all
+   three frame planes of the strand (0..2 FWD, 3..5 RVS) -- the same 3-copy
+   replication the text path gets on disk (frame '.' in ReadHSP), done here in
+   memory. sr[]/readcount[] are per-fragment scratch (reset every call, like
+   ReadScan), so fragments never double-count across the OVERLAP band. */
+static void FillCoverageFrameless(packExternalInformation* external, int Strand,
+                                  long l1, long l2, covIv* iv, long niv)
+{
+  short frameStart = (Strand == FORWARD) ? 0 : FRAMES;
+  short frameEnd   = frameStart + FRAMES;
+  short x;
+  long  i, k, j;
+
+  for (x = frameStart; x < frameEnd; x++) {
+    for (i = 0; i < l2 - l1 + 1; i++) {
+      external->sr[x][i] = NO_SCORE;
+      external->readcount[x][i] = 0.0;
+    }
+    for (k = 0; k < niv; k++) {
+      float scoreHSP = (RREADS / MRM) * iv[k].v;
+      long a = (iv[k].s < l1)     ? l1     : iv[k].s;   /* clip to [l1, l2]  */
+      long b = (iv[k].e > l2 + 1) ? l2 + 1 : iv[k].e;   /* half-open upper   */
+      for (j = a; j < b; j++)
+        CoverAdd(external, x, j - l1, scoreHSP, iv[k].v);
+    }
+  }
+}
+
+/* bigWig counterpart of ProcessHSPs (see geneid.h). */
+void ProcessCoverageBigWig(long l1, long l2, int Strand,
+                           packExternalInformation* external,
+                           long LengthSequence)
+{
+  BigWig* bw = (Strand == FORWARD) ? external->bwPlus : external->bwMinus;
+  covBuf buf;
+  long gS, gE;   /* genomic half-open query range for this fragment */
+
+  buf.a = NULL; buf.n = 0; buf.cap = 0;
+  buf.strand = Strand; buf.L = LengthSequence;
+
+  /* 0-based genomic query range for this fragment, widened by one base each
+     side so an interval abutting the fragment edge is still returned; the exact
+     1-based mapping + clip to [l1,l2] happens in covCollect/FillCoverageFrameless. */
+  if (Strand == FORWARD) {
+    gS = l1 - 1;                   /* FWD fill frame (1-based) ~ genomic+1 */
+    gE = l2 + 2;
+  } else {
+    gS = LengthSequence - 2 - l2;  /* RSeq [l1,l2] -> genomic ~[L-1-l2, L-1-l1] */
+    gE = LengthSequence - l1 + 1;
+  }
+  if (gS < 0) gS = 0;
+
+  printMess("Preprocessing bigWig coverage: step 1");
+  if (bw != NULL && external->curLocus != NULL)
+    bwQuery(bw, external->curLocus, gS, gE, covCollect, &buf);
+
+  FillCoverageFrameless(external, Strand, l1, l2, buf.a, buf.n);
+  free(buf.a);
+
+  printMess("Preprocessing bigWig coverage: step 2");
+  HSPScan2(external, NULL, Strand, l1, l2);
 }
 
 

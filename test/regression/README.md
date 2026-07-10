@@ -25,6 +25,7 @@ Exit status is non-zero if any case fails, so it can gate a commit/PR.
 | `human` | human3iso (3 isochores) | example1.fa | Isochore selection + protein/cDNA/tDNA on the documented example |
 | `morc_u12` | human3isoU12 | chr21 MORC3 locus | U12 intron prediction (`-3UnDTA`); the MORC3 gene has two real U12 introns |
 | `rnaseq` | human.rnaseq | chr21 MORC3 locus | RNA-seq evidence: intron junctions (`-R`), expression coverage (`-S`), UTRs (`-u`) |
+| `rnaseq_bw` | human.rnaseq | chr21 MORC3 locus | Same RNA-seq case with `-S` coverage as two stranded bigWigs (`plus.bw,minus.bw`) via per-split range queries; byte-identical to `rnaseq`, guards `bwQuery`→`FillCoverage`→`HSPScan2` and the 0-based→1-based `sr[]` mapping |
 | `human_intron` | human.chr12.intron_length (weight 0.2) | Red-masked chr14 250kb slice | Soft intron-length penalty: two far-band introns (>27kb) are penalized away vs weight 0, pinning the convex-hinge penalty + far-band fast-DP path (`-3Un`) |
 | `human_intron_multifrag` | human.chr12.intron_length (weight 0.2) | Red-masked chr14 550kb slice | Same penalty on a >500kb (LENGTHSi) slice → two fragments, pinning the near-band deque's cross-fragment maintenance in `BackupArrayD` |
 | `human_intron_bb` | human.chr12.intron_length (weight 0.2) | Red-masked chr14 250kb slice + `-R` bigBed | bigBed `-R` evidence (per-split range query): the same two Intron junctions via bigBed span both far-band introns; exercises `bbOpen`→`bbQuery`→`AddEvidenceExon`, byte-identical to the GFF `-R` result |
