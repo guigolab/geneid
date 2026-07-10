@@ -38,7 +38,7 @@ extern int  SFP,SDP,SAP,STP,
             GFF, GFF3, X10,
             EVD, SRP, BEG, UTR,
             scanORF, XML, cDNA, PSEQ, tDNA,
-            SGE;
+            SGE, SCOREANNOT;
 extern float EW,EvidenceEW,MRM;
 extern long LOW,HI;
 
@@ -46,7 +46,7 @@ extern long LOW,HI;
 extern char* optarg;
 extern int optind;
 
-char* USAGE="NAME\n\tgeneid - a program to annotate genomic sequences\nSYNOPSIS\n\tgeneid\t[-bdaefitnxszru]\n\t\t[-TDAZU]\n\t\t[-p gene_prefix]\n\t\t[-G] [-3] [-X] [-M] [-m]\n\t\t[-WCF] [-o]\n\t\t[-j lower_bound_coord]\n\t\t[-k upper_bound_coord]\n\t\t[-N numer_nt_mapped]\n\t\t[-O <gff_exons_file>]\n\t\t[-R <gff_annotation-file>]\n\t\t[-S <gff_homology_file>]\n\t\t[-P <parameter_file>]\n\t\t[-E exonweight]\n\t\t[-V evidence_exonweight]\n\t\t[-Bv] [-h]\n\t\t<locus_seq_in_fasta_format>\nRELEASE\n\t" GENEID_RELEASE "\n";
+char* USAGE="NAME\n\tgeneid - a program to annotate genomic sequences\nSYNOPSIS\n\tgeneid\t[-bdaefitnxszru]\n\t\t[-TDAZU]\n\t\t[-p gene_prefix]\n\t\t[-G] [-3] [-X] [-M] [-m]\n\t\t[-WCF] [-o] [-J]\n\t\t[-j lower_bound_coord]\n\t\t[-k upper_bound_coord]\n\t\t[-N numer_nt_mapped]\n\t\t[-O <gff_exons_file>]\n\t\t[-R <gff_annotation-file>]\n\t\t[-S <gff_homology_file>]\n\t\t[-P <parameter_file>]\n\t\t[-E exonweight]\n\t\t[-V evidence_exonweight]\n\t\t[-Bv] [-h]\n\t\t<locus_seq_in_fasta_format>\nRELEASE\n\t" GENEID_RELEASE "\n";
 
 void printHelp()
 {
@@ -91,6 +91,10 @@ void printHelp()
   printf("\t-Z: Activate Open Reading Frames searching\n\n");
   
   printf("\t-R  <exons_filename>: Provide annotations to improve predictions\n");
+  printf("\t-J: Annotation-scoring mode: score the splice sites of forced annotation\n");
+  printf("\t    exons (from -O or -R) under the parameter's profiles and classify each\n");
+  printf("\t    intron as U2 or U12 (report-only; does not change the assembly). Best\n");
+  printf("\t    used as -J -O <annotation> to score/type a provided gene structure\n");
   printf("\t-S  <HSP_filename>: Using information from protein sequence alignments to improve predictions\n\n");
   printf("\t-u: Turn on UTR prediction. Only valid with -S option: HSP/EST/short read ends are used to determine UTR ends\n");
   
@@ -157,7 +161,14 @@ void printDTD()
  * S*P/E*P flags for what gets printed instead). geneidOpts/genamicOpts
  * tally how many options were given that only make sense when the
  * corresponding stage actually runs, so the checks below can reject e.g.
- * -O combined with an exon-only-stage option. printOptions tallies the
+ * -O combined with an exon-only-stage option. geneidOpts counts only the
+ * PREDICTION-ONLY options -- ones with no effect once ab initio prediction is
+ * off (-R/-S evidence & homology into the scorer, -Z ORF scan, -r recursive
+ * splice, and the -a/-b/-d/-e/-f/-i/-s/-t/-x/-z predicted-feature print flags).
+ * Options that also make sense on the assemble-only path (-u UTR, -U U12 typing,
+ * -N reads-mapped, -E exon weight, -F single-gene) are deliberately NOT counted,
+ * so they are allowed alongside -O (assemble + score a provided annotation).
+ * printOptions tallies the
  * single-feature debug print flags (-b/-d/-a/-e/-f/-i/-t/-s/-x/-z, i.e.
  * SFP/SDP/SAP/STP/EFP/EIP/ETP/ESP/EXP/EOP), which are mutually exclusive
  * with XML output (-M) below. */
@@ -176,7 +187,7 @@ void readargv (int argc,char* argv[],
   char *dummy2;
   char *dummy3;
   /* Reading setup options */
-  while ((c = getopt(argc,argv,"oO:bdaefitnsrxj:k:N:p:UDATzZXmMG3BvE:V:R:S:WCFP:hu")) != -1)
+  while ((c = getopt(argc,argv,"oO:bdaefitnsrxj:k:N:p:UDATzZXmMG3BvE:V:R:S:WCFP:huJ")) != -1)
     switch(c)
       {
       case 'B': BEG++; 
@@ -197,13 +208,13 @@ void readargv (int argc,char* argv[],
 		genamicOpts++;
 		break;
 	  case 'E': EW = atof(optarg);
-		geneidOpts++;
+		/* assembly-compatible: exon weight, allowed under -O */
 		break;
 	  case 'V': EvidenceEW = atof(optarg);
 		genamicOpts++;
 		break;
 	  case 'F': SGE++;
-		geneidOpts++;
+		/* assembly-compatible: force single gene, allowed under -O */
 		break;
 	  case 'G': GFF++;
 		break;
@@ -213,7 +224,8 @@ void readargv (int argc,char* argv[],
 	  case 'M': XML++;
 	        genamicOpts++;
 		break;
-	  case 'O': GENEID--;
+	  case 'O': GENEID--;   /* assemble only: skip prediction, feed exons as evidence */
+		EVD++;
 		strcpy (ExonsFile,optarg);
 		break;
 	  case 'P': strcpy (ParamFile,optarg); 
@@ -227,7 +239,7 @@ void readargv (int argc,char* argv[],
 		geneidOpts++;
 		break;
           case 'u': UTR++;
-		geneidOpts++;
+		/* assembly-compatible: assemble UTR exons from the annotation, allowed under -O */
 		break;
 	  case 'W': RVS--;
 		/* geneidOpts++; */
@@ -272,11 +284,11 @@ void readargv (int argc,char* argv[],
 		/* geneidOpts++; */
 		break;
 	  case 'N': MRM = strtof(optarg,&dummy3);
-		geneidOpts++;
+		/* assembly-compatible: reads-mapped (rpkm reporting), allowed under -O */
 		NOpt++;
 		break;
 	  case 'U': U12++;
-		geneidOpts++;
+		/* assembly-compatible: U12 intron typing, allowed under -O */
 		break;
 	  case 'r': RSS++;
 		geneidOpts++;
@@ -297,6 +309,8 @@ void readargv (int argc,char* argv[],
 	  case 'n': PRINTINT++;
 		printOptions++;
 		/* geneidOpts++; */
+		break;
+	  case 'J': SCOREANNOT++;   /* score forced-annotation splice sites + type introns */
 		break;
       case 'v': VRB++;
 		break;
@@ -332,7 +346,10 @@ void readargv (int argc,char* argv[],
   if (PSEQ && GFF && !GFF3)
     printError("Incompatible options( -A | -G)");
 
-  if (UTR && !SRP)
+  /* UTR prediction from RNA-seq needs the -S coverage file, but only when ab
+     initio prediction runs. Under -O (GENEID off) the UTR exons are supplied in
+     the annotation and assembled directly, so -S is not required there. */
+  if (UTR && !SRP && GENEID)
     printError("UTR option ( -u )selected without required SR file ( -S <HSP_filename>)");
   if (NOpt && !UTR)
     printError("N option requires UTR option ( -u )");

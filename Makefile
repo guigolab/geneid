@@ -30,7 +30,7 @@ OBJECTS = $(OBJ)/BackupGenes.o $(OBJ)/PeakEdgeScore.o $(OBJ)/GetTranscriptTermin
 	$(OBJ)/GetSitesWithProfile.o $(OBJ)/GetStopCodons.o $(OBJ)/Output.o \
 	$(OBJ)/PrintExons.o $(OBJ)/PrintSites.o $(OBJ)/ReadExonsGFF.o $(OBJ)/ReadExonsBigBed.o $(OBJ)/bigbed.o \
 	$(OBJ)/ReadGeneModel.o $(OBJ)/ReadSequence.o $(OBJ)/ReadHSP.o $(OBJ)/RecomputePositions.o \
-	$(OBJ)/RequestMemory.o $(OBJ)/ProcessHSPs.o $(OBJ)/ScoreExons.o $(OBJ)/SearchEvidenceExons.o \
+	$(OBJ)/RequestMemory.o $(OBJ)/ProcessHSPs.o $(OBJ)/ScoreExons.o $(OBJ)/ScoreProfile.o $(OBJ)/SearchEvidenceExons.o \
 	$(OBJ)/SetRatios.o $(OBJ)/SortExons.o $(OBJ)/SortSites.o $(OBJ)/SortHSPs.o $(OBJ)/SwitchFrames.o \
 	$(OBJ)/SwitchPositions.o $(OBJ)/Translate.o \
 	$(OBJ)/account.o $(OBJ)/beggar.o $(OBJ)/genamic.o $(OBJ)/manager.o \
@@ -172,6 +172,9 @@ $(OBJ)/RequestMemory.o :  $(CDIR)/RequestMemory.c $(HEADERS)
 
 $(OBJ)/ScoreExons.o : $(CDIR)/ScoreExons.c $(HEADERS)
 	$(CC) -c $(OPTS) $(CDIR)/ScoreExons.c -o $(OBJ)/ScoreExons.o
+
+$(OBJ)/ScoreProfile.o : $(CDIR)/ScoreProfile.c $(HEADERS)
+	$(CC) -c $(OPTS) $(CDIR)/ScoreProfile.c -o $(OBJ)/ScoreProfile.o
 
 $(OBJ)/SearchEvidenceExons.o : $(CDIR)/SearchEvidenceExons.c $(HEADERS)	
 	$(CC) -c $(OPTS) $(CDIR)/SearchEvidenceExons.c -o $(OBJ)/SearchEvidenceExons.o

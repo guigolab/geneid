@@ -915,6 +915,16 @@ long GetTES(
 	    long ns
 	    );
 
+/* Score one profile at a single signal position (annotation-scoring mode, -J);
+   replicates BuildDonors/BuildAcceptors order-0/1/2 math. See ScoreProfile.c. */
+float ScoreProfileAt(char* s, long pos, profile* p);
+
+/* Annotation-scoring mode (-J): score+classify the evidence splice sites of the
+   optimal gene chain about to be printed (genes->GOptim), walked via PreviousExon
+   -- multi-split-safe (report-only). See ScoreProfile.c. */
+void ScoreEvidenceSites(exonGFF* chain, char* Sequence, char* RSequence,
+                        long L, gparam* gp);
+
 long BuildDonors(char* s,short class,char* type,
 		 char* subtype,
 		 profile* p,

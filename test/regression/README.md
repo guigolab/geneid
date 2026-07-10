@@ -28,6 +28,10 @@ Exit status is non-zero if any case fails, so it can gate a commit/PR.
 | `human_intron` | human.chr12.intron_length (weight 0.2) | Red-masked chr14 250kb slice | Soft intron-length penalty: two far-band introns (>27kb) are penalized away vs weight 0, pinning the convex-hinge penalty + far-band fast-DP path (`-3Un`) |
 | `human_intron_multifrag` | human.chr12.intron_length (weight 0.2) | Red-masked chr14 550kb slice | Same penalty on a >500kb (LENGTHSi) slice → two fragments, pinning the near-band deque's cross-fragment maintenance in `BackupArrayD` |
 | `human_intron_bb` | human.chr12.intron_length (weight 0.2) | Red-masked chr14 250kb slice + `-R` bigBed | bigBed `-R` evidence (per-split range query): the same two Intron junctions via bigBed span both far-band introns; exercises `bbOpen`→`bbQuery`→`AddEvidenceExon`, byte-identical to the GFF `-R` result |
+| `human_o` | human3iso (3 isochores) | example1.fa + `-O` | Assemble-only (`-O`): forces example1's own 8 typed exons; guards the `-O` path's independent `nExons` accounting |
+| `human_o_multilocus` | human3iso (3 isochores) | 2-record example1 + `-O` | Multi-locus `-O`: the same 8 exons under two sequences → two genes assembled (one per locus) |
+| `morc_jo_u12` | human3isoU12 | whole chr21 (multi-split) + `-J -O -U` | Annotation-scoring (`-J`) + U12 typing over forced MORC3 CDS exons: guards `-U` allowed under `-O` and the multi-split `-J` classify (walks the printed `GOptim` chain → two U12 introns typed) |
+| `morc_o_utr` | human.rnaseq | whole chr21 (multi-split) + `-O -u` | UTR assemble-only: forces MORC3 CDS + both UTR halves; guards `-u` under `-O` and the UTR-exon frame/remainder fix (the 3′ `UTR_Terminal_Half`, length not a multiple of 3, must not be dropped) |
 
 The `morc_u12` and `rnaseq` cases mirror the documented MORC3 workflow from
 the Current Protocols geneid chapter (Alioto et al.). They restrict
@@ -42,8 +46,11 @@ chapter describes). All other inputs (params, example1.fa, the snake
 fragment + its param, the `longprot` 155 kb window cut from SUPER_1
 (~199.14-199.30 Mb), the `human_intron` 250 kb Red-masked chr14 slice
 (GRCh38 chr14:67,900,000-68,150,000) and the `human_intron_multifrag` 550 kb
-slice (chr14:67,700,000-68,250,000) + their chr12-trained param, and the
-MORC evidence GFFs) are tracked.
+slice (chr14:67,700,000-68,250,000) + their chr12-trained param, the
+MORC evidence GFFs, and the `-O` annotation fixtures — `example1.geneid.gff`,
+the 2-record `example1.2locus.fa` + `example1.2locus.geneid.gff`,
+`MORC.CDS.geneid.gff` (17 typed CDS exons), and `MORC.UTR.geneid.gff`
+(CDS + both UTR halves)) are tracked.
 
 ## Guarantee
 

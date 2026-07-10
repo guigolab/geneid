@@ -35,6 +35,7 @@ extern int PPT;
 extern int U12;
 extern int SRP;
 extern int UTR;
+extern int SCOREANNOT;
 extern float EvidenceFactor;
 extern float EvidenceEW;
 extern float MRM;
@@ -98,7 +99,9 @@ void PrintExon(exonGFF *e, char Name[], char* s, dict* dAA, char* GenePrefix)
 
   if (GFF3)
     {
-      if (! e->evidence){
+      /* In annotation-scoring mode (-J) the forced evidence sites now carry real
+	 profile scores (see ScoreEvidenceSites), so print them too. */
+      if (! e->evidence || SCOREANNOT){
 	if (e->Strand == cFORWARD){
 	  if (!strcmp(e->Type,sFIRST)){
 	    sprintf(tmpstr,";start_score=%1.2f;donor_score=%1.2f;donor=%s",e->Acceptor->Score,e->Donor->Score,e->Donor->subtype);strcat(attribute,tmpstr);
@@ -321,7 +324,7 @@ void PrintGCDS(exonGFF *e,
       if (e->five_prime_partial) { strcpy(attribute,";5_prime_partial=true");}
       if (e->three_prime_partial) { strcat(attribute,";3_prime_partial=true");}
       sprintf(tmpstr,";exon_type=%s",e->Type);strcat(attribute,tmpstr);
-      if (! e->evidence){
+      if (! e->evidence || SCOREANNOT){
 	if (e->Strand == cFORWARD){
 	  if (!strcmp(e->Type,sFIRST)){
 	    sprintf(tmpstr,";start_score=%1.2f;donor_score=%1.2f",e->Acceptor->Score,e->Donor->Score);strcat(attribute,tmpstr);
@@ -539,7 +542,7 @@ void PrintGUTR(exonGFF *e,
       if (e->five_prime_partial) { strcpy(attribute,";5_prime_partial=true");}
       if (e->three_prime_partial) { strcat(attribute,";3_prime_partial=true");}
       sprintf(tmpstr,";exon_type=%s",e->Type);strcat(attribute,tmpstr);
-      if (! e->evidence){
+      if (! e->evidence || SCOREANNOT){
 	if (e->Strand == cFORWARD){
 	  
 	  if (!strcmp(e->Type,sUTRFIRST)){
@@ -781,8 +784,21 @@ void PrintGIntron(exonGFF *d,
   strcpy(intronSubtype,"GT-AG");
   short phase = (3 - d->Remainder)%3;
   /* short phase = MIN(0, 3 - a->Frame); */
-  long start = (a->evidence)? a->Acceptor->Position: d->Donor->Position + 1 + d->offset2;
-  long end = (a->evidence)? a->Donor->Position: a->Acceptor->Position -1 + a->offset1;
+  /* Reconstruct the intron span from its flanking exons. Three cases:
+     - forced Intron *feature* as `a` (its Acceptor/Donor Positions ARE the
+       intron boundaries): use them directly (legacy behaviour, unchanged);
+     - forced annotation EXON as `a` (First/Internal/Terminal/Single): the
+       evidence Positions are the true 1-based exon boundaries, so the intron is
+       [d.donor+1, a.acceptor-1] with NO offset term (unlike ab-initio, whose
+       Positions carry an offset). Evidence exons walk genomic-ascending on both
+       strands, so this is strand-agnostic;
+     - ab-initio: the historical offset-based reconstruction. */
+  int aIsExon = !strcmp(a->Type,sFIRST) || !strcmp(a->Type,sINTERNAL)
+             || !strcmp(a->Type,sTERMINAL) || !strcmp(a->Type,sSINGLE);
+  long start = (a->evidence)? (aIsExon ? d->Donor->Position + 1    : a->Acceptor->Position)
+                            : d->Donor->Position + 1 + d->offset2;
+  long end   = (a->evidence)? (aIsExon ? a->Acceptor->Position - 1 : a->Donor->Position)
+                            : a->Acceptor->Position - 1 + a->offset1;
 
   if (evidence){
     /* score = a->Score; */
@@ -811,7 +827,7 @@ void PrintGIntron(exonGFF *d,
   }
   if (GFF3) {
     /* GFF3 format */
-      if (! d->evidence && ! a->evidence){
+      if ((! d->evidence && ! a->evidence) || SCOREANNOT){
 	if(!strcmp(eType,sINTRON)||!strcmp(eType,sUTRINTRON)||!strcmp(eType,sUTR5INTRON)||!strcmp(eType,sUTR3INTRON)){
 	  sprintf(tmpstr,";etype=%s",eType);strcat(attribute,tmpstr);
 	}
