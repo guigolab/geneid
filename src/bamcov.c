@@ -118,3 +118,45 @@ long bamCoverageQuery(BamCov* bc, const char* chrom, long start, long end,
   free(depth);
   return count;
 }
+
+long bamJunctionQuery(BamCov* bc, const char* chrom, long start, long end,
+                      bamJunctionCB cb, void* userData)
+{
+  int tid = sam_hdr_name2tid(bc->hdr, chrom);
+  if (tid < 0) return 0;
+
+  hts_itr_t* iter = sam_itr_queryi(bc->idx, tid, start, end);
+  if (iter == NULL) return -1;
+
+  bam1_t* b = bam_init1();
+  if (b == NULL) { hts_itr_destroy(iter); return -1; }
+
+  long count = 0, ret;
+  while ((ret = sam_itr_next(bc->fp, iter, b)) >= 0) {
+    if (b->core.flag & BAMCOV_SKIP) continue;
+
+    /* Junction strand comes from the XS tag (spliced-transcript strand, set by
+       STAR/HISAT2). Without it a junction cannot be placed on a strand. */
+    uint8_t* xs = bam_aux_get(b, "XS");
+    char strand = (xs != NULL) ? bam_aux2A(xs) : '.';
+    if (strand != '+' && strand != '-') continue;
+
+    long refpos = b->core.pos;
+    uint32_t* cig = bam_get_cigar(b);
+    int n = b->core.n_cigar, i;
+    for (i = 0; i < n; i++) {
+      int op  = bam_cigar_op(cig[i]);
+      int len = bam_cigar_oplen(cig[i]);
+      if (op == BAM_CREF_SKIP) {              /* N = intron gap */
+        cb(refpos, refpos + len, strand, userData);
+        count++;
+      }
+      if (bam_cigar_type(op) & 2) refpos += len;
+    }
+  }
+  bam_destroy1(b);
+  hts_itr_destroy(iter);
+
+  if (ret < -1) return -1;                    /* truncated/corrupt iteration */
+  return count;
+}

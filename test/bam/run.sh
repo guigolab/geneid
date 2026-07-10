@@ -24,7 +24,10 @@ if [ -z "$PREFIX" ] || [ ! -f "$PREFIX/include/htslib/sam.h" ]; then
   exit 0
 fi
 
-BIN=$(mktemp -d)/bamdump
+D=$(mktemp -d)
 gcc -I"$ROOT/include" -I"$PREFIX/include" -Wall -O2 "$ROOT/src/bamcov.c" bamdump.c \
-    -o "$BIN" -L"$PREFIX/lib" -lhts || { echo "BUILD FAILED"; exit 2; }
-python3 check.py "$BIN" .
+    -o "$D/bamdump" -L"$PREFIX/lib" -lhts || { echo "BUILD FAILED (bamdump)"; exit 2; }
+gcc -I"$ROOT/include" -I"$PREFIX/include" -Wall -O2 "$ROOT/src/bamcov.c" juncdump.c \
+    -o "$D/juncdump" -L"$PREFIX/lib" -lhts || { echo "BUILD FAILED (juncdump)"; exit 2; }
+python3 check.py "$D/bamdump" . || exit 1
+python3 check_junc.py "$D/juncdump" .
