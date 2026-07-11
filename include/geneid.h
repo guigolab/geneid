@@ -1074,10 +1074,13 @@ long ReadExonsBigBed(struct BigBed* bb, packExternalInformation* external, dict*
 
 /* Per-fragment BAM intron ingest: collect spliced-read junctions overlapping
    this fragment, tally read counts, and commit each as an Intron evidence
-   feature (score = read count). BamCov is the htslib reader (include/bamcov.h);
-   only reached in a WITH_HTSLIB build (external side never opens a BAM otherwise). */
+   feature (score = read count). Junction strand comes from the read XS/ts tag,
+   or (when absent) from the splice motif in `Sequence` (forward, 1-based via
+   Sequence[pos-1]). BamCov is the htslib reader (include/bamcov.h); only reached
+   in a WITH_HTSLIB build (external side never opens a BAM otherwise). */
 long ReadIntronsBam(BamCov* bc, packExternalInformation* external, dict* d,
-		    char* Locus, long l1, long l2, long ownedLo, long ownedHi);
+		    char* Locus, long l1, long l2, long ownedLo, long ownedHi,
+		    char* Sequence, long LengthSequence);
 
 void SwitchPositions(packExons *allExons);
 

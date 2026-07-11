@@ -93,6 +93,7 @@ void printHelp()
   
   printf("\t-R  <exons_filename>: Provide annotations to improve predictions (GFF, or a bigBed of the same records)\n");
   printf("\t    In a WITH_HTSLIB build, -R may instead be an indexed BAM: spliced-read (CIGAR N) junctions become Intron evidence\n");
+  printf("\t    (junction strand from the XS tag, else minimap2 ts, else the GT-AG/CT-AC splice motif)\n");
   printf("\t-J: Annotation-scoring mode: score the splice sites of forced annotation\n");
   printf("\t    exons (from -O or -R) under the parameter's profiles and classify each\n");
   printf("\t    intron as U2 or U12 (report-only; does not change the assembly). Best\n");

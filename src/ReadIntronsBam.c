@@ -47,6 +47,27 @@ static void collectCB(long start, long end, char strand, void* ud){
   L->n++;
 }
 
+#define UPNT(c) ((c) >= 'a' && (c) <= 'z' ? (c) - 32 : (c))
+
+/* Infer intron strand from the forward-genome splice dinucleotides: canonical
+   GT-AG (also GC-AG, AT-AC) -> '+', their reverse complement (CT-AC, CT-GC,
+   GT-AT) -> '-', ambiguous/non-canonical -> '.'. begin/end are 1-based intron
+   boundaries; Sequence[pos-1] is the base at 1-based pos (COFFSET=1). */
+static char motifStrand(char* Sequence, long L, long begin, long end){
+  char d0, d1, a0, a1;
+  int plus, minus;
+  if (begin < 1 || end > L || end < begin + 1) return '.';
+  d0 = UPNT(Sequence[begin-1]); d1 = UPNT(Sequence[begin]);   /* donor (begin, begin+1) */
+  a0 = UPNT(Sequence[end-2]);   a1 = UPNT(Sequence[end-1]);   /* acceptor (end-1, end) */
+  plus  = ((d0=='G'&&d1=='T')||(d0=='G'&&d1=='C')||(d0=='A'&&d1=='T'))
+       && ((a0=='A'&&a1=='G')||(a0=='A'&&a1=='C'));
+  minus = ((d0=='C'&&d1=='T')&&((a0=='A'&&a1=='C')||(a0=='G'&&a1=='C')))
+       || ((d0=='G'&&d1=='T')&&(a0=='A'&&a1=='T'));
+  if (plus && !minus) return '+';
+  if (minus && !plus) return '-';
+  return '.';                                    /* non-canonical / ambiguous */
+}
+
 /* Sort junctions by (start, end, strand) so identical ones are adjacent. */
 static int cmpJunc(const void* a, const void* b){
   const juncRec* x = (const juncRec*)a;
@@ -62,7 +83,8 @@ static int cmpJunc(const void* a, const void* b){
    each distinct junction is committed in exactly one fragment. Returns the
    number of evidence exon slots produced (including frame/intron replicas). */
 long ReadIntronsBam(BamCov* bc, packExternalInformation* external, dict* d,
-                    char* Locus, long l1, long l2, long ownedLo, long ownedHi){
+                    char* Locus, long l1, long l2, long ownedLo, long ownedHi,
+                    char* Sequence, long LengthSequence){
   packEvidence* ev = external->evidence[0];
   juncList L = { NULL, 0, 0 };
   long lastAcceptor = -INFI;
@@ -75,6 +97,14 @@ long ReadIntronsBam(BamCov* bc, packExternalInformation* external, dict* d,
      acceptor units, matching the GFF/bigBed evidence assignment. */
   if (bamJunctionQuery(bc, Locus, l1, l2 + 1, collectCB, &L) < 0)
     printError("BAM junction query failed");
+
+  /* Junctions with no read-tag strand ('.') get one from the splice motif; this
+     depends only on (start,end), so all '.' copies of a junction resolve alike
+     and then tally with any tagged copies. */
+  for (i = 0; i < L.n; i++)
+    if (L.v[i].strand != '+' && L.v[i].strand != '-')
+      L.v[i].strand = motifStrand(Sequence, LengthSequence,
+                                  L.v[i].start + 1, L.v[i].end);
 
   qsort(L.v, L.n, sizeof(juncRec), cmpJunc);
 
@@ -92,6 +122,7 @@ long ReadIntronsBam(BamCov* bc, packExternalInformation* external, dict* d,
 
     i = j;
 
+    if (strand != '+' && strand != '-') continue;        /* strand unresolved -> drop */
     if (begin <= ownedLo || begin > ownedHi) continue;   /* owned by another fragment */
     if ((strand == '+' && !FWD) || (strand == '-' && !RVS)) continue;
 

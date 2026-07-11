@@ -150,11 +150,24 @@ long bamJunctionQuery(BamCov* bc, const char* chrom, long start, long end,
   while ((ret = sam_itr_next(bc->fp, iter, b)) >= 0) {
     if (b->core.flag & BAMCOV_SKIP) continue;
 
-    /* Junction strand comes from the XS tag (spliced-transcript strand, set by
-       STAR/HISAT2). Without it a junction cannot be placed on a strand. */
+    /* Junction strand: XS (genomic transcript strand; STAR/HISAT2) if present,
+       else minimap2 ts (transcript strand RELATIVE TO THE READ) mapped to the
+       genome via the read orientation, else '.' -- the caller then infers the
+       strand from the splice motif. */
+    char strand = '.';
     uint8_t* xs = bam_aux_get(b, "XS");
-    char strand = (xs != NULL) ? bam_aux2A(xs) : '.';
-    if (strand != '+' && strand != '-') continue;
+    if (xs != NULL) {
+      char v = bam_aux2A(xs);
+      if (v == '+' || v == '-') strand = v;
+    }
+    if (strand == '.') {
+      uint8_t* ts = bam_aux_get(b, "ts");
+      if (ts != NULL) {
+        char v = bam_aux2A(ts);
+        if (v == '+' || v == '-')
+          strand = (b->core.flag & BAM_FREVERSE) ? (v == '+' ? '-' : '+') : v;
+      }
+    }
 
     long refpos = b->core.pos;
     uint32_t* cig = bam_get_cigar(b);
