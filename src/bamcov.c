@@ -30,6 +30,20 @@ struct BamCov {
 #define BAMCOV_SKIP (BAM_FUNMAP | BAM_FSECONDARY | BAM_FSUPPLEMENTARY | \
                      BAM_FQCFAIL | BAM_FDUP)
 
+/* Transcription strand of a read under the given library mode. RF (dUTP):
+   read1/single-end antisense, read2 sense. FR: the reverse. */
+static char readTxnStrand(const bam1_t* b, int libMode)
+{
+  int rev   = (b->core.flag & BAM_FREVERSE) != 0;
+  int read2 = (b->core.flag & BAM_FPAIRED) && (b->core.flag & BAM_FREAD2);
+  int fwd;                                  /* is the transcription strand '+' ? */
+  if (libMode == BAMLIB_FR)
+    fwd = read2 ? rev : !rev;               /* read1/SE sense, read2 antisense */
+  else
+    fwd = read2 ? !rev : rev;               /* RF: read1/SE antisense, read2 sense */
+  return fwd ? '+' : '-';
+}
+
 BamCov* bamOpen(const char* path)
 {
   BamCov* bc = (BamCov*) calloc(1, sizeof(BamCov));
@@ -61,7 +75,7 @@ void bamClose(BamCov* bc)
 }
 
 long bamCoverageQuery(BamCov* bc, const char* chrom, long start, long end,
-                      bwIntervalCB cb, void* userData)
+                      char wantStrand, int libMode, bwIntervalCB cb, void* userData)
 {
   int tid = sam_hdr_name2tid(bc->hdr, chrom);
   if (tid < 0) return 0;                       /* chrom not in this BAM */
@@ -80,6 +94,7 @@ long bamCoverageQuery(BamCov* bc, const char* chrom, long start, long end,
   long ret;
   while ((ret = sam_itr_next(bc->fp, iter, b)) >= 0) {
     if (b->core.flag & BAMCOV_SKIP) continue;
+    if (wantStrand && readTxnStrand(b, libMode) != wantStrand) continue;
 
     long refpos = b->core.pos;                 /* 0-based leftmost ref coord */
     uint32_t* cig = bam_get_cigar(b);
