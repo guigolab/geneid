@@ -90,32 +90,53 @@ json.dump(oracle, open(os.path.join(OUT, "oracle.json"), "w"), indent=1)
 print(f"wrote synth.bam (+.bai), oracle.json; {len(reads)} reads, max depth {max(depth.values())}")
 
 
-# --- junction fixture: XS-tagged spliced reads (only these become introns) ----
-# Each entry: (junction_start0, junction_end0, strand, n_reads). Two junctions
-# share coords but differ in strand (distinct); one read carries two junctions;
-# a few reads have NO XS tag and must be ignored.
-juncs = [(102_000, 103_000, "+", 5),
-         (102_000, 103_000, "-", 2),   # same coords, other strand
-         (105_000, 105_500, "-", 3),
-         (108_000, 108_400, "+", 1)]
-jreads = []   # (pos0, cigar, xs_or_None)
-for js, je, strand, k in juncs:
+# --- junction fixture: spliced reads exercising bamJunctionQuery's strand
+# resolution -- XS (genomic strand, used directly), minimap2 ts (relative to the
+# read, flipped by orientation), and no tag (emitted as '.'). Each read is
+# (pos0, cigar, flag, tag) with tag = ("XS",s) | ("ts",s) | None. Motif inference
+# is NOT tested here (it lives above bamJunctionQuery, in ReadIntronsBam).
+def spliced(js, je, flank=40):
+    return js - flank, f"{flank}M{je-js}N{flank}M"
+
+jreads = []
+# XS-tagged: two junctions share coords but differ in strand (distinct)
+for js, je, s, k in [(102_000, 103_000, "+", 5), (102_000, 103_000, "-", 2),
+                     (105_000, 105_500, "-", 3), (108_000, 108_400, "+", 1)]:
     for _ in range(k):
-        jreads.append((js - 40, f"40M{je-js}N40M", strand))
-# a read spanning TWO junctions (both '+') -> (102000,103000) and (104000,104500),
-# plus 2 unspliced reads with no XS tag (must be ignored for junctions)
-jreads.append((101_960, "40M1000N1000M500N40M", "+"))
-jreads.append((103_500, "80M", None))
-jreads.append((106_100, "80M", None))
+        p, c = spliced(js, je)
+        jreads.append((p, c, 0, ("XS", s)))
+# a read spanning TWO junctions -> (102000,103000) and (104000,104500), XS +
+jreads.append((101_960, "40M1000N1000M500N40M", 0, ("XS", "+")))
+# minimap2 ts: forward read (flag 0) -> genomic == ts; reverse read (flag 16) -> flipped
+p, c = spliced(110_000, 110_500); jreads.append((p, c, 0, ("ts", "+")))    # genomic +
+p, c = spliced(111_000, 111_400); jreads.append((p, c, 16, ("ts", "+")))   # genomic -
+# no tag -> emitted with strand '.'
+p, c = spliced(112_000, 112_300); jreads.append((p, c, 0, None))
+
+import re
+
+
+def read_mlen(c):
+    return sum(int(x) for x in re.findall(r"(\d+)[M=XIS]", c))
+
+
+def genomic_strand(flag, tag):
+    if tag is None:
+        return "."
+    kind, s = tag
+    if kind == "XS":
+        return s
+    return ("-" if s == "+" else "+") if (flag & 16) else s   # ts: flip if reverse
+
 
 jsam = os.path.join(OUT, "_junc.sam")
 with open(jsam, "w") as f:
     f.write("@HD\tVN:1.6\tSO:unsorted\n")
     f.write(f"@SQ\tSN:{CHROM}\tLN:{SIZE}\n")
-    for i, (pos, c, xs) in enumerate(jreads):
-        mlen = sum(int(x) for x in __import__("re").findall(r"(\d+)[M=XIS]", c))
-        tag = f"\tXS:A:{xs}" if xs else ""
-        f.write(f"j{i}\t0\t{CHROM}\t{pos+1}\t60\t{c}\t*\t0\t0\t{'A'*mlen}\t{'I'*mlen}{tag}\n")
+    for i, (pos, c, flag, tag) in enumerate(jreads):
+        m = read_mlen(c)
+        t = f"\t{tag[0]}:A:{tag[1]}" if tag else ""
+        f.write(f"j{i}\t{flag}\t{CHROM}\t{pos+1}\t60\t{c}\t*\t0\t0\t{'A'*m}\t{'I'*m}{t}\n")
 
 jbam = os.path.join(OUT, "synth_junc.bam")
 subprocess.run(f"samtools sort -o {jbam} {jsam}", shell=True, check=True)
@@ -123,19 +144,16 @@ subprocess.run(f"samtools index {jbam}", shell=True, check=True)
 os.remove(jsam)
 
 
-# Build the junction oracle directly from the read set (authoritative), so the
-# two-junction read and the no-XS reads are accounted for exactly.
+# Authoritative oracle: every N junction, strand resolved as bamJunctionQuery does.
 def all_junctions(reads):
-    import re
     out = []
-    for pos, c, xs in reads:
-        if xs not in ("+", "-"):
-            continue
+    for pos, c, flag, tag in reads:
+        st = genomic_strand(flag, tag)
         ref = pos
         for ln, op in re.findall(r"(\d+)([MIDNSHP=X])", c):
             ln = int(ln)
             if op == "N":
-                out.append((ref, ref + ln, xs))
+                out.append((ref, ref + ln, st))
             if op in ("M", "=", "X", "D", "N"):
                 ref += ln
     return out
@@ -143,7 +161,8 @@ def all_junctions(reads):
 
 occ = all_junctions(jreads)
 jqueries = [(CHROM, 101_000, 106_000), (CHROM, 102_000, 102_001),
-            (CHROM, 107_000, 109_000), (CHROM, 120_000, 121_000), ("chrX", 0, 1000)]
+            (CHROM, 107_000, 109_000), (CHROM, 109_000, 113_000),  # ts + / ts - / no-tag '.'
+            (CHROM, 120_000, 121_000), ("chrX", 0, 1000)]
 joracle = {"queries": []}
 for c, s, e in jqueries:
     agg = {}

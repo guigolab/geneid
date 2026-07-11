@@ -583,7 +583,8 @@ int main (int argc, char *argv[])
 #ifdef WITH_HTSLIB
 		      else
 			ReadIntronsBam(evBam, external, isochores[0]->D,
-				       Locus, l1, l2, bbOwnedLo, ownedHi);
+				       Locus, l1, l2, bbOwnedLo, ownedHi,
+				       Sequence, LengthSequence);
 #endif
 		      bbOwnedLo = ownedHi;
 		    }
