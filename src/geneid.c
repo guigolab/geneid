@@ -388,14 +388,12 @@ int main (int argc, char *argv[])
 
 	  if (external->bam != NULL)
 	    {
-	      if (!UTR)
-		printError("BAM -S coverage requires -u (RNA-seq/UTR mode)");
+	      /* Coverage fills sr[] to score exons with or without -u; -u adds UTR
+		 prediction (and the rpkm report) on top. */
 	      printMess("Reading RNA-seq coverage from indexed BAM (per-split range queries)...");
 	    }
 	  else if (external->bwPlus != NULL)
 	    {
-	      if (!UTR)
-		printError("bigWig -S coverage requires -u (RNA-seq/UTR mode)");
 	      printMess("Reading RNA-seq coverage from bigWig (per-split range queries)...");
 	    }
 	  else

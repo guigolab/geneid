@@ -1,0 +1,60 @@
+##gff-version 3
+# source-version: geneid_v1.5 -- geneid@crg.es
+##sequence-region chr21 1 46709983
+# Optimal Gene Structure. 2 genes. Score = 3621.57 
+# Gene 1 (Forward). 23 exons. 1124 aa. Score = 3619.76 
+chr21	geneid_v1.5	gene	36320175	36376280	3619.76	+	.	ID=chr21_1;Name=chr21_1
+chr21	geneid_v1.5	mRNA	36320175	36376280	3619.76	+	.	ID=mRNA_chr21_1;Parent=chr21_1
+chr21	geneid_v1.5	CDS	36320175	36320303	22.53	+	0	ID=cds_chr21_1;Parent=mRNA_chr21_1;Target=geneid_v1.5_predicted_protein_chr21_1 1 43;5_prime_partial=true;exon_type=Internal;acceptor_score=-1.59;donor_score=3.58;coding_potential=1.47;homology_score=667.03
+chr21	geneid_v1.5	exon	36320175	36320303	22.53	+	.	ID=exon_chr21_1.1;Parent=mRNA_chr21_1;5_prime_partial=true;acceptor_score=-1.59;donor_score=3.58;homology_score=667.03
+chr21	geneid_v1.5	CDS	36333646	36333718	16.23	+	0	ID=cds_chr21_1;Parent=mRNA_chr21_1;Target=geneid_v1.5_predicted_protein_chr21_1 44 68;exon_type=Internal;acceptor_score=3.97;donor_score=3.89;coding_potential=0.71;homology_score=423.53
+chr21	geneid_v1.5	exon	36333646	36333718	16.23	+	.	ID=exon_chr21_1.2;Parent=mRNA_chr21_1;acceptor_score=3.97;donor_score=3.89;homology_score=423.53
+chr21	geneid_v1.5	CDS	36336874	36337006	66.37	+	2	ID=cds_chr21_1;Parent=mRNA_chr21_1;Target=geneid_v1.5_predicted_protein_chr21_1 68 112;exon_type=Internal;acceptor_score=3.34;donor_score=4.33;coding_potential=5.17;homology_score=1668.73
+chr21	geneid_v1.5	exon	36336874	36337006	66.37	+	.	ID=exon_chr21_1.3;Parent=mRNA_chr21_1;acceptor_score=3.34;donor_score=4.33;homology_score=1668.73
+chr21	geneid_v1.5	CDS	36337732	36337960	97.17	+	1	ID=cds_chr21_1;Parent=mRNA_chr21_1;Target=geneid_v1.5_predicted_protein_chr21_1 112 188;exon_type=Internal;acceptor_score=4.18;donor_score=-2.62;coding_potential=15.01;homology_score=2505.87
+chr21	geneid_v1.5	exon	36337732	36337960	97.17	+	.	ID=exon_chr21_1.4;Parent=mRNA_chr21_1;acceptor_score=4.18;donor_score=-2.62;homology_score=2505.87
+chr21	geneid_v1.5	CDS	36338779	36338921	124.20	+	0	ID=cds_chr21_1;Parent=mRNA_chr21_1;Target=geneid_v1.5_predicted_protein_chr21_1 189 236;exon_type=Internal;acceptor_score=0.68;donor_score=3.06;coding_potential=7.21;homology_score=3168.33
+chr21	geneid_v1.5	exon	36338779	36338921	124.20	+	.	ID=exon_chr21_1.5;Parent=mRNA_chr21_1;acceptor_score=0.68;donor_score=3.06;homology_score=3168.33
+chr21	geneid_v1.5	CDS	36341399	36341546	134.53	+	1	ID=cds_chr21_1;Parent=mRNA_chr21_1;Target=geneid_v1.5_predicted_protein_chr21_1 236 285;exon_type=Internal;acceptor_score=2.59;donor_score=2.60;coding_potential=12.87;homology_score=3390.73
+chr21	geneid_v1.5	exon	36341399	36341546	134.53	+	.	ID=exon_chr21_1.6;Parent=mRNA_chr21_1;acceptor_score=2.59;donor_score=2.60;homology_score=3390.73
+chr21	geneid_v1.5	CDS	36344579	36344707	44.25	+	0	ID=cds_chr21_1;Parent=mRNA_chr21_1;Target=geneid_v1.5_predicted_protein_chr21_1 286 328;exon_type=Internal;acceptor_score=4.99;donor_score=-2.59;coding_potential=5.87;homology_score=1192.93
+chr21	geneid_v1.5	exon	36344579	36344707	44.25	+	.	ID=exon_chr21_1.7;Parent=mRNA_chr21_1;acceptor_score=4.99;donor_score=-2.59;homology_score=1192.93
+chr21	geneid_v1.5	CDS	36344912	36345031	36.06	+	0	ID=cds_chr21_1;Parent=mRNA_chr21_1;Target=geneid_v1.5_predicted_protein_chr21_1 329 368;exon_type=Internal;acceptor_score=-0.18;donor_score=2.67;coding_potential=4.36;homology_score=990.72
+chr21	geneid_v1.5	exon	36344912	36345031	36.06	+	.	ID=exon_chr21_1.8;Parent=mRNA_chr21_1;acceptor_score=-0.18;donor_score=2.67;homology_score=990.72
+chr21	geneid_v1.5	CDS	36349311	36349408	30.65	+	0	ID=cds_chr21_1;Parent=mRNA_chr21_1;Target=geneid_v1.5_predicted_protein_chr21_1 369 401;exon_type=Internal;acceptor_score=4.54;donor_score=3.47;coding_potential=5.50;homology_score=769.80
+chr21	geneid_v1.5	exon	36349311	36349408	30.65	+	.	ID=exon_chr21_1.9;Parent=mRNA_chr21_1;acceptor_score=4.54;donor_score=3.47;homology_score=769.80
+chr21	geneid_v1.5	CDS	36356620	36356724	37.10	+	1	ID=cds_chr21_1;Parent=mRNA_chr21_1;Target=geneid_v1.5_predicted_protein_chr21_1 401 436;exon_type=Internal;acceptor_score=1.76;donor_score=2.88;coding_potential=7.58;homology_score=976.34
+chr21	geneid_v1.5	exon	36356620	36356724	37.10	+	.	ID=exon_chr21_1.10;Parent=mRNA_chr21_1;acceptor_score=1.76;donor_score=2.88;homology_score=976.34
+chr21	geneid_v1.5	CDS	36359955	36360077	43.71	+	1	ID=cds_chr21_1;Parent=mRNA_chr21_1;Target=geneid_v1.5_predicted_protein_chr21_1 436 477;exon_type=Internal;acceptor_score=3.94;donor_score=1.59;coding_potential=8.20;homology_score=1126.61
+chr21	geneid_v1.5	exon	36359955	36360077	43.71	+	.	ID=exon_chr21_1.11;Parent=mRNA_chr21_1;acceptor_score=3.94;donor_score=1.59;homology_score=1126.61
+chr21	geneid_v1.5	CDS	36360184	36360258	28.19	+	1	ID=cds_chr21_1;Parent=mRNA_chr21_1;Target=geneid_v1.5_predicted_protein_chr21_1 477 502;exon_type=Internal;acceptor_score=2.35;donor_score=2.93;coding_potential=7.75;homology_score=743.74
+chr21	geneid_v1.5	exon	36360184	36360258	28.19	+	.	ID=exon_chr21_1.12;Parent=mRNA_chr21_1;acceptor_score=2.35;donor_score=2.93;homology_score=743.74
+chr21	geneid_v1.5	CDS	36362183	36362228	12.54	+	1	ID=cds_chr21_1;Parent=mRNA_chr21_1;Target=geneid_v1.5_predicted_protein_chr21_1 502 517;exon_type=Internal;acceptor_score=2.26;donor_score=1.29;coding_potential=5.19;homology_score=384.73
+chr21	geneid_v1.5	exon	36362183	36362228	12.54	+	.	ID=exon_chr21_1.13;Parent=mRNA_chr21_1;acceptor_score=2.26;donor_score=1.29;homology_score=384.73
+chr21	geneid_v1.5	CDS	36364093	36364259	95.35	+	0	ID=cds_chr21_1;Parent=mRNA_chr21_1;Target=geneid_v1.5_predicted_protein_chr21_1 518 573;exon_type=Internal;acceptor_score=3.29;donor_score=2.65;coding_potential=10.11;homology_score=2406.87
+chr21	geneid_v1.5	exon	36364093	36364259	95.35	+	.	ID=exon_chr21_1.14;Parent=mRNA_chr21_1;acceptor_score=3.29;donor_score=2.65;homology_score=2406.87
+chr21	geneid_v1.5	CDS	36368988	36369876	613.48	+	1	ID=cds_chr21_1;Parent=mRNA_chr21_1;Target=geneid_v1.5_predicted_protein_chr21_1 573 869;exon_type=Internal;acceptor_score=3.19;donor_score=4.61;coding_potential=64.56;homology_score=15196.10
+chr21	geneid_v1.5	exon	36368988	36369876	613.48	+	.	ID=exon_chr21_1.15;Parent=mRNA_chr21_1;acceptor_score=3.19;donor_score=4.61;homology_score=15196.10
+chr21	geneid_v1.5	CDS	36372374	36372531	78.01	+	0	ID=cds_chr21_1;Parent=mRNA_chr21_1;Target=geneid_v1.5_predicted_protein_chr21_1 870 922;exon_type=Internal;acceptor_score=1.75;donor_score=2.08;coding_potential=14.49;homology_score=1994.03
+chr21	geneid_v1.5	exon	36372374	36372531	78.01	+	.	ID=exon_chr21_1.16;Parent=mRNA_chr21_1;acceptor_score=1.75;donor_score=2.08;homology_score=1994.03
+chr21	geneid_v1.5	CDS	36375143	36375288	62.90	+	1	ID=cds_chr21_1;Parent=mRNA_chr21_1;Target=geneid_v1.5_predicted_protein_chr21_1 922 971;exon_type=Internal;acceptor_score=2.24;donor_score=-1.86;coding_potential=13.75;homology_score=1670.05
+chr21	geneid_v1.5	exon	36375143	36375288	62.90	+	.	ID=exon_chr21_1.17;Parent=mRNA_chr21_1;acceptor_score=2.24;donor_score=-1.86;homology_score=1670.05
+chr21	geneid_v1.5	CDS	36375379	36375489	79.14	+	2	ID=cds_chr21_1;Parent=mRNA_chr21_1;Target=geneid_v1.5_predicted_protein_chr21_1 971 1008;exon_type=Internal;acceptor_score=3.83;donor_score=-3.60;coding_potential=-1.67;homology_score=2116.73
+chr21	geneid_v1.5	exon	36375379	36375489	79.14	+	.	ID=exon_chr21_1.18;Parent=mRNA_chr21_1;acceptor_score=3.83;donor_score=-3.60;homology_score=2116.73
+chr21	geneid_v1.5	CDS	36375554	36375655	116.21	+	2	ID=cds_chr21_1;Parent=mRNA_chr21_1;Target=geneid_v1.5_predicted_protein_chr21_1 1008 1042;exon_type=Internal;acceptor_score=-0.94;donor_score=-3.62;coding_potential=-6.07;homology_score=3126.23
+chr21	geneid_v1.5	exon	36375554	36375655	116.21	+	.	ID=exon_chr21_1.19;Parent=mRNA_chr21_1;acceptor_score=-0.94;donor_score=-3.62;homology_score=3126.23
+chr21	geneid_v1.5	CDS	36375855	36375913	38.06	+	2	ID=cds_chr21_1;Parent=mRNA_chr21_1;Target=geneid_v1.5_predicted_protein_chr21_1 1042 1061;exon_type=Internal;acceptor_score=-1.54;donor_score=-1.39;coding_potential=1.58;homology_score=1128.86
+chr21	geneid_v1.5	exon	36375855	36375913	38.06	+	.	ID=exon_chr21_1.20;Parent=mRNA_chr21_1;acceptor_score=-1.54;donor_score=-1.39;homology_score=1128.86
+chr21	geneid_v1.5	CDS	36375961	36376035	40.23	+	0	ID=cds_chr21_1;Parent=mRNA_chr21_1;Target=geneid_v1.5_predicted_protein_chr21_1 1062 1086;exon_type=Internal;acceptor_score=-4.78;donor_score=-0.54;coding_potential=1.17;homology_score=1220.08
+chr21	geneid_v1.5	exon	36375961	36376035	40.23	+	.	ID=exon_chr21_1.21;Parent=mRNA_chr21_1;acceptor_score=-4.78;donor_score=-0.54;homology_score=1220.08
+chr21	geneid_v1.5	CDS	36376086	36376112	13.42	+	0	ID=cds_chr21_1;Parent=mRNA_chr21_1;Target=geneid_v1.5_predicted_protein_chr21_1 1087 1095;exon_type=Internal;acceptor_score=2.11;donor_score=1.22;coding_potential=0.65;homology_score=421.40
+chr21	geneid_v1.5	exon	36376086	36376112	13.42	+	.	ID=exon_chr21_1.22;Parent=mRNA_chr21_1;acceptor_score=2.11;donor_score=1.22;homology_score=421.40
+chr21	geneid_v1.5	CDS	36376194	36376280	31.47	+	0	ID=cds_chr21_1;Parent=mRNA_chr21_1;Target=geneid_v1.5_predicted_protein_chr21_1 1096 1124;exon_type=Terminal;acceptor_score=1.29;coding_potential=-4.88;homology_score=916.93
+chr21	geneid_v1.5	exon	36376194	36376280	31.47	+	.	ID=exon_chr21_1.23;Parent=mRNA_chr21_1;acceptor_score=1.29;homology_score=916.93
+###
+# Gene 2 (Forward). 1 exons. 70 aa. Score = 1.81 
+chr21	geneid_v1.5	gene	36376692	36376901	1.81	+	.	ID=chr21_2;Name=chr21_2
+chr21	geneid_v1.5	mRNA	36376692	36376901	1.81	+	.	ID=mRNA_chr21_2;Parent=chr21_2
+chr21	geneid_v1.5	CDS	36376692	36376901	1.81	+	0	ID=cds_chr21_2;Parent=mRNA_chr21_2;Target=geneid_v1.5_predicted_protein_chr21_2 1 70;exon_type=Single;start_score=-2.52;coding_potential=2.05;homology_score=212.86
+chr21	geneid_v1.5	exon	36376692	36376901	1.81	+	.	ID=exon_chr21_2.1;Parent=mRNA_chr21_2;start_score=-2.52;homology_score=212.86
+###
