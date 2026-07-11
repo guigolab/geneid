@@ -42,6 +42,10 @@ CASES=(
   # text GFF. Byte-identical to the rnaseq golden -> guards bwQuery -> FillCoverage ->
   # HSPScan2 and the 0-based bigWig -> 1-based sr[] coordinate mapping on both strands.
   "rnaseq_bw|param/human.rnaseq.param|-3U -u -R samples/ENCFF001.1.MORC.introns.gff -S samples/ENCFF001.1.MORC.stranded.plus.bw,samples/ENCFF001.1.MORC.stranded.minus.bw -j 36315000 -k 36380000|samples/chr21.fa"
+  # rnaseq_bw_nou: bigWig -S coverage WITHOUT -u -- guards that coverage scores
+  # exons (via sr[]) with no UTR prediction and no readcount[] allocation (the
+  # -u-decoupling): must run (no crash) and predict CDS but emit no UTR lines.
+  "rnaseq_bw_nou|param/human.rnaseq.param|-3 -R samples/ENCFF001.1.MORC.introns.gff -S samples/ENCFF001.1.MORC.stranded.plus.bw,samples/ENCFF001.1.MORC.stranded.minus.bw -j 36315000 -k 36380000|samples/chr21.fa"
   # human_intron: soft intron-length penalty on a 250kb Red-masked chr14 slice
   # (GRCh38 chr14:67,900,000-68,150,000, RAD51B locus). The param is chr12-trained
   # and carries Intron_length_model 7.1788 1.51411 with weight 0.2 (feature ON) and

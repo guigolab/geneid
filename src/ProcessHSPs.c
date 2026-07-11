@@ -237,7 +237,10 @@ static void CoverAdd(packExternalInformation* external, short x, long idx,
   else
     external->sr[x][idx] = MIN(external->sr[x][idx] + scoreHSP, COV);
 
-  external->readcount[x][idx] = external->readcount[x][idx] + rawScore;
+  /* readcount[] (raw read support, for the rpkm report) is only allocated under
+     -u; without it, coverage still fills sr[] to score exons but keeps no rpkm. */
+  if (UTR)
+    external->readcount[x][idx] = external->readcount[x][idx] + rawScore;
 }
 
 /* Projection of RNA-seq reads: accumulate summed depth for each nucleotide */
@@ -497,7 +500,8 @@ void ProcessHSPs(long l1,
 /* ------------------------------------------------------------------------- *
  *  bigWig RNA-seq coverage: the same sr[]/readcount[] fill as the text       *
  *  ReadScan path, but sourced from a per-fragment bigWig range query instead *
- *  of the preloaded HSP list. Requires -u (readcount[] is UTR-allocated).    *
+ *  of the preloaded HSP list. Fills sr[] to score exons whether or not -u is  *
+ *  set; readcount[] (rpkm) is only touched under -u (see CoverAdd).          *
  * ------------------------------------------------------------------------- */
 
 /* One coverage interval in the CURRENT strand's coordinate frame (genomic for
@@ -554,7 +558,7 @@ static void FillCoverageFrameless(packExternalInformation* external, int Strand,
   for (x = frameStart; x < frameEnd; x++) {
     for (i = 0; i < l2 - l1 + 1; i++) {
       external->sr[x][i] = NO_SCORE;
-      external->readcount[x][i] = 0.0;
+      if (UTR) external->readcount[x][i] = 0.0;   /* readcount[] is -u-only (see CoverAdd) */
     }
     for (k = 0; k < niv; k++) {
       float scoreHSP = (RREADS / MRM) * iv[k].v;
