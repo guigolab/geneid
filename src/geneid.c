@@ -57,6 +57,9 @@ int
   /* Annotation-scoring mode (-J): score the forced evidence splice sites under
      the enabled profiles and classify each intron (report-only, no DP change) */
   SCOREANNOT = 0,
+  /* -y library strandedness for BAM -S coverage: 0=unstranded (default),
+     1=RF/dUTP, 2=FR (see BAMLIB_* in bamcov.h). Only used in a WITH_HTSLIB build. */
+  BAMSTRAND = 0,
   /* Output formats */
   GFF = 0, GFF3 = 0, X10 = 0, XML = 0, cDNA = 0, PSEQ = 0, tDNA = 0,
   /* Verbose flag (memory/processing information) */

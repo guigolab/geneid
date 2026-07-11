@@ -155,3 +155,48 @@ for c, s, e in jqueries:
                                "junctions": sorted([list(k) + [v] for k, v in agg.items()])})
 json.dump(joracle, open(os.path.join(OUT, "oracle_junc.json"), "w"), indent=1)
 print(f"wrote synth_junc.bam (+.bai), oracle_junc.json; {len(jreads)} junction reads")
+
+
+# --- stranded fixture: reads with controlled FLAGs to exercise readTxnStrand ---
+# (pos0, flag): read1/read2 x forward/reverse x SE, non-overlapping 100M reads.
+sreads = [(200_000, 83),   # PAIRED|PROPER|READ1|REVERSE
+          (200_500, 67),   # PAIRED|PROPER|READ1 (forward)
+          (201_000, 147),  # PAIRED|PROPER|READ2|REVERSE
+          (201_500, 131),  # PAIRED|PROPER|READ2 (forward)
+          (202_000, 0)]    # single-end, forward
+RLEN = 100
+
+ssam = os.path.join(OUT, "_str.sam")
+with open(ssam, "w") as f:
+    f.write("@HD\tVN:1.6\tSO:unsorted\n")
+    f.write(f"@SQ\tSN:{CHROM}\tLN:{SIZE}\n")
+    for i, (pos, flag) in enumerate(sreads):
+        f.write(f"s{i}\t{flag}\t{CHROM}\t{pos+1}\t60\t{RLEN}M\t=\t{pos+1}\t0\t{'A'*RLEN}\t{'I'*RLEN}\n")
+
+sbam = os.path.join(OUT, "synth_str.bam")
+subprocess.run(f"samtools sort -o {sbam} {ssam}", shell=True, check=True)
+subprocess.run(f"samtools index {sbam}", shell=True, check=True)
+os.remove(ssam)
+
+
+def txn(flag, libmode):
+    rev = bool(flag & 16)
+    read2 = bool(flag & 1) and bool(flag & 128)
+    if libmode == "fr":
+        fwd = rev if read2 else (not rev)
+    else:  # rf (dUTP)
+        fwd = (not rev) if read2 else rev
+    return "+" if fwd else "-"
+
+
+# query [199000,203000) covers all 5 reads; expected runs per (want, libmode)
+soracle = {"queries": []}
+for want, lib in [("+", "rf"), ("-", "rf"), ("+", "fr"), ("-", "fr"), (".", "none")]:
+    runs = []
+    for pos, flag in sreads:
+        if want == "." or txn(flag, lib) == want:
+            runs.append([pos, pos + RLEN, 1])
+    soracle["queries"].append({"chrom": CHROM, "start": 199_000, "end": 203_000,
+                               "want": want, "libmode": lib, "runs": sorted(runs)})
+json.dump(soracle, open(os.path.join(OUT, "oracle_strand.json"), "w"), indent=1)
+print(f"wrote synth_str.bam (+.bai), oracle_strand.json; {len(sreads)} stranded reads")

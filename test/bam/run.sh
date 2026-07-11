@@ -30,4 +30,5 @@ gcc -I"$ROOT/include" -I"$PREFIX/include" -Wall -O2 "$ROOT/src/bamcov.c" bamdump
 gcc -I"$ROOT/include" -I"$PREFIX/include" -Wall -O2 "$ROOT/src/bamcov.c" juncdump.c \
     -o "$D/juncdump" -L"$PREFIX/lib" -lhts || { echo "BUILD FAILED (juncdump)"; exit 2; }
 python3 check.py "$D/bamdump" . || exit 1
+python3 check_strand.py "$D/bamdump" . || exit 1
 python3 check_junc.py "$D/juncdump" .

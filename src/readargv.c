@@ -41,12 +41,13 @@ extern int  SFP,SDP,SAP,STP,
             SGE, SCOREANNOT;
 extern float EW,EvidenceEW,MRM;
 extern long LOW,HI;
+extern int BAMSTRAND;   /* -y library strandedness for BAM -S coverage */
 
 /* required by getopts */
 extern char* optarg;
 extern int optind;
 
-char* USAGE="NAME\n\tgeneid - a program to annotate genomic sequences\nSYNOPSIS\n\tgeneid\t[-bdaefitnxszru]\n\t\t[-TDAZU]\n\t\t[-p gene_prefix]\n\t\t[-G] [-3] [-X] [-M] [-m]\n\t\t[-WCF] [-o] [-J]\n\t\t[-j lower_bound_coord]\n\t\t[-k upper_bound_coord]\n\t\t[-N numer_nt_mapped]\n\t\t[-O <gff_exons_file>]\n\t\t[-R <gff_annotation-file>]\n\t\t[-S <gff_homology_file>]\n\t\t[-P <parameter_file>]\n\t\t[-E exonweight]\n\t\t[-V evidence_exonweight]\n\t\t[-Bv] [-h]\n\t\t<locus_seq_in_fasta_format>\nRELEASE\n\t" GENEID_RELEASE "\n";
+char* USAGE="NAME\n\tgeneid - a program to annotate genomic sequences\nSYNOPSIS\n\tgeneid\t[-bdaefitnxszru]\n\t\t[-TDAZU]\n\t\t[-p gene_prefix]\n\t\t[-G] [-3] [-X] [-M] [-m]\n\t\t[-WCF] [-o] [-J]\n\t\t[-j lower_bound_coord]\n\t\t[-k upper_bound_coord]\n\t\t[-N numer_nt_mapped]\n\t\t[-O <gff_exons_file>]\n\t\t[-R <gff_annotation-file>]\n\t\t[-S <gff_homology_file>]\n\t\t[-y library_type]\n\t\t[-P <parameter_file>]\n\t\t[-E exonweight]\n\t\t[-V evidence_exonweight]\n\t\t[-Bv] [-h]\n\t\t<locus_seq_in_fasta_format>\nRELEASE\n\t" GENEID_RELEASE "\n";
 
 void printHelp()
 {
@@ -98,7 +99,8 @@ void printHelp()
   printf("\t    used as -J -O <annotation> to score/type a provided gene structure\n");
   printf("\t-S  <HSP_filename>: Using information from protein sequence alignments to improve predictions\n");
   printf("\t    RNA-seq coverage may instead be given as bigWig(s): -S plus.bw,minus.bw (stranded) or -S cov.bw (unstranded); requires -u\n");
-  printf("\t    or, in a WITH_HTSLIB build, as an indexed BAM: -S reads.bam (unstranded coverage; requires -u)\n\n");
+  printf("\t    or, in a WITH_HTSLIB build, as an indexed BAM: -S reads.bam (requires -u)\n");
+  printf("\t-y  <rf|fr|none>: BAM -S library strandedness -- rf=dUTP/reverse, fr=forward, none=unstranded (default)\n\n");
   printf("\t-u: Turn on UTR prediction. Only valid with -S option: HSP/EST/short read ends are used to determine UTR ends\n");
   
   printf("\t-E: Add this value to the exon weight parameter (see parameter file)\n");
@@ -190,7 +192,7 @@ void readargv (int argc,char* argv[],
   char *dummy2;
   char *dummy3;
   /* Reading setup options */
-  while ((c = getopt(argc,argv,"oO:bdaefitnsrxj:k:N:p:UDATzZXmMG3BvE:V:R:S:WCFP:huJ")) != -1)
+  while ((c = getopt(argc,argv,"oO:bdaefitnsrxj:k:N:p:UDATzZXmMG3BvE:V:R:S:WCFP:huJy:")) != -1)
     switch(c)
       {
       case 'B': BEG++; 
@@ -314,6 +316,16 @@ void readargv (int argc,char* argv[],
 		/* geneidOpts++; */
 		break;
 	  case 'J': SCOREANNOT++;   /* score forced-annotation splice sites + type introns */
+		break;
+	  case 'y':   /* library strandedness for BAM -S coverage */
+		if (!strcmp(optarg,"rf") || !strcmp(optarg,"RF"))
+		  BAMSTRAND = 1;
+		else if (!strcmp(optarg,"fr") || !strcmp(optarg,"FR"))
+		  BAMSTRAND = 2;
+		else if (!strcmp(optarg,"none") || !strcmp(optarg,"unstranded"))
+		  BAMSTRAND = 0;
+		else
+		  printError("-y expects a library type: rf (dUTP), fr, or none");
 		break;
       case 'v': VRB++;
 		break;

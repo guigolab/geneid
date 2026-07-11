@@ -28,6 +28,7 @@
 #include "bigwig.h"
 #ifdef WITH_HTSLIB
 #include "bamcov.h"
+extern int BAMSTRAND;   /* -y library type: BAMLIB_NONE (unstranded) / RF / FR */
 #endif
 
 extern float MRM;
@@ -624,9 +625,17 @@ void ProcessCoverageBam(long l1, long l2, int Strand,
   }
   if (gS < 0) gS = 0;
 
+  /* Unstranded: count every read on both strands. Stranded (-y rf|fr): this
+     pass wants only the reads whose transcription strand matches the frame
+     being filled (FORWARD -> '+', REVERSE -> '-'). */
+  char wantStrand = 0;
+  if (BAMSTRAND != BAMLIB_NONE)
+    wantStrand = (Strand == FORWARD) ? '+' : '-';
+
   printMess("Preprocessing BAM coverage: step 1");
   if (external->bam != NULL && external->curLocus != NULL)
-    bamCoverageQuery(external->bam, external->curLocus, gS, gE, covCollect, &buf);
+    bamCoverageQuery(external->bam, external->curLocus, gS, gE,
+                     wantStrand, BAMSTRAND, covCollect, &buf);
 
   FillCoverageFrameless(external, Strand, l1, l2, buf.a, buf.n);
   free(buf.a);

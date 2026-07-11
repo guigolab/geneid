@@ -23,6 +23,14 @@
 
 typedef struct BamCov BamCov;
 
+/* Library strandedness for deriving a read's transcription strand from its FLAG.
+   NONE = unstranded (every read counts on both strands). RF = "reverse"/dUTP
+   (read1 & single-end reads are antisense, read2 sense) -- the common Illumina
+   protocol. FR = "forward" (read1 & single-end sense, read2 antisense). */
+#define BAMLIB_NONE 0
+#define BAMLIB_RF   1
+#define BAMLIB_FR   2
+
 /* Open an indexed, coordinate-sorted BAM (reads header + .bai/.csi index).
    Returns NULL on error, or when the file is not a BAM (so this doubles as the
    -S format sniff) or has no index. */
@@ -32,9 +40,12 @@ void bamClose(BamCov* bc);
 
 /* Invoke cb for each maximal run of constant non-zero depth overlapping
    [start,end) on `chrom` (0-based half-open genomic coords, value = depth).
-   Returns the number of runs reported, or -1 on error; unknown chrom -> 0. */
+   wantStrand selects which reads contribute by transcription strand (derived
+   from the FLAG via libMode): '+' or '-' for a single strand, or 0 for
+   unstranded (all reads, libMode ignored). Returns the number of runs
+   reported, or -1 on error; unknown chrom -> 0. */
 long bamCoverageQuery(BamCov* bc, const char* chrom, long start, long end,
-                      bwIntervalCB cb, void* userData);
+                      char wantStrand, int libMode, bwIntervalCB cb, void* userData);
 
 /* Called once per spliced-read junction (a CIGAR N gap) overlapping the query.
    start/end are the intron's 0-based half-open reference coordinates; strand is
