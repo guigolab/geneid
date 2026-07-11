@@ -1,0 +1,44 @@
+##gff-version 3
+# source-version: geneid_v1.5 -- geneid@crg.es
+##sequence-region morc_rc 1 65001
+# Optimal Gene Structure. 1 genes. Score = 2496.53 
+# Gene 1 (Reverse). 17 exons. 940 aa. Score = 2496.53 
+morc_rc	geneid_v1.5	gene	1283	59805	2496.53	-	.	ID=morc_rc_1;Name=morc_rc_1
+morc_rc	geneid_v1.5	mRNA	1283	59805	2496.53	-	.	ID=mRNA_morc_rc_1;Parent=morc_rc_1
+morc_rc	geneid_v1.5	UTR	1283	4704	74.97	-	0	ID=utr_morc_rc_1.2;Parent=mRNA_morc_rc_1;exon_type=UTR_Terminal_Half;homology_score=3748.67;rpkm=5914.59
+morc_rc	geneid_v1.5	CDS	4705	4858	23.45	-	1	ID=cds_morc_rc_1;Parent=mRNA_morc_rc_1;Target=geneid_v1.5_predicted_protein_morc_rc_1 889 940;exon_type=Terminal;acceptor_score=20.78;coding_potential=13.90;homology_score=377.33;rpkm=11260.61
+morc_rc	geneid_v1.5	exon	1283	4858	98.43	-	.	ID=exon_morc_rc_1.17;Parent=mRNA_morc_rc_1;acceptor_score=0.00;homology_score=4125.99;rpkm=6144.82
+morc_rc	geneid_v1.5	CDS	7470	7627	36.75	-	0	ID=cds_morc_rc_1;Parent=mRNA_morc_rc_1;Target=geneid_v1.5_predicted_protein_morc_rc_1 837 889;exon_type=Internal;acceptor_score=11.87;donor_score=28.92;coding_potential=14.49;homology_score=408.34;rpkm=12620.67
+morc_rc	geneid_v1.5	exon	7470	7627	36.75	-	.	ID=exon_morc_rc_1.16;Parent=mRNA_morc_rc_1;acceptor_score=11.87;donor_score=28.92;homology_score=408.34;rpkm=12620.67
+morc_rc	geneid_v1.5	CDS	10125	11013	129.72	-	1	ID=cds_morc_rc_1;Parent=mRNA_morc_rc_1;Target=geneid_v1.5_predicted_protein_morc_rc_1 540 836;exon_type=Internal;acceptor_score=24.45;donor_score=20.59;coding_potential=64.56;homology_score=2543.45;rpkm=17093.44
+morc_rc	geneid_v1.5	exon	10125	11013	129.72	-	.	ID=exon_morc_rc_1.15;Parent=mRNA_morc_rc_1;acceptor_score=24.45;donor_score=20.59;homology_score=2543.45;rpkm=17093.44
+morc_rc	geneid_v1.5	CDS	15742	15908	44.92	-	0	ID=cds_morc_rc_1;Parent=mRNA_morc_rc_1;Target=geneid_v1.5_predicted_protein_morc_rc_1 485 540;exon_type=Internal;acceptor_score=17.59;donor_score=35.22;coding_potential=10.11;homology_score=443.08;rpkm=14412.38
+morc_rc	geneid_v1.5	exon	15742	15908	44.92	-	.	ID=exon_morc_rc_1.14;Parent=mRNA_morc_rc_1;acceptor_score=17.59;donor_score=35.22;homology_score=443.08;rpkm=14412.38
+morc_rc	geneid_v1.5	CDS	17773	17818	26.98	-	1	ID=cds_morc_rc_1;Parent=mRNA_morc_rc_1;Target=geneid_v1.5_predicted_protein_morc_rc_1 469 484;exon_type=Internal;acceptor_score=17.18;donor_score=29.33;coding_potential=5.19;homology_score=101.40;rpkm=8363.77
+morc_rc	geneid_v1.5	exon	17773	17818	26.98	-	.	ID=exon_morc_rc_1.13;Parent=mRNA_morc_rc_1;acceptor_score=17.18;donor_score=29.33;homology_score=101.40;rpkm=8363.77
+morc_rc	geneid_v1.5	CDS	19743	19817	22.95	-	1	ID=cds_morc_rc_1;Parent=mRNA_morc_rc_1;Target=geneid_v1.5_predicted_protein_morc_rc_1 444 469;exon_type=Internal;acceptor_score=13.84;donor_score=20.50;coding_potential=7.75;homology_score=176.69;rpkm=9916.44
+morc_rc	geneid_v1.5	exon	19743	19817	22.95	-	.	ID=exon_morc_rc_1.12;Parent=mRNA_morc_rc_1;acceptor_score=13.84;donor_score=20.50;homology_score=176.69;rpkm=9916.44
+morc_rc	geneid_v1.5	CDS	19924	20046	38.38	-	1	ID=cds_morc_rc_1;Parent=mRNA_morc_rc_1;Target=geneid_v1.5_predicted_protein_morc_rc_1 403 444;exon_type=Internal;acceptor_score=25.97;donor_score=26.97;coding_potential=8.20;homology_score=282.55;rpkm=9159.35
+morc_rc	geneid_v1.5	exon	19924	20046	38.38	-	.	ID=exon_morc_rc_1.11;Parent=mRNA_morc_rc_1;acceptor_score=25.97;donor_score=26.97;homology_score=282.55;rpkm=9159.35
+morc_rc	geneid_v1.5	CDS	23277	23381	32.93	-	1	ID=cds_morc_rc_1;Parent=mRNA_morc_rc_1;Target=geneid_v1.5_predicted_protein_morc_rc_1 368 403;exon_type=Internal;acceptor_score=18.53;donor_score=28.05;coding_potential=7.58;homology_score=243.08;rpkm=9298.41
+morc_rc	geneid_v1.5	exon	23277	23381	32.93	-	.	ID=exon_morc_rc_1.10;Parent=mRNA_morc_rc_1;acceptor_score=18.53;donor_score=28.05;homology_score=243.08;rpkm=9298.41
+morc_rc	geneid_v1.5	CDS	30593	30690	26.08	-	0	ID=cds_morc_rc_1;Parent=mRNA_morc_rc_1;Target=geneid_v1.5_predicted_protein_morc_rc_1 336 368;exon_type=Internal;acceptor_score=20.55;donor_score=17.11;coding_potential=5.50;homology_score=210.71;rpkm=7855.10
+morc_rc	geneid_v1.5	exon	30593	30690	26.08	-	.	ID=exon_morc_rc_1.9;Parent=mRNA_morc_rc_1;acceptor_score=20.55;donor_score=17.11;homology_score=210.71;rpkm=7855.10
+morc_rc	geneid_v1.5	CDS	34970	35089	32.62	-	0	ID=cds_morc_rc_1;Parent=mRNA_morc_rc_1;Target=geneid_v1.5_predicted_protein_morc_rc_1 296 335;exon_type=Internal;acceptor_score=20.28;donor_score=24.87;coding_potential=4.36;homology_score=264.81;rpkm=8256.11
+morc_rc	geneid_v1.5	exon	34970	35089	32.62	-	.	ID=exon_morc_rc_1.8;Parent=mRNA_morc_rc_1;acceptor_score=20.28;donor_score=24.87;homology_score=264.81;rpkm=8256.11
+morc_rc	geneid_v1.5	CDS	35294	35422	30.35	-	0	ID=cds_morc_rc_1;Parent=mRNA_morc_rc_1;Target=geneid_v1.5_predicted_protein_morc_rc_1 253 295;exon_type=Internal;acceptor_score=27.20;donor_score=11.72;coding_potential=5.87;homology_score=297.64;rpkm=9247.55
+morc_rc	geneid_v1.5	exon	35294	35422	30.35	-	.	ID=exon_morc_rc_1.7;Parent=mRNA_morc_rc_1;acceptor_score=27.20;donor_score=11.72;homology_score=297.64;rpkm=9247.55
+morc_rc	geneid_v1.5	CDS	38455	38602	46.73	-	1	ID=cds_morc_rc_1;Parent=mRNA_morc_rc_1;Target=geneid_v1.5_predicted_protein_morc_rc_1 203 252;exon_type=Internal;acceptor_score=23.85;donor_score=30.35;coding_potential=12.87;homology_score=460.52;rpkm=22910.36
+morc_rc	geneid_v1.5	exon	38455	38602	46.73	-	.	ID=exon_morc_rc_1.6;Parent=mRNA_morc_rc_1;acceptor_score=23.85;donor_score=30.35;homology_score=460.52;rpkm=22910.36
+morc_rc	geneid_v1.5	CDS	41080	41227	39.82	-	2	ID=cds_morc_rc_1;Parent=mRNA_morc_rc_1;Target=geneid_v1.5_predicted_protein_morc_rc_1 154 203;exon_type=Internal;acceptor_score=19.42;donor_score=24.97;coding_potential=7.39;homology_score=448.63;rpkm=21604.96
+morc_rc	geneid_v1.5	exon	41080	41227	39.82	-	.	ID=exon_morc_rc_1.5;Parent=mRNA_morc_rc_1;acceptor_score=19.42;donor_score=24.97;homology_score=448.63;rpkm=21604.96
+morc_rc	geneid_v1.5	CDS	42055	42269	43.59	-	1	ID=cds_morc_rc_1;Parent=mRNA_morc_rc_1;Target=geneid_v1.5_predicted_protein_morc_rc_1 82 154;exon_type=Internal;acceptor_score=21.96;donor_score=22.05;coding_potential=16.23;homology_score=526.41;rpkm=11662.33
+morc_rc	geneid_v1.5	exon	42055	42269	43.59	-	.	ID=exon_morc_rc_1.4;Parent=mRNA_morc_rc_1;acceptor_score=21.96;donor_score=22.05;homology_score=526.41;rpkm=11662.33
+morc_rc	geneid_v1.5	CDS	42995	43127	41.72	-	2	ID=cds_morc_rc_1;Parent=mRNA_morc_rc_1;Target=geneid_v1.5_predicted_protein_morc_rc_1 38 82;exon_type=Internal;acceptor_score=19.43;donor_score=35.49;coding_potential=5.17;homology_score=343.81;rpkm=12546.87
+morc_rc	geneid_v1.5	exon	42995	43127	41.72	-	.	ID=exon_morc_rc_1.3;Parent=mRNA_morc_rc_1;acceptor_score=19.43;donor_score=35.49;homology_score=343.81;rpkm=12546.87
+morc_rc	geneid_v1.5	CDS	46283	46355	28.82	-	0	ID=cds_morc_rc_1;Parent=mRNA_morc_rc_1;Target=geneid_v1.5_predicted_protein_morc_rc_1 14 38;exon_type=Internal;acceptor_score=21.35;donor_score=26.70;coding_potential=0.71;homology_score=135.57;rpkm=5801.83
+morc_rc	geneid_v1.5	exon	46283	46355	28.82	-	.	ID=exon_morc_rc_1.2;Parent=mRNA_morc_rc_1;acceptor_score=21.35;donor_score=26.70;homology_score=135.57;rpkm=5801.83
+morc_rc	geneid_v1.5	CDS	59698	59736	14.64	-	0	ID=cds_morc_rc_1;Parent=mRNA_morc_rc_1;Target=geneid_v1.5_predicted_protein_morc_rc_1 2 13;exon_type=First;start_score=7.30;donor_score=20.26;coding_potential=2.73;homology_score=83.25;rpkm=7743.59
+morc_rc	geneid_v1.5	UTR	59737	59805	3.12	-	0	ID=utr_morc_rc_1.1;Parent=mRNA_morc_rc_1;exon_type=UTR_First_Half;homology_score=119.62;rpkm=5401.93
+morc_rc	geneid_v1.5	exon	59698	59805	17.76	-	.	ID=exon_morc_rc_1.1;Parent=mRNA_morc_rc_1;homology_score=202.87;rpkm=6247.53
+###
