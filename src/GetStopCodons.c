@@ -223,8 +223,10 @@ long GetStopCodons(char* s,
 		} 
     }
   
-  /* 3. Remaining stops until the end of sequence. Set score to 0 for those */
-  if (!(s+p->dimension))
+  /* 3. Remaining stops until the end of sequence. Set score to 0 for those.
+     (The dereference was missing here: the guard used to test the pointer, which
+     is never NULL, so this end-of-sequence scan never ran.) */
+  if (!*(s+p->dimension))
     {
       s=(s-is);
       is+=p->offset;

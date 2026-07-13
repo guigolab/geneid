@@ -52,7 +52,7 @@ long BuildUTRExons(
 /*   int Frame; */
 /*   int js; */
 
-  long i, j, k, ks;
+  long i, k, ks;
   int l;
   float pen = 0.002;
   /* Final number of predicted UTR exons */
@@ -64,7 +64,7 @@ long BuildUTRExons(
     printError("Not enough memory: local UTR exons");
 
   /* Main loop, forall beginning sites looking for ending sites... */
-  for (i = 0, j = 0, k = 0, nExon = 0;
+  for (i = 0, k = 0, nExon = 0;
        (i < nStarts); i++)
     { 
       /* Reset the best local exons array */
