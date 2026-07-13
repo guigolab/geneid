@@ -128,10 +128,16 @@ Dependencies:
     >make WITH_HTSLIB=1 HTSLIB_PREFIX=/opt/homebrew        # e.g. macOS/Homebrew
     >make WITH_HTSLIB=1 HTSLIB_PREFIX=/path/to/htslib
 
+    The build bakes HTSLIB_PREFIX/lib into the binary's runtime search path
+    (-Wl,-rpath), so the resulting geneid finds libhts.so.* on its own -- no
+    "module load" or LD_LIBRARY_PATH needed at run time. (If you ever move the
+    htslib install, either rebuild or set
+    LD_LIBRARY_PATH=<prefix>/lib:$LD_LIBRARY_PATH.)
+
     The default build (plain "make") never references htslib; BAM input just
     isn't available in that binary. Install htslib from
     https://github.com/samtools/htslib (or "brew install htslib",
-    "apt-get install libhts-dev", etc.).
+    "apt-get install libhts-dev", a cluster module, etc.).
 
 Type:
 >geneid -h

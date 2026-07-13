@@ -45,7 +45,10 @@ OBJECTS = $(OBJ)/BackupGenes.o $(OBJ)/PeakEdgeScore.o $(OBJ)/GetTranscriptTermin
 HTSLIB_PREFIX ?= /usr/local
 ifdef WITH_HTSLIB
 OPTS += -DWITH_HTSLIB -I$(HTSLIB_PREFIX)/include
-HTSLIBS = -L$(HTSLIB_PREFIX)/lib -lhts
+# -L is a LINK-time path; -Wl,-rpath bakes the same dir into the binary's
+# runtime search path so it finds libhts.so.* without LD_LIBRARY_PATH or a
+# module load. (Harmless when htslib comes from a module / the default prefix.)
+HTSLIBS = -L$(HTSLIB_PREFIX)/lib -Wl,-rpath,$(HTSLIB_PREFIX)/lib -lhts
 OBJECTS += $(OBJ)/bamcov.o $(OBJ)/ReadIntronsBam.o
 else
 HTSLIBS =
