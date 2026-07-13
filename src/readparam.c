@@ -457,7 +457,7 @@ void ReadProfileSpliceSites(FILE* RootFile, gparam* gp)
 								}
 					  			else
 								  {
-						  			sprintf(mess,"Wrong format: profile name %s \n\tis not admitted for acceptors [only %s, %s, %s, %s, %s or %s]",
+						  			snprintf(mess,MAXSTRING,"Wrong format: profile name %.256s \n\tis not admitted for acceptors [only %s, %s, %s, %s, %s or %s]",
 								  	header, sprofileACC, sprofilePPT, sprofileBP, sprofileU12BP, sprofileU12gtagACC, sprofileU12atacACC);
 						  			printError(mess);
 								  }
@@ -557,7 +557,7 @@ void ReadProfileSpliceSites(FILE* RootFile, gparam* gp)
 			    }
 			  else
 			    {		  
-			      sprintf(mess,"Wrong format: profile name %s \n\tis not admitted for donors [only %s, %s, %s, %s, %s, %s or %s]",
+			      snprintf(mess,MAXSTRING,"Wrong format: profile name %.256s \n\tis not admitted for donors [only %s, %s, %s, %s, %s, %s or %s]",
 				      header, sprofileDON, sprofileU12gtagDON, sprofileU12atacDON,sprofileU2gcagDON,sprofileU2gtaDON,sprofileU2gtgDON,sprofileU2gtyDON);
 			      printError(mess);		
 			    }
@@ -920,7 +920,7 @@ void ReadIsochore(FILE* RootFile, gparam* gp)
       readLine(RootFile,line); 
       if ((sscanf(line, "%*s %d %d %f", &i, &f, &lscore))!=3)
         {
-          sprintf(mess, "Wrong format/nunber (%s): Initial Markov value", line);
+          snprintf(mess, MAXSTRING, "Wrong format/nunber (%.512s): Initial Markov value", line);
           printError(mess);
         }
       gp->OligoLogsIni[f][i]=lscore;
@@ -941,7 +941,7 @@ void ReadIsochore(FILE* RootFile, gparam* gp)
       readLine(RootFile,line); 
       if ((sscanf(line, "%*s %d %d %f", &i, &f, &lscore))!=3)
         {
-          sprintf(mess, "Wrong format/number (%s): Transition Markov value", line);
+          snprintf(mess, MAXSTRING, "Wrong format/number (%.512s): Transition Markov value", line);
           printError(mess);
         }
       gp->OligoLogsTran[f][i]=lscore;

@@ -48,10 +48,10 @@ A. DEFINITIONS
    predicted genes/sites/exons; they track the minor version. GENEID_RELEASE
    is the human-facing release string (patch level) shown in the usage banner
    and credits -- keep it as the single source so they cannot drift again.   */
-#define VERSION   "geneid_v1.5"
-#define SITES     "geneid_v1.5"
-#define EXONS     "geneid_v1.5"
-#define GENEID_RELEASE "geneid v1.5.2"
+#define VERSION   "geneid_v1.6"
+#define SITES     "geneid_v1.6"
+#define EXONS     "geneid_v1.6"
+#define GENEID_RELEASE "geneid v1.6.0"
 #define EVIDENCE  "evidence"
 
 /* -------------------------------------------------------------------------
