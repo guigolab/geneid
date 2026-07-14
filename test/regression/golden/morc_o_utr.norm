@@ -54,7 +54,7 @@ chr21	geneid_v1.6	intron	36369877	36372373	0.00	+	0	ID=intron_chr21_1.15;Parent=
 chr21	evidence	CDS	36372374	36372531	36.75	+	0	ID=cds_chr21_1;Parent=mRNA_chr21_1;Target=geneid_v1.6_predicted_protein_chr21_1 837 889;exon_type=Internal
 chr21	evidence	exon	36372374	36372531	36.75	+	.	ID=exon_chr21_1.16;Parent=mRNA_chr21_1
 chr21	geneid_v1.6	intron	36372532	36375142	0.00	+	2	ID=intron_chr21_1.16;Parent=chr21_1;type=U2;subtype=GT-AG
-chr21	evidence	CDS	36375143	36375296	23.45	+	1	ID=cds_chr21_1;Parent=mRNA_chr21_1;Target=geneid_v1.6_predicted_protein_chr21_1 889 939;exon_type=Terminal
+chr21	evidence	CDS	36375143	36375296	23.45	+	1	ID=cds_chr21_1;Parent=mRNA_chr21_1;Target=geneid_v1.6_predicted_protein_chr21_1 889 940;exon_type=Terminal
 chr21	evidence	UTR	36375297	36378718	75.95	+	0	ID=utr_chr21_1.2;Parent=mRNA_chr21_1;exon_type=UTR_Terminal_Half
 chr21	evidence	exon	36375143	36378718	99.40	+	.	ID=exon_chr21_1.17;Parent=mRNA_chr21_1
 ###

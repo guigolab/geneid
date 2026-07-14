@@ -38,7 +38,7 @@ chr21	geneid_v1.6	CDS	36368988	36369876	129.72	+	1	ID=cds_chr21_1;Parent=mRNA_ch
 chr21	geneid_v1.6	exon	36368988	36369876	129.72	+	.	ID=exon_chr21_1.15;Parent=mRNA_chr21_1;acceptor_score=24.45;donor_score=20.59;homology_score=2543.45;rpkm=17093.44
 chr21	geneid_v1.6	CDS	36372374	36372531	36.75	+	0	ID=cds_chr21_1;Parent=mRNA_chr21_1;Target=geneid_v1.6_predicted_protein_chr21_1 837 889;exon_type=Internal;acceptor_score=11.87;donor_score=28.92;coding_potential=14.49;homology_score=408.34;rpkm=12620.67
 chr21	geneid_v1.6	exon	36372374	36372531	36.75	+	.	ID=exon_chr21_1.16;Parent=mRNA_chr21_1;acceptor_score=11.87;donor_score=28.92;homology_score=408.34;rpkm=12620.67
-chr21	geneid_v1.6	CDS	36375143	36375296	23.45	+	1	ID=cds_chr21_1;Parent=mRNA_chr21_1;Target=geneid_v1.6_predicted_protein_chr21_1 889 939;exon_type=Terminal;acceptor_score=20.78;coding_potential=13.90;homology_score=377.33;rpkm=11260.61
+chr21	geneid_v1.6	CDS	36375143	36375296	23.45	+	1	ID=cds_chr21_1;Parent=mRNA_chr21_1;Target=geneid_v1.6_predicted_protein_chr21_1 889 940;exon_type=Terminal;acceptor_score=20.78;coding_potential=13.90;homology_score=377.33;rpkm=11260.61
 chr21	geneid_v1.6	UTR	36375297	36378718	75.95	+	0	ID=utr_chr21_1.2;Parent=mRNA_chr21_1;exon_type=UTR_Terminal_Half;homology_score=3748.67;rpkm=5914.59
 chr21	geneid_v1.6	exon	36375143	36378718	99.41	+	.	ID=exon_chr21_1.17;Parent=mRNA_chr21_1;homology_score=4125.99;rpkm=6144.82
 ###
