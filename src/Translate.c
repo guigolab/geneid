@@ -173,6 +173,10 @@ void TranslateGene(exonGFF* e,
      holds (exon + running protein) at the concat steps, so it grows too. */
   growStr(&sAux,&sAuxcap, MAXAA);
 
+  /* Defensive: the first-exon block sets rmdProt (the 5' partial codon); start
+     it empty so a gene with no CDS exon can never prepend stack garbage. */
+  rmdProt[0] = '\0';
+
   /* A. Translating a forward sense exon: Terminal > Internal >.. First */
   if (e->Strand == '+')
     {
@@ -282,10 +286,13 @@ void TranslateGene(exonGFF* e,
         
 	    totalAA = totalAA + currAA;
 	    tAA[i][1] = totalAA;
+	    /* Clear lastExon only after a real CDS exon: a leading UTR feature
+	       (skipped by the type test above) must not defeat the first-exon
+	       guards below, or the first CDS exon's frame/range is mishandled. */
+	    lastExon = 0;
 	  }
 	  /* 5. Pointer jumping to the next exon */
 	  e = e->PreviousExon;
-	  lastExon = 0;
 	} /* endfor */
       
 	  /* 6. Adding first uncomplete codon of the first exon in the gene */    
@@ -420,13 +427,15 @@ void TranslateGene(exonGFF* e,
 	  
 	    totalAA = totalAA + currAA;
 	    tAA[i][1] = totalAA;
-	  
+
 	    /* Next exon */
 	    free(rs);
+	    /* Clear lastExon only after a real CDS exon: a leading UTR feature
+	       (skipped above) must not defeat the first-exon guard, or rmdProt is
+	       left uninitialised and prepended to the protein as stack garbage. */
+	    lastExon = 0;
 	  }
 	  e = e->PreviousExon;
-	  lastExon = 0;
-		  
 	}
       /* Frame of the last exon in the gene */
       growStr(&sAux,&sAuxcap, (long)strlen(rmdProt)+(long)strlen(prot)+1);
