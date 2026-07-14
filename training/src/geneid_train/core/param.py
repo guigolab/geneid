@@ -137,6 +137,13 @@ class Param:
     def vector(self, keyword: str, index: int = 0) -> list[str]:
         return self.scalar(keyword, index).split()
 
+    def data_lines(self, keyword: str, index: int = 0) -> list[str]:
+        """Every data line of a section, stripped (skips the keyword line and any
+        comment/blank lines). Used to read multi-line sections like the gene
+        model where the first line alone is not enough."""
+        block = self._find(keyword, index)
+        return [block.raw[i].strip() for i in block.data_line_indices()]
+
     def set_scalar(self, keyword: str, value: object, index: int = 0) -> None:
         """Replace the single data line of a section, preserving line ending."""
         block = self._find(keyword, index)

@@ -107,6 +107,7 @@ def train(
     branch_weight: float = 0.0,
     max_intron: float | None = DEFAULT_MAX_INTRON,
     intron_length_weight: float = DEFAULT_INTRON_LENGTH_WEIGHT,
+    utr: bool = False,
 ) -> str:
     """Train a geneid parameter file from complete, filtered gene ``models``.
 
@@ -195,6 +196,7 @@ def train(
         u12=u12_sections,
         u12_splice_thresh=u12_splice_thresh,
         u12_exon_thresh=u12_exon_thresh,
+        utr=utr,
     )
 
     if u2_branch:

@@ -247,6 +247,7 @@ def _cmd_train(args: argparse.Namespace) -> int:
             u12_splice_thresh=args.u12_splice_thresh, u12_exon_thresh=args.u12_exon_thresh,
             u2_branch=args.u2_branch, branch_weight=args.branch_weight,
             max_intron=args.max_intron, intron_length_weight=args.intron_length_weight,
+            utr=args.utr,
         )
     except NotImplementedError as exc:
         sys.stderr.write(f"geneid-train train: {exc}\n")
@@ -254,6 +255,40 @@ def _cmd_train(args: argparse.Namespace) -> int:
     with open(args.output, "w") as fh:
         fh.write(param_text)
     print(f"wrote parameter file: {args.output}")
+    return 0
+
+
+def _cmd_retrofit(args: argparse.Namespace) -> int:
+    from .param.gene_model import HUMAN_INTRON_LENGTH_MODEL
+    from .param.retrofit import retrofit_param
+
+    if not (args.utr or args.intron_length):
+        sys.stderr.write("retrofit: nothing to do (pass --utr and/or --intron-length)\n")
+        return 2
+
+    intron_length = None
+    if args.intron_length:
+        if args.intron_length == "human":
+            intron_length = HUMAN_INTRON_LENGTH_MODEL
+        else:
+            try:
+                mu, sigma = (float(x) for x in args.intron_length.split(","))
+            except ValueError:
+                sys.stderr.write("retrofit: --intron-length must be 'human' or 'mu,sigma'\n")
+                return 2
+            intron_length = (mu, sigma)
+
+    try:
+        out = retrofit_param(
+            open(args.param).read(), utr=args.utr, intron_length=intron_length,
+            intron_length_weight=args.intron_length_weight,
+        )
+    except (NotImplementedError, ValueError) as exc:
+        sys.stderr.write(f"geneid-train retrofit: {exc}\n")
+        return 2
+    with open(args.output, "w") as fh:
+        fh.write(out)
+    print(f"wrote retrofitted parameter file: {args.output}")
     return 0
 
 
@@ -366,7 +401,35 @@ def build_parser() -> argparse.ArgumentParser:
         help="Branch_point_score_weight: contribution of the branch score to the acceptor "
              "score (default 0 = scored and reported via bp_score/bp_pos but not counted)",
     )
+    p_train.add_argument(
+        "--utr", action="store_true",
+        help="emit a UTR-aware gene model so geneid -u (with -S/-Y RNA-seq coverage) predicts "
+             "UTRs; intergenic minimum drops to 0 so neighbouring UTRs may abut/overlap",
+    )
     p_train.set_defaults(func=_cmd_train)
+
+    p_retro = sub.add_parser(
+        "retrofit",
+        help="add UTR and/or the intron-length model to an existing .param (non-destructive)",
+    )
+    p_retro.add_argument("param", help="existing .param to retrofit")
+    p_retro.add_argument("-o", "--output", required=True, help="output .param path")
+    p_retro.add_argument(
+        "--utr", action="store_true",
+        help="inject a UTR-aware gene model (reuses the param's own intron range; intergenic "
+             "minimum 0). Skipped if the gene model already has UTR rules",
+    )
+    p_retro.add_argument(
+        "--intron-length", metavar="human|mu,sigma", default=None,
+        help="inject a soft intron-length model: 'human' for the bundled human log-normal, or "
+             "explicit 'mu,sigma'. Skipped if the param already has one",
+    )
+    p_retro.add_argument(
+        "--intron-length-weight", type=float, default=0.0,
+        help="Intron_length_score_weight (lambda) for the injected model; default 0 = inert "
+             "(no prediction change) until you enable it or retrain per species",
+    )
+    p_retro.set_defaults(func=_cmd_retrofit)
 
     p_opt = sub.add_parser(
         "optimize", help="grid-search exon/site weights against a held-out set (maximise SNSP)"
