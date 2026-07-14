@@ -262,8 +262,8 @@ def _cmd_retrofit(args: argparse.Namespace) -> int:
     from .param.gene_model import HUMAN_INTRON_LENGTH_MODEL
     from .param.retrofit import retrofit_param
 
-    if not (args.utr or args.intron_length):
-        sys.stderr.write("retrofit: nothing to do (pass --utr and/or --intron-length)\n")
+    if not (args.utr or args.intron_length or args.u12):
+        sys.stderr.write("retrofit: nothing to do (pass --utr, --intron-length and/or --u12)\n")
         return 2
 
     intron_length = None
@@ -282,6 +282,8 @@ def _cmd_retrofit(args: argparse.Namespace) -> int:
         out = retrofit_param(
             open(args.param).read(), utr=args.utr, intron_length=intron_length,
             intron_length_weight=args.intron_length_weight,
+            u12=args.u12, u12_splice_thresh=args.u12_splice_thresh,
+            u12_exon_thresh=args.u12_exon_thresh,
         )
     except (NotImplementedError, ValueError) as exc:
         sys.stderr.write(f"geneid-train retrofit: {exc}\n")
@@ -428,6 +430,19 @@ def build_parser() -> argparse.ArgumentParser:
         "--intron-length-weight", type=float, default=0.0,
         help="Intron_length_score_weight (lambda) for the injected model; default 0 = inert "
              "(no prediction change) until you enable it or retrain per species",
+    )
+    p_retro.add_argument(
+        "--u12", action="store_true",
+        help="inject the bundled pan-taxon U12 profile trio + acceptance gates so geneid -U "
+             "predicts U12 introns. Skipped if the param already has U12 profiles",
+    )
+    p_retro.add_argument(
+        "--u12-splice-thresh", type=float, default=9.0,
+        help="U12_Splice_Score_Threshold for --u12 (default 9, conservative; lower over-calls)",
+    )
+    p_retro.add_argument(
+        "--u12-exon-thresh", type=float, default=8.0,
+        help="U12_Exon_Score_Threshold for --u12 (default 8)",
     )
     p_retro.set_defaults(func=_cmd_retrofit)
 

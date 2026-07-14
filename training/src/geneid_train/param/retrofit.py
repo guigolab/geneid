@@ -9,10 +9,12 @@ needed for the modern RNA-seq workflow onto an existing param:
     dropping the intergenic minimum to 0;
   * ``--intron-length``: the soft intron-length penalty section (log-normal
     mu/sigma + weight), defaulting the weight to 0 (inert) so it never changes
-    predictions until deliberately enabled.
-
-U12 retrofit is a planned follow-up (it needs the bundled profiles re-registered
-onto the target param's donor/acceptor geometry -- see param/u12.py).
+    predictions until deliberately enabled;
+  * ``--u12``: the bundled pan-taxon U12 (minor-spliceosome) profile trio plus
+    the U12 acceptance-score gates, so ``geneid -U`` predicts U12 introns. The
+    profiles carry their own geneid geometry (offset/length, from the reference
+    U12 param -- see param/u12.py), so they drop into any param's Donor/Acceptor
+    slot; nothing genome-specific is re-registered here.
 
 Only single-isochore params are supported for now (the trainer produces those;
 multi-isochore params like human.rnaseq.param are already UTR-capable).
@@ -22,6 +24,7 @@ from __future__ import annotations
 
 from ..core.param import Param
 from .gene_model import HUMAN_INTRON_LENGTH_MODEL, extract_intron_range, utr_gene_model_lines
+from .u12 import load_bundled_u12
 
 
 def _has_utr(param: Param) -> bool:
@@ -34,6 +37,9 @@ def retrofit_param(
     utr: bool = False,
     intron_length: tuple[float, float] | None = None,
     intron_length_weight: float = 0.0,
+    u12: bool = False,
+    u12_splice_thresh: float = 9.0,
+    u12_exon_thresh: float = 8.0,
 ) -> str:
     """Return the retrofitted param text. ``intron_length`` may be
     ``HUMAN_INTRON_LENGTH_MODEL`` or an explicit ``(mu, sigma)``."""
@@ -69,5 +75,24 @@ def retrofit_param(
                 "Intron_length_score_weight\n"
                 f"{intron_length_weight:g}\n",
             )
+
+    if u12:
+        # geneid enables a U12 subtype only when its full profile trio is present
+        # (branch + donor + acceptor); the bundle carries GT-AG and AT-AC.
+        if p.has("U12gtag_Donor_profile"):
+            print("retrofit: param already has U12 profiles; leaving them unchanged")
+        else:
+            sections = load_bundled_u12()
+            # optional profiles must precede the required profile they extend
+            p.insert_text_before("Acceptor_profile", sections.acceptor_side)
+            p.insert_text_before("Donor_profile", sections.donor_side)
+            # the U12 acceptance gates (without them geneid's -1000 default
+            # mass-mislabels U2 GT-AG as U12); read before Exon_weights
+            if not p.has("U12_Splice_Score_Threshold"):
+                p.insert_text_before(
+                    "Exon_weights",
+                    f"U12_Splice_Score_Threshold\n{u12_splice_thresh:g}\n"
+                    f"U12_Exon_Score_Threshold\n{u12_exon_thresh:g}\n",
+                )
 
     return p.to_text()
