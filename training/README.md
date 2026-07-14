@@ -77,8 +77,9 @@ Train a parameter file, then tune and evaluate it:
 
 ```bash
 # GFF3 annotation + genome -> a complete geneid .param
+# add --utr for a UTR-aware gene model (geneid -u with -S/-Y RNA-seq coverage)
 geneid-train train --gff annotation.gff3 --fastas genome.fa \
-    --species Genus_species --output Genus_species.param [--u12] [--u2-branch]
+    --species Genus_species --output Genus_species.param [--utr] [--u12] [--u2-branch]
 
 # grid/search the exon weights against a held-out set
 geneid-train optimize --param Genus_species.param \
@@ -89,6 +90,21 @@ geneid-train evaluate predictions.gff annotation.gff
 geneid-train jackknife --gff annotation.gff3 --fastas genome.fa \
     --species Genus_species --eval-fastas eval.fa --eval-gff eval.gff3
 ```
+
+Retrofit an existing (CDS-only) param with newer capabilities, non-destructively:
+
+```bash
+# add a UTR-aware gene model + the human soft intron-length model (weight 0 = inert)
+geneid-train retrofit Genus_species.param -o Genus_species.rnaseq.param \
+    --utr --intron-length human
+```
+
+`--utr` reuses the param's own trained intron range and sets the intergenic
+minimum to 0 (neighbouring UTRs may abut/overlap). `--intron-length` takes
+`human` or an explicit `mu,sigma`; the weight defaults to 0 (no prediction
+change) — set `--intron-length-weight` or retrain per species to enable the
+penalty. Both injections are skipped if the param already has them. (U12
+retrofit and multi-isochore params are planned follow-ups.)
 
 `optimize`, `evaluate`, and `jackknife` need a compiled `geneid` binary on your
 `PATH` (or pass `--geneid /path/to/geneid`); build it from the repo root with

@@ -19,6 +19,7 @@ from importlib.resources import files
 
 from ..core.param import Param
 from ..stats.genemodel import DEFAULT_INTRON_LENGTH_WEIGHT
+from .gene_model import utr_gene_model_lines
 from .u12 import U12Sections
 
 
@@ -44,6 +45,7 @@ def assemble_param(
     u12_exon_thresh: float = 8.0,
     intron_length_model: tuple[float, float] | None = None,
     intron_length_weight: float = DEFAULT_INTRON_LENGTH_WEIGHT,
+    utr: bool = False,
 ) -> str:
     """Build a full geneid param. Profile/Markov args are geneid-format data
     lines (from ``stats.sites.format_profile`` / ``stats.coding.format_markov_matrix``);
@@ -68,6 +70,12 @@ def assemble_param(
     p.set_scalar("Markov_order", markov_order)
     p.replace_block_data("Markov_Initial_probability_matrix", markov_initial)
     p.replace_block_data("Markov_Transition_probability_matrix", markov_transition)
+
+    if utr:
+        # Swap the CDS-only gene model for a UTR-aware one; the intragenic CDS
+        # intron distance keeps the @INTRON_RANGE@ sentinel (filled below), the
+        # intergenic minimum drops to 0 (neighbouring UTRs may abut/overlap).
+        p.replace_block_data("General_Gene_Model", utr_gene_model_lines("@INTRON_RANGE@"))
 
     if u12 is not None:
         # order matters only in that each optional profile must precede the fixed
