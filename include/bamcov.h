@@ -60,4 +60,10 @@ typedef void (*bamJunctionCB)(long start, long end, char strand, void* userData)
 long bamJunctionQuery(BamCov* bc, const char* chrom, long start, long end,
                       bamJunctionCB cb, void* userData);
 
+/* Total mapped reads across all references, read from the index meta (like
+   `samtools idxstats`) -- no read scan. Used to set MRM (millions of reads
+   mapped) for the rpkm report when -N is not given. Returns the count, or -1
+   if the index carries no per-reference stats. */
+long bamMappedReads(BamCov* bc);
+
 #endif

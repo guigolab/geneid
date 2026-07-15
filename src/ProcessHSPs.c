@@ -31,7 +31,6 @@
 extern int BAMSTRAND;   /* -y library type: BAMLIB_NONE (unstranded) / RF / FR */
 #endif
 
-extern float MRM;
 extern int UTR;
 extern int SRP;
 extern float NO_SCORE;
@@ -286,7 +285,7 @@ void ReadScan(packExternalInformation* external,
 				   i++)
 				{
 				  /* Score value */
-				  scoreHSP = (RREADS/MRM) * hsp->sPairs[x][i]->Score;
+				  scoreHSP = (RREADS/COVNORM) * hsp->sPairs[x][i]->Score;
 				  /* / (hsp->sPairs[x][i]->Pos2 - hsp->sPairs[x][i]->Pos1 + 1); */
 				  
 				  /* For each position in the HSP update the array sr */
@@ -305,7 +304,7 @@ void ReadScan(packExternalInformation* external,
 				   i++)
 				{
 				  /* Score value */
-				  scoreHSP = (RREADS/MRM) * hsp->sPairs[x][i]->Score; 
+				  scoreHSP = (RREADS/COVNORM) * hsp->sPairs[x][i]->Score; 
 /* 				    /(hsp->sPairs[x][i]->Pos2 - hsp->sPairs[x][i]->Pos1 + 1); */
 				  
 				  /* For each position in the HSP update the array sr */
@@ -327,7 +326,7 @@ void ReadScan(packExternalInformation* external,
 				   i++)
 				{
 				  /* Score value */
-				  scoreHSP = (RREADS/MRM) * hsp->sPairs[x][i]->Score; 
+				  scoreHSP = (RREADS/COVNORM) * hsp->sPairs[x][i]->Score; 
 /* 				    /(hsp->sPairs[x][i]->Pos2 - hsp->sPairs[x][i]->Pos1 + 1); */
 				  
 				  /* Update the array sr with some positions of current HSPs */
@@ -372,7 +371,7 @@ void ReadScan(packExternalInformation* external,
 				   i++)
 				{
 				  /* Score value */
-				  scoreHSP = (RREADS/MRM) * hsp->sPairs[x][i]->Score;
+				  scoreHSP = (RREADS/COVNORM) * hsp->sPairs[x][i]->Score;
 /* 				  / (hsp->sPairs[x][i]->Pos2 - hsp->sPairs[x][i]->Pos1 + 1); */
 				  
 				  /* For each position in the HSP update the array sr */
@@ -390,7 +389,7 @@ void ReadScan(packExternalInformation* external,
 				   i++)
 				{
 				  /* Score value */
-				  scoreHSP = (RREADS/MRM) * hsp->sPairs[x][i]->Score;
+				  scoreHSP = (RREADS/COVNORM) * hsp->sPairs[x][i]->Score;
 /* 				  /(hsp->sPairs[x][i]->Pos2 - hsp->sPairs[x][i]->Pos1 + 1); */
 				  
 				  /* For each position in the HSP update the array sr */
@@ -411,7 +410,7 @@ void ReadScan(packExternalInformation* external,
 				   i++)
 				{
 				  /* Score value */
-				  scoreHSP = (RREADS/MRM) * hsp->sPairs[x][i]->Score;
+				  scoreHSP = (RREADS/COVNORM) * hsp->sPairs[x][i]->Score;
 /* 				  / (hsp->sPairs[x][i]->Pos2 - hsp->sPairs[x][i]->Pos1 + 1); */
 				  
 				  /* Update the array sr with some positions of current HSPs */
@@ -484,8 +483,10 @@ void HSPScan2(packExternalInformation* external,
  *
  * Stage 1 only REPORTS this value (verbose diagnostic, no scoring change); in
  * Stage 2 it becomes the null of a per-base log-likelihood-ratio coverage term.
- * sr[] holds depth/MRM capped at COV (see CoverAdd), so read depth ~= sr*MRM;
- * we report in depth units. Covered positions are sr[] != NO_SCORE. A strand's
+ * sr[] holds depth/COVNORM capped at COV (see CoverAdd), so read depth ~=
+ * sr*COVNORM; we report in depth units. (COVNORM, the fixed coverage-score
+ * scale, is deliberately NOT MRM -- MRM now carries the real library size for
+ * the rpkm report only.) Covered positions are sr[] != NO_SCORE. A strand's
  * three frame planes are identical copies, so we scan only the first. */
 static void ReportCoverageBackground(packExternalInformation* external,
                                      int Strand, long l1, long l2)
@@ -508,7 +509,7 @@ static void ReportCoverageBackground(packExternalInformation* external,
   for (i = 0; i < len; i++) {
     long depth;
     if (external->sr[frame][i] == NO_SCORE) continue;   /* uncovered */
-    depth = (long)(external->sr[frame][i] * MRM + 0.5);
+    depth = (long)(external->sr[frame][i] * COVNORM + 0.5);
     if (depth < 0) depth = 0;
     if (depth > HISTCAP) depth = HISTCAP;
     hist[depth]++;
@@ -629,7 +630,7 @@ static void FillCoverageFrameless(packExternalInformation* external, int Strand,
       if (UTR) external->readcount[x][i] = 0.0;   /* readcount[] is -u-only (see CoverAdd) */
     }
     for (k = 0; k < niv; k++) {
-      float scoreHSP = (RREADS / MRM) * iv[k].v;
+      float scoreHSP = (RREADS / COVNORM) * iv[k].v;
       long a = (iv[k].s < l1)     ? l1     : iv[k].s;   /* clip to [l1, l2]  */
       long b = (iv[k].e > l2 + 1) ? l2 + 1 : iv[k].e;   /* half-open upper   */
       for (j = a; j < b; j++)
