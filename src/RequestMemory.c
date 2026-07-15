@@ -473,6 +473,7 @@ packExternalInformation* RequestMemoryExternalInformation()
   p->bwMinus = NULL;
   p->curLocus = NULL;
   p->bam = NULL;   /* -S BAM handle: NULL until the -S ingest sniffs a BAM */
+  p->covLambdaBg = -1.0;   /* set per fragment by the coverage paths (-L LLR) */
 
   return(p);
 }

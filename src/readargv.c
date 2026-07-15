@@ -41,6 +41,8 @@ extern int  SFP,SDP,SAP,STP,
             SGE, SCOREANNOT;
 extern float EW,EvidenceEW,MRM;
 extern int MRMset;   /* set here when -N is given, so a BAM's index is not used to estimate MRM */
+extern int EXPRLLR;        /* -L: enable Poisson per-base expression LLR coverage scoring */
+extern float LLRK, LLRW;   /* -L fold-change k (>1); -Q weight/scale of the LLR term */
 extern long LOW,HI;
 extern int BAMSTRAND;   /* -y library strandedness for BAM -S coverage */
 
@@ -48,7 +50,7 @@ extern int BAMSTRAND;   /* -y library strandedness for BAM -S coverage */
 extern char* optarg;
 extern int optind;
 
-char* USAGE="NAME\n\tgeneid - a program to annotate genomic sequences\nSYNOPSIS\n\tgeneid\t[-bdaefitnxszru]\n\t\t[-TDAZU]\n\t\t[-p gene_prefix]\n\t\t[-G] [-3] [-X] [-M] [-m]\n\t\t[-WCF] [-o] [-J]\n\t\t[-j lower_bound_coord]\n\t\t[-k upper_bound_coord]\n\t\t[-N numer_nt_mapped]\n\t\t[-O <gff_exons_file>]\n\t\t[-R <gff_annotation-file>]\n\t\t[-S <gff_homology_file>]\n\t\t[-Y reads.bam]\n\t\t[-y library_type]\n\t\t[-P <parameter_file>]\n\t\t[-E exonweight]\n\t\t[-V evidence_exonweight]\n\t\t[-Bv] [-h]\n\t\t<locus_seq_in_fasta_format>\nRELEASE\n\t" GENEID_RELEASE "\n";
+char* USAGE="NAME\n\tgeneid - a program to annotate genomic sequences\nSYNOPSIS\n\tgeneid\t[-bdaefitnxszru]\n\t\t[-TDAZU]\n\t\t[-p gene_prefix]\n\t\t[-G] [-3] [-X] [-M] [-m]\n\t\t[-WCF] [-o] [-J]\n\t\t[-j lower_bound_coord]\n\t\t[-k upper_bound_coord]\n\t\t[-N numer_nt_mapped]\n\t\t[-L fold_change] [-Q llr_weight]\n\t\t[-O <gff_exons_file>]\n\t\t[-R <gff_annotation-file>]\n\t\t[-S <gff_homology_file>]\n\t\t[-Y reads.bam]\n\t\t[-y library_type]\n\t\t[-P <parameter_file>]\n\t\t[-E exonweight]\n\t\t[-V evidence_exonweight]\n\t\t[-Bv] [-h]\n\t\t<locus_seq_in_fasta_format>\nRELEASE\n\t" GENEID_RELEASE "\n";
 
 void printHelp()
 {
@@ -84,6 +86,11 @@ void printHelp()
   printf("\t-k  <coord>: End prediction at this coordinate\n");  
   printf("\t-N  <num_reads>: Millions of reads mapped to genome (rpkm report; for a\n"
 	 "\t     BAM input this is estimated from the index when -N is omitted)\n");
+  printf("\t-L  <k>: enable Poisson expression LLR coverage scoring, fold-change k>1\n"
+	 "\t     (expressed/background); default off (legacy log(cov+1)/raw term).\n"
+	 "\t     Recommended start: -L 2 -Q 0.01 (tuned on human RNA-seq bam+u)\n");
+  printf("\t-Q  <w>: weight/scale of the -L LLR term (default 0.01; re-tune per\n"
+	 "\t     param file and library depth)\n");
   printf("\t-W: Only Forward sense prediction (Watson)\n");
   printf("\t-C: Only Reverse sense prediction (Crick)\n");
   printf("\t-U: Allow U12 introns (Requires appropriate U12 parameters to be set in the parameter file)\n");
@@ -196,7 +203,7 @@ void readargv (int argc,char* argv[],
   char *dummy2;
   char *dummy3;
   /* Reading setup options */
-  while ((c = getopt(argc,argv,"oO:bdaefitnsrxj:k:N:p:UDATzZXmMG3BvE:V:R:S:WCFP:huJy:Y:")) != -1)
+  while ((c = getopt(argc,argv,"oO:bdaefitnsrxj:k:N:p:UDATzZXmMG3BvE:V:R:S:WCFP:huJy:Y:L:Q:")) != -1)
     switch(c)
       {
       case 'B': BEG++; 
@@ -306,6 +313,13 @@ void readargv (int argc,char* argv[],
 		/* assembly-compatible: reads-mapped (rpkm reporting), allowed under -O */
 		MRMset = 1;   /* explicit value: suppress BAM-index auto-estimation */
 		NOpt++;
+		break;
+	  case 'L': EXPRLLR = 1;   /* enable Poisson expression LLR coverage scoring */
+		LLRK = strtof(optarg,&dummy3);
+		if (LLRK <= 1.0)
+		  printError("-L expects a fold-change k > 1 (expressed/background)");
+		break;
+	  case 'Q': LLRW = strtof(optarg,&dummy3);   /* LLR weight/scale */
 		break;
 	  case 'U': U12++;
 		/* assembly-compatible: U12 intron typing, allowed under -O */

@@ -737,6 +737,13 @@ typedef struct s_packExternalInformation
   float** sr;
   float** readcount;
 
+  /* RNA-seq expression scoring: robust background coverage rate (median covered
+     read depth + pseudocount) for the current fragment/strand, set by the
+     coverage paths just before HSPScan2. It is the null of the per-base Poisson
+     log-likelihood-ratio term (-L). -1 = not computed (protein-homology path,
+     or no covered bases) => HSPScan2 keeps the legacy per-base coverage term. */
+  float covLambdaBg;
+
   /* -S RNA-seq coverage supplied as bigWig (per-split range queries) instead of
      a text HSP file. bwPlus/bwMinus are the +/- strand signals (equal when the
      signal is unstranded); both NULL => the text ReadHSP path is used. curLocus

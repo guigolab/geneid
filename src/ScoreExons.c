@@ -52,6 +52,7 @@ extern float EW;
 extern float U12EW;
 extern int SRP;
 extern float NO_SCORE;
+extern int EXPRLLR;   /* -L: with the expression LLR the background is baked into the per-base term */
 extern int U12GTAG;
 extern int U12ATAC;
 extern float RSSMARKOVSCORE;
@@ -341,7 +342,7 @@ float ScoreHSPexon(exonGFF* exon,
   /*   sprintf(mess,"iniExonRel: %ld endExonRel: %ld   iniExon: %ld  endExon: %ld  Score: %f  ValEnd: %f  ValIni: %f",iniExon,endExon,exon->Acceptor->Position,exon->Donor->Position,Score,external->sr[trueFrame][endExon],external->sr[trueFrame][(iniExon>0)?iniExon-1:iniExon]); */
   /*   	  printMess(mess); */
   /* } */
-  if (UTR && flank > 0){
+  if (UTR && flank > 0 && !EXPRLLR){   /* LLR bakes background into the per-base term */
     left = MAX(0,(iniExon - flank));
     right = MIN((l2-l1),endExon + flank);
 
