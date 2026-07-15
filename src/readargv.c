@@ -40,6 +40,7 @@ extern int  SFP,SDP,SAP,STP,
             scanORF, XML, cDNA, PSEQ, tDNA,
             SGE, SCOREANNOT;
 extern float EW,EvidenceEW,MRM;
+extern int MRMset;   /* set here when -N is given, so a BAM's index is not used to estimate MRM */
 extern long LOW,HI;
 extern int BAMSTRAND;   /* -y library strandedness for BAM -S coverage */
 
@@ -81,7 +82,8 @@ void printHelp()
 
   printf("\t-j  <coord>: Begin prediction at this coordinate\n");
   printf("\t-k  <coord>: End prediction at this coordinate\n");  
-  printf("\t-N  <num_reads>: Millions of reads mapped to genome\n");  
+  printf("\t-N  <num_reads>: Millions of reads mapped to genome (rpkm report; for a\n"
+	 "\t     BAM input this is estimated from the index when -N is omitted)\n");
   printf("\t-W: Only Forward sense prediction (Watson)\n");
   printf("\t-C: Only Reverse sense prediction (Crick)\n");
   printf("\t-U: Allow U12 introns (Requires appropriate U12 parameters to be set in the parameter file)\n");
@@ -302,6 +304,7 @@ void readargv (int argc,char* argv[],
 		break;
 	  case 'N': MRM = strtof(optarg,&dummy3);
 		/* assembly-compatible: reads-mapped (rpkm reporting), allowed under -O */
+		MRMset = 1;   /* explicit value: suppress BAM-index auto-estimation */
 		NOpt++;
 		break;
 	  case 'U': U12++;

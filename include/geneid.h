@@ -124,6 +124,15 @@ A. DEFINITIONS
 /* read params */
 #define RREADS 1
 #define COV 15
+/* Coverage-score normalisation: raw per-base depth is divided by COVNORM before
+   it accumulates into sr[] (capped at COV). This is a fixed scoring scale, kept
+   separate from MRM (millions of reads mapped, which normalises only the rpkm
+   report -- see PrintExons.c). Historically both used MRM's default of 15; they
+   were decoupled so MRM can carry the real library size (from -N or estimated
+   from the BAM index) without changing exon scores. With COV=15, a base
+   saturates its coverage score at depth COVNORM*COV = 225. The RNA-seq
+   expression-scoring redesign will replace this per-base scaling entirely. */
+#define COVNORM 15.0
 
 /* Length of allowed UTR including stop codon before intron: used to be 55 */
 #define MAXNMDLENGTH 1000

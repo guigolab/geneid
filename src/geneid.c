@@ -105,8 +105,14 @@ long
   HI=0;
 
 float
-  /* Millions of reads mapped */
+  /* Millions of reads mapped (rpkm normalisation). Default 15.0 is a
+     placeholder; -N overrides it, and for a BAM input it is estimated from the
+     index when -N is absent (see MRMset). */
 MRM=15.0;
+
+/* Set to 1 when the user passes -N, so BAM auto-estimation of MRM does not
+   override an explicit value. */
+int MRMset=0;
 
 /* Optional Predicted Gene Prefix */
 char  GenePrefix[MAXSTRING]="";
@@ -391,6 +397,27 @@ int main (int argc, char *argv[])
 	      /* Coverage fills sr[] to score exons with or without -u; -u adds UTR
 		 prediction (and the rpkm report) on top. */
 	      printMess("Reading RNA-seq coverage from indexed BAM (per-split range queries)...");
+#ifdef WITH_HTSLIB
+	      /* rpkm needs the real library size. When -N was not given, take it
+		 from the BAM index (mapped reads, in millions) instead of the
+		 15.0 placeholder. This affects only the rpkm report, not scoring
+		 (coverage scores use the fixed COVNORM scale). */
+	      if (!MRMset)
+		{
+		  long nreads = bamMappedReads(external->bam);
+		  if (nreads > 0)
+		    {
+		      MRM = (float) nreads / 1.0e6f;
+		      sprintf(mess,
+			      "MRM (millions of reads mapped) estimated from BAM index: "
+			      "%ld reads -> %.3f (override with -N)", nreads, MRM);
+		      printMess(mess);
+		    }
+		  else
+		    printMess("BAM index carries no mapped-read stats; "
+			      "rpkm uses default MRM (set it with -N)");
+		}
+#endif
 	    }
 	  else if (external->bwPlus != NULL)
 	    {

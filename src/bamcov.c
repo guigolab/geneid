@@ -74,6 +74,30 @@ void bamClose(BamCov* bc)
   free(bc);
 }
 
+/* Sum mapped reads over every reference from the index meta -- the same numbers
+   `samtools idxstats` prints, obtained without touching alignment records.
+   hts_idx_get_stat returns <0 for a reference with no index bin, which covers
+   both a reference that simply has no reads (common: a chr21-only subset BAM
+   still carries the full header) and a statless index. We skip such references
+   (count them as 0) and fail (return -1) only when NO reference carries stats,
+   so a subset BAM still yields the true library size. */
+long bamMappedReads(BamCov* bc)
+{
+  int nref, tid, anystat = 0;
+  long total = 0;
+
+  if (bc == NULL || bc->idx == NULL) return -1;
+  nref = hts_idx_nseq(bc->idx);
+  for (tid = 0; tid < nref; tid++) {
+    uint64_t mapped = 0, unmapped = 0;
+    if (hts_idx_get_stat(bc->idx, tid, &mapped, &unmapped) < 0)
+      continue;                 /* reference with no reads / no per-ref stats */
+    anystat = 1;
+    total += (long) mapped;
+  }
+  return anystat ? total : -1;
+}
+
 long bamCoverageQuery(BamCov* bc, const char* chrom, long start, long end,
                       char wantStrand, int libMode, bwIntervalCB cb, void* userData)
 {
