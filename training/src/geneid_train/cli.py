@@ -164,6 +164,37 @@ def _cmd_evaluate(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_benchmark(args: argparse.Namespace) -> int:
+    from pathlib import Path
+
+    from .benchmark import fasta_seqlen, format_table, gencode_cds_gp, run_benchmark
+
+    work = Path(args.workdir)
+    work.mkdir(parents=True, exist_ok=True)
+    seqlen = fasta_seqlen(args.fasta, args.seqid)
+    recall = work / f"{args.seqid}.mane.gp"        # canonical -> recall
+    precision = work / f"{args.seqid}.all.gp"      # all isoforms -> precision
+    recall.write_text(gencode_cds_gp(args.gff3, args.seqid, seqlen, canonical_only=True))
+    precision.write_text(gencode_cds_gp(args.gff3, args.seqid, seqlen, canonical_only=False))
+
+    base = tuple(args.base_flags.split()) if args.base_flags else ()
+    strand = ("-y", args.strand) if args.strand else ()
+    modes: list[tuple[str, tuple[str, ...]]] = [("abinitio", base)]
+    if args.coverage:
+        modes += [("cov", (*base, "-S", args.coverage)),
+                  ("cov+u", (*base, "-u", "-S", args.coverage))]
+    if args.bam:
+        modes += [("bam", (*base, *strand, "-Y", args.bam)),
+                  ("bam+u", (*base, "-u", *strand, "-Y", args.bam))]
+
+    res = run_benchmark(
+        args.geneid, args.param, args.fasta, str(recall), str(precision), modes, work)
+    print(f"# {args.seqid}: {seqlen} bp | SN=recall vs MANE, "
+          f"SP=precision vs all isoforms | {len(res)} mode(s)")
+    print(format_table(res))
+    return 0
+
+
 def _cmd_optimize(args: argparse.Namespace) -> int:
     from .optimize import coordinate_descent, global_optimize, optimize, uniform_point
 
@@ -495,6 +526,22 @@ def build_parser() -> argparse.ArgumentParser:
     p_eval.add_argument("predictions", help="geneid prediction GFF (typed CDS exons)")
     p_eval.add_argument("annotations", help="annotation GFF in gp convention (per-locus info line)")
     p_eval.set_defaults(func=_cmd_evaluate)
+
+    p_bench = sub.add_parser(
+        "benchmark",
+        help="score geneid vs a GENCODE MANE reference over one sequence, per evidence mode",
+    )
+    p_bench.add_argument("--gff3", required=True, help="GENCODE GFF3(.gz) reference annotation")
+    p_bench.add_argument("--seqid", required=True, help="sequence to benchmark (e.g. chr21)")
+    p_bench.add_argument("--fasta", required=True, help="genome FASTA containing --seqid")
+    p_bench.add_argument("--param", required=True, help="geneid param file (shared across modes)")
+    p_bench.add_argument("--geneid", default="geneid", help="geneid binary (default: on PATH)")
+    p_bench.add_argument("--workdir", default="benchmark_out", help="dir for truth + predictions")
+    p_bench.add_argument("--base-flags", default="", help="flags shared by all modes")
+    p_bench.add_argument("--coverage", help="bigWig 'plus.bw,minus.bw' -> adds cov / cov+u modes")
+    p_bench.add_argument("--bam", help="RNA-seq BAM -> adds bam / bam+u modes")
+    p_bench.add_argument("--strand", help="library strandedness for --bam (e.g. fr, rf)")
+    p_bench.set_defaults(func=_cmd_benchmark)
 
     p_conv = sub.add_parser("convert", help="convert GFF2 or GTF annotation to canonical GFF3")
     p_conv.add_argument("--from", dest="from_", required=True, choices=["gff2", "gtf"])
