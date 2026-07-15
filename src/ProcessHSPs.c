@@ -35,6 +35,7 @@ extern float MRM;
 extern int UTR;
 extern int SRP;
 extern float NO_SCORE;
+extern int VRB;         /* -v verbose: gates the Stage-1 coverage-background diagnostic */
 
 
 /* Projection of HSPs: save the maximum for each nucleotide */
@@ -471,6 +472,72 @@ void HSPScan2(packExternalInformation* external,
 }
 
 
+/* --- RNA-seq expression-scoring redesign, Stage 1 -------------------------- *
+ * Estimate a robust background coverage level (lambda_bg) for the current
+ * fragment/strand from the raw per-base coverage in sr[], read BEFORE HSPScan2
+ * turns sr[] into a prefix sum. We use the MEDIAN of covered positions, not the
+ * mean: RNA-seq coverage has a heavy hyper-expressed tail (rRNA, pileups) that
+ * inflates the mean ~16x on real data, so a mean-based null would sit far above
+ * normal genes and penalise them. The median tracks the typical background/low-
+ * expression level and scales with sequencing depth, so deeper data raises the
+ * null and the signal together (the null stays calibrated).
+ *
+ * Stage 1 only REPORTS this value (verbose diagnostic, no scoring change); in
+ * Stage 2 it becomes the null of a per-base log-likelihood-ratio coverage term.
+ * sr[] holds depth/MRM capped at COV (see CoverAdd), so read depth ~= sr*MRM;
+ * we report in depth units. Covered positions are sr[] != NO_SCORE. A strand's
+ * three frame planes are identical copies, so we scan only the first. */
+static void ReportCoverageBackground(packExternalInformation* external,
+                                     int Strand, long l1, long l2)
+{
+  short frame = (Strand == FORWARD) ? 0 : FRAMES;
+  long  len   = l2 - l1 + 1;
+  long  i, covered = 0, run, half, medianDepth = 0;
+  double lambdaBg;
+  /* Depth histogram for the median. Depth is small for the vast majority of
+     bases; a fixed cap with an overflow bin keeps this O(len) and allocation
+     free. The median is a low quantile, so depths >= HISTCAP (all above it)
+     only need counting, not exact binning. */
+  enum { HISTCAP = 1024 };
+  long hist[HISTCAP + 1];
+  char mess[MAXSTRING];
+
+  if (!VRB) return;              /* pure diagnostic; nothing else consumes it yet */
+
+  for (i = 0; i <= HISTCAP; i++) hist[i] = 0;
+  for (i = 0; i < len; i++) {
+    long depth;
+    if (external->sr[frame][i] == NO_SCORE) continue;   /* uncovered */
+    depth = (long)(external->sr[frame][i] * MRM + 0.5);
+    if (depth < 0) depth = 0;
+    if (depth > HISTCAP) depth = HISTCAP;
+    hist[depth]++;
+    covered++;
+  }
+
+  if (covered == 0) {
+    sprintf(mess, "Coverage background [%ld-%ld] %s: no covered bases",
+            l1, l2, (Strand == FORWARD) ? "fwd" : "rvs");
+    printMess(mess);
+    return;
+  }
+
+  half = (covered + 1) / 2;
+  run = 0;
+  for (i = 0; i <= HISTCAP; i++) {
+    run += hist[i];
+    if (run >= half) { medianDepth = i; break; }
+  }
+  lambdaBg = medianDepth + 1.0;   /* + pseudocount */
+  sprintf(mess,
+          "Coverage background [%ld-%ld] %s: covered %ld/%ld (%.1f%%), "
+          "median depth %ld, lambda_bg %.1f",
+          l1, l2, (Strand == FORWARD) ? "fwd" : "rvs",
+          covered, len, 100.0 * (double) covered / (double) len,
+          medianDepth, lambdaBg);
+  printMess(mess);
+}
+
 /* Management function to score and filter exons */
 void ProcessHSPs(long l1,
                 long l2,
@@ -487,6 +554,7 @@ void ProcessHSPs(long l1,
 	  if (UTR){
 	    printMess("Preprocessing read information: step 1");
 	    ReadScan(external,hsp,Strand,l1,l2);
+	    ReportCoverageBackground(external, Strand, l1, l2);
 	  }else{
 	    printMess("Preprocessing homology information: step 1");
 	    HSPScan(external,hsp,Strand,l1,l2);
@@ -600,6 +668,7 @@ void ProcessCoverageBigWig(long l1, long l2, int Strand,
 
   FillCoverageFrameless(external, Strand, l1, l2, buf.a, buf.n);
   free(buf.a);
+  ReportCoverageBackground(external, Strand, l1, l2);
 
   printMess("Preprocessing bigWig coverage: step 2");
   HSPScan2(external, NULL, Strand, l1, l2);
@@ -643,6 +712,7 @@ void ProcessCoverageBam(long l1, long l2, int Strand,
 
   FillCoverageFrameless(external, Strand, l1, l2, buf.a, buf.n);
   free(buf.a);
+  ReportCoverageBackground(external, Strand, l1, l2);
 
   printMess("Preprocessing BAM coverage: step 2");
   HSPScan2(external, NULL, Strand, l1, l2);
