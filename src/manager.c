@@ -143,9 +143,9 @@ void  manager(char *Sequence,
   /* 0. Preprocss HSPs */
   if (SRP){
     if (external->bam != NULL)          /* -S is an indexed BAM: coverage per split */
-      ProcessCoverageBam(l1, l2, Strand, external, LengthSequence);
+      ProcessCoverageBam(l1, l2, Strand, external, LengthSequence, gp);
     else if (external->bwPlus != NULL)  /* -S is a bigWig: coverage per split */
-      ProcessCoverageBigWig(l1, l2, Strand, external, LengthSequence);
+      ProcessCoverageBigWig(l1, l2, Strand, external, LengthSequence, gp);
     else
       ProcessHSPs(l1, l2, Strand,
 		  external, hsp);

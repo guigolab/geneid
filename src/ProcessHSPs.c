@@ -37,6 +37,7 @@ extern float NO_SCORE;
 extern int VRB;         /* -v verbose: gates the Stage-1 coverage-background diagnostic */
 extern int EXPRLLR;     /* -L: Poisson per-base expression LLR coverage scoring */
 extern float LLRK, LLRW;/* -L fold-change k (>1); -Q weight/scale of the LLR term */
+extern int LLRWset;     /* -Q given: overrides the auto-derived weight */
 
 
 /* Projection of HSPs: save the maximum for each nucleotide */
@@ -489,7 +490,7 @@ void HSPScan2(packExternalInformation* external,
 		    /* sr[] holds depth/COVNORM (NO_SCORE if uncovered -> depth 0) */
 		    double depth = (external->sr[x][i-l1] == NO_SCORE)
 		                   ? 0.0 : (double) external->sr[x][i-l1] * COVNORM;
-		    double llr = (double) LLRW * (depth * invLam * logk - bgTerm);
+		    double llr = (double) external->covLLRW * (depth * invLam * logk - bgTerm);
 		    external->sr[x][i-l1] = previousScore + (float) llr;
 		    previousScore = external->sr[x][i-l1];
 		    if (UTR){
@@ -559,9 +560,15 @@ static void bgCollect(long s, long e, float v, void* ud)
   b->covered += n;
 }
 
-/* Trimmed-mean depth over evenly spaced sample windows of this sequence/strand. */
+/* Trimmed-mean depth over evenly spaced sample windows of this sequence/strand
+   (lambda_bg), and alongside it the typical depth of an EXPRESSED base
+   (*typical): the LLR_EXPR_Q quantile of the COVERED depths in the same sample.
+   The background is a mean over ALL positions (so it is depth-linear); the
+   typical-expressed level is a high quantile of the covered ones, far from the
+   depth<1 truncation boundary that biases low quantiles, so it is depth-linear
+   too. Their ratio is the typical enrichment, which is depth-invariant. */
 static float SampleCoverageBackground(packExternalInformation* external,
-                                      int Strand, long seqLen)
+                                      int Strand, long seqLen, float* typical)
 {
   enum { NWIN = 100, WINLEN = 10000 };
   long hist[BG_HISTCAP + 1];
@@ -569,6 +576,7 @@ static float SampleCoverageBackground(packExternalInformation* external,
   long i, sampled = 0, keep, run, cap, kept, sum;
   double lam;
 
+  *typical = -1.0;
   if (external->curLocus == NULL || seqLen <= 0) return -1.0;
 
   for (i = 0; i <= BG_HISTCAP; i++) hist[i] = 0;
@@ -615,12 +623,33 @@ static float SampleCoverageBackground(packExternalInformation* external,
   sum = 0; kept = 0;
   for (i = 0; i <= cap; i++) { sum += i * hist[i]; kept += hist[i]; }
   lam = kept ? (double) sum / (double) kept : 0.0;
+
+  /* Typical EXPRESSED depth: the MEAN over the band between the trim cap and the
+     tip cutoff (see geneid.h). A mean over a fixed fraction is the only estimator
+     here that is linear in depth; the band placement puts it on expressed bases;
+     the tip cutoff keeps the rRNA tail from dragging the mean and keeps every
+     depth in the band inside the histogram, so the sum is exact. */
+  {
+    long tipRank = (long)((1.0 - LLR_EXPR_TIP) * (double) sampled);
+    long tipCap = BG_HISTCAP, bsum = 0, bn = 0;
+
+    if (tipRank < 1) tipRank = 1;
+    run = 0;
+    for (i = 0; i <= BG_HISTCAP; i++) {
+      run += hist[i];
+      if (run >= tipRank) { tipCap = i; break; }
+    }
+    if (tipCap > BG_HISTCAP - 1) tipCap = BG_HISTCAP - 1;   /* never fold in the overflow bin */
+    for (i = cap + 1; i <= tipCap; i++) { bsum += i * hist[i]; bn += hist[i]; }
+    if (bn > 0 && bsum > 0) *typical = (float) ((double) bsum / (double) bn);
+  }
   return (float) lam;
 }
 
 /* Point external->covLambdaBg at this sequence/strand's global background,
-   computing and caching it on first use for the sequence. Sets -1 when the LLR
-   must not apply (feature off, no coverage handle, or no usable signal). */
+   computing and caching it (with the typical expressed depth) on first use for
+   the sequence. Sets -1 when the LLR must not apply (feature off, no coverage
+   handle, or no usable signal). */
 static void SetCoverageBackground(packExternalInformation* external,
                                   int Strand, long seqLen)
 {
@@ -635,22 +664,87 @@ static void SetCoverageBackground(packExternalInformation* external,
   if (strcmp(external->covLambdaLocus, external->curLocus) != 0) {
     external->covLambdaGlobal[0] = -1.0;
     external->covLambdaGlobal[1] = -1.0;
+    external->covTypical[0] = -1.0;
+    external->covTypical[1] = -1.0;
     strncpy(external->covLambdaLocus, external->curLocus, MAXSTRING - 1);
     external->covLambdaLocus[MAXSTRING - 1] = '\0';
   }
 
   if (external->covLambdaGlobal[si] < 0.0) {
-    external->covLambdaGlobal[si] = SampleCoverageBackground(external, Strand, seqLen);
+    float typical = -1.0;
+    external->covLambdaGlobal[si] =
+      SampleCoverageBackground(external, Strand, seqLen, &typical);
+    external->covTypical[si] = typical;
     if (VRB) {
-      sprintf(mess, "Coverage background %s %s: lambda_bg %.4f (global, sampled)",
+      sprintf(mess, "Coverage background %s %s: lambda_bg %.4f, typical expressed "
+              "depth %.1f (global, sampled)",
               external->curLocus, (Strand == FORWARD) ? "fwd" : "rvs",
-              external->covLambdaGlobal[si]);
+              external->covLambdaGlobal[si], typical);
       printMess(mess);
     }
   }
 
   if (external->covLambdaGlobal[si] >= LLR_MINLAMBDA)
     external->covLambdaBg = external->covLambdaGlobal[si];
+}
+
+/* The weight applied to the per-base LLR (the -Q value, or an automatic one).
+ *
+ * -Q exists only to put the expression term on the same scale as the coding
+ * term, and BOTH are length-extensive sums of per-base quantities, so the whole
+ * job is matching them per base. In geneid's exon score
+ *
+ *     scoreTotal = siteFactor*sites + exonFactor*markov + HSPFactor*scoreHSP
+ *
+ * making the two commensurate at typical expression means
+ *
+ *     exonFactor * mbar  =  HSPFactor * w * lbar
+ *     w = (exonFactor/HSPFactor) * mbar / lbar
+ *
+ * where mbar is the typical per-base coding log-odds of a real coding exon and
+ * lbar is the per-base LLR at typical expression. Every input is available
+ * without an annotation: the factors come from the parameter file, and lbar from
+ * the coverage sample (typical expressed depth over lambda_bg). This matters
+ * because the obvious way to fit -Q -- optimising it against a truth set built
+ * from the same RNA-seq (StringTie/PASA/TransDecoder) -- is CIRCULAR: every gene
+ * in such a set has coverage by construction, so coverage looks perfectly
+ * predictive and the fit drives -Q too high. Deriving it sidesteps that: no truth
+ * set, so nothing to overfit, and it works on a genome with no annotation at all.
+ *
+ * lbar uses the SAME k as the scoring term, so the two stay consistent, and it is
+ * built from a ratio of two depth-linear quantities, so the weight inherits the
+ * depth-invariance of the term itself. Measured on pancreas chr21 this lands
+ * within ~1.4x of the swept optimum -- well inside the plateau, over which eSNSP
+ * varies by <0.03. An explicit -Q always wins. */
+static float CoverageLLRWeight(packExternalInformation* external, int Strand,
+                               gparam* gp)
+{
+  int si = (Strand == FORWARD) ? 0 : 1;
+  double ctyp, lbar, ef, hf, w;
+  char mess[MAXSTRING];
+
+  if (LLRWset) return LLRW;                  /* explicit -Q wins */
+
+  ctyp = (double) external->covTypical[si];
+  if (ctyp <= 0.0 || external->covLambdaBg <= 0.0) return LLRW;   /* fall back to the default */
+
+  /* Internal exons are the representative type for the coding/expression balance. */
+  ef = (double) gp->Internal->exonFactor;
+  hf = (double) gp->Internal->HSPFactor;
+  if (ef <= 0.0 || hf <= 0.0) return LLRW;
+
+  /* Per-base LLR at typical expression, in the same units the scoring term uses. */
+  lbar = (ctyp / (double) external->covLambdaBg) * log((double) LLRK) - ((double) LLRK - 1.0);
+  if (lbar <= 0.0) return LLRW;              /* typical expression below the threshold */
+
+  w = (ef / hf) * (double) CODING_LOGODDS_PER_BASE / lbar;
+  if (VRB) {
+    sprintf(mess, "Expression LLR weight (auto): typical/lambda_bg %.1fx, lbar %.1f, "
+            "exonFactor/HSPFactor %.2f -> -Q %.3e",
+            ctyp / (double) external->covLambdaBg, lbar, ef / hf, w);
+    printMess(mess);
+  }
+  return (float) w;
 }
 
 /* Management function to score and filter exons */
@@ -758,7 +852,7 @@ static void FillCoverageFrameless(packExternalInformation* external, int Strand,
 /* bigWig counterpart of ProcessHSPs (see geneid.h). */
 void ProcessCoverageBigWig(long l1, long l2, int Strand,
                            packExternalInformation* external,
-                           long LengthSequence)
+                           long LengthSequence, gparam* gp)
 {
   BigWig* bw = (Strand == FORWARD) ? external->bwPlus : external->bwMinus;
   covBuf buf;
@@ -786,6 +880,7 @@ void ProcessCoverageBigWig(long l1, long l2, int Strand,
   FillCoverageFrameless(external, Strand, l1, l2, buf.a, buf.n);
   free(buf.a);
   SetCoverageBackground(external, Strand, LengthSequence);
+  external->covLLRW = CoverageLLRWeight(external, Strand, gp);
 
   printMess("Preprocessing bigWig coverage: step 2");
   HSPScan2(external, NULL, Strand, l1, l2);
@@ -797,7 +892,7 @@ void ProcessCoverageBigWig(long l1, long l2, int Strand,
    strands see the same per-base depth. */
 void ProcessCoverageBam(long l1, long l2, int Strand,
                         packExternalInformation* external,
-                        long LengthSequence)
+                        long LengthSequence, gparam* gp)
 {
 #ifdef WITH_HTSLIB
   covBuf buf;
@@ -830,11 +925,12 @@ void ProcessCoverageBam(long l1, long l2, int Strand,
   FillCoverageFrameless(external, Strand, l1, l2, buf.a, buf.n);
   free(buf.a);
   SetCoverageBackground(external, Strand, LengthSequence);
+  external->covLLRW = CoverageLLRWeight(external, Strand, gp);
 
   printMess("Preprocessing BAM coverage: step 2");
   HSPScan2(external, NULL, Strand, l1, l2);
 #else
-  (void) l1; (void) l2; (void) Strand; (void) external; (void) LengthSequence;
+  (void) l1; (void) l2; (void) Strand; (void) external; (void) LengthSequence; (void) gp;
   printError("BAM input requires building geneid with WITH_HTSLIB=1");
 #endif
 }

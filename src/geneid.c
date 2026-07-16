@@ -132,6 +132,9 @@ float LLRK=50.0;
    across library depths (verified over a 4x range); it still scales the LLR
    against coding/site scores, so it remains param-file dependent. */
 float LLRW=0.0007;
+/* Set when the user passes -Q, which then overrides the automatically derived
+   weight (see CoverageLLRWeight in ProcessHSPs.c). */
+int LLRWset=0;
 
 /* Optional Predicted Gene Prefix */
 char  GenePrefix[MAXSTRING]="";

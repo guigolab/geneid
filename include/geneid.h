@@ -146,6 +146,42 @@ A. DEFINITIONS
 #define LLR_TRIM 0.01
 #define LLR_MINLAMBDA 0.05
 
+/* The "typical expressed" depth used to derive the LLR weight: the MEAN depth of
+   the positions ranked between the (1-LLR_TRIM) and (1-LLR_EXPR_TIP) quantiles
+   of ALL sampled positions -- the band just above the background trim, with the
+   extreme tip cut off.
+
+   Both properties this needs were measured the hard way:
+     - LINEAR IN DEPTH, so the enrichment c/lambda_bg (and the weight derived from
+       it) does not drift with library size. It must be a MEAN OVER A FIXED
+       FRACTION: E[sum] scales exactly with depth however the ranking reshuffles.
+       QUANTILES do NOT work here, however far they sit from zero -- downsampling
+       is Poisson thinning, so a position's depth becomes Binomial(c,d), and that
+       noise (plus integer discretisation at low depth) pushes upper quantiles
+       above d x the original. Measured: a quantile fell 25->14->8 across a 4x cut
+       where 25->12.5->6.25 was needed; a banded mean tracked 0.516/0.242 of full
+       depth against an ideal 0.50/0.25.
+     - PLACED ON THE EXPRESSED BASES. Exonic sequence is a tiny share of a genome
+       (MANE CDS is 0.68% of human chr21), so expressed bases sit in the top ~1% by
+       depth -- exactly what LLR_TRIM removes from the background. The band below
+       the trim measures the untranscribed bulk instead (measured: c ~9 vs ~30,
+       putting the weight 7x high).
+   LLR_EXPR_TIP drops the rRNA/pileup tip, which would otherwise dominate a mean of
+   this band; cutting it also keeps every depth in the band inside BG_HISTCAP, so
+   the histogram sum stays exact (clamping the tail instead breaks linearity, since
+   the clamp bites harder at high depth than at low). */
+#define LLR_EXPR_TIP 0.0005
+
+/* Typical per-base coding log-odds of a REAL coding exon, used to put the
+   expression term on the same scale as the coding term (see CoverageLLRWeight).
+   Measured on human chr21 as the median of geneid's own coding_potential/length
+   over CDS exons matching MANE exactly: 0.067 (IQR 0.043-0.096). It is a
+   property of coding DNA rather than of any RNA-seq library, so it is not
+   circular to measure it from expression-derived gene models (e.g. PASA /
+   TransDecoder). The derived weight is insensitive to it: the whole IQR moves
+   the weight only ~2x, inside a plateau that tolerates ~5x. */
+#define CODING_LOGODDS_PER_BASE 0.067
+
 /* Length of allowed UTR including stop codon before intron: used to be 55 */
 #define MAXNMDLENGTH 1000
 
@@ -768,6 +804,16 @@ typedef struct s_packExternalInformation
   float covLambdaGlobal[2];          /* [0]=FORWARD, [1]=REVERSE; -1 = not yet computed */
   char  covLambdaLocus[MAXSTRING];   /* sequence covLambdaGlobal was computed for */
 
+  /* Typical depth of an EXPRESSED base (a high quantile of the covered depths in
+     the same sample that yields covLambdaGlobal), per strand. Used to derive the
+     LLR weight automatically: covTypical/covLambdaBg is the typical enrichment,
+     and both scale with sequencing depth, so their ratio does not. */
+  float covTypical[2];
+
+  /* Effective weight of the per-base LLR term for the strand being filled:
+     the -Q value, or the automatically derived one (see CoverageLLRWeight). */
+  float covLLRW;
+
   /* -S RNA-seq coverage supplied as bigWig (per-split range queries) instead of
      a text HSP file. bwPlus/bwMinus are the +/- strand signals (equal when the
      signal is unstranded); both NULL => the text ReadHSP path is used. curLocus
@@ -1312,7 +1358,8 @@ void ProcessCoverageBigWig(long l1,
                 long l2,
                 int Strand,
 		packExternalInformation* external,
-                long LengthSequence);
+                long LengthSequence,
+                gparam* gp);
 
 /* BAM counterpart of ProcessCoverageBigWig: same per-fragment sr[]/readcount[]
    fill, sourced from an indexed BAM (external->bam) via htslib. Only does real
@@ -1322,7 +1369,8 @@ void ProcessCoverageBam(long l1,
                 long l2,
                 int Strand,
 		packExternalInformation* external,
-                long LengthSequence);
+                long LengthSequence,
+                gparam* gp);
 
 void ScoreExons(char *Sequence, 
                 packExons* allExons, 

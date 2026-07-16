@@ -479,6 +479,9 @@ packExternalInformation* RequestMemoryExternalInformation()
   p->covLambdaBg = -1.0;
   p->covLambdaGlobal[0] = -1.0;
   p->covLambdaGlobal[1] = -1.0;
+  p->covTypical[0] = -1.0;
+  p->covTypical[1] = -1.0;
+  p->covLLRW = 0.0;
   p->covLambdaLocus[0] = '\0';
 
   return(p);

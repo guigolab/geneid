@@ -43,6 +43,7 @@ extern float EW,EvidenceEW,MRM;
 extern int MRMset;   /* set here when -N is given, so a BAM's index is not used to estimate MRM */
 extern int EXPRLLR;        /* -L: enable Poisson per-base expression LLR coverage scoring */
 extern float LLRK, LLRW;   /* -L fold-change k (>1); -Q weight/scale of the LLR term */
+extern int LLRWset;        /* set by -Q: suppresses the auto-derived weight */
 extern long LOW,HI;
 extern int BAMSTRAND;   /* -y library strandedness for BAM -S coverage */
 
@@ -321,6 +322,7 @@ void readargv (int argc,char* argv[],
 		  printError("-L expects a fold-change k > 1 (expressed/background)");
 		break;
 	  case 'Q': LLRW = strtof(optarg,&dummy3);   /* LLR weight/scale */
+		LLRWset = 1;   /* explicit: suppress the auto-derived weight */
 		break;
 	  case 'U': U12++;
 		/* assembly-compatible: U12 intron typing, allowed under -O */
