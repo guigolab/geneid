@@ -86,11 +86,12 @@ void printHelp()
   printf("\t-k  <coord>: End prediction at this coordinate\n");  
   printf("\t-N  <num_reads>: Millions of reads mapped to genome (rpkm report; for a\n"
 	 "\t     BAM input this is estimated from the index when -N is omitted)\n");
-  printf("\t-L  <k>: enable Poisson expression LLR coverage scoring, fold-change k>1\n"
-	 "\t     (expressed/background); default off (legacy log(cov+1)/raw term).\n"
-	 "\t     Recommended start: -L 2 -Q 0.01 (tuned on human RNA-seq bam+u)\n");
-  printf("\t-Q  <w>: weight/scale of the -L LLR term (default 0.01; re-tune per\n"
-	 "\t     param file and library depth)\n");
+  printf("\t-L  <k>: enable Poisson expression LLR coverage scoring; k>1 is the\n"
+	 "\t     enrichment of an expressed exon over the genome-wide mean coverage\n"
+	 "\t     (tens, not units). Default off (legacy log(cov+1)/raw term).\n"
+	 "\t     Recommended start: -L 50 -Q 0.0007 (human RNA-seq, bam+u)\n");
+  printf("\t-Q  <w>: weight/scale of the -L LLR term (default 0.0007). Transfers\n"
+	 "\t     across library depths; re-tune per param file\n");
   printf("\t-W: Only Forward sense prediction (Watson)\n");
   printf("\t-C: Only Reverse sense prediction (Crick)\n");
   printf("\t-U: Allow U12 introns (Requires appropriate U12 parameters to be set in the parameter file)\n");

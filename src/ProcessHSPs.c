@@ -441,14 +441,30 @@ void HSPScan2(packExternalInformation* external,
   short frameStart, frameEnd;
   /* -L expression LLR: replace the legacy per-base coverage term with a Poisson
      two-state log-likelihood ratio, covered depth vs the background rate
-     covLambdaBg. Term = LLRW*(depth*log(k) - (k-1)*lambda_bg): <=0 at/below
-     background (so uncovered/low-coverage bases are neutral-to-negative rather
-     than rewarded), positive only for genuine enrichment. Gated on a valid
-     covLambdaBg (>0), so the protein-homology path and empty fragments keep the
-     legacy term -> default off (-L absent) is byte-identical. */
-  int   useLLR = (EXPRLLR && external->covLambdaBg > 0.0);
-  double logk  = useLLR ? log((double) LLRK) : 0.0;
-  double bgTerm = useLLR ? ((double) LLRK - 1.0) * (double) external->covLambdaBg : 0.0;
+     covLambdaBg, expressed in units of that background:
+
+         term = LLRW * ( (depth/lambda_bg)*log(k) - (k-1) )
+
+     i.e. the Poisson LLR (depth*log k - (k-1)*lambda_bg) DIVIDED BY lambda_bg.
+     The division is what makes the term depth-invariant: the raw LLR is linear
+     in depth, so a 2x deeper library would silently double the coverage term's
+     weight against the (depth-independent) coding and site scores. Dividing by
+     lambda_bg leaves the term a function of fold-enrichment over background
+     only, which is a property of the transcript, not of how deep we sequenced.
+     (This only holds because lambda_bg is itself depth-linear -- see the
+     global trimmed-mean estimator in SetCoverageBackground.)
+
+     It crosses zero at depth/lambda_bg = (k-1)/log k, a pure enrichment
+     threshold: 1.44x background for k=2, 1.82x for k=3. Uncovered bases score
+     -LLRW*(k-1), a bounded penalty rather than one that grows with depth.
+
+     Gated on a valid covLambdaBg (>0), so the protein-homology path and
+     coverage-free fragments keep the legacy term -> default off (-L absent) is
+     byte-identical. */
+  int    useLLR = (EXPRLLR && external->covLambdaBg > 0.0);
+  double logk   = useLLR ? log((double) LLRK) : 0.0;
+  double invLam = useLLR ? 1.0 / (double) external->covLambdaBg : 0.0;
+  double bgTerm = useLLR ? ((double) LLRK - 1.0) : 0.0;
 
   if (Strand == FORWARD)
     {
@@ -473,7 +489,7 @@ void HSPScan2(packExternalInformation* external,
 		    /* sr[] holds depth/COVNORM (NO_SCORE if uncovered -> depth 0) */
 		    double depth = (external->sr[x][i-l1] == NO_SCORE)
 		                   ? 0.0 : (double) external->sr[x][i-l1] * COVNORM;
-		    double llr = (double) LLRW * (depth * logk - bgTerm);
+		    double llr = (double) LLRW * (depth * invLam * logk - bgTerm);
 		    external->sr[x][i-l1] = previousScore + (float) llr;
 		    previousScore = external->sr[x][i-l1];
 		    if (UTR){
@@ -494,79 +510,147 @@ void HSPScan2(packExternalInformation* external,
 }
 
 
-/* --- RNA-seq expression-scoring redesign ---------------------------------- *
- * Estimate a robust background coverage level (lambda_bg) for the current
- * fragment/strand from the raw per-base coverage in sr[], read BEFORE HSPScan2
- * turns sr[] into a prefix sum, and store it in external->covLambdaBg for the
- * per-base LLR term (-L). We use the MEDIAN of covered positions, not the mean:
- * RNA-seq coverage has a heavy hyper-expressed tail (rRNA, pileups) that inflates
- * the mean ~16x on real data, so a mean-based null would sit far above normal
- * genes and penalise them. The median tracks the typical background/low-
- * expression level and scales with sequencing depth, so deeper data raises the
- * null and the signal together (the null stays calibrated).
+/* --- RNA-seq expression-scoring redesign: global background (lambda_bg) ---- *
+ * lambda_bg is the null of the per-base LLR term (-L): the coverage level an
+ * unexpressed base is expected to show. It is estimated ONCE PER SEQUENCE AND
+ * STRAND by sampling evenly spaced windows and taking a trimmed mean of the
+ * per-base depth, then cached (covLambdaGlobal/covLambdaLocus).
  *
- * Computed only when needed (-L expression LLR, or -v diagnostic); the value is
- * also printed under -v. sr[] holds depth/COVNORM capped at COV (see CoverAdd),
- * so read depth ~= sr*COVNORM; lambda_bg is in depth units. (COVNORM, the fixed
- * coverage-score scale, is deliberately NOT MRM -- MRM carries the real library
- * size for the rpkm report only.) Covered positions are sr[] != NO_SCORE. A
- * strand's three frame planes are identical copies, so we scan only the first.
- * covLambdaBg = -1 (no covered bases) leaves HSPScan2 on the legacy term. */
-static void ComputeCoverageBackground(packExternalInformation* external,
-                                      int Strand, long l1, long l2)
+ * WHY GLOBAL, NOT PER FRAGMENT. Two biases pull in opposite directions and
+ * cannot both be avoided within one fragment:
+ *   - Anything conditioned on "covered" (e.g. the median of covered positions)
+ *     is DEPTH-biased: as depth falls, low-coverage bases drop below 1 and leave
+ *     the covered set, so the statistic falls only ~sqrt(depth). Measured on
+ *     pancreas chr21: 6.0 -> 4.0 -> 3.0 across a 4x depth cut, which hardened the
+ *     effective enrichment threshold ~2x on shallow data.
+ *   - Anything over ALL positions is DENSITY-biased per fragment: most of a
+ *     chromosome is gene desert, so the mean collapses to ~0 there and every
+ *     covered base then looks enormously enriched. Measured per fragment on
+ *     chr21: median 0.010, max 20.1 -- a ~400x swing in the null.
+ * Estimating over the whole sequence removes the density term by construction
+ * (density is then a fixed property of the sequence) and leaves a mean that is
+ * exactly linear in depth -- the property the LLR needs, since it compares
+ * coverage to lambda_bg as a RATIO. Absolute accuracy barely matters: a constant
+ * multiplicative bias is absorbed by the fold-change k (the term crosses zero at
+ * c/lambda_bg = (k-1)/log k), which is why ~1% sampling error is irrelevant.
+ * Trimming the top LLR_TRIM fraction drops the hyper-expressed tail (rRNA,
+ * pileups) and the most-expressed genes, none of which are background.
+ *
+ * Depth values come from the same range-query machinery the per-fragment fill
+ * uses, so this works for BAM and bigWig alike. The text HSP path has no range
+ * query and so cannot supply a global null: there the LLR stays off. */
+
+#define BG_HISTCAP 1024      /* depth histogram cap; the trim discards the tail anyway */
+
+/* Depth histogram accumulator for the background sampler. Intervals arrive as
+   [s,e) with a constant depth v, so each contributes (e-s) positions. */
+typedef struct { long* hist; long covered; } bgBuf;
+
+static void bgCollect(long s, long e, float v, void* ud)
 {
-  short frame = (Strand == FORWARD) ? 0 : FRAMES;
-  long  len   = l2 - l1 + 1;
-  long  i, covered = 0, run, half, medianDepth = 0;
-  double lambdaBg;
-  /* Depth histogram for the median. Depth is small for the vast majority of
-     bases; a fixed cap with an overflow bin keeps this O(len) and allocation
-     free. The median is a low quantile, so depths >= HISTCAP (all above it)
-     only need counting, not exact binning. */
-  enum { HISTCAP = 1024 };
-  long hist[HISTCAP + 1];
+  bgBuf* b = (bgBuf*) ud;
+  long d = (long)(v + 0.5);
+  long n = e - s;
+
+  if (n <= 0) return;
+  if (d < 0) d = 0;
+  if (d > BG_HISTCAP) d = BG_HISTCAP;
+  b->hist[d] += n;
+  b->covered += n;
+}
+
+/* Trimmed-mean depth over evenly spaced sample windows of this sequence/strand. */
+static float SampleCoverageBackground(packExternalInformation* external,
+                                      int Strand, long seqLen)
+{
+  enum { NWIN = 100, WINLEN = 10000 };
+  long hist[BG_HISTCAP + 1];
+  bgBuf b;
+  long i, sampled = 0, keep, run, cap, kept, sum;
+  double lam;
+
+  if (external->curLocus == NULL || seqLen <= 0) return -1.0;
+
+  for (i = 0; i <= BG_HISTCAP; i++) hist[i] = 0;
+  b.hist = hist; b.covered = 0;
+
+  for (i = 0; i < NWIN; i++) {
+    long gS = (long)((double) seqLen * (double) i / (double) NWIN);
+    long gE = gS + WINLEN;
+    long before = b.covered;
+
+    if (gE > seqLen) gE = seqLen;
+    if (gE <= gS) continue;
+
+    if (external->bam != NULL) {
+#ifdef WITH_HTSLIB
+      /* Stranded libraries get a per-strand null; unstranded sees every read. */
+      char wantStrand = 0;
+      if (BAMSTRAND != BAMLIB_NONE)
+        wantStrand = (Strand == FORWARD) ? '+' : '-';
+      bamCoverageQuery(external->bam, external->curLocus, gS, gE,
+                       wantStrand, BAMSTRAND, bgCollect, &b);
+#endif
+    } else {
+      BigWig* bw = (Strand == FORWARD) ? external->bwPlus : external->bwMinus;
+      if (bw == NULL) return -1.0;
+      bwQuery(bw, external->curLocus, gS, gE, bgCollect, &b);
+    }
+
+    sampled += (gE - gS);
+    hist[0] += (gE - gS) - (b.covered - before);   /* the window's uncovered bases */
+  }
+
+  if (sampled <= 0) return -1.0;
+
+  /* Depth cap = the (1 - LLR_TRIM) quantile over the sampled positions. */
+  keep = (long)((1.0 - LLR_TRIM) * (double) sampled);
+  if (keep < 1) keep = 1;
+  run = 0; cap = BG_HISTCAP;
+  for (i = 0; i <= BG_HISTCAP; i++) {
+    run += hist[i];
+    if (run >= keep) { cap = i; break; }
+  }
+
+  sum = 0; kept = 0;
+  for (i = 0; i <= cap; i++) { sum += i * hist[i]; kept += hist[i]; }
+  lam = kept ? (double) sum / (double) kept : 0.0;
+  return (float) lam;
+}
+
+/* Point external->covLambdaBg at this sequence/strand's global background,
+   computing and caching it on first use for the sequence. Sets -1 when the LLR
+   must not apply (feature off, no coverage handle, or no usable signal). */
+static void SetCoverageBackground(packExternalInformation* external,
+                                  int Strand, long seqLen)
+{
+  int si = (Strand == FORWARD) ? 0 : 1;
   char mess[MAXSTRING];
 
-  external->covLambdaBg = -1.0;             /* default: not computed */
-  if (!EXPRLLR && !VRB) return;             /* only needed for -L or -v */
+  external->covLambdaBg = -1.0;
+  if (!EXPRLLR && !VRB) return;
+  if (external->curLocus == NULL) return;
 
-  for (i = 0; i <= HISTCAP; i++) hist[i] = 0;
-  for (i = 0; i < len; i++) {
-    long depth;
-    if (external->sr[frame][i] == NO_SCORE) continue;   /* uncovered */
-    depth = (long)(external->sr[frame][i] * COVNORM + 0.5);
-    if (depth < 0) depth = 0;
-    if (depth > HISTCAP) depth = HISTCAP;
-    hist[depth]++;
-    covered++;
+  /* New sequence -> drop the cached values. */
+  if (strcmp(external->covLambdaLocus, external->curLocus) != 0) {
+    external->covLambdaGlobal[0] = -1.0;
+    external->covLambdaGlobal[1] = -1.0;
+    strncpy(external->covLambdaLocus, external->curLocus, MAXSTRING - 1);
+    external->covLambdaLocus[MAXSTRING - 1] = '\0';
   }
 
-  if (covered == 0) {
+  if (external->covLambdaGlobal[si] < 0.0) {
+    external->covLambdaGlobal[si] = SampleCoverageBackground(external, Strand, seqLen);
     if (VRB) {
-      sprintf(mess, "Coverage background [%ld-%ld] %s: no covered bases",
-              l1, l2, (Strand == FORWARD) ? "fwd" : "rvs");
+      sprintf(mess, "Coverage background %s %s: lambda_bg %.4f (global, sampled)",
+              external->curLocus, (Strand == FORWARD) ? "fwd" : "rvs",
+              external->covLambdaGlobal[si]);
       printMess(mess);
     }
-    return;                                  /* covLambdaBg stays -1 */
   }
 
-  half = (covered + 1) / 2;
-  run = 0;
-  for (i = 0; i <= HISTCAP; i++) {
-    run += hist[i];
-    if (run >= half) { medianDepth = i; break; }
-  }
-  lambdaBg = medianDepth + 1.0;   /* + pseudocount */
-  external->covLambdaBg = (float) lambdaBg;
-  if (VRB) {
-    sprintf(mess,
-            "Coverage background [%ld-%ld] %s: covered %ld/%ld (%.1f%%), "
-            "median depth %ld, lambda_bg %.1f",
-            l1, l2, (Strand == FORWARD) ? "fwd" : "rvs",
-            covered, len, 100.0 * (double) covered / (double) len,
-            medianDepth, lambdaBg);
-    printMess(mess);
-  }
+  if (external->covLambdaGlobal[si] >= LLR_MINLAMBDA)
+    external->covLambdaBg = external->covLambdaGlobal[si];
 }
 
 /* Management function to score and filter exons */
@@ -585,7 +669,9 @@ void ProcessHSPs(long l1,
 	  if (UTR){
 	    printMess("Preprocessing read information: step 1");
 	    ReadScan(external,hsp,Strand,l1,l2);
-	    ComputeCoverageBackground(external, Strand, l1, l2);
+	    /* The text HSP path has no range query, so it cannot supply the global
+	       background the LLR needs; leave the legacy per-base term in place. */
+	    external->covLambdaBg = -1.0;
 	  }else{
 	    printMess("Preprocessing homology information: step 1");
 	    HSPScan(external,hsp,Strand,l1,l2);
@@ -699,7 +785,7 @@ void ProcessCoverageBigWig(long l1, long l2, int Strand,
 
   FillCoverageFrameless(external, Strand, l1, l2, buf.a, buf.n);
   free(buf.a);
-  ComputeCoverageBackground(external, Strand, l1, l2);
+  SetCoverageBackground(external, Strand, LengthSequence);
 
   printMess("Preprocessing bigWig coverage: step 2");
   HSPScan2(external, NULL, Strand, l1, l2);
@@ -743,7 +829,7 @@ void ProcessCoverageBam(long l1, long l2, int Strand,
 
   FillCoverageFrameless(external, Strand, l1, l2, buf.a, buf.n);
   free(buf.a);
-  ComputeCoverageBackground(external, Strand, l1, l2);
+  SetCoverageBackground(external, Strand, LengthSequence);
 
   printMess("Preprocessing BAM coverage: step 2");
   HSPScan2(external, NULL, Strand, l1, l2);
