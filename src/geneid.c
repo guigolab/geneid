@@ -114,6 +114,18 @@ MRM=15.0;
    override an explicit value. */
 int MRMset=0;
 
+/* RNA-seq expression scoring: Poisson two-state per-base log-likelihood ratio.
+   EXPRLLR toggles it on (default off -> legacy log(cov+1)/raw coverage term).
+   Enabled by -L, which also sets LLRK (the expressed/background fold-change k>1);
+   LLRW (-Q) scales the LLR contribution (the term is on a different scale from
+   the legacy one, so this tunes it vs coding/site scores; HSPFactor also weights
+   it). Per-base term = LLRW * (depth*log(LLRK) - (LLRK-1)*covLambdaBg). */
+int   EXPRLLR=0;
+float LLRK=2.0;    /* fold-change; -L overrides. k=2 was the harness optimum */
+float LLRW=0.01;   /* -Q default; 0.01 tuned on human.rnaseq/pancreas chr21 (bam+u).
+                      w scales the LLR vs coding/site scores, so it depends on the
+                      param file and library depth -- re-tune -Q per dataset. */
+
 /* Optional Predicted Gene Prefix */
 char  GenePrefix[MAXSTRING]="";
   
