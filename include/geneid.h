@@ -134,6 +134,18 @@ A. DEFINITIONS
    expression-scoring redesign will replace this per-base scaling entirely. */
 #define COVNORM 15.0
 
+/* Expression-LLR background estimator (-L). LLR_TRIM is the fraction of
+   positions, highest depth first, discarded before taking the mean that becomes
+   lambda_bg: it removes the hyper-expressed tail (rRNA, pileups) and the
+   most-expressed genes, neither of which belongs in a background estimate.
+   Trimming a fixed FRACTION keeps the estimator depth-linear, which is the
+   property the LLR needs (a constant bias is absorbed by the fold-change k; a
+   depth-dependent one is not). LLR_MINLAMBDA guards the per-base division by
+   lambda_bg: below it a fragment has no usable coverage and keeps the legacy
+   term. */
+#define LLR_TRIM 0.01
+#define LLR_MINLAMBDA 0.05
+
 /* Length of allowed UTR including stop codon before intron: used to be 55 */
 #define MAXNMDLENGTH 1000
 
@@ -737,12 +749,24 @@ typedef struct s_packExternalInformation
   float** sr;
   float** readcount;
 
-  /* RNA-seq expression scoring: robust background coverage rate (median covered
-     read depth + pseudocount) for the current fragment/strand, set by the
-     coverage paths just before HSPScan2. It is the null of the per-base Poisson
-     log-likelihood-ratio term (-L). -1 = not computed (protein-homology path,
-     or no covered bases) => HSPScan2 keeps the legacy per-base coverage term. */
+  /* RNA-seq expression scoring (-L): background coverage rate, the null of the
+     per-base Poisson log-likelihood-ratio term. covLambdaBg is the value for the
+     strand currently being filled, set by the coverage paths just before
+     HSPScan2; -1 = do not apply the LLR (protein-homology or text-HSP path, no
+     usable coverage) => HSPScan2 keeps the legacy per-base term.
+
+     It is deliberately GLOBAL per sequence+strand (cached in covLambdaGlobal,
+     keyed by covLambdaLocus), not per fragment. A per-fragment null cannot work:
+     any statistic conditioned on "covered" is depth-biased (as depth falls, low
+     bases leave the covered set), and any statistic over all positions is
+     density-biased (a gene-desert fragment has almost no coverage, so its mean
+     collapses to ~0 and every covered base then looks hugely enriched). Measured
+     per-fragment on chr21 the null swung ~400x (median 0.01, max 20). Estimating
+     it once per sequence fixes the density term by construction and leaves a
+     mean that is exactly linear in sequencing depth. */
   float covLambdaBg;
+  float covLambdaGlobal[2];          /* [0]=FORWARD, [1]=REVERSE; -1 = not yet computed */
+  char  covLambdaLocus[MAXSTRING];   /* sequence covLambdaGlobal was computed for */
 
   /* -S RNA-seq coverage supplied as bigWig (per-split range queries) instead of
      a text HSP file. bwPlus/bwMinus are the +/- strand signals (equal when the

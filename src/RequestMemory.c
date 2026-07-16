@@ -473,7 +473,13 @@ packExternalInformation* RequestMemoryExternalInformation()
   p->bwMinus = NULL;
   p->curLocus = NULL;
   p->bam = NULL;   /* -S BAM handle: NULL until the -S ingest sniffs a BAM */
-  p->covLambdaBg = -1.0;   /* set per fragment by the coverage paths (-L LLR) */
+  /* -L expression LLR background: covLambdaBg is set per fragment from the
+     per-sequence/strand cache, which is filled on first use (see
+     SetCoverageBackground). -1 = not computed -> legacy per-base term. */
+  p->covLambdaBg = -1.0;
+  p->covLambdaGlobal[0] = -1.0;
+  p->covLambdaGlobal[1] = -1.0;
+  p->covLambdaLocus[0] = '\0';
 
   return(p);
 }

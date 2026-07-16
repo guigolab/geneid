@@ -121,10 +121,17 @@ int MRMset=0;
    the legacy one, so this tunes it vs coding/site scores; HSPFactor also weights
    it). Per-base term = LLRW * (depth*log(LLRK) - (LLRK-1)*covLambdaBg). */
 int   EXPRLLR=0;
-float LLRK=2.0;    /* fold-change; -L overrides. k=2 was the harness optimum */
-float LLRW=0.01;   /* -Q default; 0.01 tuned on human.rnaseq/pancreas chr21 (bam+u).
-                      w scales the LLR vs coding/site scores, so it depends on the
-                      param file and library depth -- re-tune -Q per dataset. */
+/* Fold-change of the expressed state over lambda_bg; -L overrides. lambda_bg is
+   the GLOBAL mean coverage of the sequence (mostly gene desert, so ~0.4 on human
+   chr21), hence k is the enrichment of an expressed exon over the GENOMIC MEAN
+   -- tens, not single digits. k=50 was the harness optimum; the term crosses zero
+   at c/lambda_bg = (k-1)/log k, i.e. ~12x the genomic mean for k=50. */
+float LLRK=50.0;
+/* -Q default, tuned on human.rnaseq/pancreas chr21 (bam+u). Because lambda_bg is
+   depth-linear and the term uses only the ratio c/lambda_bg, this transfers
+   across library depths (verified over a 4x range); it still scales the LLR
+   against coding/site scores, so it remains param-file dependent. */
+float LLRW=0.0007;
 
 /* Optional Predicted Gene Prefix */
 char  GenePrefix[MAXSTRING]="";
