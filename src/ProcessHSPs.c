@@ -25,6 +25,7 @@
 *************************************************************************/
 
 #include "geneid.h"
+#include <float.h>
 #include "bigwig.h"
 #ifdef WITH_HTSLIB
 #include "bamcov.h"
@@ -37,6 +38,7 @@ extern float NO_SCORE;
 extern int VRB;         /* -v verbose: gates the Stage-1 coverage-background diagnostic */
 extern int EXPRLLR;     /* -L: Poisson per-base expression LLR coverage scoring */
 extern float LLRK, LLRW;/* -L fold-change k (>1); -Q weight/scale of the LLR term */
+extern int LLRMINLIBS;  /* -K: libraries that must support a base (order statistic) */
 
 
 /* Projection of HSPs: save the maximum for each nucleotide */
@@ -461,10 +463,12 @@ void HSPScan2(packExternalInformation* external,
      Gated on a valid covLambdaBg (>0), so the protein-homology path and
      coverage-free fragments keep the legacy term -> default off (-L absent) is
      byte-identical. */
-  int    useLLR = (EXPRLLR && external->covLambdaBg > 0.0);
-  double logk   = useLLR ? log((double) LLRK) : 0.0;
-  double invLam = useLLR ? 1.0 / (double) external->covLambdaBg : 0.0;
-  double bgTerm = useLLR ? ((double) LLRK - 1.0) : 0.0;
+  /* covLambdaBg > 0 means the coverage fill already wrote finished per-base LLR
+     values into sr[] (FillCoverageLLR): the transform has to happen per library,
+     before the MAX, so it cannot be done here. All that is left is the running
+     sum. Legacy paths (protein homology, text HSP, -L absent) keep their
+     per-base term below, so the default stays byte-identical. */
+  int preLLR = (EXPRLLR && external->covLambdaBg > 0.0);
 
   if (Strand == FORWARD)
     {
@@ -485,12 +489,9 @@ void HSPScan2(packExternalInformation* external,
       for (i=l1; i<=l2; i++)
 		{
 		  /* Accumulating step */
-		  if (useLLR){
-		    /* sr[] holds depth/COVNORM (NO_SCORE if uncovered -> depth 0) */
-		    double depth = (external->sr[x][i-l1] == NO_SCORE)
-		                   ? 0.0 : (double) external->sr[x][i-l1] * COVNORM;
-		    double llr = (double) LLRW * (depth * invLam * logk - bgTerm);
-		    external->sr[x][i-l1] = previousScore + (float) llr;
+		  if (preLLR){
+		    /* sr[] already holds this base's LLR: accumulate only. */
+		    external->sr[x][i-l1] = previousScore + external->sr[x][i-l1];
 		    previousScore = external->sr[x][i-l1];
 		    if (UTR){
 		      external->readcount[x][i-l1] = previousReadCount + external->readcount[x][i-l1];
@@ -509,6 +510,43 @@ void HSPScan2(packExternalInformation* external,
     }
 }
 
+
+/* One coverage interval in the CURRENT strand's coordinate frame (genomic for
+   FORWARD, RSequence for REVERSE). */
+typedef struct { long s, e; float v; } covIv;
+
+/* Growable buffer + mapping context for the bwQuery callback. */
+typedef struct {
+  covIv* a;
+  long   n, cap;
+  int    strand;
+  long   L;          /* LengthSequence, for the REVERSE genomic<->RSequence flip */
+} covBuf;
+
+/* bwQuery reports genomic intervals [s,e) 0-based half-open; store each in the
+   1-based position frame the sr[] fill uses (the text HSP path stores GFF
+   1-based coords). FORWARD: 0-based [s,e) -> 1-based half-open [s+1, e+1).
+   REVERSE: the manager runs on RSequence, so genomic 1-based p maps to
+   RSequence coord L-p+1; genomic 0-based [s,e) = 1-based [s+1,e], which reverses
+   to RSequence 1-based [L-e+1, L-s], i.e. half-open [L-e+1, L-s+1). */
+static void covCollect(long s, long e, float v, void* ud)
+{
+  covBuf* b = (covBuf*) ud;
+  long rs, re;
+
+  if (b->strand == FORWARD) { rs = s + 1;        re = e + 1; }
+  else                      { rs = b->L - e + 1; re = b->L - s + 1; }
+
+  if (b->n == b->cap) {
+    b->cap = b->cap ? b->cap * 2 : 64;
+    b->a = (covIv*) realloc(b->a, b->cap * sizeof(covIv));
+    if (b->a == NULL) printError("Not enough memory: bigWig coverage buffer");
+  }
+  b->a[b->n].s = rs;
+  b->a[b->n].e = re;
+  b->a[b->n].v = v;
+  b->n++;
+}
 
 /* --- RNA-seq expression-scoring redesign: global background (lambda_bg) ---- *
  * lambda_bg is the null of the per-base LLR term (-L): the coverage level an
@@ -561,7 +599,7 @@ static void bgCollect(long s, long e, float v, void* ud)
 
 /* Trimmed-mean depth over evenly spaced sample windows of this sequence/strand. */
 static float SampleCoverageBackground(packExternalInformation* external,
-                                      int Strand, long seqLen)
+                                      BamCov* bam, int Strand, long seqLen)
 {
   enum { NWIN = 100, WINLEN = 10000 };
   long hist[BG_HISTCAP + 1];
@@ -582,13 +620,13 @@ static float SampleCoverageBackground(packExternalInformation* external,
     if (gE > seqLen) gE = seqLen;
     if (gE <= gS) continue;
 
-    if (external->bam != NULL) {
+    if (bam != NULL) {
 #ifdef WITH_HTSLIB
       /* Stranded libraries get a per-strand null; unstranded sees every read. */
       char wantStrand = 0;
       if (BAMSTRAND != BAMLIB_NONE)
         wantStrand = (Strand == FORWARD) ? '+' : '-';
-      bamCoverageQuery(external->bam, external->curLocus, gS, gE,
+      bamCoverageQuery(bam, external->curLocus, gS, gE,
                        wantStrand, BAMSTRAND, bgCollect, &b);
 #endif
     } else {
@@ -618,13 +656,16 @@ static float SampleCoverageBackground(packExternalInformation* external,
   return (float) lam;
 }
 
-/* Point external->covLambdaBg at this sequence/strand's global background,
-   computing and caching it on first use for the sequence. Sets -1 when the LLR
-   must not apply (feature off, no coverage handle, or no usable signal). */
+/* Fill this sequence/strand's per-LIBRARY background cache (covLambdaGlobal[si][b]),
+   computing it on first use for the sequence. Each library keeps its OWN null:
+   lambda_bg is tissue biology, not depth -- across 5 human total-RNA libraries it
+   spans 14x per read -- so one pooled null would be wrong for every library in the
+   pool (see MAXBAMS in geneid.h). */
 static void SetCoverageBackground(packExternalInformation* external,
                                   int Strand, long seqLen)
 {
   int si = (Strand == FORWARD) ? 0 : 1;
+  int b, nlib;
   char mess[MAXSTRING];
 
   external->covLambdaBg = -1.0;
@@ -633,24 +674,152 @@ static void SetCoverageBackground(packExternalInformation* external,
 
   /* New sequence -> drop the cached values. */
   if (strcmp(external->covLambdaLocus, external->curLocus) != 0) {
-    external->covLambdaGlobal[0] = -1.0;
-    external->covLambdaGlobal[1] = -1.0;
+    int s2;
+    for (s2 = 0; s2 < 2; s2++)
+      for (b = 0; b < MAXBAMS; b++)
+        external->covLambdaGlobal[s2][b] = -1.0;
     strncpy(external->covLambdaLocus, external->curLocus, MAXSTRING - 1);
     external->covLambdaLocus[MAXSTRING - 1] = '\0';
   }
 
-  if (external->covLambdaGlobal[si] < 0.0) {
-    external->covLambdaGlobal[si] = SampleCoverageBackground(external, Strand, seqLen);
+  /* bigWig (or the single-bigWig path) has no library array: slot 0, bam NULL. */
+  nlib = (external->nBams > 0) ? external->nBams : 1;
+  for (b = 0; b < nlib; b++) {
+    if (external->covLambdaGlobal[si][b] >= 0.0) continue;
+    external->covLambdaGlobal[si][b] =
+      SampleCoverageBackground(external,
+                               (external->nBams > 0) ? external->bams[b] : NULL,
+                               Strand, seqLen);
     if (VRB) {
-      sprintf(mess, "Coverage background %s %s: lambda_bg %.4f (global, sampled)",
+      sprintf(mess, "Coverage background %s %s lib %d/%d: lambda_bg %.4f (global, sampled)",
               external->curLocus, (Strand == FORWARD) ? "fwd" : "rvs",
-              external->covLambdaGlobal[si]);
+              b + 1, nlib, external->covLambdaGlobal[si][b]);
       printMess(mess);
     }
   }
 
-  if (external->covLambdaGlobal[si] >= LLR_MINLAMBDA)
-    external->covLambdaBg = external->covLambdaGlobal[si];
+  /* Legacy single-source path keeps using covLambdaBg directly. */
+  if (nlib == 1 && external->covLambdaGlobal[si][0] >= LLR_MINLAMBDA)
+    external->covLambdaBg = external->covLambdaGlobal[si][0];
+}
+
+/* Query ONE library's coverage for this fragment as per-base DEPTH into dst[]
+   (0 where uncovered), saturating exactly like CoverAdd does (COV*COVNORM). */
+static void QueryLibDepth(packExternalInformation* external, BamCov* bam, int Strand,
+                          long l1, long l2, long LengthSequence, float* dst)
+{
+  covBuf buf;
+  long gS, gE, i, k, j, len = l2 - l1 + 1;
+
+  buf.a = NULL; buf.n = 0; buf.cap = 0;
+  buf.strand = Strand; buf.L = LengthSequence;
+
+  if (Strand == FORWARD) { gS = l1 - 1; gE = l2 + 2; }
+  else                   { gS = LengthSequence - 2 - l2; gE = LengthSequence - l1 + 1; }
+  if (gS < 0) gS = 0;
+
+  for (i = 0; i < len; i++) dst[i] = 0.0;
+
+  if (bam != NULL) {
+#ifdef WITH_HTSLIB
+    char wantStrand = 0;
+    if (BAMSTRAND != BAMLIB_NONE)
+      wantStrand = (Strand == FORWARD) ? '+' : '-';
+    if (external->curLocus != NULL)
+      bamCoverageQuery(bam, external->curLocus, gS, gE,
+                       wantStrand, BAMSTRAND, covCollect, &buf);
+#endif
+  } else {
+    BigWig* bw = (Strand == FORWARD) ? external->bwPlus : external->bwMinus;
+    if (bw != NULL && external->curLocus != NULL)
+      bwQuery(bw, external->curLocus, gS, gE, covCollect, &buf);
+  }
+
+  for (k = 0; k < buf.n; k++) {
+    long a = (buf.a[k].s < l1)     ? l1     : buf.a[k].s;
+    long z = (buf.a[k].e > l2 + 1) ? l2 + 1 : buf.a[k].e;
+    for (j = a; j < z; j++) {
+      float d = dst[j - l1] + buf.a[k].v;
+      dst[j - l1] = (d > (float)(COV * COVNORM)) ? (float)(COV * COVNORM) : d;
+    }
+  }
+  free(buf.a);
+}
+
+/* -L fill: write the per-base LLR straight into sr[], combining libraries by MAX.
+ *
+ * The LLR must be computed PER LIBRARY and only then combined, because each
+ * library has its own lambda_bg: you cannot max (or sum) raw depths across
+ * libraries whose backgrounds differ 14x. MAX gives union semantics -- "expressed
+ * in ANY tissue", which is what annotation wants -- and makes a redundant library
+ * NEUTRAL (max of a duplicate changes nothing) where merging made it actively
+ * harmful (measured: a 2nd brain region adding 0 new genes still cost gSN
+ * .178->.168 purely by contributing background). Summing LLRs instead would be
+ * AND-ish and would kill exactly the tissue-specific genes extra tissues are for.
+ *
+ * sr[] then holds the finished per-base term, so HSPScan2 only prefix-sums it.
+ * Returns 0 when no library has usable signal here (caller keeps the legacy term). */
+static int FillCoverageLLR(packExternalInformation* external, int Strand,
+                           long l1, long l2, long LengthSequence)
+{
+  short frameStart = (Strand == FORWARD) ? 0 : FRAMES;
+  short frameEnd   = frameStart + FRAMES;
+  int   si   = (Strand == FORWARD) ? 0 : 1;
+  long  len  = l2 - l1 + 1;
+  double logk = log((double) LLRK);
+  double km1  = (double) LLRK - 1.0;
+  int    nlib = (external->nBams > 0) ? external->nBams : 1;
+  int    b, nvalid = 0, useSecond;
+  long   i;
+  short  x;
+
+  if (UTR)
+    for (i = 0; i < len; i++) external->readcount[frameStart][i] = 0.0;
+
+  /* Track the best (covComb) and 2nd best (covComb2) per-base LLR across the
+     libraries, so -K can pick which order statistic to score with. */
+  for (i = 0; i < len; i++) {
+    external->covComb[i]  = -FLT_MAX;
+    external->covComb2[i] = -FLT_MAX;
+  }
+
+  for (b = 0; b < nlib; b++) {
+    float lam = external->covLambdaGlobal[si][b];
+    if (lam < LLR_MINLAMBDA) continue;          /* this library has nothing usable here */
+
+    QueryLibDepth(external, (external->nBams > 0) ? external->bams[b] : NULL,
+                  Strand, l1, l2, LengthSequence, external->covTmp);
+
+    for (i = 0; i < len; i++) {
+      float llr = (float) ((double) LLRW *
+                  (((double) external->covTmp[i] / (double) lam) * logk - km1));
+      if (llr > external->covComb[i]) {
+        external->covComb2[i] = external->covComb[i];
+        external->covComb[i]  = llr;
+      } else if (llr > external->covComb2[i]) {
+        external->covComb2[i] = llr;
+      }
+      if (UTR) external->readcount[frameStart][i] += external->covTmp[i];
+    }
+    nvalid++;
+  }
+
+  if (nvalid == 0) return 0;                    /* no usable library */
+
+  /* -K n: score with the n-th highest library. With fewer libraries than -K, fall
+     back to the max, so one library behaves the same however -K is set. */
+  useSecond = (LLRMINLIBS >= 2 && nvalid >= 2);
+
+  /* The signal has no reading frame: replicate into the strand's 3 frame planes. */
+  for (x = frameStart; x < frameEnd; x++)
+    for (i = 0; i < len; i++) {
+      external->sr[x][i] = useSecond ? external->covComb2[i] : external->covComb[i];
+      if (UTR && x != frameStart)
+        external->readcount[x][i] = external->readcount[frameStart][i];
+    }
+
+  external->covLambdaBg = 1.0;   /* >0 = sr[] already holds the per-base LLR */
+  return 1;
 }
 
 /* Management function to score and filter exons */
@@ -688,43 +857,6 @@ void ProcessHSPs(long l1,
  *  of the preloaded HSP list. Fills sr[] to score exons whether or not -u is  *
  *  set; readcount[] (rpkm) is only touched under -u (see CoverAdd).          *
  * ------------------------------------------------------------------------- */
-
-/* One coverage interval in the CURRENT strand's coordinate frame (genomic for
-   FORWARD, RSequence for REVERSE). */
-typedef struct { long s, e; float v; } covIv;
-
-/* Growable buffer + mapping context for the bwQuery callback. */
-typedef struct {
-  covIv* a;
-  long   n, cap;
-  int    strand;
-  long   L;          /* LengthSequence, for the REVERSE genomic<->RSequence flip */
-} covBuf;
-
-/* bwQuery reports genomic intervals [s,e) 0-based half-open; store each in the
-   1-based position frame the sr[] fill uses (the text HSP path stores GFF
-   1-based coords). FORWARD: 0-based [s,e) -> 1-based half-open [s+1, e+1).
-   REVERSE: the manager runs on RSequence, so genomic 1-based p maps to
-   RSequence coord L-p+1; genomic 0-based [s,e) = 1-based [s+1,e], which reverses
-   to RSequence 1-based [L-e+1, L-s], i.e. half-open [L-e+1, L-s+1). */
-static void covCollect(long s, long e, float v, void* ud)
-{
-  covBuf* b = (covBuf*) ud;
-  long rs, re;
-
-  if (b->strand == FORWARD) { rs = s + 1;        re = e + 1; }
-  else                      { rs = b->L - e + 1; re = b->L - s + 1; }
-
-  if (b->n == b->cap) {
-    b->cap = b->cap ? b->cap * 2 : 64;
-    b->a = (covIv*) realloc(b->a, b->cap * sizeof(covIv));
-    if (b->a == NULL) printError("Not enough memory: bigWig coverage buffer");
-  }
-  b->a[b->n].s = rs;
-  b->a[b->n].e = re;
-  b->a[b->n].v = v;
-  b->n++;
-}
 
 /* Fill sr[]/readcount[] over fragment [l1,l2] from a frameless coverage stream.
    The signal has no reading frame, so it is replicated identically into all
@@ -780,12 +912,20 @@ void ProcessCoverageBigWig(long l1, long l2, int Strand,
   if (gS < 0) gS = 0;
 
   printMess("Preprocessing bigWig coverage: step 1");
-  if (bw != NULL && external->curLocus != NULL)
-    bwQuery(bw, external->curLocus, gS, gE, covCollect, &buf);
-
-  FillCoverageFrameless(external, Strand, l1, l2, buf.a, buf.n);
-  free(buf.a);
   SetCoverageBackground(external, Strand, LengthSequence);
+
+  if (EXPRLLR && FillCoverageLLR(external, Strand, l1, l2, LengthSequence))
+    {
+      free(buf.a);
+    }
+  else
+    {
+      external->covLambdaBg = -1.0;
+      if (bw != NULL && external->curLocus != NULL)
+        bwQuery(bw, external->curLocus, gS, gE, covCollect, &buf);
+      FillCoverageFrameless(external, Strand, l1, l2, buf.a, buf.n);
+      free(buf.a);
+    }
 
   printMess("Preprocessing bigWig coverage: step 2");
   HSPScan2(external, NULL, Strand, l1, l2);
@@ -823,13 +963,24 @@ void ProcessCoverageBam(long l1, long l2, int Strand,
     wantStrand = (Strand == FORWARD) ? '+' : '-';
 
   printMess("Preprocessing BAM coverage: step 1");
-  if (external->bam != NULL && external->curLocus != NULL)
-    bamCoverageQuery(external->bam, external->curLocus, gS, gE,
-                     wantStrand, BAMSTRAND, covCollect, &buf);
-
-  FillCoverageFrameless(external, Strand, l1, l2, buf.a, buf.n);
-  free(buf.a);
   SetCoverageBackground(external, Strand, LengthSequence);
+
+  /* -L: score each library against its OWN background and combine by MAX (this
+     is the only path that supports several libraries; they are never merged).
+     Otherwise fall back to the legacy single-source depth fill. */
+  if (EXPRLLR && FillCoverageLLR(external, Strand, l1, l2, LengthSequence))
+    {
+      free(buf.a);
+    }
+  else
+    {
+      external->covLambdaBg = -1.0;            /* legacy per-base term in HSPScan2 */
+      if (external->bam != NULL && external->curLocus != NULL)
+        bamCoverageQuery(external->bam, external->curLocus, gS, gE,
+                         wantStrand, BAMSTRAND, covCollect, &buf);
+      FillCoverageFrameless(external, Strand, l1, l2, buf.a, buf.n);
+      free(buf.a);
+    }
 
   printMess("Preprocessing BAM coverage: step 2");
   HSPScan2(external, NULL, Strand, l1, l2);

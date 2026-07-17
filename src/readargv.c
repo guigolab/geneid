@@ -43,6 +43,7 @@ extern float EW,EvidenceEW,MRM;
 extern int MRMset;   /* set here when -N is given, so a BAM's index is not used to estimate MRM */
 extern int EXPRLLR;        /* -L: enable Poisson per-base expression LLR coverage scoring */
 extern float LLRK, LLRW;   /* -L fold-change k (>1); -Q weight/scale of the LLR term */
+extern int LLRMINLIBS;     /* -K: libraries required to agree (order statistic of per-library LLRs) */
 extern long LOW,HI;
 extern int BAMSTRAND;   /* -y library strandedness for BAM -S coverage */
 
@@ -92,6 +93,9 @@ void printHelp()
 	 "\t     Recommended start: -L 50 -Q 0.0007 (human RNA-seq, bam+u)\n");
   printf("\t-Q  <w>: weight/scale of the -L LLR term (default 0.0007). Transfers\n"
 	 "\t     across library depths; re-tune per param file\n");
+  printf("\t-K  <n>: with -Y a.bam,b.bam,...: libraries that must support a base\n"
+	 "\t     (default 2 = require two to agree; 1 = max/union). Each library keeps\n"
+	 "\t     its own background; they are never merged. One library ignores this\n");
   printf("\t-W: Only Forward sense prediction (Watson)\n");
   printf("\t-C: Only Reverse sense prediction (Crick)\n");
   printf("\t-U: Allow U12 introns (Requires appropriate U12 parameters to be set in the parameter file)\n");
@@ -204,7 +208,7 @@ void readargv (int argc,char* argv[],
   char *dummy2;
   char *dummy3;
   /* Reading setup options */
-  while ((c = getopt(argc,argv,"oO:bdaefitnsrxj:k:N:p:UDATzZXmMG3BvE:V:R:S:WCFP:huJy:Y:L:Q:")) != -1)
+  while ((c = getopt(argc,argv,"oO:bdaefitnsrxj:k:N:p:UDATzZXmMG3BvE:V:R:S:WCFP:huJy:Y:L:Q:K:")) != -1)
     switch(c)
       {
       case 'B': BEG++; 
@@ -321,6 +325,10 @@ void readargv (int argc,char* argv[],
 		  printError("-L expects a fold-change k > 1 (expressed/background)");
 		break;
 	  case 'Q': LLRW = strtof(optarg,&dummy3);   /* LLR weight/scale */
+		break;
+	  case 'K': LLRMINLIBS = atoi(optarg);   /* libraries required to agree (-Y a,b,c) */
+		if (LLRMINLIBS < 1)
+		  printError("-K expects a library count >= 1 (1 = max/union, 2 = require two)");
 		break;
 	  case 'U': U12++;
 		/* assembly-compatible: U12 intron typing, allowed under -O */

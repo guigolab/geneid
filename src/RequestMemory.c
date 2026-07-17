@@ -473,12 +473,29 @@ packExternalInformation* RequestMemoryExternalInformation()
   p->bwMinus = NULL;
   p->curLocus = NULL;
   p->bam = NULL;   /* -S BAM handle: NULL until the -S ingest sniffs a BAM */
+  p->nBams = 0;
+  {
+    int b;
+    for (b = 0; b < MAXBAMS; b++) p->bams[b] = NULL;
+  }
+  /* Scratch for the -L multi-library fill (see FillCoverageLLR): one library's
+     depth, and the running per-base MAX of the libraries' LLRs. */
+  if ((p->covTmp = (float*) calloc(LENGTHSi, sizeof(float))) == NULL)
+    printError("Not enough memory: coverage scratch (covTmp)");
+  if ((p->covComb = (float*) calloc(LENGTHSi, sizeof(float))) == NULL)
+    printError("Not enough memory: coverage scratch (covComb)");
+  if ((p->covComb2 = (float*) calloc(LENGTHSi, sizeof(float))) == NULL)
+    printError("Not enough memory: coverage scratch (covComb2)");
   /* -L expression LLR background: covLambdaBg is set per fragment from the
      per-sequence/strand cache, which is filled on first use (see
      SetCoverageBackground). -1 = not computed -> legacy per-base term. */
   p->covLambdaBg = -1.0;
-  p->covLambdaGlobal[0] = -1.0;
-  p->covLambdaGlobal[1] = -1.0;
+  {
+    int si, b;
+    for (si = 0; si < 2; si++)
+      for (b = 0; b < MAXBAMS; b++)
+        p->covLambdaGlobal[si][b] = -1.0;
+  }
   p->covLambdaLocus[0] = '\0';
 
   return(p);

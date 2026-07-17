@@ -133,6 +133,31 @@ float LLRK=50.0;
    against coding/site scores, so it remains param-file dependent. */
 float LLRW=0.0007;
 
+/* -K: how many libraries must support a base before it counts as expressed, i.e.
+   which order statistic of the per-library LLRs is used (1 = the MAX = union,
+   2 = the 2nd highest = "at least two agree", ...).
+   MAX alone is monotonically permissive: with N libraries a base is called if ANY
+   of them shows a peak, so false positives grow ~proportionally to N -- measured
+   across 5 libraries, predicted genes climbed 199->309 against a MANE truth of
+   214 while eSP fell .770->.679. Requiring two libraries kills single-library
+   noise (rank-1 only) while keeping genes that are expressed in several tissues.
+   The tension: a genuinely TISSUE-SPECIFIC gene is rank-1 by definition, so -K 2
+   drops it -- which is exactly what extra tissues were added to catch. Hence a
+   knob rather than a hardcoded rule. Default 1 = max (previous behaviour).
+   With fewer libraries than -K, the effective order falls back to the max, so a
+   single library behaves identically however -K is set (and -Y with one BAM is
+   unchanged by this default).
+   DEFAULT 2, measured on 5 human total-RNA libraries (chr21 vs MANE=214): -K 2
+   beat -K 1 by eSNSP +.024/+.031 at N=4/5 and cut predicted genes 309->254, and
+   -- unlike max (peaks N=3 then decays) or samtools merge (peaks N=2 then
+   decays) -- it still IMPROVES as libraries are added (.727 -> .728), which is
+   the whole point of feeding geneid many tissues. It also handles a redundant
+   library almost neutrally (+.001 eSNSP) where max lost .006. Counter-intuitively
+   it RAISES sensitivity too (eSN .658 -> .744 from N=3 to N=5): with more
+   libraries more real genes have two supporters, so the rule relaxes with scale
+   while rank-1 noise stays suppressed. -K 1 restores the plain union/max. */
+int LLRMINLIBS=2;
+
 /* Optional Predicted Gene Prefix */
 char  GenePrefix[MAXSTRING]="";
   
@@ -170,6 +195,41 @@ long NUMSITES,NUMEXONS,MAXBACKUPSITES,MAXBACKUPEXONS,NUMU12SITES,NUMU12EXONS,NUM
 
 /* Accounting time and results */
 account *m;
+
+
+#ifdef WITH_HTSLIB
+/* Open a comma-separated list of indexed BAMs into out[], returning the count.
+   Returns 0 when the FIRST element is not a BAM, so the caller can fall through
+   to the bigWig / text paths (this doubles as the format sniff, like bamOpen
+   alone did). A later element failing is fatal rather than skipped: silently
+   dropping a library would quietly change the evidence a run was given.
+   Several libraries are kept SEPARATE on purpose -- each kes its own lambda_bg
+   and they are combined by MAX, never merged (see MAXBAMS in geneid.h). */
+static int openBamList(const char* spec, BamCov** out, const char* what)
+{
+  char buf[MAXSTRING];
+  char err[MAXSTRING];
+  char* tok;
+  int n = 0;
+
+  strncpy(buf, spec, MAXSTRING - 1);
+  buf[MAXSTRING - 1] = '\0';
+  for (tok = strtok(buf, ","); tok != NULL; tok = strtok(NULL, ",")) {
+    BamCov* b = bamOpen(tok);
+    if (b == NULL) {
+      if (n == 0) return 0;                  /* not a BAM: let the caller sniff on */
+      sprintf(err, "%s: cannot open '%s' as an indexed BAM (needs .bai/.csi)", what, tok);
+      printError(err);
+    }
+    if (n >= MAXBAMS) {
+      sprintf(err, "%s: too many BAMs (max %d)", what, MAXBAMS);
+      printError(err);
+    }
+    out[n++] = b;
+  }
+  return n;
+}
+#endif
 
 /************************************************************************
                             geneid MAIN program
@@ -243,7 +303,11 @@ int main (int argc, char *argv[])
   int reading;
   int lastSplit;
   BigBed* evBB = NULL;    /* non-NULL => -R evidence is a bigBed, queried per split */
-  BamCov* evBam = NULL;   /* non-NULL => -R evidence is a BAM (introns), per split */
+  BamCov* evBam = NULL;   /* == evBams[0]; non-NULL => -R/-Y evidence is BAM (introns), per split */
+#ifdef WITH_HTSLIB
+  BamCov* evBams[MAXBAMS];   /* -Y a.bam,b.bam: junctions are UNIONed across libraries */
+  int     nEvBams = 0;
+#endif
   long bbOwnedLo = 0;     /* upper acceptor bound owned by the previous fragment */
   char mess[MAXSTRING];
 
@@ -370,8 +434,14 @@ int main (int argc, char *argv[])
 	  if (evBB)
 	    printMess("Reading evidence from bigBed (per-split range queries)...");
 #ifdef WITH_HTSLIB
-	  else if ((evBam = bamOpen(ExonsFile)) != NULL)
-	    printMess("Reading introns from BAM junctions (per-split range queries)...");
+	  else if ((nEvBams = openBamList(ExonsFile, evBams, "-Y/-R introns")) > 0)
+	    {
+	      evBam = evBams[0];
+	      sprintf(mess, "Reading introns from %d BAM%s junctions (per-split range "
+		      "queries; junctions UNIONed, support summed)...",
+		      nEvBams, (nEvBams > 1) ? "s" : "");
+	      printMess(mess);
+	    }
 #endif
 	  else
 	    {
@@ -394,12 +464,30 @@ int main (int argc, char *argv[])
 	  char* comma = strchr(HSPFile, ',');
 	  if (comma != NULL)
 	    {
+	      /* A comma list is either the legacy stranded bigWig pair
+		 (plus.bw,minus.bw) or several BAM libraries. Sniff the first
+		 element: bigWig -> pair; BAM -> list. */
 	      *comma = '\0';
-	      external->bwPlus  = bwOpen(HSPFile);
-	      external->bwMinus = bwOpen(comma + 1);
+	      external->bwPlus = bwOpen(HSPFile);
 	      *comma = ',';
-	      if (external->bwPlus == NULL || external->bwMinus == NULL)
-		printError("-S with two comma-separated files expects stranded bigWigs (plus.bw,minus.bw)");
+	      if (external->bwPlus != NULL)
+		{
+		  *comma = '\0';
+		  external->bwMinus = bwOpen(comma + 1);
+		  *comma = ',';
+		  if (external->bwMinus == NULL)
+		    printError("-S with two comma-separated bigWigs expects plus.bw,minus.bw");
+		}
+	      else
+		{
+#ifdef WITH_HTSLIB
+		  external->nBams = openBamList(HSPFile, external->bams, "-Y/-S coverage");
+		  external->bam = (external->nBams > 0) ? external->bams[0] : NULL;
+#endif
+		  if (external->bam == NULL)
+		    printError("-S/-Y comma list: expected stranded bigWigs (plus.bw,minus.bw) "
+			       "or indexed BAMs (a.bam,b.bam,...)");
+		}
 	    }
 	  else
 	    {
@@ -407,7 +495,11 @@ int main (int argc, char *argv[])
 	      external->bwMinus = external->bwPlus;   /* unstranded: same signal both strands */
 #ifdef WITH_HTSLIB
 	      if (external->bwPlus == NULL)
-		external->bam = bamOpen(HSPFile);   /* not a bigWig: try an indexed BAM */
+		{
+		  external->bams[0] = bamOpen(HSPFile);   /* not a bigWig: try an indexed BAM */
+		  external->nBams = (external->bams[0] != NULL) ? 1 : 0;
+		  external->bam = external->bams[0];
+		}
 #endif
 	    }
 
@@ -626,7 +718,7 @@ int main (int argc, char *argv[])
 					Locus, l1, l2, bbOwnedLo, ownedHi);
 #ifdef WITH_HTSLIB
 		      else
-			ReadIntronsBam(evBam, external, isochores[0]->D,
+			ReadIntronsBam(evBams, nEvBams, external, isochores[0]->D,
 				       Locus, l1, l2, bbOwnedLo, ownedHi,
 				       Sequence, LengthSequence);
 #endif
@@ -770,10 +862,14 @@ int main (int argc, char *argv[])
   if (external->bwPlus != NULL)
     bwClose(external->bwPlus);
 #ifdef WITH_HTSLIB
-  if (external->bam != NULL)
-    bamClose(external->bam);
-  if (evBam != NULL)
-    bamClose(evBam);
+  {
+    int b;
+    for (b = 0; b < external->nBams; b++) bamClose(external->bams[b]);
+  }
+  {
+    int b;
+    for (b = 0; b < nEvBams; b++) bamClose(evBams[b]);
+  }
 #endif
 
   /* 4. The End */

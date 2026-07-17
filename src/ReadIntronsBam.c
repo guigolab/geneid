@@ -82,21 +82,29 @@ static int cmpJunc(const void* a, const void* b){
    the same non-overlapping per-fragment assignment ReadExonsBigBed makes -- so
    each distinct junction is committed in exactly one fragment. Returns the
    number of evidence exon slots produced (including frame/intron replicas). */
-long ReadIntronsBam(BamCov* bc, packExternalInformation* external, dict* d,
+/* Junctions from ONE OR MORE libraries. Unlike coverage -- where each library
+   needs its own lambda_bg and they are combined by MAX, because merging pools
+   backgrounds -- junctions have no background to pool, so several libraries are
+   simply UNIONed here. The existing sort+tally below then sums read support
+   across libraries for free: an intron seen in three tissues gets their combined
+   support, which is exactly the wanted semantics. */
+long ReadIntronsBam(BamCov** bcs, int nbcs, packExternalInformation* external, dict* d,
                     char* Locus, long l1, long l2, long ownedLo, long ownedHi,
                     char* Sequence, long LengthSequence){
   packEvidence* ev = external->evidence[0];
   juncList L = { NULL, 0, 0 };
   long lastAcceptor = -INFI;
   long i;
+  int b;
 
   ev->nvExons = 0;
   ev->nvSites = 0;
 
   /* Reads overlapping [l1,l2+1) (0-based); ownership (below) is in 1-based
      acceptor units, matching the GFF/bigBed evidence assignment. */
-  if (bamJunctionQuery(bc, Locus, l1, l2 + 1, collectCB, &L) < 0)
-    printError("BAM junction query failed");
+  for (b = 0; b < nbcs; b++)
+    if (bamJunctionQuery(bcs[b], Locus, l1, l2 + 1, collectCB, &L) < 0)
+      printError("BAM junction query failed");
 
   /* Junctions with no read-tag strand ('.') get one from the splice motif; this
      depends only on (start,end), so all '.' copies of a junction resolve alike
