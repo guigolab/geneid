@@ -146,6 +146,17 @@ A. DEFINITIONS
 #define LLR_TRIM 0.01
 #define LLR_MINLAMBDA 0.05
 
+/* -Y a.bam,b.bam,... : how many RNA-seq libraries may be combined in one run.
+   Libraries are NOT merged: each keeps its own lambda_bg and its per-base LLR is
+   combined with MAX (see FillCoverageLLR). Merging (samtools merge or summing
+   depth) pools BACKGROUNDS, and lambda_bg is tissue biology, not depth --
+   measured across 5 human total-RNA libraries it spans 14x PER READ (pancreas
+   0.028/Mread, heart 0.403/Mread) -- so a pooled null is wrong for every library
+   in the pool. Measured: merging degraded from N=3 on, and a REDUNDANT library
+   (a 2nd brain region adding 0 new genes) still cost gSN .178->.168 purely by
+   contributing background. MAX makes a redundant library neutral instead. */
+#define MAXBAMS 32
+
 /* Length of allowed UTR including stop codon before intron: used to be 55 */
 #define MAXNMDLENGTH 1000
 
@@ -764,9 +775,19 @@ typedef struct s_packExternalInformation
      per-fragment on chr21 the null swung ~400x (median 0.01, max 20). Estimating
      it once per sequence fixes the density term by construction and leaves a
      mean that is exactly linear in sequencing depth. */
+  /* >0 once the fill has written per-base LLR values into sr[] (so HSPScan2 just
+     prefix-sums them); -1 = legacy per-base term (protein homology, text HSP
+     path, -L absent, or no usable coverage). */
   float covLambdaBg;
-  float covLambdaGlobal[2];          /* [0]=FORWARD, [1]=REVERSE; -1 = not yet computed */
+  /* Per sequence+strand+LIBRARY background: [0]=FORWARD, [1]=REVERSE. Each
+     library keeps its OWN null -- see MAXBAMS for why pooling is wrong. */
+  float covLambdaGlobal[2][MAXBAMS];
   char  covLambdaLocus[MAXSTRING];   /* sequence covLambdaGlobal was computed for */
+  /* Scratch, LENGTHSi each: covTmp = one library's per-base depth; covComb = the
+     running per-base MAX of the libraries' LLRs. */
+  float* covTmp;
+  float* covComb;    /* best LLR seen so far, per base */
+  float* covComb2;   /* 2nd-best, so -K 2 can require two libraries to agree */
 
   /* -S RNA-seq coverage supplied as bigWig (per-split range queries) instead of
      a text HSP file. bwPlus/bwMinus are the +/- strand signals (equal when the
@@ -778,7 +799,12 @@ typedef struct s_packExternalInformation
 
   /* -S RNA-seq coverage supplied as an indexed BAM (htslib, WITH_HTSLIB build);
      NULL => not a BAM. Coverage is derived per fragment, unstranded. */
+  /* -S/-Y RNA-seq coverage from indexed BAM(s) (htslib, WITH_HTSLIB build).
+     bam == bams[0] (or NULL) so existing "is this BAM mode?" checks still read
+     naturally; nBams > 1 means several libraries combined by MAX, never merged. */
   BamCov* bam;
+  BamCov* bams[MAXBAMS];
+  int     nBams;
 } packExternalInformation;
 
 /* Hash-bucket entry identifying one already-backed-up exon (see DumpHash.c);
@@ -1118,7 +1144,7 @@ long ReadExonsBigBed(struct BigBed* bb, packExternalInformation* external, dict*
    or (when absent) from the splice motif in `Sequence` (forward, 1-based via
    Sequence[pos-1]). BamCov is the htslib reader (include/bamcov.h); only reached
    in a WITH_HTSLIB build (external side never opens a BAM otherwise). */
-long ReadIntronsBam(BamCov* bc, packExternalInformation* external, dict* d,
+long ReadIntronsBam(BamCov** bcs, int nbcs, packExternalInformation* external, dict* d,
 		    char* Locus, long l1, long l2, long ownedLo, long ownedHi,
 		    char* Sequence, long LengthSequence);
 
