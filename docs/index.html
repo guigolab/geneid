@@ -1,83 +1,63 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<style type="text/css">
-div.bulk { text-align: justify }
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>geneid manual</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  .hero { max-width: 900px; margin: 0 auto; padding: 3.5rem clamp(1.2rem,5vw,2rem) 1rem; }
+  .hero h1 { font-size: 2.8rem; margin: 0; letter-spacing: -0.03em; }
+  .hero .ver { color: var(--muted); font-weight: 400; font-size: 1.3rem; }
+  .hero .lead { font-size: 1.25rem; max-width: 60ch; }
+  .hero .links a { margin-right: 1.2rem; font-weight: 600; }
+  .toc { max-width: 900px; margin: 1rem auto 4rem; padding: 0 clamp(1.2rem,5vw,2rem); }
+  .toc h2 { border: 0; padding: 0; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 0.9rem; margin-top: 1rem; }
+  .card { display: block; padding: 1rem 1.1rem; border: 1px solid var(--border); border-radius: 11px; text-decoration: none; color: var(--fg); background: var(--sidebar-bg); }
+  .card:hover { border-color: var(--accent); text-decoration: none; }
+  .card .n { color: var(--accent); font-weight: 700; font-size: 0.8rem; }
+  .card .t { display: block; font-weight: 650; margin: 0.15rem 0 0.2rem; }
+  .card .d { color: var(--muted); font-size: 0.9rem; line-height: 1.45; }
+  footer.site { max-width: 900px; margin: 0 auto; padding: 0 clamp(1.2rem,5vw,2rem) 3rem; }
 </style>
-<title>
-geneid docs
-</title>
 </head>
+<body>
 
-<BODY 
-TEXT color ="blue"
-BGCOLOR="white"
-LINK="blue"
-VLINK="blue"
-ALINK="blue">
-
-
-<center>
-<table border=0 width=700>
-<tr>
-<td align=center>
-<img src="./images/geneid.jpg">
-</td>
-<td align=center>
-<font face=courier size=5 color=red><b>geneid v 1.2 documentation:</b></font>
-<br><p><br><p>
-<font face=arial black size=4>
-Enrique Blanco García
-<br><p>Genís Parra
-<br><p>and<br><p>
-Roderic Guigó Serra
-</font>
-</td>
-</td>
-</table>
-
-<br><p><br><p>
-<table border=0 width=700 cellpadding=10>
-<tr>
-<td bgcolor="red"><font face="arial black" size=3>Table of contents:</font></td>
-<tr>
-<td>
-<div class="bulk"><font face="arial black" size=2>
-<ol>
-<li> <a href="./chapter1/index.html">What is <tt>geneid</tt> ?</a>
-<li> <a href="./chapter2/index.html">Signals, exons and genes</a>
-<li> <a href="./chapter3/index.html">How to install <tt>geneid</tt></a>
-<li> <a href="./chapter4/index.html">Running <tt>geneid</tt></a>
-<li> <a href="./chapter5/index.html">Assembling predicted exons into gene structures</a>
-<li> <a href="./chapter6/index.html">Introducing external evidence: re-annotation</a>
-<li> <a href="./chapter7/index.html">Using sequence homology information</a>
-<li> <a href="./chapter8/index.html"><tt>geneid</tt> parameter file</a>
-<li> <a href="./chapter9/index.html">Source code documentation</a>
-<li> <a href="./chapter10/index.html"><tt>geneid</tt> history</a>
-</ol>
-</font>
+<div class="hero">
+  <h1>geneid <span class="ver">v1.6</span></h1>
+  <p class="lead">A program for predicting genes in anonymous eukaryotic genomic
+  sequences &mdash; splice sites, exons, and complete gene structures &mdash;
+  ab&nbsp;initio or guided by annotations, protein homology and RNA&#8209;seq.</p>
+  <p class="links">
+    <a href="https://github.com/guigolab/geneid">GitHub</a>
+    <a href="https://github.com/guigolab/geneid/wiki">Wiki</a>
+    <a href="chapter3/index.html">Install</a>
+    <a href="chapter4/index.html">Run</a>
+  </p>
 </div>
-</td>
-</table>
 
-<br><p><br><p><br><p>
+<div class="toc">
+  <h2>Manual</h2>
+  <div class="grid">
+    <a class="card" href="chapter1/index.html"><span class="n">1</span><span class="t">What is geneid?</span><span class="d">Overview, what it predicts, where to get it.</span></a>
+    <a class="card" href="chapter2/index.html"><span class="n">2</span><span class="t">Signals, exons and genes</span><span class="d">The prediction hierarchy: sites &rarr; exons &rarr; assembled genes; frame and remainder.</span></a>
+    <a class="card" href="chapter3/index.html"><span class="n">3</span><span class="t">Installing geneid</span><span class="d">Build from source, dependencies (zlib, optional htslib).</span></a>
+    <a class="card" href="chapter4/index.html"><span class="n">4</span><span class="t">Running geneid</span><span class="d">Input, the full command-line reference, output formats.</span></a>
+    <a class="card" href="chapter5/index.html"><span class="n">5</span><span class="t">Assembling exons (-O)</span><span class="d">Chaining externally-supplied elements into gene structures.</span></a>
+    <a class="card" href="chapter6/index.html"><span class="n">6</span><span class="t">External annotations (-R)</span><span class="d">Guiding or forcing predictions with GFF / bigBed / BAM evidence.</span></a>
+    <a class="card" href="chapter7/index.html"><span class="n">7</span><span class="t">RNA-seq &amp; homology (-S / -Y)</span><span class="d">Expression coverage scoring, junctions, UTRs, multi-library input.</span></a>
+    <a class="card" href="chapter8/index.html"><span class="n">8</span><span class="t">The parameter file</span><span class="d">Isochores, signal profiles, the coding model, and the gene model.</span></a>
+    <a class="card" href="chapter9/index.html"><span class="n">9</span><span class="t">Source code &amp; architecture</span><span class="d">How the code is organised and where each stage lives.</span></a>
+    <a class="card" href="chapter10/index.html"><span class="n">10</span><span class="t">History &amp; references</span><span class="d">Authors, version history, and how to cite geneid.</span></a>
+  </div>
+</div>
 
-<table border=0>
-<tr>
-<td align=left bgcolor=darkgreen>
-<script>
-var modifieddate=document.lastModified
-    document.write("<font size=1 face  = 'arial black'  color='white'>" + 
-                   "Last modified: " + modifieddate)
-</script>
-</td>
-</table>
+<footer class="site">
+  geneid is free software under the GNU General Public License.
+  Developed by Enrique Blanco, Tyler Alioto and Roderic Guig&oacute; at the CRG.
+  Questions: <a href="mailto:geneid@crg.es">geneid@crg.es</a>.
+</footer>
 
-<br><p>
-Enrique Blanco Garcia &copy; 2003<br><p><br><p>
-</center>
 </body>
 </html>
-
-
-
-

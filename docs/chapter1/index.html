@@ -1,138 +1,105 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<style type="text/css">
-div.bulk { text-align: justify }
-</style>
-<title>
-geneid docs
-</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>1. What is geneid? &mdash; geneid manual</title>
+<link rel="stylesheet" href="../style.css">
 </head>
+<body>
+<div class="layout">
+<nav class="sidebar">
+  <a class="brand" href="../index.html">geneid <span class="ver">v1.6 manual</span></a>
+  <ol>
+    <li><a class="current" href="../chapter1/index.html">What is geneid?</a></li>
+    <li><a href="../chapter2/index.html">Signals, exons and genes</a></li>
+    <li><a href="../chapter3/index.html">Installing geneid</a></li>
+    <li><a href="../chapter4/index.html">Running geneid</a></li>
+    <li><a href="../chapter5/index.html">Assembling exons (-O)</a></li>
+    <li><a href="../chapter6/index.html">External annotations (-R)</a></li>
+    <li><a href="../chapter7/index.html">RNA-seq &amp; homology (-S / -Y)</a></li>
+    <li><a href="../chapter8/index.html">The parameter file</a></li>
+    <li><a href="../chapter9/index.html">Source code &amp; architecture</a></li>
+    <li><a href="../chapter10/index.html">History &amp; references</a></li>
+  </ol>
+</nav>
 
-<BODY 
-TEXT color ="blue"
-BGCOLOR="white"
-LINK="blue"
-VLINK="blue"
-ALINK="blue">
+<div class="content">
+<main>
+  <p class="eyebrow">Chapter 1</p>
+  <h1>What is geneid?</h1>
+  <p class="lead">geneid predicts genes &mdash; splice sites, exons, and complete
+  gene structures &mdash; along anonymous eukaryotic genomic DNA.</p>
 
-<center>
-<table border=0 width=700>
-<tr>
-<td align=left>
-<font face=courier size=5 color=red><b>geneid documentation:</b></font>
-</td>
-<td align=right>
-<font face="arial black" size=3>1. What is <tt>geneid</tt> ?
-</td>
-</table>
+  <p><strong>geneid</strong> is an ab&nbsp;initio gene prediction program: given
+  only a genomic sequence and a species parameter file, it finds candidate
+  signals (start/stop codons and splice sites), builds exons from them, scores
+  each exon by its signals and coding potential, and then assembles the
+  highest-scoring set of compatible exons into gene structures. It can run purely
+  ab&nbsp;initio, or fold in external evidence &mdash; annotations, protein
+  homology, and RNA&#8209;seq &mdash; to improve accuracy.</p>
 
-<br><p><br><p>
-<table border=0 width=700 cellpadding=10>
-<tr>
-<td bgcolor="red"><font face="arial black" size=3>Table of contents:</font></td>
-<tr>
-<td>
-<div class="bulk"><font face="arial black" size=2>
-<ol>
-<li> <a href="#description">Description</a>
-<li> <a href="#web"><tt>geneid</tt> on line</a>
-<li> <a href="./../index.html">INDEX</a>
-</ol>
-</font>
+  <p>It is written in ANSI C, has no runtime dependencies beyond zlib (and,
+  optionally, htslib for direct BAM input), and runs on Linux and macOS. A
+  prediction on a bacterial or fungal genome takes seconds; a full vertebrate
+  chromosome, minutes.</p>
+
+  <h2>What it predicts</h2>
+  <ul>
+    <li><strong>Signals</strong> &mdash; start and stop codons, and acceptor and
+      donor splice sites, scored with position weight arrays. Optional
+      branch-point and poly-pyrimidine-tract models refine acceptors, and U12
+      (minor-spliceosome) introns can be modelled and typed.</li>
+    <li><strong>Exons</strong> &mdash; first, internal, terminal and single-gene
+      coding exons, plus UTR exons when RNA&#8209;seq is supplied. Each is scored
+      by its defining sites, a Markov coding-potential model, and any evidence.</li>
+    <li><strong>Genes</strong> &mdash; the optimal chain of frame-compatible exons
+      under a configurable <em>gene model</em>, computed by dynamic programming.</li>
+  </ul>
+
+  <h2>Working with evidence</h2>
+  <p>Beyond ab&nbsp;initio prediction, geneid reads several kinds of external
+  information, each per genomic fragment so large genomes stream rather than load
+  whole:</p>
+  <ul>
+    <li><strong>Annotations</strong> (<code>-R</code>) &mdash; GFF, bigBed, or a
+      BAM of spliced-read junctions &mdash; to guide or force predictions
+      (<a href="../chapter6/index.html">chapter&nbsp;6</a>).</li>
+    <li><strong>Protein homology and RNA&#8209;seq</strong> (<code>-S</code> /
+      <code>-Y</code>) &mdash; HSP alignments, or bigWig / BAM coverage that scores
+      exons by expression, with UTR calling, junction evidence and multi-library
+      support (<a href="../chapter7/index.html">chapter&nbsp;7</a>).</li>
+    <li><strong>Externally-provided exons</strong> (<code>-O</code>) &mdash;
+      assembled into gene structures without ab&nbsp;initio prediction
+      (<a href="../chapter5/index.html">chapter&nbsp;5</a>).</li>
+  </ul>
+
+  <h2>Getting geneid</h2>
+  <p>Source, releases, and the issue tracker are on GitHub; a companion Wiki
+  covers training new parameter files.</p>
+  <div class="tablewrap">
+  <table>
+    <tr><th>Resource</th><th>Location</th></tr>
+    <tr><td>Source &amp; releases</td><td><a href="https://github.com/guigolab/geneid">github.com/guigolab/geneid</a></td></tr>
+    <tr><td>Wiki (training, guides)</td><td><a href="https://github.com/guigolab/geneid/wiki">github.com/guigolab/geneid/wiki</a></td></tr>
+    <tr><td>Home page</td><td><a href="http://genome.crg.es/software/geneid">genome.crg.es/software/geneid</a></td></tr>
+    <tr><td>Contact</td><td><a href="mailto:geneid@crg.es">geneid@crg.es</a></td></tr>
+  </table>
+  </div>
+
+  <div class="callout">
+    <span class="label">License</span>
+    geneid source code, binaries and documentation are distributed under the
+    <strong>GNU General Public License</strong>. Comments, suggestions and bug
+    reports are welcome at <a href="mailto:geneid@crg.es">geneid@crg.es</a>.
+  </div>
+
+  <div class="pagenav">
+    <a href="../index.html"><span class="dir">&larr; Up</span><span>Manual home</span></a>
+    <a class="next" href="../chapter2/index.html"><span class="dir">Next &rarr;</span><span>Signals, exons and genes</span></a>
+  </div>
+</main>
 </div>
-</td>
-</table>
-
-<br><p><br><p>
-<table border=0 width=700 cellpadding=10>
-<tr>
-<td bgcolor=orange><font face="arial black" size=3>Description:</font>
-<a name ="description"></td>
-<tr>
-<td>
-<div class="bulk"><font face="arial black" size=2>
-<tt>geneid</tt> is a program to predict genic elements as splice sites, exons
-and genes, along eukaryotic DNA sequences. <tt>geneid</tt> offers some type
-of support to integrate predictions from multiple sources and allows to improve
-the quality of predictions by using sequence homology information.
-<br><p>
-The program is written in <b>ANSI C</b> and runs on <tt>UNIX</tt> operating
-systems such as Linux, Solaris or Irix. Installation, setup and usage
-are pretty fast and simple and there is a wide range of options to configure the
-behaviour of the program engine.
-<br><p>
-<tt>geneid</tt> source code, compiled binaries and documentation are
-available under the GNU GENERAL PUBLIC LICENSE.
-<br><p>
-Comments, suggestions and other questions will be warmly welcomed by the authors.
-</font>
 </div>
-</td>
-</table>
-
-<br><p><br><p>
-<table border=0 width=700 cellpadding=10>
-<tr>
-<td bgcolor=orange><font face="arial black" size=3><tt>geneid</tt> on line:</font>
-<a name ="web"></td>
-<tr>
-<td>
-<div class="bulk"><font face="arial black" size=2>
-<tt>geneid</tt> homepage including more information about program such as accuracy
-or efficiency (benchmarking) and a <tt>geneid</tt> online webserver service 
-are provided over there:
-
-<ul>
-<li>
-<a href="http://www1.imim.es/software/geneid/index.html"> 
-http://www1.imim.es/software/geneid/index.html</a> (web) 
-<li>
-<a href="http://www1.imim.es/geneid.html">http://www1.imim.es/geneid.html</a> (server)
-</ul>
-
-<br><p>
-<tt>geneid</tt> distribution can be obtained through anonymous ftp to:
-<ul>
-<li><tt>ftp.imim.es</tt> in the directory <tt>/pub/software/geneid</tt>
-</ul>
-
-
-<br><p>
-<tt>geneid</tt> authors e-mail address:
-<ul>
-<li> Enrique Blanco Garcia: <A HREF="mailto:eblanco@imim.es">eblanco@imim.es</a>
-<li> Genis Parra Farre: <A HREF="mailto:gparra@imim.es">gparra@imim.es</a>
-<li> Roderic Guigo i Serra: <A HREF="mailto:rguigo@imim.es">rguigo@imim.es</a>
-</ul>
-<br><p>
-If you need help about <tt>geneid</tt>, send a message to:
-<ul>
-<li> <A HREF="mailto:geneid@imim.es">geneid@imim.es</a>
-</ul>
-</font>
-</div>
-</td>
-</table>
-
-<br><p><br><p><br><p>
-
-<table border=0>
-<tr>
-<td align=left bgcolor=darkgreen>
-<script>
-var modifieddate=document.lastModified
-    document.write("<font size=1 face  = 'arial black'  color='white'>" + 
-                   "Last modified: " + modifieddate)
-</script>
-</td>
-</table>
-
-<br><p>
-Enrique Blanco Garcia &copy; 2003<br><p><br><p>
-</center>
 </body>
 </html>
-
-
-
-
