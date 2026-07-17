@@ -147,15 +147,17 @@ float LLRW=0.0007;
    With fewer libraries than -K, the effective order falls back to the max, so a
    single library behaves identically however -K is set (and -Y with one BAM is
    unchanged by this default).
-   DEFAULT 2, measured on 5 human total-RNA libraries (chr21 vs MANE=214): -K 2
-   beat -K 1 by eSNSP +.024/+.031 at N=4/5 and cut predicted genes 309->254, and
-   -- unlike max (peaks N=3 then decays) or samtools merge (peaks N=2 then
-   decays) -- it still IMPROVES as libraries are added (.727 -> .728), which is
-   the whole point of feeding geneid many tissues. It also handles a redundant
-   library almost neutrally (+.001 eSNSP) where max lost .006. Counter-intuitively
-   it RAISES sensitivity too (eSN .658 -> .744 from N=3 to N=5): with more
-   libraries more real genes have two supporters, so the rule relaxes with scale
-   while rank-1 noise stays suppressed. -K 1 restores the plain union/max. */
+   DEFAULT 2, measured on 6 human total-RNA libraries (chr21 vs MANE=214, greedy
+   order): all three combiners peak and then decline, but -K 2 peaks LATEST and
+   HIGHEST and degrades most gracefully -- eSNSP .727 at N=4 vs samtools merge's
+   .716 at N=2 and max's (-K 1) .713 at N=3 -- while holding the gene count near
+   the truth (247 at N=4 vs max's 309). It also handles a redundant library
+   almost neutrally where max lost .006 eSNSP. It does NOT improve without bound:
+   eSP falls monotonically with N under every combiner (.741 -> .699 here), so
+   -K 2 slows the ~N-proportional false-positive pressure without removing it.
+   Operating point is ~4 DIVERSE libraries (the reachable-gene curve saturates
+   there too); more is not better, complementary is. -K 1 restores plain
+   union/max. */
 int LLRMINLIBS=2;
 
 /* -I: minimum reads supporting a junction (summed across all -Y/-R libraries,

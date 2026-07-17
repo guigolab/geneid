@@ -183,18 +183,64 @@ external evidence (annotations, protein homology and RNA-seq) are:
               the common Illumina protocol), "fr" (forward), or "none"
               (unstranded, the default).
 
-  -Y <reads.bam>
-              (WITH_HTSLIB) Convenience: use ONE indexed BAM as BOTH intron
-              evidence (-R junctions) AND RNA-seq coverage (-S), instead of
-              passing the same file to -R and -S separately.
+  -Y <reads.bam[,reads2.bam,...]>
+              (WITH_HTSLIB) Use an indexed BAM as BOTH intron evidence
+              (-R junctions) AND RNA-seq coverage (-S), instead of passing the
+              same file to -R and -S separately. A comma-separated list combines
+              several RNA-seq libraries in one run -- see "Multiple libraries".
+
+RNA-seq expression scoring (-L)
+
+  By default the coverage signal (-S / -Y) scores an exon with an additive
+  per-base term that has no null model, so background transcription is rewarded
+  and the score grows with sequencing depth. -L replaces that with a two-state
+  Poisson log-likelihood ratio against the sequence's own background coverage:
+  a base scores > 0 only where it is genuinely enriched over that background,
+  and the score depends on fold-enrichment rather than raw depth, so it does not
+  drift with library size. This cuts the over-prediction the additive term
+  produces on deep data while keeping (and sharpening) real genes.
+
+  -L <k>      Enable expression LLR scoring. k is the enrichment of an expressed
+              exon over the genome-wide mean coverage (tens, not units, because
+              most of a genome is untranscribed). Off by default (legacy term).
+              Recommended start for human RNA-seq: -L 50 -Q 0.0007 with -u.
+  -Q <w>      Weight of the -L term against the coding/site scores (default
+              0.0007). It transfers across library depths but depends on the
+              parameter file's factors, so re-tune it if you change param files.
+  -N <M>      Millions of reads mapped, used only for the rpkm= report attribute
+              (-u). For a BAM it is estimated from the index; -N overrides that.
+
+Multiple libraries (-Y a.bam,b.bam,... and -K)
+
+  Give -Y a comma-separated list to combine several RNA-seq libraries. They are
+  NOT merged: each keeps its OWN background estimate (which is tissue biology,
+  not depth -- across human total-RNA libraries it varies several-fold per read),
+  and their per-base LLRs are combined by an order statistic. Junctions are
+  unioned across libraries with read support summed.
+
+  -K <n>      How many libraries must support a base for it to count as expressed
+              (default 2 = require two to agree; 1 = max / union). Requiring two
+              suppresses single-library noise, whose false-positive rate would
+              otherwise grow with the number of libraries. A single -Y BAM
+              ignores -K. Diminishing returns set in around ~4 diverse tissues.
+  -I <n>      Minimum reads (summed across all -Y/-R libraries) supporting a BAM
+              junction before it becomes intron evidence (default 1 = every
+              junction). -I 2 helps a little for a single library; it is
+              redundant once -K >= 2 aggregates several.
 
 BAM inputs must be coordinate-sorted and indexed (a .bai/.csi alongside).
 For BAM introns, the junction strand is taken from the read's XS tag, else the
 minimap2 ts tag, else the GT-AG/CT-AC splice motif.
 
-For example, RNA-seq-guided prediction from a single STAR/minimap2 BAM
-(htslib build):
->bin/geneid -3U -u -Y aligned.bam -P param/human.rnaseq.param genome.fa
+Examples (htslib build). Single STAR/minimap2 BAM, expression-scored with UTRs
+(-y sets the library strandedness):
+>bin/geneid -3U -u -y rf -L 50 -Q 0.0007 -Y aligned.bam \
+            -P param/human.rnaseq.param genome.fa
+
+Several tissue BAMs combined (each keeps its own background; two must agree):
+>bin/geneid -3U -u -y rf -L 50 -Q 0.0007 -K 2 \
+            -Y brain.bam,liver.bam,heart.bam,testis.bam \
+            -P param/human.rnaseq.param genome.fa
 
 ***************************************
 
