@@ -158,6 +158,25 @@ float LLRW=0.0007;
    while rank-1 noise stays suppressed. -K 1 restores the plain union/max. */
 int LLRMINLIBS=2;
 
+/* -I: minimum reads supporting a junction (summed across all -Y/-R libraries,
+   see ReadIntronsBam) before it becomes Intron evidence. Default 1 = every
+   distinct junction is used, whatever its support. Unlike -K, this fires
+   unconditionally whenever -R/-Y supplies a BAM -- with or without -L -- so
+   raising the default would be a live behaviour change for existing non-LLR
+   junction/structure users with zero regression coverage of that path; default
+   stays 1 (regression-safe, matches every prior behaviour) and -I is opt-in.
+
+   Measured (chr21 vs MANE, human.rnaseq.param): single library, -I 2 gives a
+   small real gain (eSN .660->.670, eSNSP .715->.721) at a small gene-level cost
+   (gSN .145->.140); -I 3 gives nothing further back. Under -K 2 with 4 combined
+   libraries, -I 2 changed NOTHING (byte-identical output) -- with several
+   libraries' read support summed, a genuine junction essentially never lands at
+   exactly 1 read, so the aggregation already does what the floor is for; -I 3
+   there starts trimming real junctions for no gain (gSP .206->.199). Recommended
+   for single/few-library runs: -I 2. Redundant once -K >= 2 aggregates several
+   libraries -- raising it further only costs precision. */
+int MINJUNCREADS=1;
+
 /* Optional Predicted Gene Prefix */
 char  GenePrefix[MAXSTRING]="";
   

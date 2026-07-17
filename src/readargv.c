@@ -44,6 +44,7 @@ extern int MRMset;   /* set here when -N is given, so a BAM's index is not used 
 extern int EXPRLLR;        /* -L: enable Poisson per-base expression LLR coverage scoring */
 extern float LLRK, LLRW;   /* -L fold-change k (>1); -Q weight/scale of the LLR term */
 extern int LLRMINLIBS;     /* -K: libraries required to agree (order statistic of per-library LLRs) */
+extern int MINJUNCREADS;    /* -I: minimum read support for a BAM junction to become Intron evidence */
 extern long LOW,HI;
 extern int BAMSTRAND;   /* -y library strandedness for BAM -S coverage */
 
@@ -96,6 +97,10 @@ void printHelp()
   printf("\t-K  <n>: with -Y a.bam,b.bam,...: libraries that must support a base\n"
 	 "\t     (default 2 = require two to agree; 1 = max/union). Each library keeps\n"
 	 "\t     its own background; they are never merged. One library ignores this\n");
+  printf("\t-I  <n>: minimum reads (summed across -Y/-R libraries) supporting a BAM\n"
+	 "\t     junction before it becomes Intron evidence (default 1 = every junction).\n"
+	 "\t     Recommended -I 2 for single/few libraries; redundant once -K >= 2\n"
+	 "\t     aggregates several -- raising it further there only costs precision\n");
   printf("\t-W: Only Forward sense prediction (Watson)\n");
   printf("\t-C: Only Reverse sense prediction (Crick)\n");
   printf("\t-U: Allow U12 introns (Requires appropriate U12 parameters to be set in the parameter file)\n");
@@ -208,7 +213,7 @@ void readargv (int argc,char* argv[],
   char *dummy2;
   char *dummy3;
   /* Reading setup options */
-  while ((c = getopt(argc,argv,"oO:bdaefitnsrxj:k:N:p:UDATzZXmMG3BvE:V:R:S:WCFP:huJy:Y:L:Q:K:")) != -1)
+  while ((c = getopt(argc,argv,"oO:bdaefitnsrxj:k:N:p:UDATzZXmMG3BvE:V:R:S:WCFP:huJy:Y:L:Q:K:I:")) != -1)
     switch(c)
       {
       case 'B': BEG++; 
@@ -329,6 +334,10 @@ void readargv (int argc,char* argv[],
 	  case 'K': LLRMINLIBS = atoi(optarg);   /* libraries required to agree (-Y a,b,c) */
 		if (LLRMINLIBS < 1)
 		  printError("-K expects a library count >= 1 (1 = max/union, 2 = require two)");
+		break;
+	  case 'I': MINJUNCREADS = atoi(optarg);   /* junction read-support floor (-R/-Y BAM) */
+		if (MINJUNCREADS < 1)
+		  printError("-I expects a read count >= 1 (1 = off, every junction counts)");
 		break;
 	  case 'U': U12++;
 		/* assembly-compatible: U12 intron typing, allowed under -O */

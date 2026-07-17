@@ -25,6 +25,7 @@
 extern float EvidenceFactor;
 extern float EvidenceEW;
 extern int FWD, RVS;
+extern int MINJUNCREADS;   /* -I: junction read-support floor (default 1 = off) */
 
 /* One spliced-read junction occurrence (0-based half-open reference coords). */
 typedef struct { long start, end; char strand; } juncRec;
@@ -133,6 +134,7 @@ long ReadIntronsBam(BamCov** bcs, int nbcs, packExternalInformation* external, d
     if (strand != '+' && strand != '-') continue;        /* strand unresolved -> drop */
     if (begin <= ownedLo || begin > ownedHi) continue;   /* owned by another fragment */
     if ((strand == '+' && !FWD) || (strand == '-' && !RVS)) continue;
+    if (readCount < MINJUNCREADS) continue;               /* -I: too little read support */
 
     float score = (float) readCount * EvidenceFactor + EvidenceEW;
     int three = 1;                             /* introns carry no frame -> 3 copies */
