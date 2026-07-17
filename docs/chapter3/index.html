@@ -1,163 +1,101 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<style type="text/css">
-div.bulk { text-align: justify }
-</style>
-<title>
-geneid docs
-</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3. Installing geneid &mdash; geneid manual</title>
+<link rel="stylesheet" href="../style.css">
 </head>
+<body>
+<div class="layout">
+<nav class="sidebar">
+  <a class="brand" href="../index.html">geneid <span class="ver">v1.6 manual</span></a>
+  <ol>
+    <li><a href="../chapter1/index.html">What is geneid?</a></li>
+    <li><a href="../chapter2/index.html">Signals, exons and genes</a></li>
+    <li><a class="current" href="../chapter3/index.html">Installing geneid</a></li>
+    <li><a href="../chapter4/index.html">Running geneid</a></li>
+    <li><a href="../chapter5/index.html">Assembling exons (-O)</a></li>
+    <li><a href="../chapter6/index.html">External annotations (-R)</a></li>
+    <li><a href="../chapter7/index.html">RNA-seq &amp; homology (-S / -Y)</a></li>
+    <li><a href="../chapter8/index.html">The parameter file</a></li>
+    <li><a href="../chapter9/index.html">Source code &amp; architecture</a></li>
+    <li><a href="../chapter10/index.html">History &amp; references</a></li>
+  </ol>
+</nav>
 
-<BODY 
-TEXT color ="blue"
-BGCOLOR="white"
-LINK="blue"
-VLINK="blue"
-ALINK="blue">
+<div class="content">
+<main>
+  <p class="eyebrow">Chapter 3</p>
+  <h1>Installing geneid</h1>
+  <p class="lead">geneid builds from source with a single <code>make</code>. A
+  plain build needs only a C compiler and zlib.</p>
 
-<center>
-<table border=0 width=700>
-<tr>
-<td align=left>
-<font face=courier size=5 color=red><b>geneid documentation:</b></font>
-</td>
-<td align=right>
-<font face="arial black" size=3>3. How to install <tt>geneid</tt>
-</td>
-</table>
+  <h2>Get the source</h2>
+  <pre><code><span class="cmd">$</span> git clone https://github.com/guigolab/geneid.git
+<span class="cmd">$</span> cd geneid</code></pre>
+  <p>Or download a release tarball from the
+  <a href="https://github.com/guigolab/geneid/releases">releases page</a> and
+  unpack it.</p>
 
-<br><p><br><p>
-<table border=0 width=700 cellpadding=10>
-<tr>
-<td bgcolor="red"><font face="arial black" size=3>Table of contents:</font></td>
-<tr>
-<td>
-<div class="bulk"><font face="arial black" size=2>
-<ol>
-<li> <a href="#extract">Extracting the distribution</a>
-<li> <a href="#list"><tt>geneid</tt> file listing</a>
-<li> <a href="#compilation">Compiling <tt>geneid</tt> code</a>
-<li> <a href="./../index.html">INDEX</a>
-</ol>
-</font>
+  <h2>Build</h2>
+  <pre><code><span class="cmd">$</span> make</code></pre>
+  <p>This produces the executable at <code>bin/geneid</code>. Test it:</p>
+  <pre><code><span class="cmd">$</span> bin/geneid -h</code></pre>
+  <div class="callout tip">
+    <span class="label">Memory</span>
+    geneid's working arrays grow on demand, so there is nothing to size at build
+    time &mdash; just <code>make</code>. (The old <code>MEM=low|medium|high</code>
+    build profiles are gone.) Resident memory follows the input and stays modest,
+    a few&nbsp;GB even on a large, dense genome.
+  </div>
+
+  <h2>Dependencies</h2>
+  <h3>zlib &mdash; required</h3>
+  <p>Used by the indexed bigBed (<code>-R</code>) and bigWig (<code>-S</code>)
+  readers. It is preinstalled on virtually every system (package
+  <code>zlib1g-dev</code> / <code>zlib-devel</code>); the Makefile links it with
+  <code>-lz</code> automatically, so a plain <code>make</code> just works.</p>
+
+  <h3>htslib &mdash; optional (for BAM input)</h3>
+  <p>Reading indexed <strong>BAM</strong> evidence directly
+  (<code>-R</code>/<code>-S</code>/<code>-Y</code> with a <code>.bam</code>)
+  needs <a href="https://github.com/samtools/htslib">htslib</a>. Enable it:</p>
+  <pre><code><span class="cmd">$</span> make WITH_HTSLIB=1</code></pre>
+  <p>If htslib is not under <code>/usr/local</code>, point the build at its
+  prefix:</p>
+  <pre><code><span class="cmd">$</span> make WITH_HTSLIB=1 HTSLIB_PREFIX=/opt/homebrew        <span style="color:var(--muted)"># macOS / Homebrew</span>
+<span class="cmd">$</span> make WITH_HTSLIB=1 HTSLIB_PREFIX=/path/to/htslib</code></pre>
+  <p>The build bakes <code>HTSLIB_PREFIX/lib</code> into the binary's runtime
+  search path (<code>-Wl,-rpath</code>), so the resulting geneid finds
+  <code>libhts</code> on its own &mdash; no <code>module load</code> or
+  <code>LD_LIBRARY_PATH</code> at run time. Install htslib with
+  <code>brew install htslib</code>, <code>apt-get install libhts-dev</code>, a
+  cluster module, or from source.</p>
+  <div class="callout">
+    <span class="label">Note</span>
+    The default build (plain <code>make</code>) never references htslib; BAM input
+    simply is not available in that binary. bigWig / bigBed / GFF evidence still
+    work without it.
+  </div>
+
+  <h2>What's in the distribution</h2>
+  <div class="tablewrap"><table>
+    <tr><th>Path</th><th>Contents</th></tr>
+    <tr><td><code>src/</code>, <code>include/</code></td><td>C source and the <code>geneid.h</code> header.</td></tr>
+    <tr><td><code>bin/</code>, <code>objects/</code></td><td>the built binary and object files.</td></tr>
+    <tr><td><code>param/</code></td><td>parameter files for several species (see <a href="../chapter8/index.html">chapter&nbsp;8</a>).</td></tr>
+    <tr><td><code>samples/</code></td><td>example FASTA sequences.</td></tr>
+    <tr><td><code>docs/</code></td><td>this manual.</td></tr>
+    <tr><td><code>Makefile</code>, <code>README</code></td><td>build rules and quick-start notes.</td></tr>
+  </table></div>
+
+  <div class="pagenav">
+    <a href="../chapter2/index.html"><span class="dir">&larr; Prev</span><span>Signals, exons and genes</span></a>
+    <a class="next" href="../chapter4/index.html"><span class="dir">Next &rarr;</span><span>Running geneid</span></a>
+  </div>
+</main>
 </div>
-</td>
-</table>
-
-<br><p><br><p>
-<table border=0 width=700 cellpadding=10>
-<tr>
-<td bgcolor=orange><font face="arial black" size=3>Extracting the distribution:</font>
-<a name ="extract"></td>
-<tr>
-<td>
-<div class="bulk"><font face="arial black" size=2>
-<tt>geneid</tt> distribution contains several directories and files. Source
-code and documentation files are included in the distribution, as well as
-parameters file and other extra information.
-<br><p>
-The distribution os archived and compressed in a single file using the
-Linux command <tt><font color="red">tar -zcvf</font></tt>. The compressed
-filename is <tt>geneid.tar.gz</tt>. <tt>geneid</tt> files can be
-extracted following these instructions:
-<ol>
-<li>Type <tt><font color="red">gzip -d geneid.tar.gz</font></tt>
-<li>Type <tt><font color="red">tar -xvf geneid.tar</font></tt>
-</ol>
-Under Linux, try:
-<ol>
-<li>Type <tt><font color="red">tar -zxvf geneid.tar.gz</font></tt>
-</ol>
-After executing those commands, the directory <tt>geneid</tt> will have been
-created in your current working directory.
-</font>
 </div>
-</td>
-</table>
-
-<br><p><br><p>
-<table border=0 width=700 cellpadding=10>
-<tr>
-<td bgcolor=orange><font face="arial black" size=3><tt>geneid</tt> file listing:</font>
-<a name ="list"></td>
-<tr>
-<td>
-<font face="arial black" size=2>
-<tt>geneid</tt> distribution contains the following things:
-<ul>
-<li> <b><tt>bin/</tt></b><br>
-binaries will be stored over there.
-<li> <b><tt>docs/</tt></b><br>
-HTML documentation. Open the <tt>index.html</tt> page.
-<li> <b><tt>include/</tt></b><br>
-<tt>geneid</tt> header file called <tt>geneid.h</tt>.
-<li> <b><tt>objects/</tt></b><br>
-object files will be stored over there.
-<li> <b><tt>params/</tt></b><br>
-Different parameters files are provided. Select the proper one according to
-the organism to which the input sequence belongs.
-<li> <b><tt>samples/</tt></b><br>
-Some FASTA sequences as examples 
-(E. Blanco, G. Parra and R. Guigó. <i>Using geneid to Identify Genes.</i>
-In A. D. Baxevanis and D. B. Davison, chief editors: Current Protocols in 
-Bioinformatics. Volume 1, Unit 4.3. John Wiley & Sons Inc., New York, 
-2002. ISBN: 0-471-25093-7.)
-<li> <b><tt>src/</tt></b><br>
-<tt>geneid</tt> source code.
-<li> <b><tt>GNULicense</tt></b><br>
-This software has been registered under this license. Copy of the license.
-<li> <b><tt>Makefile</tt></b><br>
-Makefile to build <tt>geneid</tt> binary.
-<li> <b><tt>README</tt></b><br>
-This file contains information about how to install and run the program,
-and other more recent information.
-</ul>
-</font>
-</td>
-</table>
-
-<br><p><br><p>
-<table border=0 width=700 cellpadding=10>
-<tr>
-<td bgcolor=orange><font face="arial black" size=3>Compiling <tt>geneid</tt> code:</font>
-<a name ="compilation"></td>
-<tr>
-<td>
-<div class="bulk"><font face="arial black" size=2>
-Enter the <tt>geneid</tt> directory and then, to build the binary file
-use the make tool:
-<ol>
-<li>Type <tt><font color="red">cd geneid</font></tt>
-<li>Type <tt><font color="red">make</font></tt>
-</ol>
-
-The binary <tt>geneid</tt> will have been created into the <tt>bin</tt>
-directory. Type <tt><font color="red">bin/geneid -h</font></tt> to test
-the file has been properly built.
-</font>
-</div>
-</td>
-</table>
-
-<br><p><br><p><br><p>
-
-<table border=0>
-<tr>
-<td align=left bgcolor=darkgreen>
-<script>
-var modifieddate=document.lastModified
-    document.write("<font size=1 face  = 'arial black'  color='white'>" + 
-                   "Last modified: " + modifieddate)
-</script>
-</td>
-</table>
-
-<br><p>
-Enrique Blanco Garcia &copy; 2003<br><p><br><p>
-</center>
 </body>
 </html>
-
-
-
-

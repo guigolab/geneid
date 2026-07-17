@@ -1,202 +1,138 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<style type="text/css">
-div.bulk { text-align: justify }
-</style>
-<title>
-geneid docs
-</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>7. RNA-seq &amp; homology (-S / -Y) &mdash; geneid manual</title>
+<link rel="stylesheet" href="../style.css">
 </head>
+<body>
+<div class="layout">
+<nav class="sidebar">
+  <a class="brand" href="../index.html">geneid <span class="ver">v1.6 manual</span></a>
+  <ol>
+    <li><a href="../chapter1/index.html">What is geneid?</a></li>
+    <li><a href="../chapter2/index.html">Signals, exons and genes</a></li>
+    <li><a href="../chapter3/index.html">Installing geneid</a></li>
+    <li><a href="../chapter4/index.html">Running geneid</a></li>
+    <li><a href="../chapter5/index.html">Assembling exons (-O)</a></li>
+    <li><a href="../chapter6/index.html">External annotations (-R)</a></li>
+    <li><a class="current" href="../chapter7/index.html">RNA-seq &amp; homology (-S / -Y)</a></li>
+    <li><a href="../chapter8/index.html">The parameter file</a></li>
+    <li><a href="../chapter9/index.html">Source code &amp; architecture</a></li>
+    <li><a href="../chapter10/index.html">History &amp; references</a></li>
+  </ol>
+</nav>
 
-<BODY 
-TEXT color ="blue"
-BGCOLOR="white"
-LINK="blue"
-VLINK="blue"
-ALINK="blue">
+<div class="content">
+<main>
+  <p class="eyebrow">Chapter 7</p>
+  <h1>RNA-seq &amp; homology evidence</h1>
+  <p class="lead"><code>-S</code> feeds geneid a per-base signal that scores exons
+  &mdash; either protein-homology alignments or RNA&#8209;seq coverage.
+  <code>-Y</code> uses a BAM as both coverage and junctions.</p>
 
-<center>
-<table border=0 width=700>
-<tr>
-<td align=left>
-<font face=courier size=5 color=red><b>geneid documentation:</b></font>
-</td>
-<td align=right>
-<font face="arial black" size=3>7. Using sequence homology information</font>
-</td>
-</table>
+  <p>The <code>-S</code> option supplies a signal that raises the score of exons
+  it overlaps. It accepts two kinds of evidence: <strong>protein homology</strong>
+  as HSP alignments, and <strong>RNA&#8209;seq coverage</strong> as bigWig or BAM.
+  The rest of this chapter covers each.</p>
 
-<br><p><br><p>
-<table border=0 width=700 cellpadding=10>
-<tr>
-<td bgcolor="red"><font face="arial black" size=3>Table of contents:</font></td>
-<tr>
-<td>
-<div class="bulk"><font face="arial black" size=2>
-<ol>
-<li> <a href="#description">Description</a>
-<li> <a href="#srs">HSPs</a>
-<li> <a href="#frame">Frame definition in <tt>blast</tt> and <tt>geneid</tt></a>
-<li> <a href="./../index.html">INDEX</a>
-</ol>
-</font>
+  <h2>Protein homology (HSPs)</h2>
+  <p>Given alignments between the input and well-annotated sequences, the
+  High-scoring Segment Pairs (HSPs) can raise the score of overlapping predicted
+  exons. Supply them as a GFF list with <code>-S</code>; order does not matter.
+  To combine several alignments, geneid projects the HSPs onto the sequence,
+  taking the highest score at each position. Positions with no homology get the
+  parameter file's <code>NO_SCORE</code> value
+  (<a href="../chapter8/index.html">chapter&nbsp;8</a>).</p>
+  <div class="callout">
+    <span class="label">Frame in BLAST vs geneid</span>
+    BLAST frames are <code>1,2,3</code> (from <code>start&nbsp;mod&nbsp;3</code>,
+    with 0&nbsp;&rarr;&nbsp;3); geneid frames are <code>0,1,2</code> (nucleotides
+    to the first complete codon). geneid converts between them internally as
+    <code>blastFrame = (start(exon) + geneidFrame) mod 3</code>. Give a frame of
+    <code>.</code> for DNA&ndash;DNA alignments, which have none.
+  </div>
+
+  <h2>RNA-seq coverage</h2>
+  <p>RNA&#8209;seq read depth scores exons by expression. Supply it as stranded
+  or unstranded bigWig, or &mdash; in an <span class="flag">htslib</span> build
+  &mdash; directly as an indexed BAM:</p>
+  <pre><code><span class="cmd">$</span> bin/geneid -3U -u -y rf -S plus.bw,minus.bw  -P param/human.rnaseq.param genome.fa
+<span class="cmd">$</span> bin/geneid -3U -u -y rf -S reads.bam         -P param/human.rnaseq.param genome.fa</code></pre>
+  <p>Coverage scores exons with or without <code>-u</code>; adding
+  <code>-u</code> also predicts <strong>UTRs</strong> from where coverage extends
+  beyond the coding exons. <code>-y</code> sets library strandedness
+  (<code>rf</code> = dUTP/reverse, the common Illumina protocol; <code>fr</code>;
+  or <code>none</code>). BAMs must be coordinate-sorted and indexed.</p>
+
+  <h3>Expression scoring (-L / -Q)</h3>
+  <p>By default the coverage term is additive and has no null model, so
+  background transcription is rewarded and the score grows with sequencing depth
+  &mdash; deep libraries over-predict. <code>-L</code> replaces it with a
+  two-state <strong>log-likelihood ratio</strong> against the sequence's own
+  background coverage: a base scores positive only where it is genuinely enriched
+  over that background, and only its <em>fold</em>-enrichment matters, so the
+  score does not drift with library size.</p>
+  <div class="tablewrap"><table class="flags">
+    <tr><th>Flag</th><th>Meaning</th></tr>
+    <tr><td><code>-L &lt;k&gt;</code></td><td>Enable expression LLR scoring. <code>k</code> is the enrichment of an expressed exon over the genome-wide mean coverage (tens, not units, because most of a genome is untranscribed). Off by default.</td></tr>
+    <tr><td><code>-Q &lt;w&gt;</code></td><td>Weight of the <code>-L</code> term against the coding/site scores (default <code>0.0007</code>). It transfers across library depths but depends on the parameter file's factors, so re-tune it if you change parameter files.</td></tr>
+  </table></div>
+  <div class="callout tip">
+    <span class="label">Recommended start</span>
+    For human RNA&#8209;seq: <code>-L 50 -Q 0.0007</code> together with
+    <code>-u</code>.
+  </div>
+
+  <h3>Multiple libraries (-Y a.bam,b.bam,&hellip; and -K)</h3>
+  <p><code>-Y</code> takes a comma-separated list of BAMs to combine several
+  libraries in one run &mdash; each also contributes its junctions. They are
+  <strong>not merged</strong>: each library keeps its own background estimate
+  (which reflects tissue biology, not just depth, and varies several-fold per
+  read across tissues), and their per-base scores are combined by an order
+  statistic. Junctions are unioned across libraries with read support summed.</p>
+  <div class="tablewrap"><table class="flags">
+    <tr><th>Flag</th><th>Meaning</th></tr>
+    <tr><td><code>-K &lt;n&gt;</code></td><td>How many libraries must support a base for it to count as expressed (default <code>2</code>; <code>1</code> = the plain maximum / union). Requiring two suppresses single-library noise, whose false positives would otherwise grow with the number of libraries. A single BAM ignores <code>-K</code>.</td></tr>
+    <tr><td><code>-I &lt;n&gt;</code></td><td>Minimum reads (summed across all libraries) supporting a BAM junction before it becomes intron evidence (default <code>1</code>). <code>-I 2</code> helps a little for a single library; it is redundant once <code>-K &ge; 2</code>.</td></tr>
+    <tr><td><code>-N &lt;M&gt;</code></td><td>Millions of reads mapped, used only for the <code>rpkm=</code> report attribute; estimated from a BAM index when omitted.</td></tr>
+  </table></div>
+  <div class="callout">
+    <span class="label">How many tissues?</span>
+    Diminishing returns set in around <strong>four diverse tissues</strong>: on a
+    human benchmark, most protein-coding genes reachable from RNA&#8209;seq are
+    covered by the fourth complementary library, and adding more (or a second
+    sample of the same organ) helps little. Prefer complementary tissues over
+    many similar ones.
+  </div>
+
+  <h2>One BAM, both roles (-Y)</h2>
+  <p>A single <code>-Y&nbsp;reads.bam</code> uses that BAM as both the
+  <code>-R</code> junction source and the <code>-S</code> coverage source, instead
+  of passing it to each separately. A full example &mdash; GFF3 output, U12
+  introns allowed, UTRs, expression scoring, from one STAR/minimap2 BAM:</p>
+  <pre><code><span class="cmd">$</span> bin/geneid -3U -u -y rf -L 50 -Q 0.0007 -Y aligned.bam \
+             -P param/human.rnaseq.param genome.fa</code></pre>
+  <p>And several tissue BAMs, each keeping its own background, two required to
+  agree:</p>
+  <pre><code><span class="cmd">$</span> bin/geneid -3U -u -y rf -L 50 -Q 0.0007 -K 2 \
+             -Y brain.bam,liver.bam,heart.bam,testis.bam \
+             -P param/human.rnaseq.param genome.fa</code></pre>
+
+  <div class="callout warn">
+    <span class="label">Hard-mask repeats</span>
+    geneid ignores soft-masking. Hard-mask repeats to <code>N</code> in the FASTA;
+    otherwise repeat-region coverage inflates false predictions
+    (<a href="../chapter4/index.html">chapter&nbsp;4</a>).
+  </div>
+
+  <div class="pagenav">
+    <a href="../chapter6/index.html"><span class="dir">&larr; Prev</span><span>External annotations (-R)</span></a>
+    <a class="next" href="../chapter8/index.html"><span class="dir">Next &rarr;</span><span>The parameter file</span></a>
+  </div>
+</main>
 </div>
-</td>
-</table>
-
-<br><p><br><p>
-<table border=0 width=700 cellpadding=10>
-<tr>
-<td bgcolor=orange><font face="arial black" size=3>Description:</font>
-<a name ="description"></td>
-<tr>
-<td>
-<div class="bulk"><font face="arial black" size=2>
-<tt>geneid</tt> provides a simple support to the usage of homology
-information, either genomic homology (DNA - DNA) or protein homology
-(Protein - DNA translated). Homology information extracted from the aligment
-between input sequence and others (well-annotated) can be used to improve
-the degree of accuracy obtained ab initio, increasing the final score on the
-set of predicted exons overlapping the shared regions in such alignment
-(High-scoring Segment Pairs).
-<br><p>
-The information from aligments is read from an additional file in
-<tt>gff</tt> format as a list of HSPs. <tt>geneid</tt>
-is instructed to read this file with the command line option 
-<tt>-S filename</tt>. It is NOT necessary to provide the HSPs ordered 
-by any position in the sequence.
-<br><p>
-The frame can be either set in the column 8 of <tt>gff</tt> format or
-skipped by using the wildcar "." when is unknown. In the last case,
-<tt>geneid</tt> generates 3 equivalent elements (one per possible frame).
-This is necessary when aligments have been produced between 2 genomic
-sequences (DNA to DNA) and therefore there is no frame associated to.
-<br><p>
-The group field (column 9 in <tt>gff</tt> format) can be present but will be
-omitted when storing this information.
-</font>
 </div>
-</td>
-</table>
-
-<br><p>
-
-<table border=0 width=700 cellpadding=10>
-<tr>
-<td bgcolor=orange><font face="arial black" size=3>HSPs:</font>
-<a name ="srs"></td>
-<tr>
-<td>
-<div class="bulk"><font face="arial black" size=2>
-Given an <tt>blast</tt> aligment, a set of High-score Segment Pairs (HSPs)
-are produced to represent parts common in both sequences. Given the
-interesting sequence (input to <tt>geneid</tt>), numerous pairwise
-alignments can be done by using sequences related to the original by
-many causes such as containing an homologous gene (syntenic gene prediction).
-<br><p>
-<tt>geneid</tt> will increase proportionally the score of predicted exons
-which overlap the HSPs obtained by previous pairwise aligments. To sum up
-the information coming from several aligments, a projection of HSPs over the
-sequence is performed, taking always the highest score among the HSPs 
-being in every position of the input sequence. Exon positions overlapping
-regions without homology support will be given a value <tt>NO_SCORE</tt> 
-(see <a href="../chapter8/index.html">chapter 8. <tt>geneid</tt> 
-parameter file</a>)
-<br><p>
-<center>
-<IMG SRC="../images/SR.jpg">
-</center>
-
-</font>
-</div>
-</td>
-</table>
-
-<br><p><br><p>
-<table border=0 width=700 cellpadding=10>
-<tr>
-<td bgcolor=orange><font face="arial black" size=3>
-Frame definition in <tt>blast</tt> and <tt>geneid</tt>
-</font>
-<a name ="frame"></td>
-<tr>
-<td>
-<div class="bulk"><font face="arial black" size=2>
-<font color="red">
-It is important to understand that frame definition in <tt>blast</tt> and
-<tt>geneid</tt> is different and therefore a simple translation from one into
-another format is needed. Altough this conversion is implemented inside
-<tt>geneid</tt>, it might be necessary to keep it in mind to analyze and
-understand the new results.
-</font>
-<br><p>
-<hr>
-<br><p>
-In <tt>blast</tt>, there are 3 frames (1,2 or 3)
-corresponding to the mathematical modulus operation computed following this
-formula:
-<br><p>
-<center>
-frame = HSP starting position modulus 3 (0 corresponds to frame 3).
-</center>
-<br><p>
-i.e. Given a sequence which its first position is called 1, one HSP which starts
-at the position 7 is said to be in frame 1 (7 modulus 3 = 1), while a HSP
-which starts at the position 9 is said to be in frame 3 (9 modulus 3 = 0
-and 0 is coded by 3).
-<br><p>
-<font color="green">
-IMPORTANT: HSPs might appear in the negative (reverse) strand of the
-input sequence. In that case, the HSPs coordinates must be translated into
-coordinates regarding to the reverse reading direction before computing the
-frame.
-</font>
-<br><p>
-<hr>
-<br><p>
-In <tt>geneid</tt>, the frame is defined as the number of nucleotides (0,1,2)
-from the first nucleotide in the exon sequence to the the first nucleotide
-in the first COMPLETE codon translated from the genomic sequence
-(<a href="../chapter2/index.html#frames">see section Frame and Remainder (chapter 2)</a>).
-<br><p>
-<hr>
-<br><p>
-Obviously, it is necessary a method to convert <tt>geneid</tt> frames (exons)
-into <tt>blast</tt> frames (HSPs) to use this information properly. The
-following formula makes both types of frame definitions compatible
-<br><p>
-  Given an exon and a HSP (both in the same strand):
-<center>
-<br><p>
-  blastFrame(HSP) = (starting(exon) + geneidFrame(exon)) % 3;<br>
-  (result 0 corresponding to blastFrame 3)
-</center>
-<br><p>
-  notice: blastFrame = [1,2,3] and geneidFrame = [0,1,2].
-</font>
-</div>
-</td>
-</table>
-
-<br><p><br><p><br><p>
-
-<table border=0>
-<tr>
-<td align=left bgcolor=darkgreen>
-<script>
-var modifieddate=document.lastModified
-    document.write("<font size=1 face  = 'arial black'  color='white'>" + 
-                   "Last modified: " + modifieddate)
-</script>
-</td>
-</table>
-
-<br><p>
-Enrique Blanco Garcia &copy; 2003<br><p><br><p>
-</center>
 </body>
 </html>
-
-
-
-

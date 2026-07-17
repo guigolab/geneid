@@ -1,203 +1,105 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<style type="text/css">
-div.bulk { text-align: justify }
-</style>
-<title>
-geneid docs
-</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2. Signals, exons and genes &mdash; geneid manual</title>
+<link rel="stylesheet" href="../style.css">
 </head>
+<body>
+<div class="layout">
+<nav class="sidebar">
+  <a class="brand" href="../index.html">geneid <span class="ver">v1.6 manual</span></a>
+  <ol>
+    <li><a href="../chapter1/index.html">What is geneid?</a></li>
+    <li><a class="current" href="../chapter2/index.html">Signals, exons and genes</a></li>
+    <li><a href="../chapter3/index.html">Installing geneid</a></li>
+    <li><a href="../chapter4/index.html">Running geneid</a></li>
+    <li><a href="../chapter5/index.html">Assembling exons (-O)</a></li>
+    <li><a href="../chapter6/index.html">External annotations (-R)</a></li>
+    <li><a href="../chapter7/index.html">RNA-seq &amp; homology (-S / -Y)</a></li>
+    <li><a href="../chapter8/index.html">The parameter file</a></li>
+    <li><a href="../chapter9/index.html">Source code &amp; architecture</a></li>
+    <li><a href="../chapter10/index.html">History &amp; references</a></li>
+  </ol>
+</nav>
 
-<BODY 
-TEXT color ="blue"
-BGCOLOR="white"
-LINK="blue"
-VLINK="blue"
-ALINK="blue">
+<div class="content">
+<main>
+  <p class="eyebrow">Chapter 2</p>
+  <h1>Signals, exons and genes</h1>
+  <p class="lead">geneid predicts genes hierarchically: signals first, then exons,
+  then the optimal chain of exons.</p>
 
-<center>
-<table border=0 width=700>
-<tr>
-<td align=left>
-<font face=courier size=5 color=red><b>geneid documentation:</b></font>
-</td>
-<td align=right>
-<font face="arial black" size=3>2. Signals, exons and genes</td>
-</table>
+  <p>The engine has three stages. First, <strong>signals</strong> (splice sites
+  and start/stop codons) are found and scored along the sequence with position
+  weight arrays. Second, <strong>exons</strong> are built between compatible
+  signals and scored by those sites plus a Markov coding-potential model. Third,
+  the best <strong>gene structure</strong> is assembled from the exons by dynamic
+  programming, maximising the summed exon score subject to a gene model.</p>
 
-<br><p><br><p>
-<table border=0 width=700 cellpadding=10>
-<tr>
-<td bgcolor="red"><font face="arial black" size=3>Table of contents:</font></td>
-<tr>
-<td>
-<div class="bulk"><font face="arial black" size=2>
-<ol>
-<li> <a href="#context">General context</a>
-<li> <a href="#signals">Signals</a>
-<li> <a href="#frames">Frame and remainder</a>
-<li> <a href="#exons">Exons</a>
-<li> <a href="#genes">Genes</a>
-<li> <a href="./../index.html">INDEX</a>
-</ol>
-</font>
+  <h2>Signals</h2>
+  <div class="tablewrap"><table>
+    <tr><th>Signal</th><th>Core</th><th>Where</th></tr>
+    <tr><td>Acceptor splice site</td><td>intron ends in <code>AG</code></td><td>intron&rarr;exon boundary</td></tr>
+    <tr><td>Donor splice site</td><td>intron begins <code>GT</code></td><td>exon&rarr;intron boundary</td></tr>
+    <tr><td>Start codon</td><td><code>ATG</code></td><td>start of translation</td></tr>
+    <tr><td>Stop codon</td><td><code>TAA</code>, <code>TAG</code>, <code>TGA</code></td><td>end of translation</td></tr>
+  </table></div>
+  <p>Acceptors can be refined with optional <strong>branch-point</strong> and
+  <strong>poly-pyrimidine-tract</strong> profiles. With <code>-U</code> and the
+  right profiles, geneid also models <strong>U12</strong> (minor-spliceosome)
+  introns &mdash; both <code>GT&ndash;AG</code> and <code>AT&ndash;AC</code>
+  subtypes &mdash; and can type each predicted intron as U2 or U12. All signal
+  profiles live in the parameter file (<a href="../chapter8/index.html">chapter&nbsp;8</a>).</p>
+
+  <h2>Frame and remainder</h2>
+  <p>geneid exons are open reading frames delimited by signals. Two values place
+  each exon in its reading frame:</p>
+  <dl>
+    <dt>Frame</dt>
+    <dd>the number of nucleotides (0, 1, 2) from the exon's first base to the
+    first base of its first <em>complete</em> codon.</dd>
+    <dt>Remainder</dt>
+    <dd>the number of nucleotides (0, 1, 2) left after the last complete codon.
+    It is fixed by the exon's length and frame.</dd>
+  </dl>
+  <div class="callout">
+    <span class="label">Note</span>
+    <code>X</code> denotes an unknown codon in translation &mdash; e.g. when a
+    masked base (<code>N</code>) falls inside the codon.
+  </div>
+
+  <h2>Exons</h2>
+  <div class="tablewrap"><table>
+    <tr><th>Exon type</th><th>Delimited by</th><th>Frame</th><th>Remainder</th></tr>
+    <tr><td>First</td><td>Start &hellip; Donor</td><td>0</td><td>0, 1, 2</td></tr>
+    <tr><td>Internal</td><td>Acceptor &hellip; Donor</td><td>0, 1, 2</td><td>0, 1, 2</td></tr>
+    <tr><td>Terminal</td><td>Acceptor &hellip; Stop</td><td>0, 1, 2</td><td>0</td></tr>
+    <tr><td>Single</td><td>Start &hellip; Stop</td><td>0</td><td>0</td></tr>
+  </table></div>
+  <p>Each exon's score combines its site scores, the coding-potential
+  log-likelihood ratio, and any external evidence, weighted by per-exon-type
+  factors in the parameter file. When RNA&#8209;seq is supplied with
+  <code>-u</code>, geneid additionally builds <strong>UTR exons</strong> to place
+  untranslated 5&prime;/3&prime; ends (<a href="../chapter7/index.html">chapter&nbsp;7</a>).</p>
+
+  <h2>Genes</h2>
+  <p>A gene structure is a series of frame-compatible exons chained under the
+  gene model. Two exons are <strong>frame compatible</strong> when</p>
+  <pre><code>(frame(second) + remainder(first)) mod 3 == 0</code></pre>
+  <p>Exons are connected as long as frame compatibility holds and the gene
+  model's succession and distance rules allow it. geneid finds the single
+  highest-scoring assembly in linear time by dynamic programming; the gene model
+  that governs which chains are legal is described in
+  <a href="../chapter8/index.html">chapter&nbsp;8</a>.</p>
+
+  <div class="pagenav">
+    <a href="../chapter1/index.html"><span class="dir">&larr; Prev</span><span>What is geneid?</span></a>
+    <a class="next" href="../chapter3/index.html"><span class="dir">Next &rarr;</span><span>Installing geneid</span></a>
+  </div>
+</main>
 </div>
-</td>
-</table>
-
-<br><p><br><p>
-<table border=0 width=700 cellpadding=10>
-<tr>
-<td bgcolor=orange><font face="arial black" size=3>General context:</font>
-<a name ="context"></td>
-<tr>
-<td>
-<div class="bulk"><font face="arial black" size=2>
-<tt>geneid</tt> is a program to predict genes in anonymous genomic sequences
-designed with a hierarchical structure. First of all, splice sites and
-start/stop codons are predicted and scored along the DNA sequence by using
-Position Weight Arrays (PWA). Secondly, exons are built from the set of
-predicted signals before. Exons are scored as the sum of the scores
-of the defining sites, plus the log-likelihood ratio of a Markov model
-to distinguish between coding and non-coding DNA. Finally, from the
-set of predicted exons, the best gene structure is assembled maximizing the
-sum of the scores of the assembled exons.
-</font>
 </div>
-</td>
-</table>
-
-
-<br><p><br><p>
-<table border=0 width=700 cellpadding=10>
-<tr>
-<td bgcolor=orange><font face="arial black" size=3>Signals:</font>
-<a name ="signals"></td>
-<tr>
-<td>
-<font face="arial black" size=2>
-<tt>geneid</tt> is able to detect the following signals:
-<ul>
-<li> <b>Acceptor splice sites</b>:
-<i>Last intron dinucleotide mandatory <tt>AG</tt></i>.<br>
-Acceptors occur at the limits between intron/exon.
-<br>
-The following signals associated to the acceptors are also detected (optional):
-<ol>
-<li> Branch point
-<li> Poly Pyrimidine Tract
-</ol>
-<li> <b>Donor splice sites</b>:
-<i>First intron dinucleotide mandatory <tt>GT</tt></i>.<br>
-Donors occur at the limits between exon/intron.
-<li> <b>Start codons (translation)</b>:
-<i>First exon first trinucleotide mandatory <tt>ATG</tt></i>.<br>
-Initiation of transcription from mRNA into protein.
-<li> <b>Stop codons (translation)</b>:
-<i>Three possible codons <tt>TAA, TAG and TGA</tt></i>.<br>
-End of transcription from mRNA into protein.
-</ul>
-</font>
-</td>
-</table>
-
-<br><p><br><p>
-<table border=0 width=700 cellpadding=10>
-<tr>
-<td bgcolor=orange><font face="arial black" size=3>Frame and remainder:</font>
-<a name ="frames"></td>
-<tr>
-<td>
-<div class="bulk"><font face="arial black" size=2>
-<tt>geneid</tt> exons are Open Reading Frames delimitited by signals. Frame
-and remainder are 2 values assigned to exons which have to be understood in
-the following way:
-<br><p>
-<b>FRAME:</b>
-The number of nucleotides (0,1,2) from the first nucleotide in the exon sequence
-to the the first nucleotide in the first COMPLETE codon translated from the
-genomic sequence.
-
-<br><p>
-
-<b>REMAINDER:</b>
-The number of nucleotides left (0,1,2) after the last COMPLETE codon has
-been defined from the exon sequence, given its frame. Therefore, exon
-remainder is completely determined by the length of the exon and its frame.
-</font>
-</div>
-</td>
-</table>
-
-<br><p><br><p>
-<table border=0 width=700 cellpadding=10>
-<tr>
-<td bgcolor=orange><font face="arial black" size=3>Exons:</font>
-<a name ="exons"></td>
-<tr>
-<td>
-<font face="arial black" size=2>
-<tt>geneid</tt> is able to build the following type of exons:
-<ul>
-<li> <b>First exons</b>:
-<i>Delimited by Start and Donor</i>.<br>
-Frame = 0 - Remainder = 0,1,2
-<li> <b>Internal exons</b>:
-<i>Delimited by Acceptor and Donor</i>.<br>
-Frame = 0,1,2 - Remainder = 0,1,2
-<li> <b>Terminal exons</b>:
-<i>Delimited by Acceptor and Stop</i>.<br>
-Frame = 0,1,2 - Remainder = 0
-<li> <b>Single genes</b>:
-<i>Delimited by Start and Stop</i>.<br>
-Frame = 0 - Remainder = 0
-</ul>
-<font color="red">NOTE: The character 'X' denotes unknown codons in the 
-translation process<br>(such those cases in which there are masked 
-nucleotides, "N", within the codon sequence).</font>
-</font>
-</td>
-</table>
-
-
-<br><p><br><p>
-<table border=0 width=700 cellpadding=10>
-<tr>
-<td bgcolor=orange><font face="arial black" size=3>Genes:</font>
-<a name ="genes"></td>
-<tr>
-<td>
-<div class="bulk"><font face="arial black" size=2>
-Gene structures are series of frame compatible exons that are assembled
-following some fixed rules and restrictions specified in a Gene Model.
-Two exons are frame compatible if the frame of the second exon plus
-the remainder of the first one MODULUS 3 is 0. Predicted exons are connected
-as long as frame compatibility rule and gene model restrictions are
-respected properly.
-</font>
-</div>
-</td>
-</table>
-
-<br><p><br><p><br><p>
-
-<table border=0>
-<tr>
-<td align=left bgcolor=darkgreen>
-<script>
-var modifieddate=document.lastModified
-    document.write("<font size=1 face  = 'arial black'  color='white'>" + 
-                   "Last modified: " + modifieddate)
-</script>
-</td>
-</table>
-
-<br><p>
-Enrique Blanco Garcia &copy; 2003<br><p><br><p>
-</center>
 </body>
 </html>
-
-
-
-
