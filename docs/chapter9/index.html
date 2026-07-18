@@ -1,239 +1,97 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<style type="text/css">
-div.bulk { text-align: justify }
-</style>
-<title>
-geneid docs
-</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>9. Source code &amp; architecture &mdash; geneid manual</title>
+<link rel="stylesheet" href="../style.css">
 </head>
+<body>
+<div class="layout">
+<nav class="sidebar">
+  <a class="brand" href="../index.html">geneid <span class="ver">v1.6 manual</span></a>
+  <ol>
+    <li><a href="../chapter1/index.html">What is geneid?</a></li>
+    <li><a href="../chapter2/index.html">Signals, exons and genes</a></li>
+    <li><a href="../chapter3/index.html">Installing geneid</a></li>
+    <li><a href="../chapter4/index.html">Running geneid</a></li>
+    <li><a href="../chapter5/index.html">Assembling exons (-O)</a></li>
+    <li><a href="../chapter6/index.html">External annotations (-R)</a></li>
+    <li><a href="../chapter7/index.html">RNA-seq &amp; homology (-S / -Y)</a></li>
+    <li><a href="../chapter8/index.html">The parameter file</a></li>
+    <li><a class="current" href="../chapter9/index.html">Source code &amp; architecture</a></li>
+    <li><a href="../chapter10/index.html">History &amp; references</a></li>
+  </ol>
+</nav>
 
-<BODY 
-TEXT color ="blue"
-BGCOLOR="white"
-LINK="blue"
-VLINK="blue"
-ALINK="blue">
+<div class="content">
+<main>
+  <p class="eyebrow">Chapter 9</p>
+  <h1>Source code &amp; architecture</h1>
+  <p class="lead">geneid is ANSI C in <code>src/</code>, with one header
+  <code>include/geneid.h</code>. This chapter maps the code to the prediction
+  pipeline.</p>
 
-<center>
-<table border=0 width=700>
-<tr>
-<td align=left>
-<font face=courier size=5 color=red><b>geneid documentation:</b></font>
-</td>
-<td align=right>
-<font face="arial black" size=3>9. Source code documentation
-</td>
-</table>
+  <p>The authoritative source is on
+  <a href="https://github.com/guigolab/geneid">GitHub</a>; browse
+  <a href="https://github.com/guigolab/geneid/tree/master/src"><code>src/</code></a>
+  for the current files. The modules below are grouped by the stage they serve,
+  following the flow of a run.</p>
 
-<br><p><br><p>
-<table border=0 width=700 cellpadding=10>
-<tr>
-<td bgcolor=orange><font face="arial black" size=3>Source code documentation:</font>
-<a name ="code"></td>
-<tr>
-<td>
-<div class="bulk"><font face="arial black" size=2>
-<img src="./images/V_orange.gif" border=0>: Description
-<br>
-<img src="./images/V_silver.gif" border=0>: Code
-<br><p>
+  <h2>The pipeline</h2>
+  <p>A run moves through these stages, per genomic fragment for large sequences:</p>
+  <ol>
+    <li><strong>Set-up</strong> &mdash; parse arguments and the parameter file,
+      read the sequence.</li>
+    <li><strong>Signals</strong> &mdash; score sites with the profiles.</li>
+    <li><strong>Exons</strong> &mdash; build and score candidate exons.</li>
+    <li><strong>Evidence</strong> &mdash; fold in annotations, homology and
+      RNA&#8209;seq.</li>
+    <li><strong>Assembly</strong> &mdash; chain exons into the optimal gene
+      structure by dynamic programming.</li>
+    <li><strong>Output</strong> &mdash; translate and print.</li>
+  </ol>
 
-<table border=0>
-<tr>
-<td width=250 bgcolor="lightgreen"><tt>account.c</tt></td>
-<td><a href="./code_html/account.html"><img src="./images/V_orange.gif" border=0></a></td>
-<td><a href="../../src/account.c"><img src="./images/V_silver.gif" border=0></a></td>
-<td width=250 bgcolor="lightgreen"><tt>Output.c</tt></td>
-<td><a href="./code_html/Output.html"><img src="./images/V_orange.gif" border=0></a></td>
-<td><a href="../../src/Output.c"><img src="./images/V_silver.gif" border=0></a></td>
+  <h2>Module map</h2>
+  <div class="tablewrap"><table>
+    <tr><th>Stage</th><th>Key modules</th></tr>
+    <tr><td>Entry &amp; orchestration</td>
+        <td><code>geneid.c</code>, <code>manager.c</code>, <code>readargv.c</code>, <code>readparam.c</code>, <code>ReadGeneModel.c</code>, <code>SetRatios.c</code>, <code>RequestMemory.c</code></td></tr>
+    <tr><td>Sequence I/O</td>
+        <td><code>ReadSequence.c</code>, <code>FetchSequence.c</code>, <code>Dictionary.c</code></td></tr>
+    <tr><td>Signals</td>
+        <td><code>GetSitesWithProfile.c</code>, <code>ScoreProfile.c</code>, <code>BuildAcceptors.c</code>, <code>BuildU12Acceptors.c</code>, <code>BuildDonors.c</code>, <code>GetStopCodons.c</code>, <code>ComputeStopInfo.c</code></td></tr>
+    <tr><td>Exons &amp; coding potential</td>
+        <td><code>BuildInitialExons.c</code>, <code>BuildInternalExons.c</code>, <code>BuildTerminalExons.c</code>, <code>BuildSingles.c</code>, <code>BuildORFs.c</code>, <code>BuildUTRExons.c</code>, <code>BuildZeroLengthExons.c</code>, <code>ScoreExons.c</code>, <code>CorrectExon.c</code></td></tr>
+    <tr><td>Evidence (annotations, homology, RNA-seq)</td>
+        <td><code>ReadExonsGFF.c</code>, <code>ReadExonsBigBed.c</code>, <code>ReadHSP.c</code>, <code>ReadIntronsBam.c</code>, <code>ProcessHSPs.c</code>, <code>SearchEvidenceExons.c</code>, <code>PeakEdgeScore.c</code>, <code>GetTranscriptTermini-usingslopes.c</code>, <code>bamcov.c</code>, <code>bigwig.c</code>, <code>bigbed.c</code></td></tr>
+    <tr><td>Gene assembly (dynamic programming)</td>
+        <td><code>genamic.c</code>, <code>CookingGenes.c</code>, <code>BackupGenes.c</code>, <code>beggar.c</code></td></tr>
+    <tr><td>Sorting &amp; coordinate utilities</td>
+        <td><code>SortExons.c</code>, <code>SortSites.c</code>, <code>SortHSPs.c</code>, <code>BuildSort.c</code>, <code>SwitchFrames.c</code>, <code>SwitchPositions.c</code>, <code>RecomputePositions.c</code>, <code>DumpHash.c</code></td></tr>
+    <tr><td>Translation &amp; output</td>
+        <td><code>Translate.c</code>, <code>PrintExons.c</code>, <code>PrintSites.c</code>, <code>Output.c</code>, <code>account.c</code></td></tr>
+  </table></div>
 
-<tr>
-<td width=250 bgcolor="lightgreen"><tt>BackupGenes.c</tt></td>
-<td><a href="./code_html/BackupGenes.html"><img src="./images/V_orange.gif" border=0></a></td>
-<td><a href="../../src/BackupGenes.c"><img src="./images/V_silver.gif" border=0></a></td>
-<td width=250 bgcolor="lightgreen"><tt>PrintExons.c</tt></td>
-<td><a href="./code_html/PrintExons.html"><img src="./images/V_orange.gif" border=0></a></td>
-<td><a href="../../src/PrintExons.c"><img src="./images/V_silver.gif" border=0></a></td>
+  <div class="callout">
+    <span class="label">htslib modules</span>
+    <code>bamcov.c</code> and <code>ReadIntronsBam.c</code> are compiled only in a
+    <code>WITH_HTSLIB</code> build. <code>bigwig.c</code> and <code>bigbed.c</code>
+    depend only on zlib and are always built.
+  </div>
 
-<tr>
-<td width=250 bgcolor="lightgreen"><tt>beggar.c</tt></td>
-<td><a href="./code_html/beggar.html"><img src="./images/V_orange.gif" border=0></a></td>
-<td><a href="../../src/beggar.c"><img src="./images/V_silver.gif" border=0></a></td>
+  <div class="callout tip">
+    <span class="label">Memory model</span>
+    geneid's working arrays grow on demand; there are no compile-time capacity
+    ceilings. See the constants and comments in <code>include/geneid.h</code>.
+  </div>
 
-<tr>
-<td width=250 bgcolor="lightgreen"><tt>BuildAcceptors.c</tt></td>
-<td><a href="./code_html/BuildAcceptors.html"><img src="./images/V_orange.gif" border=0></a></td>
-<td><a href="../../src/BuildAcceptors.c"><img src="./images/V_silver.gif" border=0></a></td>
-
-<tr>
-<td width=250 bgcolor="lightgreen"><tt>BuildInitialExons.c</tt></td>
-<td><a href="./code_html/BuildInitialExons.html"><img src="./images/V_orange.gif" border=0></a></td>
-<td><a href="../../src/BuildInitialExons.c"><img src="./images/V_silver.gif" border=0></a></td>
-<td width=250 bgcolor="lightgreen"><tt>PrintSites.c</tt></td>
-<td><a href="./code_html/PrintSites.html"><img src="./images/V_orange.gif" border=0></a></td>
-<td><a href="../../src/PrintSites.c"><img src="./images/V_silver.gif" border=0></a></td>
-
-<tr>
-<td width=250 bgcolor="lightgreen"><tt>BuildInternalExons.c</tt></td>
-<td><a href="./code_html/BuildInternalExons.html"><img src="./images/V_orange.gif" border=0></a></td>
-<td><a href="../../src/BuildInternalExons.c"><img src="./images/V_silver.gif" border=0></a></td>
-<td width=250 bgcolor="lightgreen"><tt>readargv.c</tt></td>
-<td><a href="./code_html/readargv.html"><img src="./images/V_orange.gif" border=0></a></td>
-<td><a href="../../src/readargv.c"><img src="./images/V_silver.gif" border=0></a></td>
-
-<tr>
-<td width=250 bgcolor="lightgreen"><tt>BuildORFs.c</tt></td>
-<td><a href="./code_html/BuildORFs.html"><img src="./images/V_orange.gif" border=0></a></td>
-<td><a href="../../src/BuildORFs.c"><img src="./images/V_silver.gif" border=0></a></td>
-<td width=250 bgcolor="lightgreen"><tt>ReadExonsGFF.c</tt></td>
-<td><a href="./code_html/ReadExonsGFF.html"><img src="./images/V_orange.gif" border=0></a></td>
-<td><a href="../../src/ReadExonsGFF.c"><img src="./images/V_silver.gif" border=0></a></td>
-
-<tr>
-<td width=250 bgcolor="lightgreen"><tt>BuildSingles.c</tt></td>
-<td><a href="./code_html/BuildSingles.html"><img src="./images/V_orange.gif" border=0></a></td>
-<td><a href="../../src/BuildSingles.c"><img src="./images/V_silver.gif" border=0></a></td>
-<td width=250 bgcolor="lightgreen"><tt>ReadGeneModel.c</tt></td>
-<td><a href="./code_html/ReadGeneModel.html"><img src="./images/V_orange.gif" border=0></a></td>
-<td><a href="../../src/ReadGeneModel.c"><img src="./images/V_silver.gif" border=0></a></td>
-
-<tr>
-<td width=250 bgcolor="lightgreen"><tt>BuildSort.c</tt></td>
-<td><a href="./code_html/BuildSort.html"><img src="./images/V_orange.gif" border=0></a></td>
-<td><a href="../../src/BuildSort.c"><img src="./images/V_silver.gif" border=0></a></td>
-<td width=250 bgcolor="lightgreen"><tt>readparam.c</tt></td>
-<td><a href="./code_html/readparam.html"><img src="./images/V_orange.gif" border=0></a></td>
-<td><a href="../../src/readparam.c"><img src="./images/V_silver.gif" border=0></a></td>
-
-<tr>
-<td width=250 bgcolor="lightgreen"><tt>BuildTerminalExons.c</tt></td>
-<td><a href="./code_html/BuildTerminalExons.html"><img src="./images/V_orange.gif" border=0></a></td>
-<td><a href="../../src/BuildTerminalExons.c"><img src="./images/V_silver.gif" border=0></a></td>
-<td width=250 bgcolor="lightgreen"><tt>ReadSequence.c</tt></td>
-<td><a href="./code_html/ReadSequence.html"><img src="./images/V_orange.gif" border=0></a></td>
-<td><a href="../../src/ReadSequence.c"><img src="./images/V_silver.gif" border=0></a></td>
-
-<tr>
-<td width=250 bgcolor="lightgreen"><tt>CookingGenes.c</tt></td>
-<td><a href="./code_html/CookingGenes.html"><img src="./images/V_orange.gif" border=0></a></td>
-<td><a href="../../src/CookingGenes.c"><img src="./images/V_silver.gif" border=0></a></td>
-<td width=250 bgcolor="lightgreen"><tt>ReadHSP.c</tt></td>
-<td><a href="./code_html/ReadHSP.html"><img src="./images/V_orange.gif" border=0></a></td>
-<td><a href="../../src/ReadHSP.c"><img src="./images/V_silver.gif" border=0></a></td>
-
-<tr>
-<td width=250 bgcolor="lightgreen"><tt>ComputeStopInfo.c</tt></td>
-<td><a href="./code_html/ComputeStopInfo.html"><img src="./images/V_orange.gif" border=0></a></td><td><a href="../../src/ComputeStopInfo.c"><img src="./images/V_silver.gif" border=0></a></td>
-<td width=250 bgcolor="lightgreen"><tt>RecomputePositions.c</tt></td>
-<td><a href="./code_html/RecomputePositions.html"><img src="./images/V_orange.gif" border=0></a></td>
-<td><a href="../../src/RecomputePositions.c"><img src="./images/V_silver.gif" border=0></a></td>
-
-<tr>
-<td width=250 bgcolor="lightgreen"><tt>CorrectExon.c</tt></td>
-<td><a href="./code_html/CorrectExon.html"><img src="./images/V_orange.gif" border=0></a></td>
-<td><a href="../../src/CorrectExon.c"><img src="./images/V_silver.gif" border=0></a></td>
-<td width=250 bgcolor="lightgreen"><tt>RequestMemory.c</tt></td>
-<td><a href="./code_html/RequestMemory.html"><img src="./images/V_orange.gif" border=0></a></td>
-<td><a href="../../src/RequestMemory.c"><img src="./images/V_silver.gif" border=0></a></td>
-
-<tr>
-<td width=250 bgcolor="lightgreen"><tt>Dictionary.c</tt></td>
-<td><a href="./code_html/Dictionary.html"><img src="./images/V_orange.gif" border=0></a></td>
-<td><a href="../../src/Dictionary.c"><img src="./images/V_silver.gif" border=0></a></td>
-<td width=250 bgcolor="lightgreen"><tt>ScoreExons.c</tt></td>
-<td><a href="./code_html/ScoreExons.html"><img src="./images/V_orange.gif" border=0></a></td>
-<td><a href="../../src/ScoreExons.c"><img src="./images/V_silver.gif" border=0></a></td>
-
-<tr>
-<td width=250 bgcolor="lightgreen"><tt>DumpHash.c</tt></td>
-<td><a href="./code_html/DumpHash.html"><img src="./images/V_orange.gif" border=0></a></td>
-<td><a href="../../src/DumpHash.c"><img src="./images/V_silver.gif" border=0></a></td>
-<td width=250 bgcolor="lightgreen"><tt>SearchEvidenceExons.c</tt></td>
-<td><a href="./code_html/SearchEvidenceExons.html"><img src="./images/V_orange.gif" border=0></a></td>
-<td><a href="../../src/SearchEvidenceExons.c"><img src="./images/V_silver.gif" border=0></a></td>
-
-<tr>
-<td width=250 bgcolor="lightgreen"><tt>FetchSequence.c</tt></td>
-<td><a href="./code_html/FetchSequence.html"><img src="./images/V_orange.gif" border=0></a></td>
-<td><a href="../../src/FetchSequence.c"><img src="./images/V_silver.gif" border=0></a></td>
-<td width=250 bgcolor="lightgreen"><tt>SetRatios.c</tt></td>
-<td><a href="./code_html/SetRatios.html"><img src="./images/V_orange.gif" border=0></a></td>
-<td><a href="../../src/SetRatios.c"><img src="./images/V_silver.gif" border=0></a></td>
-
-<tr>
-<td width=250 bgcolor="red"><tt>genamic.c</tt></td>
-<td><a href="./code_html/genamic.html"><img src="./images/V_orange.gif" border=0></a></td>
-<td><a href="../../src/genamic.c"><img src="./images/V_silver.gif" border=0></a></td>
-<td width=250 bgcolor="lightgreen"><tt>SortExons.c</tt></td>
-<td><a href="./code_html/SortExons.html"><img src="./images/V_orange.gif" border=0></a></td>
-<td><a href="../../src/SortExons.c"><img src="./images/V_silver.gif" border=0></a></td>
-
-<tr>
-<td width=250 bgcolor="red"><tt>geneid.c</tt></td>
-<td><a href="./code_html/geneid.html"><img src="./images/V_orange.gif" border=0></a></td>
-<td><a href="../../src/geneid.c"><img src="./images/V_silver.gif" border=0></a></td>
-<td width=250 bgcolor="lightgreen"><tt>SortHSPs.c</tt></td>
-<td><a href="./code_html/SortHSPs.html"><img src="./images/V_orange.gif" border=0></a></td>
-<td><a href="../../src/SortHSPs.c"><img src="./images/V_silver.gif" border=0></a></td>
-
-<tr>
-<td width=250 bgcolor="lightgreen"><tt>GetSitesWithProfile.c</tt></td>
-<td><a href="./code_html/GetSitesWithProfile.html"><img src="./images/V_orange.gif" border=0></a></td>
-<td><a href="../../src/GetSitesWithProfile.c"><img src="./images/V_silver.gif" border=0></a></td>
-<td width=250 bgcolor="lightgreen"><tt>SwitchFrames.c</tt></td>
-<td><a href="./code_html/SwitchFrames.html"><img src="./images/V_orange.gif" border=0></a></td>
-<td><a href="../../src/SwitchFrames.c"><img src="./images/V_silver.gif" border=0></a></td>
-
-<tr>
-<td width=250 bgcolor="lightgreen"><tt>GetStopCodons.c</tt></td>
-<td><a href="./code_html/GetStopCodons.html"><img src="./images/V_orange.gif" border=0></a></td>
-<td><a href="../../src/GetStopCodons.c"><img src="./images/V_silver.gif" border=0></a></td>
-<td width=250 bgcolor="lightgreen"><tt>SwitchPositions.c</tt></td>
-<td><a href="./code_html/SwitchPositions.html"><img src="./images/V_orange.gif" border=0></a></td>
-<td><a href="../../src/SwitchPositions.c"><img src="./images/V_silver.gif" border=0></a></td>
-
-<tr>
-<td width=250 bgcolor="lightgreen"><tt>manager.c</tt></td>
-<td><a href="./code_html/manager.html"><img src="./images/V_orange.gif" border=0></a></td>
-<td><a href="../../src/manager.c"><img src="./images/V_silver.gif" border=0></a></td>
-<td width=250 bgcolor="lightgreen"><tt>Translate.c</tt></td>
-<td><a href="./code_html/Translate.html"><img src="./images/V_orange.gif" border=0></a></td>
-<td><a href="../../src/Translate.c"><img src="./images/V_silver.gif" border=0></a></td>
-</table>
-<br><p><br><p>
-<center>
-<table border=0 width=250 cellpadding=10>
-<tr>
-<td width=250 bgcolor="yellow"><tt>geneid.h</tt></td>
-<td><a href="./code_html/geneid.h.html"><img src="./images/V_orange.gif" border=0></a></td>
-<td><a href="../../include/geneid.h"><img src="./images/V_silver.gif" border=0></a></td>
-</table>
-</center>
-</font>
+  <div class="pagenav">
+    <a href="../chapter8/index.html"><span class="dir">&larr; Prev</span><span>The parameter file</span></a>
+    <a class="next" href="../chapter10/index.html"><span class="dir">Next &rarr;</span><span>History &amp; references</span></a>
+  </div>
+</main>
 </div>
-</td>
-</table>
-
-<br><p><br><p><br><p>
-
-<table border=0>
-<tr>
-<td align=left bgcolor=darkgreen>
-<script>
-var modifieddate=document.lastModified
-    document.write("<font size=1 face  = 'arial black'  color='white'>" + 
-                   "Last modified: " + modifieddate)
-</script>
-</td>
-</table>
-
-<br><p>
-Enrique Blanco Garcia &copy; 2003<br><p><br><p>
-</center>
+</div>
 </body>
 </html>
-
-
-
-

@@ -1,164 +1,112 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<style type="text/css">
-div.bulk { text-align: justify }
-</style>
-<title>
-geneid docs
-</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>10. History &amp; references &mdash; geneid manual</title>
+<link rel="stylesheet" href="../style.css">
 </head>
+<body>
+<div class="layout">
+<nav class="sidebar">
+  <a class="brand" href="../index.html">geneid <span class="ver">v1.6 manual</span></a>
+  <ol>
+    <li><a href="../chapter1/index.html">What is geneid?</a></li>
+    <li><a href="../chapter2/index.html">Signals, exons and genes</a></li>
+    <li><a href="../chapter3/index.html">Installing geneid</a></li>
+    <li><a href="../chapter4/index.html">Running geneid</a></li>
+    <li><a href="../chapter5/index.html">Assembling exons (-O)</a></li>
+    <li><a href="../chapter6/index.html">External annotations (-R)</a></li>
+    <li><a href="../chapter7/index.html">RNA-seq &amp; homology (-S / -Y)</a></li>
+    <li><a href="../chapter8/index.html">The parameter file</a></li>
+    <li><a href="../chapter9/index.html">Source code &amp; architecture</a></li>
+    <li><a class="current" href="../chapter10/index.html">History &amp; references</a></li>
+  </ol>
+</nav>
 
-<BODY 
-TEXT color ="blue"
-BGCOLOR="white"
-LINK="blue"
-VLINK="blue"
-ALINK="blue">
+<div class="content">
+<main>
+  <p class="eyebrow">Chapter 10</p>
+  <h1>History &amp; references</h1>
+  <p class="lead">Three decades of geneid, its authors, and how to cite it.</p>
 
-<center>
-<table border=0 width=700>
-<tr>
-<td align=left>
-<font face=courier size=5 color=red><b>geneid documentation:</b></font>
-</td>
-<td align=right>
-<font face="arial black" size=3>10. <tt>geneid</tt> history.
-</td>
-</table>
+  <h2>A short history</h2>
+  <p>The <strong>first geneid</strong> was developed at the Molecular Biology
+  Computer Research Resource (Dana-Farber Cancer Institute / Harvard) by Roderic
+  Guig&oacute;, Steen Knudsen, Neil Drake and Temple F. Smith. It was never
+  distributed, but an e-mail server was later set up at the Biomolecular
+  Engineering Research Center (Boston University) by Kathleen Klose and Steen
+  Knudsen.</p>
+  <p>geneid was <strong>rewritten from scratch</strong> at the Institut Municipal
+  d'Investigaci&oacute; M&egrave;dica (IMIM) in Barcelona in late 1999, mostly by
+  Enrique Blanco and Roderic Guig&oacute;, with contributions from Mois&eacute;s
+  Burset and Xavier Messeguer. That version, <strong>v1.0</strong>, was released
+  in July 2000. <strong>v1.1</strong> (2002) added XML output, ORF searching and
+  homology support and roughly doubled the speed; <strong>v1.2</strong> (2004)
+  added multi-FASTA processing, forcing a complete gene, and more species.</p>
+  <p>Development later moved to the <strong>Centre for Genomic Regulation
+  (CRG)</strong> in Barcelona, where Tyler Alioto took on maintenance and
+  continued development. The modern releases add substantial capability:</p>
+  <div class="tablewrap"><table>
+    <tr><th>Era</th><th>What changed</th></tr>
+    <tr><td>v1.4.x</td><td>Grow-on-demand memory (no build-time capacity profiles); build and portability cleanups.</td></tr>
+    <tr><td>v1.5.x</td><td>A Python <strong>geneid-train</strong> trainer; U2 branch-point modelling; <strong>U12</strong> (minor-spliceosome) intron prediction and typing; a soft intron-length model.</td></tr>
+    <tr><td>v1.6.0</td><td>Direct <strong>indexed evidence</strong> &mdash; bigWig / bigBed, and (with htslib) <strong>BAM</strong> coverage and junctions; a statistically grounded <strong>RNA&#8209;seq expression score</strong> (depth-invariant per-base log-likelihood ratio) with UTR calling and <strong>multi-library</strong> combining; GFF3 output.</td></tr>
+  </table></div>
 
-<br><p><br><p>
-<table border=0 width=700 cellpadding=10>
-<tr>
-<td bgcolor="red"><font face="arial black" size=3>Table of contents:</font></td>
-<tr>
-<td>
-<div class="bulk"><font face="arial black" size=2>
-<ol>
-<li> <a href="#authors">About the authors</a>
-<li> <a href="#version"><tt>geneid</tt> versions and names</a>
-<li> <a href="#ack">Acknowledgements</a>
-<li> <a href="#biblio">Bibliography</a>
-<li> <a href="./../index.html">INDEX</a>
-</ol>
-</font>
+  <h2>On the name</h2>
+  <p>Over the years the program has been written GeneID, GeneId, geneID and
+  Geneid. Since the 1.0 release the canonical spelling &mdash; the one most in
+  keeping with UNIX command names &mdash; is simply <strong>geneid</strong>.</p>
+
+  <h2>Authors</h2>
+  <p>geneid v1.6 is developed by <strong>Enrique Blanco</strong>,
+  <strong>Tyler Alioto</strong> and <strong>Roderic Guig&oacute;</strong> at the
+  CRG. Parameter files have been created by <strong>Gen&iacute;s Parra</strong>,
+  <strong>Francisco C&acirc;mara</strong> and <strong>Tyler Alioto</strong>, with
+  earlier contributions from Mois&eacute;s Burset and Xavier Messeguer.
+  Questions and bug reports are welcome at
+  <a href="mailto:geneid@crg.es">geneid@crg.es</a>.</p>
+
+  <h2>How to cite</h2>
+  <p>For general use, cite the Genome Research paper and the Current Protocols
+  chapter:</p>
+  <ul>
+    <li>G. Parra, E. Blanco and R. Guig&oacute;. <em>geneid in Drosophila.</em>
+      Genome Research 10:511&ndash;515, 2000.</li>
+    <li>E. Blanco, G. Parra and R. Guig&oacute;. <em>Using geneid to identify
+      genes.</em> Current Protocols in Bioinformatics, Unit&nbsp;4.3. John Wiley
+      &amp; Sons.</li>
+  </ul>
+
+  <h2>Bibliography</h2>
+  <ul>
+    <li>R. Guig&oacute;, S. Knudsen, N. Drake and T. F. Smith. <em>Prediction of
+      gene structure.</em> Journal of Molecular Biology 226:141&ndash;157, 1992.</li>
+    <li>S. Knudsen, R. Guig&oacute; and T. F. Smith. <em>GeneID &mdash; a computer
+      server for prediction of genes in DNA sequences.</em> In Proc. 2nd Int.
+      Conf. on Bioinformatics, Supercomputing and Complex Genome Analysis,
+      545&ndash;553. World Scientific, 1993.</li>
+    <li>R. Guig&oacute;. <em>Assembling genes from predicted exons in linear time
+      with dynamic programming.</em> Journal of Computational Biology
+      5:681&ndash;702, 1998.</li>
+    <li>G. Parra, E. Blanco and R. Guig&oacute;. <em>geneid in Drosophila.</em>
+      Genome Research 10:511&ndash;515, 2000.</li>
+    <li>E. Blanco, G. Parra and R. Guig&oacute;. <em>Using geneid to identify
+      genes.</em> Current Protocols in Bioinformatics, Unit&nbsp;4.3, 2002.</li>
+  </ul>
+
+  <h2>Acknowledgements</h2>
+  <p>Early work was supported in part by grants from the Spanish "Plan Nacional de
+  I+D" and the Ministerio de Educaci&oacute;n y Ciencia. geneid is free software
+  under the GNU General Public License.</p>
+
+  <div class="pagenav">
+    <a href="../chapter9/index.html"><span class="dir">&larr; Prev</span><span>Source code &amp; architecture</span></a>
+    <a class="next" href="../index.html"><span class="dir">&uarr; Up</span><span>Manual home</span></a>
+  </div>
+</main>
 </div>
-</td>
-</table>
-
-<br><p><br><p>
-<table border=0 width=700 cellpadding=10>
-<tr>
-<td bgcolor=orange><font face="arial black" size=3>About the authors:</font>
-<a name ="authors"></td>
-<tr>
-<td>
-<div class="bulk"><font face="arial black" size=2>
-Roderic Guigo, Steen Knudsen, Neil Drake and Temple F. Smith contributed to the first 
-implementation of <tt>geneid</tt> developed at the Molecular Biology Computer Research Resource 
-(Dana Farber Cancer Institute - Hardvard University). It was never distributed , but an e-mail
-server was latter set up at the Biomolecular Engineering Research Center (Boston University).
-Kathleen Klose and Steen Knudsen developed the server.
-<br><p>
-<tt>geneid</tt> was rewritten from scratch at the Institut Municipal d'Investigacions Mediques in 
-Barcelona in late 1999 mostly by Enrique Blanco and Roderic Guigo. Moises Burset also made some 
-contributions to the code as well as Xavier Messeguer from Universitat Politecnica de Catalunya.
-This version called geneid v. 1.0 was released in July, 2000.
-<br><p>
-A new release (2002) called geneid v. 1.1 contained many improvements and fixed bugs. Moreover, a new
-set of command line options were developed including XML format output, searching ORFs,
-usage of sequence homology to get better predictions and so on. Processing speed was 
-increased twice while accuraccy of predictions has been maintained. 
-<br><p>
-This latest version geneid v. 1.2 has been released in 2004. New options has been added to support
-processing of multi-fasta files as well as forcing the prediction of a complete gene in the 
-sequence. New parameter files for more species have been simultaneously delivered with this release.
-</font>
 </div>
-</td>
-</table>
-
-<br><p><br><p>
-<table border=0 width=700 cellpadding=10>
-<tr>
-<td bgcolor=orange><font face="arial black" size=3><tt>geneid</tt> versions and names:</font>
-<a name ="version"></td>
-<tr>
-<td>
-<div class="bulk"><font face="arial black" size=2>
-During many years, <tt>geneid</tt> has been referred to as GeneID, GeneId, geneID or Geneid. Before
-release the 1.0 version, we decided for the simplest, most sensible with UNIX commands 
-nomenclature, name: <tt>geneid</tt>. After that, new releases are enhanced versions of basic 1.0
-so that we selected the numeration 1.1 and 1.2.
-</font>
-</div>
-</td>
-</table>
-
-<br><p><br><p>
-<table border=0 width=700 cellpadding=10>
-<tr>
-<td bgcolor=orange><font face="arial black" size=3>Acknowledgments:</font>
-<a name ="ack"></td>
-<tr>
-<td>
-<div class="bulk"><font face="arial black" size=2>
-This work was partially supported by a grant from "Plan nacional de I+D", BIO98-0443-C02-01,
-and from the "Ministerio de Educacion y Ciencia" (Spain).
-</font>
-</div>
-</td>
-</table>
-
-<br><p><br><p>
-<table border=0 width=700 cellpadding=10>
-<tr>
-<td bgcolor=orange><font face="arial black" size=3>Bibliography:</font>
-<a name ="biblio"></td>
-<tr>
-<td>
-<div class="bulk"><font face="arial black" size=2>
-<ol>
-<li>
-R.Guigo, S.Knudsen, N.Drake and T.F.Smith. Prediction of gene structure. <i>Journal of molecular
-biology</i>, 226:141-157, 1992.
-<li>
-S.Knudsen, R.Guigo and T.F.Smith. GeneID -- a computer server for prediction of genes in DNA 
-sequences. In H.A.Lim, J.W.Fickett, C.R.Cantor and R.J.Robins, editors, <i>Proceedings on the
-Second International Conference on Bioinformatics, Supercomputing and Complex Genome Analysis</i>,
-pages 545-553. World Scientific, 1993.
-<li>
-R.Guigo. Assembling genes from predicted exons in linear time with dynamic programming. <i>Journal
-of computational biology</i>, 5:681-702, 1998.
-<li>
-G.Parra, E.Blanco and R.Guigo. Geneid in Drosphila. <i>Genome Research</i> 10:511-515, 2000.
-<li>
-E. Blanco, G. Parra and R. Guigó.<i>Using geneid to Identify Genes.</i> In A. D. Baxevanis and D. B. Davison, chief editors: Current Protocols in Bioinformatics. Volume 1, Unit 4.3. John Wiley & Sons Inc., New York, 2002. 
-ISBN: 0-471-25093-7, 2003. 
-</ol>
-</font>
-</div>
-</td>
-</table>
-
-<br><p><br><p><br><p>
-
-<table border=0>
-<tr>
-<td align=left bgcolor=darkgreen>
-<script>
-var modifieddate=document.lastModified
-    document.write("<font size=1 face  = 'arial black'  color='white'>" + 
-                   "Last modified: " + modifieddate)
-</script>
-</td>
-</table>
-
-<br><p>
-Enrique Blanco Garcia &copy; 2003<br><p><br><p>
-</center>
 </body>
 </html>
-
-
-
-

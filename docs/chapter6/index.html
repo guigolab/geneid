@@ -1,185 +1,93 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<style type="text/css">
-div.bulk { text-align: justify }
-</style>
-<title>
-geneid docs
-</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>6. External annotations (-R) &mdash; geneid manual</title>
+<link rel="stylesheet" href="../style.css">
 </head>
+<body>
+<div class="layout">
+<nav class="sidebar">
+  <a class="brand" href="../index.html">geneid <span class="ver">v1.6 manual</span></a>
+  <ol>
+    <li><a href="../chapter1/index.html">What is geneid?</a></li>
+    <li><a href="../chapter2/index.html">Signals, exons and genes</a></li>
+    <li><a href="../chapter3/index.html">Installing geneid</a></li>
+    <li><a href="../chapter4/index.html">Running geneid</a></li>
+    <li><a href="../chapter5/index.html">Assembling exons (-O)</a></li>
+    <li><a class="current" href="../chapter6/index.html">External annotations (-R)</a></li>
+    <li><a href="../chapter7/index.html">RNA-seq &amp; homology (-S / -Y)</a></li>
+    <li><a href="../chapter8/index.html">The parameter file</a></li>
+    <li><a href="../chapter9/index.html">Source code &amp; architecture</a></li>
+    <li><a href="../chapter10/index.html">History &amp; references</a></li>
+  </ol>
+</nav>
 
-<BODY 
-TEXT color ="blue"
-BGCOLOR="white"
-LINK="blue"
-VLINK="blue"
-ALINK="blue">
+<div class="content">
+<main>
+  <p class="eyebrow">Chapter 6</p>
+  <h1>External annotations (-R)</h1>
+  <p class="lead"><code>-R</code> folds external evidence into geneid's own
+  predictions &mdash; guiding them, or forcing specific elements into the result.</p>
 
-<center>
-<table border=0 width=700>
-<tr>
-<td align=left>
-<font face=courier size=5 color=red><b>geneid documentation:</b></font>
-</td>
-<td align=right>
-<font face="arial black" size=3>6. Introducing external information: annotations</font>
-</td>
-</table>
+  <p>With <code>-R&nbsp;&lt;file&gt;</code>, the final gene structure is built from
+  <em>both</em> the external records and geneid's ab&nbsp;initio predictions.
+  (Contrast <code>-O</code>, which assembles only the supplied elements.)</p>
 
-<br><p><br><p>
-<table border=0 width=700 cellpadding=10>
-<tr>
-<td bgcolor="red"><font face="arial black" size=3>Table of contents:</font></td>
-<tr>
-<td>
-<div class="bulk"><font face="arial black" size=2>
-<ol>
-<li> <a href="#description">Description</a>
-<li> <a href="./../index.html">INDEX</a>
-</ol>
-</font>
+  <h2>Input formats</h2>
+  <div class="tablewrap"><table>
+    <tr><th>Format</th><th>Notes</th></tr>
+    <tr><td>GFF</td><td>text records; must be sorted by acceptor (start) position.</td></tr>
+    <tr><td>bigBed</td><td>the same records, indexed; queried per genomic fragment.</td></tr>
+    <tr><td>BAM <span class="flag">htslib</span></td><td>spliced-read (CIGAR&nbsp;<code>N</code>) junctions become <strong>intron</strong> evidence; sorted internally.</td></tr>
+  </table></div>
+  <p>bigBed and BAM are read with per-fragment range queries, so large evidence
+  sets stream rather than load whole. For BAM junctions, strand comes from the
+  read's <code>XS</code> tag, else the minimap2 <code>ts</code> tag, else the
+  <code>GT&ndash;AG</code>/<code>CT&ndash;AC</code> splice motif.</p>
+
+  <h2>Competing vs. forced elements</h2>
+  <p>Whether an element is a hint or a requirement depends on its score
+  (GFF column 6):</p>
+  <p><strong>Scored</strong> elements <em>compete</em> with ab&nbsp;initio
+  predictions to enter the final structure:</p>
+  <pre><code>chr21   lab_XX   Internal   66255   66323   3.27   +   1</code></pre>
+  <p>An element with a score of <code>.</code> is <strong>forced</strong> &mdash;
+  it must appear in the output (unless a conflicting forced element is also
+  given):</p>
+  <pre><code>chr21   lab_XX   Internal   66255   66323   .   +   1</code></pre>
+
+  <h2>Unknown frame</h2>
+  <p>Set the frame in GFF column 8, or use <code>.</code> when it is unknown.
+  geneid then expands the record into the three possible frames, computing each
+  remainder, and keeps frame/remainder consistency during assembly:</p>
+  <pre><code>chr21   lab_XX   Internal   66255   66323   3.27   +   .
+   &rarr; internally becomes the frame-0, frame-1 and frame-2 candidates</code></pre>
+
+  <h2>Preserving whole genes (the group field)</h2>
+  <p>Use the group field (GFF column 9) to tie the exons of one annotated gene
+  together so they are kept as a block, rather than mixed with ab&nbsp;initio
+  exons. Given this annotation, the gene is preserved intact:</p>
+  <pre><code>chr21   external   Terminal   21839   22922   18.37   -   1   gene_2
+chr21   external   Internal   23679   24029    7.99   -   1   gene_2
+chr21   external   First      30732   30775   -1.11   -   0   gene_2</code></pre>
+  <p>Without a shared group id, geneid may interleave its own predictions between
+  the supplied exons.</p>
+
+  <div class="callout tip">
+    <span class="label">One BAM for both roles</span>
+    A single indexed BAM can serve as both <code>-R</code> junctions and
+    <code>-S</code> coverage via <code>-Y</code> &mdash; see
+    <a href="../chapter7/index.html">chapter&nbsp;7</a>.
+  </div>
+
+  <div class="pagenav">
+    <a href="../chapter5/index.html"><span class="dir">&larr; Prev</span><span>Assembling exons (-O)</span></a>
+    <a class="next" href="../chapter7/index.html"><span class="dir">Next &rarr;</span><span>RNA-seq &amp; homology (-S / -Y)</span></a>
+  </div>
+</main>
 </div>
-</td>
-</table>
-
-<br><p><br><p>
-<table border=0 width=700 cellpadding=10>
-<tr>
-<td bgcolor=orange><font face="arial black" size=3>Description:</font>
-<a name ="description"></td>
-<tr>
-<td>
-<div class="bulk"><font face="arial black" size=2>
-<tt>geneid</tt> allows to integrate ab initio predictions with external
-evidence (annotations), such as annotated genes. The external
-evidence is read from an additional file in <tt>gff</tt> format. <tt>geneid</tt>
-is instructed to read this file with the command line option <tt>-R filename</tt>.
-This input file must sorted by the starting position (column 4 in <tt>gff</tt>).
-<br><p>
-There is a difference between using options <tt>-O filename</tt> and
-<tt>-R filename</tt>. In the first case, only elements extracted from file
-will be assembled while, in the second one, gene predictions are built from
-both file records and from <tt>geneid</tt> predictions.
-<br><p>
-If the elements in the input file are assigned an score, then they will
-"compete" with <tt>geneid</tt> original predictions (if any) to be in the final gene
-structure. For instance, this record will fight against ab initio predictions:
-<br><p>
-<center>
-<table border=1 cellpadding=10 width=700>
-<tr>
-<td align=center bgcolor="skyblue">
-<pre>
-AE002566   lab_XX  Internal    66255    66323    3.27  +  1
-</pre>
-</td>
-</table>
-</center>
-<br><p>
-If no score is given for the element (a dot "."), then this element is
-supposed to be mandatory (forced) in the final gene prediction (unless a conflicting
-element with no score is also given in the input file). For instance, this record
-will be in the final prediction.
-<br><p>
-<center>
-<table border=1 cellpadding=10 width=700>
-<tr>
-<td align=center bgcolor="skyblue">
-<pre>
-AE002566   lab_XX  Internal    66255    66323    .  +  1
-</pre>
-</td>
-</table>
-</center>
-<br><p>
-The frame can be either set in the column 8 of <tt>gff</tt> format or
-skipped by using the wildcar "." when is unknown. In the last case,
-<tt>geneid</tt> generates 3 equivalent elements (one per possible frame),
-computing the corresponding remainder in each case, keeping the frame/remainder
-consistency anyway when assembling is done. For instance, this record is
-internally expanded to these 3 exons, being incorporated to the set of
-candidate exons to be part of final gene prediction:
-<br><p>
-<center>
-<table border=1 cellpadding=10 width=700>
-<tr>
-<td align=center bgcolor="skyblue">
-<pre>
-AE002566   lab_XX  Internal    66255    66323    3.27  +  .
-<hr>
-AE002566   lab_XX  Internal    66255    66323    3.27  +  0
-AE002566   lab_XX  Internal    66255    66323    3.27  +  1
-AE002566   lab_XX  Internal    66255    66323    3.27  +  2
-</pre>
-</td>
-</table>
-</center>
-<br><p>
-By using the optional group field (column 9 in <tt>gff</tt> format), user
-is able to specificy whether one annotated gene (annotation) introduced
-in the input file has to be preserved if it is incorporated in the final results
-or <tt>geneid</tt> predictions can be mixed within that annotation.
-For instance, given this annotation (1), this gene will be preserved
-in the final output. But, given this other annotation (2) for the same gene
-but without setting a group identifier, we can obtain predictions such as
-the following (3):
-<br><p>
-<center>
-<table border=1 cellpadding=10 width=700>
-<tr>
-<td align=left bgcolor="skyblue">
-<pre>
-(1)
-AE002566  external Terminal  21839    22922   18.37 -  1  gene_2
-AE002566  external Internal  23679    24029    7.99 -  1  gene_2
-AE002566  external First     30732    30775   -1.11 -  0  gene_2
-<hr>
-(2)
-AE002566  external Terminal  21839    22922   18.37 -  1  
-AE002566  external Internal  23679    24029    7.99 -  1  
-AE002566  external First     30732    30775   -1.11 -  0  
-<hr>
-(3)
-AE002566     external  Terminal  21839    22922   18.37 -  1  
-AE002566     external  Internal  23679    24029    7.99 -  1  
-<font color="red">AE002566  geneid_v1.2  Internal  28002    28007    1.14 -  1 </font>
-AE002566     external  First     30732    30775   -1.11 -  0
-</pre>
-</td>
-</table>
-</center>
-
-
-
-
-
-
-
-</font>
 </div>
-</td>
-</table>
-
-
-<br><p><br><p><br><p>
-
-<table border=0>
-<tr>
-<td align=left bgcolor=darkgreen>
-<script>
-var modifieddate=document.lastModified
-    document.write("<font size=1 face  = 'arial black'  color='white'>" + 
-                   "Last modified: " + modifieddate)
-</script>
-</td>
-</table>
-
-<br><p>
-Enrique Blanco Garcia &copy; 2003<br><p><br><p>
-</center>
 </body>
 </html>
-
-
-
-
